@@ -13,9 +13,8 @@ import glob
 import struct
 import array
 
-# IF ONLY my linux machine was more up to date, I could compile and run this
-# Instead I have to run it on Windows for the moment
-CONVERT_COLLADA = False
+CONVERT_COLLADA = True
+COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 
 def parse_XYZ(is_float, x_str, y_str, z_str):
   ''' Helpful function to read XYZ cooordinates
@@ -288,7 +287,7 @@ class GOCAD_KIT:
       out_fp.close()
 
 
-  def write_voxel_png(self, fileName, src_file_str):
+  def write_voxel_png(self, src_dir, fileName, src_file_str):
     ''' Writes out a PNG file of the top layer of the voxel data
         fileName - filename of OBJ file, without extension
         src_filen_str - filename of source gocad file
@@ -305,7 +304,7 @@ class GOCAD_KIT:
         pixel_cnt += 1
     img = PIL.Image.frombytes('RGB', (self.vol_dims[1], self.vol_dims[0]), colour_arr.tobytes()) 
     print(img)
-    img.save(fileName+".PNG")
+    img.save(os.path.join(src_dir, fileName+".PNG"))
   
 
     
@@ -605,7 +604,7 @@ class GOCAD_KIT:
     
     
 
-  def process_gocad(self, filename_str, file_lines):
+  def process_gocad(self, src_dir, filename_str, file_lines):
     ''' Extracts details from gocad file
         filename_str - filename of gocad file
         file_lines - array of strings of lines from gocad file
@@ -722,7 +721,7 @@ class GOCAD_KIT:
       
       # Voxel file attributes
       elif splitstr_arr[0] == "PROP_FILE":
-        self.voxel_file = splitstr_arr_raw[2]
+        self.voxel_file = os.path.join(src_dir, splitstr_arr_raw[2])
       
       elif splitstr_arr[0] == "AXIS_O":
         is_ok, x_flt, y_flt, z_flt = parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
@@ -768,6 +767,7 @@ class GOCAD_KIT:
      
     # Open up and read voxel file   
     if self.is_vo and len(self.voxel_file)>0:
+      print("VOXEL FILE=", self.voxel_file)
       try:
         # Check file size first
         file_sz = os.path.getsize(self.voxel_file)
@@ -789,15 +789,15 @@ class GOCAD_KIT:
               self.voxel_data[x][y][z] = val
         fp.close()
         print("min=", self.voxel_data_stats['min'], "max=", self.voxel_data_stats['max'])
-      except (IOError):
-          print("SORRY - Cannot process voxel file IOError", filename_str)
+      except IOError as e:
+          print("SORRY - Cannot process voxel file IOError", filename_str, str(e), e.args)
           sys.exit(1)
 
 
 #  END OF GOCAD_KIT CLASS
 
 
-def extract_gocad(filename_str, file_lines, base_xyz):
+def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
   ''' Extracts gocad files from a gocad group file
       filename_str - filename of gocad file
       file_lines - lines extracted from gocad group file
@@ -832,7 +832,7 @@ def extract_gocad(filename_str, file_lines, base_xyz):
       inGoCAD = False
       print("END gathering")
       gs = GOCAD_KIT(base_xyz)
-      gs.process_gocad(filename_str, gocad_lines)
+      gs.process_gocad(src_dir, filename_str, gocad_lines)
       gs_list.append(gs)
       gocad_lines = []
     if inMember and inGoCAD:
@@ -843,11 +843,11 @@ def extract_gocad(filename_str, file_lines, base_xyz):
   
   
 
-def find_and_process(base_x, base_y, base_z):
+def find_and_process(gocad_src_dir, base_x, base_y, base_z):
   ''' Searches for gocad files and processes them
   '''
   for ext_str in GOCAD_KIT.SUPPORTED_EXTS:
-    wildcard_str = "*."+ext_str.lower()
+    wildcard_str = os.path.join(gocad_src_dir, "*."+ext_str.lower())
     file_list = glob.glob(wildcard_str)
     for filename_str in file_list:
       fileName, fileExt = os.path.splitext(filename_str)
@@ -860,7 +860,7 @@ def find_and_process(base_x, base_y, base_z):
 
       if ext_str in ['TS', 'PL', 'VS', 'VO']:
         gs = GOCAD_KIT((base_x, base_y, base_z))
-        gs.process_gocad(filename_str, file_lines)
+        gs.process_gocad(gocad_src_dir, filename_str, file_lines)
 
         # Check that conversion worked and write out files
         if ext_str == 'TS' and len(gs.vrtx_arr) > 0 and len(gs.trgl_arr) > 0:
@@ -873,12 +873,13 @@ def find_and_process(base_x, base_y, base_z):
           gs.write_collada(fileName)
       
         elif ext_str == 'VO' and gs.voxel_data.shape[0] > 1:
+          # Must use PNG because some files are too large
           #gs.write_collada(fileName, gs)
           #gs.write_OBJ(fileName, filename_str)
-          gs.write_voxel_png(fileName, filename_str)
+          gs.write_voxel_png(gocad_src_dir, fileName, filename_str)
           
       elif ext_str == 'GP':
-        gs_list=extract_gocad(filename_str, file_lines, (base_x, base_y, base_z))
+        gs_list=extract_gocad(gocad_src_dir, filename_str, file_lines, (base_x, base_y, base_z))
         file_idx=0
         for gs in gs_list:
           gs.write_collada("{0}_{1:d}".format(fileName, file_idx))
@@ -888,16 +889,23 @@ def find_and_process(base_x, base_y, base_z):
         
   # Convert from collada to GLTF v2
   if CONVERT_COLLADA:
-    daefile_list = glob.glob("*.dae")
+    wildcard_str = os.path.join(gocad_src_dir, "*.dae")
+    daefile_list = glob.glob(wildcard_str)
     for daefile_str in daefile_list:
       fileName, fileExt = os.path.splitext(daefile_str)
-      os.system("./collada2gltf -f "+daefile_str+" -o "+fileName+".gltf")
+      cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i "+daefile_str+" -o "+fileName+".gltf")
+      print(cmd_str)
+      os.system(cmd_str)
       
   
 
 if __name__ == "__main__":
-    # To force the model to move to (0,0,0)
-    # extent = (868000.0, 1036000.0, 6848000.0, 7016000.0)
-    # find_and_process((extent[0]+extent[1])/2.0,  (extent[2]+extent[3])/2.0, 0.0)
-    find_and_process(0.0,0.0,0.0)
+    if len(sys.argv) > 1:
+      gocad_src_dir = sys.argv[1]
+      if os.path.isdir(gocad_src_dir):
+        find_and_process(gocad_src_dir, 0.0,0.0,0.0)
+      else:
+        print("Dir "+gocad_src_dir+"does not exist")
+    else:
+      print("Command line parameter is a source dir of gocad files")
 
