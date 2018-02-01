@@ -2,16 +2,18 @@
 #
 # I am writing this because the current library (LaGrit) used to read  GOCAD *.ts
 # is buggy (seg faults a lot) and does not read the 'ZPOSITIVE', so some parts of models are displayed 
-# upside down
+# upside down.
+#
+# Eventually this will accept all types of GOCAD files and support colours and 'ZPOSITIVE' flag etc.
 #
 import sys
 import os
 import glob
 
 from gocad_kit import GOCAD_KIT
+import collada2gltf
 
 CONVERT_COLLADA = True
-COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 
 
 def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
@@ -104,15 +106,9 @@ def find_and_process(gocad_src_dir, base_x, base_y, base_z):
       
       fp.close()
         
-  # Convert from collada to GLTF v2
+  # Convert all files from collada to GLTF v2
   if CONVERT_COLLADA:
-    wildcard_str = os.path.join(gocad_src_dir, "*.dae")
-    daefile_list = glob.glob(wildcard_str)
-    for daefile_str in daefile_list:
-      fileName, fileExt = os.path.splitext(daefile_str)
-      cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i "+daefile_str+" -o "+fileName+".gltf")
-      print(cmd_str)
-      os.system(cmd_str)
+    collada2gltf.convert(gocad_src_dir)
       
   
 
