@@ -4,20 +4,20 @@
 #
 from collada import *
 import numpy
-import PIL
 import sys
 import os
 import glob
-import struct
-import array
 from pyproj import Proj, transform
 import xml.etree.ElementTree as ET
+import json
 
 from owslib.wfs import WebFeatureService
 import http.client, urllib
 
+# Bounding box of the area where boreholes are retrieved
 BBOX = (132.7052603, -28.3847194, 134.4664228, -26.9293133)
 
+# Namespaces for WFS Borehole response
 NS = { 'wfs':"http://www.opengis.net/wfs",
         'xs':"http://www.w3.org/2001/XMLSchema",
         'it.geosolutions':"http://www.geo-solutions.it",
@@ -36,42 +36,32 @@ NS = { 'wfs':"http://www.opengis.net/wfs",
         'er':"urn:cgi:xmlns:GGIC:EarthResource:1.1",
         'xsi':"http://www.w3.org/2001/XMLSchema-instance" }
 
+# Geo model's CRS, all output is converted to this CRS
 MODEL_CRS = "epsg:28352"
 
+# CRS of the coordinates in the WFS response
 BOREHOLE_CRS = "epsg:4326"
 
+# Maximum number of boreholes processed
+MAX_BOREHOLES = 15
 
-"""
 
-# projection 1: UTM zone 15, grs80 ellipse, NAD83 datum
->>> # (defined by epsg code 26915)
->>> p1 = Proj(init='epsg:26915')
->>> # projection 2: UTM zone 15, clrk66 ellipse, NAD27 datum
->>> p2 = Proj(init='epsg:26715')
->>> # find x,y of Jefferson City, MO.
->>> x1, y1 = p1(-92.199881,38.56694)
->>> # transform this point to projection 2 coordinates.
->>> x2, y2 = transform(p1,p2,x1,y1)
->>> '%9.3f %11.3f' % (x1,y1)
-'569704.566 4269024.671'
->>> '%9.3f %11.3f' % (x2,y2)
-'569722.342 4268814.027'
-
-"""
 def convert_coords(input_crs, output_crs, xy):
+  ''' Converts coordinate systems
+      input_crs - coordinate reference system of input coordinates
+      output_crs - coordinate reference system of output coordinates
+      xy - input coordinates in [x,y] format
+  '''
   p_in = Proj(init=input_crs)
   p_out = Proj(init=output_crs)
   return transform(p_in, p_out, xy[0], xy[1])
 
        
-#
-# COLLADA is better than OBJ, but very bulky
-#
-def write_collada(bv, fileName):
+def write_collada_borehole(bv, dest_dir, file_name):
   ''' Write out a COLLADA file
-        fileName - filename of COLLADA file, without extension
+      file_name - filename of COLLADA file, without extension
+      bv - base vertex, position of the object within the model [x,y,z] 
   '''
-  print("write_collada(", bv, fileName, ")")
   mesh = Collada()
   POINT_SIZE = 1000
   point_cnt = 0
@@ -116,11 +106,13 @@ def write_collada(bv, fileName):
   mesh.scene = myscene
     
   print("Writing mesh")
-  mesh.write(fileName+'.dae')
+  mesh.write(os.path.join(dest_dir,file_name+'.dae'))
 
 
 def get_scanned_borehole_hrefs(wfs):
-  # this just gets a list of NVCL boreholes which have been scanned
+  ''' This gets a list of URLs of NVCL boreholes which have been scanned
+      wfs - handle of WFS object 
+  '''
   response = wfs.getfeature(typename='nvcl:ScannedBoreholeCollection')
   response_str = bytes(response.read(), 'ascii')
   #print("scannedborehole response=", response_str)
@@ -133,17 +125,24 @@ def get_scanned_borehole_hrefs(wfs):
   
   return href_list
 
-# I know that 'nvcl' href list is input, and it is not used
-# that is because there are no NVCL cores within the BBOX 
-# Usually I would like to have it read in the NVCL hrefs and use them to find 
-# the borehole data
-#
-def get_borehole_data(wfs, nvcl_href_list):
+
+def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
+  ''' Returns a list of borehole data
+      wfs - handle of borehole's WFS service
+      nvcl_href_list - list of links to NVCL boreholes 
+      max_boreholes - maximum number of boreholes to retrieve
+
+      NOTA BENE: I know that 'nvcl' href list is input, and it is not used
+      that is because there are no NVCL cores within the BBOX 
+      Usually I would like to have it read in the NVCL hrefs and use them to find 
+      the borehole data (to be done in the near future)
+  '''
   response = wfs.getfeature(typename='gsml:Borehole', bbox=BBOX, srsname='EPSG:4326')
   response_str = bytes(response.read(), 'ascii')
   href_list = []
   borehole_list = []
-  print(response_str)
+  #print(response_str)
+  borehole_cnt=0
   root = ET.fromstring(response_str)
   for child in root.findall('./*/*/{http://www.opengis.net/gml}name'):
     # print("2 2 child", child.tag, child.attrib, child.text)
@@ -190,38 +189,73 @@ def get_borehole_data(wfs, nvcl_href_list):
       except:
         borehole_dict['z'] = 0.0
 
-    borehole_list.append(borehole_dict)        
+    if 'id' in borehole_dict:
+      borehole_cnt+=1
+      borehole_list.append(borehole_dict) 
+    if borehole_cnt > max_boreholes:
+      break
   return borehole_list 
 
 
-def main():
+def write_json_borehole(json_file_path, borehole_list):
+  ''' Writes a JSON file of borehole GLTF objects to display in 3D
+      json_file_path - full path of JSON file
+      borehole_list - list of boreholes to write to JSON file
+  '''
+  json_obj = {}
+  json_obj['groups'] = {}
+  json_obj['groups']["Boreholes"] = []
+  for borehole_dict in borehole_list: 
+    j_dict = {}
+    j_dict['popup_info'] = borehole_dict
+    j_dict['type'] = 'GLTFObject'
+    x_m, y_m = convert_coords(BOREHOLE_CRS, MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+    j_dict['position'] = [x_m, y_m, borehole_dict['z']]
+    j_dict['url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
+    j_dict['display_name'] = borehole_dict['id']
+    j_dict['include'] = True
+    j_dict['displayed'] = True
+    j_dict['reference'] = borehole_dict['href']
+    json_obj['groups']["Boreholes"].append(j_dict)
+  #print(json_file_path, json_obj)
+  fp = open(json_file_path, 'w')
+  json.dump(json_obj, fp, indent=4)
+  fp.close()
+
+
+def make_borehole_filename(id):
+  ''' Returns a string, formatted borehole file name with no filename extension
+      id - borehole identifier used to make file name
+  '''
+  return "Borehole_"+id.replace(' ','_').replace('/','_')
+
+
+def get_boreholes(dest_dir):
+  ''' Retrieves borehole data and writes 3D model files to a directory
+      dest_dir - directory where 3D model files are written
+  '''
   wfs = WebFeatureService('http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs',version='1.1.0')
   nvcl_href_list = get_scanned_borehole_hrefs(wfs)
   #print("nvcl_href_list=", nvcl_href_list)
-  borehole_list = get_borehole_data(wfs, nvcl_href_list)
-       
-  
-  print("\n")
+  borehole_list = get_borehole_data(wfs, nvcl_href_list, MAX_BOREHOLES)
   
   # Parse response for all boreholes
-  MAX=15
-  for borehole_dict in borehole_list[:15]:
-    print(borehole_dict) 
+  for borehole_dict in borehole_list:
+    #print(borehole_dict) 
     if 'id' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
-      fileName = "Borehole#"+borehole_dict['id'].replace(' ','_').replace('/','_')
+      file_name = make_borehole_filename(borehole_dict['id'])
       x_m, y_m = convert_coords(BOREHOLE_CRS, MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
       base_xyz = (x_m, y_m, borehole_dict['z'])
-      write_collada(base_xyz, fileName)
-    else:
-      print("Missing")
-  
-
+      write_collada_borehole(base_xyz, dest_dir, file_name)
+  write_json_borehole(os.path.join(dest_dir, 'borehole.json'), borehole_list)
 
 
 if __name__ == "__main__":
-    main()  
-  
-    
-    
-    
-
+    if len(sys.argv) > 1:
+      dest_dir = sys.argv[1]
+      if os.path.isdir(dest_dir):
+        get_boreholes(dest_dir)
+      else:
+        print("Dir "+dest_dir+" does not exist")
+    else:
+      print("Command line parameter is a destination dir to place the output files")
