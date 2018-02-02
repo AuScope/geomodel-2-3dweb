@@ -108,7 +108,7 @@ def find_and_process(gocad_src_dir, base_x, base_y, base_z):
         
   # Convert all files from collada to GLTF v2
   if CONVERT_COLLADA:
-    collada2gltf.convert(gocad_src_dir)
+    collada2gltf.convert(gocad_src_dir, "*.dae")
       
   
 

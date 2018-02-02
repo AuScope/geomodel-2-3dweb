@@ -8,8 +8,8 @@ import glob
 # Path where 'COLLADA2GLTF-bin' is located
 COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 
-def convert(src_dir):
-  wildcard_str = os.path.join(src_dir, "*.dae")
+def convert(src_dir, file_mask):
+  wildcard_str = os.path.join(src_dir, file_mask)
   daefile_list = glob.glob(wildcard_str)
   for daefile_str in daefile_list:
     fileName, fileExt = os.path.splitext(daefile_str)
