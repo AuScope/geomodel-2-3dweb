@@ -2,7 +2,7 @@
 #
 # This code creates a set of DAE (COLLADA) files which represent BoreHoles in a 3D model
 #
-from collada import *
+import collada as Collada
 import numpy
 import sys
 import os
@@ -10,9 +10,12 @@ import glob
 from pyproj import Proj, transform
 import xml.etree.ElementTree as ET
 import json
+import math
 
 from owslib.wfs import WebFeatureService
 import http.client, urllib
+
+import collada2gltf
 
 # Bounding box of the area where boreholes are retrieved
 BBOX = (132.7052603, -28.3847194, 134.4664228, -26.9293133)
@@ -62,46 +65,64 @@ def write_collada_borehole(bv, dest_dir, file_name):
       file_name - filename of COLLADA file, without extension
       bv - base vertex, position of the object within the model [x,y,z] 
   '''
-  mesh = Collada()
-  POINT_SIZE = 1000
+  mesh = Collada.Collada()
+  BH_WIDTH = 25
+  BH_HEIGHT = 10000
+  BH_DEPTH = 20000
   point_cnt = 0
   node_list = []
 
+  # Convert bv to an equilateral triangle of floats
+  angl_rad = math.radians(30.0)
+  cos_flt = math.cos(angl_rad)
+  sin_flt = math.sin(angl_rad)
+  print(cos_flt, sin_flt)
+  ptA_high = [bv[0], bv[1]+BH_WIDTH*cos_flt, bv[2]+BH_HEIGHT]
+  ptB_high = [bv[0]+BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
+  ptC_high = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
+  ptA_low = [bv[0], bv[1]+BH_WIDTH*cos_flt, bv[2]-BH_DEPTH]
+  ptB_low = [bv[0]+BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]-BH_DEPTH]
+  ptC_low = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]-BH_DEPTH]
+
   diffuse_colour = (0.7, 0.55, 0.35, 1)
-  effect = material.Effect("effect{0:010d}".format(point_cnt), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-  mat = material.Material("material{0:010d}".format(point_cnt), "mymaterial{0:010d}".format(point_cnt), effect)
+  effect = Collada.material.Effect("effect{0:010d}".format(point_cnt), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
+  mat = Collada.material.Material("material{0:010d}".format(point_cnt), "mymaterial{0:010d}".format(point_cnt), effect)
   mesh.effects.append(effect)
   mesh.materials.append(mat)
 
-  vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
-  vert_src = source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-  geom = geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
-  input_list = source.InputList()
+  vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
+  vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_list), ('X', 'Y', 'Z'))
+  geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
+  input_list = Collada.source.InputList()
   input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
   
-  indices = [0, 2, 1,
-             3, 0, 1,
-             3, 2, 0,
-             3, 1, 2]
+  indices = [0, 1, 2,
+             3, 4, 5,
+             1, 2, 5,
+             2, 4, 5,
+             0, 2, 4,
+             0, 4, 3,
+             0, 3, 1, 
+             1, 3, 5]
   
   triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(point_cnt))
 
   geom.primitives.append(triset)
   mesh.geometries.append(geom)
 
-  matnode = scene.MaterialNode("materialref-{0:010d}".format(point_cnt), mat, inputs=[])
-  geomnode_list = [scene.GeometryNode(geom, [matnode])]
+  matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(point_cnt), mat, inputs=[])
+  geomnode_list = [Collada.scene.GeometryNode(geom, [matnode])]
         
-  node = scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
+  node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
   node_list.append(node)
   point_cnt += 1
 
-  myscene = scene.Scene("myscene", node_list)
+  myscene = Collada.scene.Scene("myscene", node_list)
   mesh.scenes.append(myscene)
   mesh.scene = myscene
   
   print("Creating a scene")
-  myscene = scene.Scene("myscene", node_list)
+  myscene = Collada.scene.Scene("myscene", node_list)
   mesh.scenes.append(myscene)
   mesh.scene = myscene
     
@@ -248,6 +269,7 @@ def get_boreholes(dest_dir):
       base_xyz = (x_m, y_m, borehole_dict['z'])
       write_collada_borehole(base_xyz, dest_dir, file_name)
   write_json_borehole(os.path.join(dest_dir, 'borehole.json'), borehole_list)
+  collada2gltf.convert(dest_dir, "Borehole*.dae")
 
 
 if __name__ == "__main__":
