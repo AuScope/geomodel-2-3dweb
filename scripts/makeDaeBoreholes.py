@@ -60,7 +60,7 @@ def convert_coords(input_crs, output_crs, xy):
   return transform(p_in, p_out, xy[0], xy[1])
 
        
-def write_collada_borehole(bv, dest_dir, file_name):
+def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
   ''' Write out a COLLADA file
       file_name - filename of COLLADA file, without extension
       bv - base vertex, position of the object within the model [x,y,z] 
@@ -69,7 +69,6 @@ def write_collada_borehole(bv, dest_dir, file_name):
   BH_WIDTH = 25
   BH_HEIGHT = 10000
   BH_DEPTH = 20000
-  point_cnt = 0
   node_list = []
 
   # Convert bv to an equilateral triangle of floats
@@ -85,17 +84,17 @@ def write_collada_borehole(bv, dest_dir, file_name):
   ptC_low = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]-BH_DEPTH]
 
   diffuse_colour = (0.7, 0.55, 0.35, 1)
-  effect = Collada.material.Effect("effect{0:010d}".format(point_cnt), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-  mat = Collada.material.Material("material{0:010d}".format(point_cnt), "mymaterial{0:010d}".format(point_cnt), effect)
+  effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
+  mat = Collada.material.Material("material0", "mymaterial0", effect)
   mesh.effects.append(effect)
   mesh.materials.append(mat)
 
   vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
-  vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_list), ('X', 'Y', 'Z'))
-  geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
+  vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list), ('X', 'Y', 'Z'))
+  geom = Collada.geometry.Geometry(mesh, "geometry0", make_borehole_label(borehole_name), [vert_src])
   input_list = Collada.source.InputList()
-  input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-  
+  input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
+   
   indices = [0, 1, 2,
              3, 4, 5,
              1, 2, 5,
@@ -105,17 +104,16 @@ def write_collada_borehole(bv, dest_dir, file_name):
              0, 3, 1, 
              1, 3, 5]
   
-  triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(point_cnt))
+  triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
 
   geom.primitives.append(triset)
   mesh.geometries.append(geom)
 
-  matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(point_cnt), mat, inputs=[])
+  matnode = Collada.scene.MaterialNode("materialref-0", mat, inputs=[])
   geomnode_list = [Collada.scene.GeometryNode(geom, [matnode])]
         
-  node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
+  node = Collada.scene.Node("node0", children=geomnode_list)
   node_list.append(node)
-  point_cnt += 1
 
   myscene = Collada.scene.Scene("myscene", node_list)
   mesh.scenes.append(myscene)
@@ -234,6 +232,7 @@ def write_json_borehole(json_file_path, borehole_list):
     j_dict['position'] = [x_m, y_m, borehole_dict['z']]
     j_dict['url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
     j_dict['display_name'] = borehole_dict['id']
+    j_dict['3dobject_label'] = make_borehole_label(borehole_dict['id'])
     j_dict['include'] = True
     j_dict['displayed'] = True
     j_dict['reference'] = borehole_dict['href']
@@ -244,11 +243,23 @@ def write_json_borehole(json_file_path, borehole_list):
   fp.close()
 
 
-def make_borehole_filename(id):
+def make_borehole_filename(borehole_name):
   ''' Returns a string, formatted borehole file name with no filename extension
-      id - borehole identifier used to make file name
+      borehole_name - borehole identifier used to make file name
   '''
-  return "Borehole_"+id.replace(' ','_').replace('/','_')
+  return "Borehole_"+clean_borehole_name(borehole_name)
+
+def clean_borehole_name(borehole_name):
+  ''' Returns a clean version of the borehole name or id
+      borehole_name - borehole identifier
+  '''
+  return borehole_name.replace(' ','_').replace('/','_')
+
+def make_borehole_label(borehole_name):
+  ''' Returns a label version of the borehole name or id
+      borehole_name - borehole name or identifier
+  '''
+  return "borehole-{0}".format(clean_borehole_name(borehole_name))
 
 
 def get_boreholes(dest_dir):
@@ -267,7 +278,7 @@ def get_boreholes(dest_dir):
       file_name = make_borehole_filename(borehole_dict['id'])
       x_m, y_m = convert_coords(BOREHOLE_CRS, MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
       base_xyz = (x_m, y_m, borehole_dict['z'])
-      write_collada_borehole(base_xyz, dest_dir, file_name)
+      write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['id'])
   write_json_borehole(os.path.join(dest_dir, 'borehole.json'), borehole_list)
   collada2gltf.convert(dest_dir, "Borehole*.dae")
 
