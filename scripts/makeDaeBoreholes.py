@@ -216,6 +216,24 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
   return borehole_list 
 
 
+def get_json_popupinfo(borehole_dict):
+  ''' Returns some JSON for displaying in a popup box when user clicks on
+      a borehole in the model
+      borehole_dict - borehole information used to make JSON
+
+  '''
+  json_obj = {}
+  json_obj['title'] = borehole_dict['id']
+  for key in ['drillingMethod','dateOfDrilling','driller', 'startPoint',
+              'coreCustodian', 'inclinationType','coredInterval']:
+    json_obj[key] = borehole_dict[key]
+  json_obj['href'] = [ { 'label': 'WFS URL', 'URL': borehole_dict['href'] },
+                       { 'label': 'AuScope URL', 'URL': 'http://portal.auscope.org/portal/gmap.html?s=XQAAAQDvv4IBAAAAAAAAAD3vvojvvonvvqI3LO+/vzc7CwN/aO++rO+/kndiBe+/pCbvvoBgTu+/te++qk/vv73vvpDvvq9SEu+/pO++h++/uu+/uDIILSAM77+u776qIu+/oe++sg/vvqLvv6/vv6cWERE5Be+/se++sD1877+Qbn3vvrfvvqXvvpEyAmUy776DX2Xvv7Tvv4Am77+iV0jvvrt077+k776B77+TS0fvvqDvvqXvv5Yy77++776l77+/NTkZawHvv7Tvv7Tvv6/vvol0SUwH776iG++/g+++lTLvvojvv5rvvoVVOu+/tRBA77+Ff3RL77+nAGlRck9VQe++qW/vvrhhFe+/gkhQYWXvvqIj776NR+++j++/uEkYPH8f776ndxIb776dOShCPnlxQw4CaO++u0/vv7vvvrLvv598A++/kO++g3BtPWrvv5Pvv6M2776AZGvvvrgudHoC77+tbxzvvqt/Lw1hKgLvvqjvv5Lvv4rvvoRECH9kbGs/77+NcRoQfe++rO+/o+++rO++lu+/pe+/ikMT776CGe++gnvvv43vvqp/PGnvv6jvv6LvvqMz776577+k776I776ZZEnvv6M577+o776SVCzvvo/vvrEjN+++lmrvvrYAVgMj77+IEEQL776OBBV/77+0T++/lSbvvp9Hfe+/qu+/pVXvv6g2UBBp77+y77+rW++/gO+/jBLvv6Hvv53vv5/vvqEt77+o77+rNTMaNBnvv5Ai776777+DKjtC77+y77+w77++77+5776wEA==&v=4' } ]
+  json_obj['elevation'] = "{0:6.3f}".format(borehole_dict['z'])
+  json_obj['location'] = "{0:6.3f} {1:6.3f}".format(borehole_dict['x'], borehole_dict['y'])
+  return json_obj
+
+
 def write_json_borehole(json_file_path, borehole_list):
   ''' Writes a JSON file of borehole GLTF objects to display in 3D
       json_file_path - full path of JSON file
@@ -226,16 +244,15 @@ def write_json_borehole(json_file_path, borehole_list):
   json_obj['groups']["Boreholes"] = []
   for borehole_dict in borehole_list: 
     j_dict = {}
-    j_dict['popup_info'] = borehole_dict
+    j_dict['popup_info'] = get_json_popupinfo(borehole_dict)
     j_dict['type'] = 'GLTFObject'
     x_m, y_m = convert_coords(BOREHOLE_CRS, MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
     j_dict['position'] = [x_m, y_m, borehole_dict['z']]
-    j_dict['url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
+    j_dict['model_url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
     j_dict['display_name'] = borehole_dict['id']
     j_dict['3dobject_label'] = make_borehole_label(borehole_dict['id'])
     j_dict['include'] = True
     j_dict['displayed'] = True
-    j_dict['reference'] = borehole_dict['href']
     json_obj['groups']["Boreholes"].append(j_dict)
   #print(json_file_path, json_obj)
   fp = open(json_file_path, 'w')
