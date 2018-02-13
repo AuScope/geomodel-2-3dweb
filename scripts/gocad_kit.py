@@ -28,16 +28,20 @@ class GOCAD_KIT:
   ]
   ''' List of file extensions to search for '''
 
-  def __init__(self, base_xyz=(0.0, 0.0, 0.0)):
+  def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
     ''' Initialise class
         base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
                    before they are output
+        group_name - optional string, name of group of this gocad file is within a group
     '''
     self.base_xyz = base_xyz
-    print("self.base_xyz = ", self.base_xyz)
+    self.group_name = group_name
+
+    self.header_name = ""
+    ''' Contents of the name field in the header '''
 
     self.vrtx_arr = []
-    '''Array to store vertice data'''
+    '''Array to store vertex data'''
 
     self.trgl_arr = []
     '''Array to store triangle face data'''
@@ -52,7 +56,7 @@ class GOCAD_KIT:
     '''If one colour is specified in the file it is stored here'''
 
     self.prop_dict = {}
-    '''Property dictionary'''
+    '''Property dictionary for PVRTX lines'''
 
     self.is_ts = False
     '''True iff it is a GOCAD TSURF file'''
@@ -328,6 +332,13 @@ class GOCAD_KIT:
         fileName - filename of COLLADA file, without extension
     '''
     mesh = Collada.Collada()
+    group_name = ""
+    if len(self.group_name)>0:
+      group_name = self.group_name+"-"
+    if len(self.header_name)>0:
+      geometry_name = group_name + self.header_name
+    else:
+      geometry_name = group_name + "geometry"
     if self.is_ts:
       if len(self.rgba_tup)==4:
         effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=self.rgba_tup, specular=(0.5, 0.5, 0.5, 1), shininess=16.0, double_sided=True)
@@ -340,7 +351,7 @@ class GOCAD_KIT:
       for v in self.vrtx_arr:
         vert_floats += [v[0]-self.base_xyz[0], v[1]-self.base_xyz[1], v[2]-self.base_xyz[2]] 
       vert_src = Collada.source.FloatSource("triverts-array", numpy.array(vert_floats), ('X', 'Y', 'Z'))
-      geom = Collada.geometry.Geometry(mesh, "geometry0", "mycube", [vert_src])
+      geom = Collada.geometry.Geometry(mesh, "geometry0", geometry_name, [vert_src])
       input_list = Collada.source.InputList()
       input_list.addInput(0, 'VERTEX', "#triverts-array")
   
@@ -380,7 +391,7 @@ class GOCAD_KIT:
         vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+LINE_WIDTH]
         print("vert_floats=", vert_floats)
         vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "line-{0:010d}".format(point_cnt), [vert_src])
+        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
    
         input_list = Collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}".format(point_cnt))
@@ -421,7 +432,7 @@ class GOCAD_KIT:
         if True:
           vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
           vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
+          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
           input_list = Collada.source.InputList()
           input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
   
@@ -435,7 +446,7 @@ class GOCAD_KIT:
           # Tried to do points as lines, but so far failed
           vert_floats = list(bv) + [bv[0], bv[1], bv[2]+1000]
           vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
+          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
           input_list = Collada.source.InputList()
           input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
   
@@ -484,7 +495,7 @@ class GOCAD_KIT:
             geomnode_list = []
             vert_floats = list(v) + [v[0]+pt_size[0], v[1], v[2]] + [v[0], v[1]+pt_size[1], v[2]] + [v[0], v[1], v[2]+pt_size[2]]
             vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "mycube-{0:010d}".format(point_cnt), [vert_src])
+            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
   
@@ -571,6 +582,9 @@ class GOCAD_KIT:
             self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
           except (ValueError, OverflowError):
             self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
+        if name_str=='NAME':
+          self.header_name = value_str.replace('/','-')
+          print("header_name", self.header_name)
       if inPropClassHeader:
         name_str, sep, value_str = line_str.partition(':')
         if name_str=='*COLORMAP*SIZE':

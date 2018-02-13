@@ -50,7 +50,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
     elif inMember and line_str == "END":
       inGoCAD = False
       print("END gathering")
-      gs = GOCAD_KIT(base_xyz)
+      gs = GOCAD_KIT(base_xyz, os.path.basename(fileName).upper())
       gs.process_gocad(src_dir, filename_str, gocad_lines)
       gs_list.append(gs)
       gocad_lines = []
