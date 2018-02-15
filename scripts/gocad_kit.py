@@ -28,6 +28,23 @@ class GOCAD_KIT:
   ]
   ''' List of file extensions to search for '''
 
+
+  EMISSION = (0,0,0,1)
+  ''' emission parameter for pycollada material effect '''
+
+  AMBIENT = (0,0,0,1)
+  ''' ambient parameter for pycollada material effect '''
+
+  SPECULAR=(0.7, 0.7, 0.7, 1)
+  ''' specular parameter for pycollada material effect '''
+
+  SHININESS=50.0
+  ''' shininess parameter for pycollada material effect '''
+
+  SHADING="phong"
+  ''' shading parameter for pycollada material effect '''
+
+
   def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
     ''' Initialise class
         base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
@@ -340,10 +357,9 @@ class GOCAD_KIT:
     else:
       geometry_name = group_name + "geometry"
     if self.is_ts:
-      if len(self.rgba_tup)==4:
-        effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=self.rgba_tup, specular=(0.5, 0.5, 0.5, 1), shininess=16.0, double_sided=True)
-      else:
-        effect = Collada.material.Effect("effect0", [], "phong", diffuse=(1,0,0), specular=(0,1,0), double_sided=True)
+      if len(self.rgba_tup)!=4:
+        self.rgba_tup = (1,0,0,1.0)
+      effect = Collada.material.Effect("effect0", [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=self.rgba_tup, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
       mat = Collada.material.Material("material0", "mymaterial", effect)
       mesh.effects.append(effect)
       mesh.materials.append(mat)
@@ -376,20 +392,19 @@ class GOCAD_KIT:
       point_cnt = 0
       node_list = []
       yellow_colour = (1,1,0,1)
-      effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=yellow_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0, double_sided=True)
+      effect = Collada.material.Effect("effect0", [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=yellow_colour, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
       mat = Collada.material.Material("material0", "mymaterial0", effect)
       mesh.effects.append(effect)
       mesh.materials.append(mat)
       matnode = Collada.scene.MaterialNode("materialref-0", mat, inputs=[])
+      geomnode_list = []
       
       for l in self.seg_arr:
         v0 = self.vrtx_arr[l[0]-1]
         v1 = self.vrtx_arr[l[1]-1]
         bv0 = (v0[0]-self.base_xyz[0], v0[1]-self.base_xyz[1], v0[2]-self.base_xyz[2]) 
         bv1 = (v1[0]-self.base_xyz[0], v1[1]-self.base_xyz[1], v1[2]-self.base_xyz[2])
-        print("PL: bv0=", bv0, "bv1=", bv1)        
         vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+LINE_WIDTH]
-        print("vert_floats=", vert_floats)
         vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
         geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
    
@@ -398,83 +413,64 @@ class GOCAD_KIT:
   
         indices = [0, 2, 3,
                    3, 1, 0]
-        print("indices=", indices)
   
         triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
          
         geom.primitives.append(triset)
         mesh.geometries.append(geom)
-        geomnode_list = []
         geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
         
-        node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
-        node_list.append(node)
         point_cnt += 1
    
+      node = Collada.scene.Node("node0", children=geomnode_list)
+      node_list.append(node)
       myscene = Collada.scene.Scene("myscene", node_list)
       mesh.scenes.append(myscene)
       mesh.scene = myscene
   
   
     elif self.is_vs:
+      # Limit to 256 colours
+      MAX_COLOURS = 256.0
+      self.make_colour_materials(mesh, MAX_COLOURS)
       POINT_SIZE = 1000
       point_cnt = 0
       print(len(self.rgba_tup), self.rgba_tup)
       node_list = []
+      geomnode_list = []
+      vert_floats = []
+      matnode_list = []
+      triset_list = []
+      vert_src_list = []
       prop_str = list(self.prop_dict.keys())[0]
       for v in self.vrtx_arr:
-        diffuse_colour = self.make_colour_map(self.prop_dict[prop_str][v], self.prop_meta[prop_str]['min'], self.prop_meta[prop_str]['max'])
-        effect = Collada.material.Effect("effect{0:010d}".format(point_cnt), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-        mat = Collada.material.Material("material{0:010d}".format(point_cnt), "mymaterial{0:010d}".format(point_cnt), effect)
-        mesh.effects.append(effect)
-        mesh.materials.append(mat)
+        colour_num = self.calculate_colour_num(self.prop_dict[prop_str][v], self.prop_meta[prop_str]['max'], self.prop_meta[prop_str]['min'], MAX_COLOURS)
         bv = (v[0]-self.base_xyz[0], v[1]-self.base_xyz[1], v[2]-self.base_xyz[2]) 
-        if True:
-          vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
-          vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
-          input_list = Collada.source.InputList()
-          input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-  
-          indices = [0, 2, 1,
-                   3, 0, 1,
-                   3, 2, 0,
-                   3, 1, 2]
-  
-          triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(point_cnt))
-        else:
-          # Tried to do points as lines, but so far failed
-          vert_floats = list(bv) + [bv[0], bv[1], bv[2]+1000]
-          vert_src = Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-          geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
-          input_list = Collada.source.InputList()
-          input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-  
-          indices = [0,1] 
-          triset = geom.createLineSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(point_cnt))
-          
-        geom.primitives.append(triset)
-        mesh.geometries.append(geom)
 
-        matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(point_cnt), mat, inputs=[])
-        geomnode_list = [Collada.scene.GeometryNode(geom, [matnode])]
+        vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
+        input_list = Collada.source.InputList()
+        input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
+        indices = [0, 2, 1, 3, 0, 1, 3, 2, 0, 3, 1, 2]
+        vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
+        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), vert_src_list)
+        triset_list = [geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))]
+        geom.primitives = triset_list
+        mesh.geometries.append(geom)
+        matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
+        geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
         
-        node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
-        node_list.append(node)
         point_cnt += 1
 
+      node = Collada.scene.Node("node0", children=geomnode_list)
+      node_list.append(node)
       myscene = Collada.scene.Scene("myscene", node_list)
       mesh.scenes.append(myscene)
       mesh.scene = myscene
         
     elif self.is_vo:
       # Limit to 256 colours, only does tetrahedrons to save space 
-      for colour_idx in range(256):
-        diffuse_colour = self.make_colour_map(float(colour_idx), 0.0, 255.0)
-        effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-        mat = Collada.material.Material("material{0:010d}".format(colour_idx), "mymaterial{0:010d}".format(colour_idx), effect)
-        mesh.effects.append(effect)
-        mesh.materials.append(mat)
+      MAX_COLOURS = 256.0
+      self.make_colour_materials(mesh, MAX_COLOURS)
       
       node_list = []
       point_cnt = 0
@@ -482,10 +478,7 @@ class GOCAD_KIT:
       for z in range(self.vol_dims[2]):
         for y in range(self.vol_dims[1]):
           for x in range(self.vol_dims[0]):
-            if (self.voxel_data_stats['max'] - self.voxel_data_stats['min'])>0.0:
-              colour_num = int(255.0*(self.voxel_data[x][y][z] - self.voxel_data_stats['min'])/(self.voxel_data_stats['max'] - self.voxel_data_stats['min']))
-            else:
-              colour_num = 0
+            colour_num = self.calculate_colour_num(self.voxel_data[x][y][z], self.voxel_data_stats['max'], self.voxel_data_stats['min'], MAX_COLOURS)
             # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
             u_offset = self.axis_origin[0]+ float(x)/self.vol_dims[0]*self.axis_u[0]
             v_offset = self.axis_origin[1]+ float(y)/self.vol_dims[1]*self.axis_v[1]
@@ -528,10 +521,34 @@ class GOCAD_KIT:
       mesh.scenes.append(myscene)
       mesh.scene = myscene
     
-    print("Writing mesh")
+    print("Writing COLLADA file")
     mesh.write(fileName+'.dae')
     
+  def calculate_colour_num(self, val_flt, max_flt, min_flt, max_colours_flt):
+    ''' Calculates a colour number via interpolation
+        val_flt - value used to calculate colour number
+        min_flt - lower bound of value
+        max_flt - upper bound of value
+        max_colours_flt - maximum number of colours
+        returns integer colour number
+    '''
+    if (max_flt - min_flt)>0.0:
+      return int((max_colours_flt-1)*(val_flt - min_flt)/(max_flt - min_flt))
+    return 0
     
+
+  def make_colour_materials(self, mesh, max_colours_flt):
+    ''' Adds a list of coloured materials to COLLADA object
+        mesh - Collada object
+        max_colours_flt =- number of colours to add
+    '''
+    for colour_idx in range(int(max_colours_flt)):
+      diffuse_colour = self.make_colour_map(float(colour_idx), 0.0, max_colours_flt - 1.0)
+      effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=diffuse_colour, specular=self.SPECULAR, shininess=self.SHININESS)
+      mat = Collada.material.Material("material{0:010d}".format(colour_idx), "mymaterial{0:010d}".format(colour_idx), effect)
+      mesh.effects.append(effect)
+      mesh.materials.append(mat)
+
 
   def process_gocad(self, src_dir, filename_str, file_lines):
     ''' Extracts details from gocad file
