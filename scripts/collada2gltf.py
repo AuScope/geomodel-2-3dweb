@@ -8,12 +8,22 @@ import glob
 # Path where 'COLLADA2GLTF-bin' is located
 COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 
-def convert(src_dir, file_mask):
+def convert_dir(src_dir, file_mask="*.dae"):
+  ''' Converts a directory of files from COLLADA to GLTF
+      src_dir - directory of COLLADA files to be converted
+      file_mask - optional file mask of files
+  '''
   wildcard_str = os.path.join(src_dir, file_mask)
   daefile_list = glob.glob(wildcard_str)
   for daefile_str in daefile_list:
-    fileName, fileExt = os.path.splitext(daefile_str)
-    cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i "+daefile_str+" -o "+fileName+".gltf")
-    print(cmd_str)
-    os.system(cmd_str)
+    convert_file(daefile_str)
+
+def convert_file(daefile_str):
+  ''' Converts a COLLADA file to GLTF
+      daefile_str - filename to be converted
+  '''
+  fileName, fileExt = os.path.splitext(daefile_str)
+  cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i "+daefile_str+" -o "+fileName+".gltf")
+  print(cmd_str)
+  os.system(cmd_str)
 
