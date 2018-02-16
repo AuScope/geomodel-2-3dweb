@@ -126,6 +126,8 @@ class GOCAD_KIT:
     self.colourmap_name = ""
     '''Name of colour map'''
 
+    self.np_filename = ""
+    ''' Filename of GOCAD file without path or extension '''
 
 
   def __repr__(self):
@@ -340,7 +342,8 @@ class GOCAD_KIT:
       if breakOut:
         break
     return ct_done
-       
+
+
   #
   # COLLADA is better than OBJ, but very bulky
   #
@@ -349,6 +352,7 @@ class GOCAD_KIT:
         fileName - filename of COLLADA file, without extension
     '''
     mesh = Collada.Collada()
+    popup_dict = {} 
     group_name = ""
     if len(self.group_name)>0:
       group_name = self.group_name+"-"
@@ -356,6 +360,8 @@ class GOCAD_KIT:
       geometry_name = group_name + self.header_name
     else:
       geometry_name = group_name + "geometry"
+
+    # Triangles
     if self.is_ts:
       if len(self.rgba_tup)!=4:
         self.rgba_tup = (1,0,0,1.0)
@@ -386,7 +392,9 @@ class GOCAD_KIT:
       myscene = Collada.scene.Scene("myscene", [node])
       mesh.scenes.append(myscene)
       mesh.scene = myscene
+      popup_dict[geometry_name] = { 'title': self.header_name, 'name': self.header_name }
 
+    # Lines
     elif self.is_pl:
       LINE_WIDTH = 1000
       point_cnt = 0
@@ -406,19 +414,21 @@ class GOCAD_KIT:
         bv1 = (v1[0]-self.base_xyz[0], v1[1]-self.base_xyz[1], v1[2]-self.base_xyz[2])
         vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+LINE_WIDTH]
         vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
+        geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
+        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
    
         input_list = Collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}".format(point_cnt))
   
-        indices = [0, 2, 3,
-                   3, 1, 0]
+        indices = [0, 2, 3, 3, 1, 0]
   
         triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
          
         geom.primitives.append(triset)
         mesh.geometries.append(geom)
         geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+
+        popup_dict[geom_label] = { 'title': self.header_name, 'name': self.header_name }
         
         point_cnt += 1
    
@@ -429,6 +439,7 @@ class GOCAD_KIT:
       mesh.scene = myscene
   
   
+    # Vertices
     elif self.is_vs:
       # Limit to 256 colours
       MAX_COLOURS = 256.0
@@ -452,13 +463,15 @@ class GOCAD_KIT:
         input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
         indices = [0, 2, 1, 3, 0, 1, 3, 2, 0, 3, 1, 2]
         vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
-        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), vert_src_list)
+        geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
+        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
         triset_list = [geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))]
         geom.primitives = triset_list
         mesh.geometries.append(geom)
         matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
         geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
         
+        popup_dict[geom_label] = { 'name': prop_str, 'val': self.prop_dict[prop_str][v], 'title': geometry_name.replace('_',' ') }
         point_cnt += 1
 
       node = Collada.scene.Node("node0", children=geomnode_list)
@@ -467,6 +480,7 @@ class GOCAD_KIT:
       mesh.scenes.append(myscene)
       mesh.scene = myscene
         
+    # Volumes
     elif self.is_vo:
       # Limit to 256 colours, only does tetrahedrons to save space 
       MAX_COLOURS = 256.0
@@ -488,7 +502,8 @@ class GOCAD_KIT:
             geomnode_list = []
             vert_floats = list(v) + [v[0]+pt_size[0], v[1], v[2]] + [v[0], v[1]+pt_size[1], v[2]] + [v[0], v[1], v[2]+pt_size[2]]
             vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), "{0}-{1:010d}".format(geometry_name, point_cnt), [vert_src])
+            geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
+            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
   
@@ -505,6 +520,7 @@ class GOCAD_KIT:
         
             node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
             node_list.append(node)
+            popup_dict[geom_label] = { 'title': self.header_name, 'name': self.header_name }
             point_cnt += 1
             
             if (point_cnt>999000000):
@@ -523,6 +539,9 @@ class GOCAD_KIT:
     
     print("Writing COLLADA file")
     mesh.write(fileName+'.dae')
+    
+    return popup_dict
+
     
   def calculate_colour_num(self, val_flt, max_flt, min_flt, max_colours_flt):
     ''' Calculates a colour number via interpolation
@@ -563,6 +582,7 @@ class GOCAD_KIT:
     v_idx = 0
     properties_list = []
     fileName, fileExt = os.path.splitext(filename_str)
+    self.np_filename = os.path.basename(fileName)
     for line in file_lines:
       line_str = line.rstrip(' \n\r').upper()
       splitstr_arr_raw = line.rstrip(' \n\r').split(' ')
