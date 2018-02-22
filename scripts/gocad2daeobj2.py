@@ -19,6 +19,31 @@ import collada2gltf
 CONVERT_COLLADA = True
 
 
+def de_concat(filename_lines):
+    ''' Separates joined GOCAD entries within a file 
+        filename_lines - lines from concatenated GOCAD file
+    '''
+    file_lines_list = []
+    part_list = []
+    in_file = False
+    for line in filename_lines:
+        line_str = line.rstrip(' \n\r').upper()
+        if not in_file:
+            for marker in GOCAD_KIT.GOCAD_HEADERS.values():
+                if line_str == marker:
+                    in_file = True
+                    part_list.append(line)
+                    break
+        elif in_file:
+            part_list.append(line) 
+            if line_str == 'END':
+                in_file = False
+                part_list.append(line)
+                file_lines_list.append(part_list)
+                part_list = []
+    return file_lines_list
+
+
 def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
     ''' Extracts gocad files from a gocad group file
         filename_str - filename of gocad file
@@ -99,24 +124,31 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         return
 
     if ext_str in ['TS', 'PL', 'VS', 'VO']:
-        gs = GOCAD_KIT((base_x, base_y, base_z))
-        gs.process_gocad(gocad_src_dir, filename_str, file_lines)
+        file_lines_list = de_concat(file_lines)
+        mask_idx = 0  
+        for file_lines in file_lines_list:
+            out_filename = fileName
+            if len(file_lines_list)>1:
+                out_filename = "{0}_{1:d}".format(fileName, mask_idx)
+            gs = GOCAD_KIT((base_x, base_y, base_z))
+            gs.process_gocad(gocad_src_dir, filename_str, file_lines)
 
-        # Check that conversion worked and write out files
-        if ext_str == 'TS' and len(gs.vrtx_arr) > 0 and len(gs.trgl_arr) > 0:
-            popup_dict = gs.write_collada(fileName)
+            # Check that conversion worked and write out files
+            if ext_str == 'TS' and len(gs.vrtx_arr) > 0 and len(gs.trgl_arr) > 0:
+                popup_dict = gs.write_collada(out_filename)
 
-        elif ext_str == 'PL' and len(gs.vrtx_arr) > 0 and len(gs.seg_arr) > 0:
-            popup_dict= gs.write_collada(fileName)
+            elif ext_str == 'PL' and len(gs.vrtx_arr) > 0 and len(gs.seg_arr) > 0:
+                popup_dict= gs.write_collada(out_filename)
 
-        elif ext_str == 'VS' and len(gs.vrtx_arr) > 0:
-            popup_dict = gs.write_collada(fileName)
+            elif ext_str == 'VS' and len(gs.vrtx_arr) > 0:
+                popup_dict = gs.write_collada(out_filename)
 
-        elif ext_str == 'VO' and gs.voxel_data.shape[0] > 1:
-            # Must use PNG because some files are too large
-            #popup_dict = gs.write_collada(fileName, gs)
-            #gs.write_OBJ(fileName, filename_str)
-            gs.write_voxel_png(gocad_src_dir, fileName, filename_str)
+            elif ext_str == 'VO' and gs.voxel_data.shape[0] > 1:
+                # Must use PNG because some files are too large
+                #popup_dict = gs.write_collada(out_filename, gs)
+                #gs.write_OBJ(out_filename, filename_str)
+                gs.write_voxel_png(gocad_src_dir, out_filename)
+            mask_idx+=1
 
     elif ext_str == 'GP':
         gs_list=extract_gocad(gocad_src_dir, filename_str, file_lines, (base_x, base_y, base_z))
@@ -208,6 +240,7 @@ if __name__ == "__main__":
             # Convert all files from collada to GLTF v2
             if CONVERT_COLLADA:
                 collada2gltf.convert_dir(gocad_src)
+            sys.exit(0)
 
         elif os.path.isfile(gocad_src):
             popup_dict_list = process(gocad_src)
@@ -215,6 +248,7 @@ if __name__ == "__main__":
             if CONVERT_COLLADA:
                 file_name, file_ext = os.path.splitext(gocad_src)
                 collada2gltf.convert_file(file_name+".dae")
+            sys.exit(0)
         else:
             print(gocad_src, "does not exist")
        

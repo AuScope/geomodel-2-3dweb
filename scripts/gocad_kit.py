@@ -228,7 +228,7 @@ class GOCAD_KIT:
             out_fp.close()
 
 
-    def write_voxel_png(self, src_dir, fileName, src_file_str):
+    def write_voxel_png(self, src_dir, fileName):
         ''' Writes out a PNG file of the top layer of the voxel data
             fileName - filename of OBJ file, without extension
             src_filen_str - filename of source gocad file
@@ -651,6 +651,23 @@ class GOCAD_KIT:
             elif splitstr_arr[0].upper() == "PROPERTIES":
                 properties_list = splitstr_arr[1:]
 
+            # Atoms
+            elif splitstr_arr[0] == "ATOM":
+                v_idx += 1
+                try:
+                    if (int(splitstr_arr[1]))!=v_idx:
+                        print("ERROR - atom ", splitstr_arr[0], " out of sequence in ", filename_str, "@", splitstr_arr[1], "!=", str(v_idx))
+                        print("       line = ", line_str)
+                        sys.exit(1)
+                    v_num = int(splitstr_arr[2])
+                    if v_num < len(self.vrtx_arr):
+                        self.vrtx_arr.append(self.vrtx_arr[v_num])
+                    else:
+                        print("ERROR - ATOM refers to VERTEX that has not been defined yet")
+                        sys.exit(1)
+                except (OverflowError, ValueError, IndexError):
+                    pass
+                  
             # Grab the vertices and properties
             # NB: Assumes vertices are numbered sequentially, will stop if they are not
             elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
@@ -661,7 +678,8 @@ class GOCAD_KIT:
                     self.vrtx_arr.append((x_flt, y_flt, z_flt))
                     v_idx += 1
                     if (int(splitstr_arr[1]))!=v_idx:
-                        print("ERROR - vertex ", splitstr_arr[0], " out of sequence in ", filename_str)
+                        print("ERROR - vertex ", splitstr_arr[0], " out of sequence in ", filename_str, "@", splitstr_arr[1], "!=", str(v_idx))
+                        print("       line = ", line_str)
                         sys.exit(1)
                     if splitstr_arr[0] == "PVRTX":
                         for p_idx in range(len(splitstr_arr[5:])):
