@@ -129,12 +129,37 @@ class GOCAD_KIT:
         self.np_filename = ""
         ''' Filename of GOCAD file without path or extension '''
 
+        self.max_X =  -sys.float_info.max
+        ''' Maximum X coordinate, used to calculate extent '''
+
+        self.min_X =  sys.float_info.max
+        ''' Minimum X coordinate, used to calculate extent '''
+
+        self.max_Y =  -sys.float_info.max
+        ''' Maximum Y coordinate, used to calculate extent '''
+
+        self.min_Y =  sys.float_info.max
+        ''' Minimum Y coordinate, used to calculate extent '''
+
+        self.max_Z =  -sys.float_info.max
+        ''' Maximum Z coordinate, used to calculate extent '''
+
+        self.min_Z =  sys.float_info.max
+        ''' Minimum Z coordinate, used to calculate extent '''
+
+
 
     def __repr__(self):
         ''' A very basic print friendly representation
         '''
         return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self.vrtx_arr))
 
+
+    def get_extent(self):
+        ''' Returns estimate of the extent of the model, using max and min coordinate values
+            format is [min_x, max_x, min_y, max_y]
+        '''
+        return [self.min_X, self.max_X, self.min_Y, self.max_Y]
 
 
     def setType(self, fileExt, firstLineStr):
@@ -246,6 +271,8 @@ class GOCAD_KIT:
         img = PIL.Image.frombytes('RGB', (self.vol_dims[1], self.vol_dims[0]), colour_arr.tobytes())
         print(img)
         img.save(os.path.join(src_dir, fileName+".PNG"))
+        popup_dict = { os.path.basename(fileName): { 'title': self.header_name, 'name': self.header_name } }
+        return popup_dict
 
 
 
@@ -446,7 +473,6 @@ class GOCAD_KIT:
             self.make_colour_materials(mesh, MAX_COLOURS)
             POINT_SIZE = 1000
             point_cnt = 0
-            print(len(self.rgba_tup), self.rgba_tup)
             node_list = []
             geomnode_list = []
             vert_floats = []
@@ -551,7 +577,7 @@ class GOCAD_KIT:
             max_colours_flt - maximum number of colours
             returns integer colour number
         '''
-        if (max_flt - min_flt)>0.0:
+        if (max_flt - min_flt)>0.1:
             return int((max_colours_flt-1)*(val_flt - min_flt)/(max_flt - min_flt))
         return 0
 
@@ -559,7 +585,7 @@ class GOCAD_KIT:
     def make_colour_materials(self, mesh, max_colours_flt):
         ''' Adds a list of coloured materials to COLLADA object
             mesh - Collada object
-            max_colours_flt =- number of colours to add
+            max_colours_flt - number of colours to add
         '''
         for colour_idx in range(int(max_colours_flt)):
             diffuse_colour = self.make_colour_map(float(colour_idx), 0.0, max_colours_flt - 1.0)
@@ -597,8 +623,12 @@ class GOCAD_KIT:
 
             splitstr_arr = line_str.split(' ')
 
+            # Skip the subsets keywords
+            if splitstr_arr[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
+                continue
+
             # Get the colour
-            if splitstr_arr[0] == "HEADER":
+            elif splitstr_arr[0] == "HEADER":
                 inHeader = True
 
             if splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
@@ -621,7 +651,6 @@ class GOCAD_KIT:
                         self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
                 if name_str=='NAME':
                     self.header_name = value_str.replace('/','-')
-                    print("header_name", self.header_name)
             if inPropClassHeader:
                 name_str, sep, value_str = line_str.partition(':')
                 if name_str=='*COLORMAP*SIZE':
@@ -666,7 +695,7 @@ class GOCAD_KIT:
                         print("ERROR - ATOM refers to VERTEX that has not been defined yet")
                         sys.exit(1)
                 except (OverflowError, ValueError, IndexError):
-                    pass
+                    v_idx -= 1
                   
             # Grab the vertices and properties
             # NB: Assumes vertices are numbered sequentially, will stop if they are not
@@ -683,12 +712,20 @@ class GOCAD_KIT:
                         sys.exit(1)
                     if splitstr_arr[0] == "PVRTX":
                         for p_idx in range(len(splitstr_arr[5:])):
-                            property_name = properties_list[p_idx]
-                            self.prop_dict.setdefault(property_name, {})
                             try:
-                                self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = float(splitstr_arr[p_idx+5])
-                            except (OverflowError, ValueError):
-                                pass
+                                property_name = properties_list[p_idx]
+                                self.prop_dict.setdefault(property_name, {})
+                                fp_str = splitstr_arr[p_idx+5]
+                                # Handle GOCAD's C++ floating point infinity for Windows and Linux
+                                if fp_str in ["1.#INF","inf"]:
+                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = sys.float_info.max
+                                elif fp_str in ["-1.#INF","-inf"]:
+                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = -sys.float_info.max
+                                else:
+                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = float(splitstr_arr[p_idx+5])
+                            except (OverflowError, ValueError, IndexError):
+                                if self.prop_dict[property_name] == {}:
+                                    del self.prop_dict[property_name]
 
             # Grab the triangular edges
             elif splitstr_arr[0] == "TRGL":
@@ -802,6 +839,18 @@ class GOCAD_KIT:
                 z = int(z_str)
             except (OverflowError, ValueError):
                 return False, None, None, None
+        if x > self.max_X:
+            self.max_X = x
+        if x < self.min_X:
+            self.min_X = x
+        if y > self.max_Y:
+            self.max_Y = y
+        if y < self.min_Y:
+            self.min_Y = y
+        if z > self.max_Z:
+            self.max_Z = z
+        if z < self.min_Z:
+            self.min_Z = z
         return True, x, y, z
 
 
