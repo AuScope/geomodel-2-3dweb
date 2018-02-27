@@ -14,6 +14,7 @@ from json import JSONDecodeError
 import argparse
 
 from gocad_kit import GOCAD_KIT
+from gocad_vessel import GOCAD_VESSEL
 from makeDaeBoreholes import get_boreholes
 import collada2gltf
 
@@ -30,7 +31,7 @@ def de_concat(filename_lines):
     for line in filename_lines:
         line_str = line.rstrip(' \n\r').upper()
         if not in_file:
-            for marker in GOCAD_KIT.GOCAD_HEADERS.values():
+            for marker in GOCAD_VESSEL.GOCAD_HEADERS.values():
                 if line_str == marker[0]:
                     in_file = True
                     part_list.append(line)
@@ -49,9 +50,9 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
     ''' Extracts gocad files from a gocad group file
         filename_str - filename of gocad file
         file_lines - lines extracted from gocad group file
-        Returns a list of GOCAD_KIT objects
+        Returns a list of GOCAD_VESSEL objects
     '''
-    gs_list = []
+    gv_list = []
     firstLine = True
     inMember = False
     inGoCAD = False
@@ -63,7 +64,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
         splitstr_arr = line_str.split(' ')
         if firstLine:
             firstLine = False
-            if fileExt.upper() != '.GP' or line_str not in GOCAD_KIT.GOCAD_HEADERS['GP']:
+            if fileExt.upper() != '.GP' or line_str not in GOCAD_VESSEL.GOCAD_HEADERS['GP']:
                 print("SORRY - not a GOCAD GP file", repr(line_str))
                 sys.exit(1)
         if line_str == "BEGIN_MEMBERS":
@@ -74,14 +75,14 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
             inGoCAD = True
         elif inMember and line_str == "END":
             inGoCAD = False
-            gs = GOCAD_KIT(base_xyz, os.path.basename(fileName).upper())
-            gs.process_gocad(src_dir, filename_str, gocad_lines)
-            gs_list.append(gs)
+            gv = GOCAD_VESSEL(base_xyz, os.path.basename(fileName).upper())
+            gv.process_gocad(src_dir, filename_str, gocad_lines)
+            gv_list.append(gv)
             gocad_lines = []
         if inMember and inGoCAD:
             gocad_lines.append(line)
 
-    return gs_list
+    return gv_list
 
 
 
@@ -94,7 +95,7 @@ def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
     '''
     ret_list = []
     extent_list = []
-    for ext_str in GOCAD_KIT.SUPPORTED_EXTS:
+    for ext_str in GOCAD_VESSEL.SUPPORTED_EXTS:
         wildcard_str = os.path.join(gocad_src_dir, "*."+ext_str.lower())
         file_list = glob.glob(wildcard_str)
         for filename_str in file_list:
@@ -117,6 +118,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
     fileName, fileExt = os.path.splitext(filename_str)
     ext_str = fileExt.lstrip('.').upper()
     gocad_src_dir = os.path.dirname(filename_str)
+    gs = GOCAD_KIT()
     try:
         fp = open(filename_str,'r')
         whole_file_lines = fp.readlines()
@@ -131,39 +133,39 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             out_filename = fileName
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
-            gs = GOCAD_KIT((base_x, base_y, base_z))
-            gs.process_gocad(gocad_src_dir, filename_str, file_lines)
+            gv = GOCAD_VESSEL((base_x, base_y, base_z))
+            gv.process_gocad(gocad_src_dir, filename_str, file_lines)
 
             # Check that conversion worked and write out files
-            if ext_str == 'TS' and len(gs.vrtx_arr) > 0 and len(gs.trgl_arr) > 0:
-                popup_dict = gs.write_collada(out_filename)
+            if ext_str == 'TS' and len(gv.vrtx_arr) > 0 and len(gv.trgl_arr) > 0:
+                popup_dict = gs.write_single_collada(gv, out_filename)
 
-            elif ext_str == 'PL' and len(gs.vrtx_arr) > 0 and len(gs.seg_arr) > 0:
-                popup_dict= gs.write_collada(out_filename)
+            elif ext_str == 'PL' and len(gv.vrtx_arr) > 0 and len(gv.seg_arr) > 0:
+                popup_dict= gs.write_single_collada(gv, out_filename)
 
-            elif ext_str == 'VS' and len(gs.vrtx_arr) > 0:
-                popup_dict = gs.write_collada(out_filename)
+            elif ext_str == 'VS' and len(gv.vrtx_arr) > 0:
+                popup_dict = gs.write_single_collada(gv, out_filename)
 
-            elif ext_str == 'VO' and gs.voxel_data.shape[0] > 1:
+            elif ext_str == 'VO' and gv.voxel_data.shape[0] > 1:
                 # Must use PNG because some files are too large
-                #popup_dict = gs.write_collada(out_filename, gs)
-                #gs.write_OBJ(out_filename, filename_str)
-                popup_dict = gs.write_voxel_png(gocad_src_dir, out_filename)
+                #popup_dict = gs.write_single_collada(gv, out_filename)
+                #gs.write_OBJ(gv, out_filename, filename_str)
+                popup_dict = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
             mask_idx+=1
             popup_dict_list.append(add_info2popup(popup_dict, out_filename))
             popup_dict = {}
-            extent_list.append(gs.get_extent())
+            extent_list.append(gv.get_extent())
 
     elif ext_str == 'GP':
-        gs_list=extract_gocad(gocad_src_dir, filename_str, whole_file_lines, (base_x, base_y, base_z))
+        gv_list=extract_gocad(gocad_src_dir, filename_str, whole_file_lines, (base_x, base_y, base_z))
         file_idx = 0
-        for gs in gs_list:
+        for gv in gv_list:
             out_filename = "{0}_{1:d}".format(fileName, file_idx)
-            p_dict = gs.write_collada(out_filename)
+            p_dict = gs.write_single_collada(gv, out_filename)
             popup_dict_list.append(add_info2popup(p_dict, out_filename))
             popup_dict = {}
             file_idx += 1
-            extent_list.append(gs.get_extent())
+            extent_list.append(gv.get_extent())
 
     fp.close()
     return popup_dict_list, reduce_extents(extent_list)
