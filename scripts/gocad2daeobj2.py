@@ -20,6 +20,10 @@ import collada2gltf
 
 CONVERT_COLLADA = True
 
+GROUP_LIMIT = 8
+''' If there are more than GROUP_LIMIT number of GOCAD objects in a group file then use one COLLADA file 
+    else put use separate COLLADA files for each object
+'''
 
 def de_concat(filename_lines):
     ''' Separates joined GOCAD entries within a file 
@@ -119,6 +123,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
     ext_str = fileExt.lstrip('.').upper()
     gocad_src_dir = os.path.dirname(filename_str)
     gs = GOCAD_KIT()
+    # Open GOCAD file an read all its contents, assume it fits in memory
     try:
         fp = open(filename_str,'r')
         whole_file_lines = fp.readlines()
@@ -126,29 +131,24 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         print("Can't open or read - skipping file", filename_str)
         return
 
-    if ext_str in ['TS', 'PL', 'VS', 'VO']:
+    # VS and VO files have lots of data points and thus one COLLADA file for each GOCAD file
+    if ext_str in ['VS', 'VO']:
         file_lines_list = de_concat(whole_file_lines)
         mask_idx = 0  
+        out_filename = fileName
         for file_lines in file_lines_list:
-            out_filename = fileName
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
             gv = GOCAD_VESSEL((base_x, base_y, base_z))
             gv.process_gocad(gocad_src_dir, filename_str, file_lines)
 
             # Check that conversion worked and write out files
-            if ext_str == 'TS' and len(gv.vrtx_arr) > 0 and len(gv.trgl_arr) > 0:
-                popup_dict = gs.write_single_collada(gv, out_filename)
-
-            elif ext_str == 'PL' and len(gv.vrtx_arr) > 0 and len(gv.seg_arr) > 0:
-                popup_dict= gs.write_single_collada(gv, out_filename)
-
-            elif ext_str == 'VS' and len(gv.vrtx_arr) > 0:
-                popup_dict = gs.write_single_collada(gv, out_filename)
+            if ext_str == 'VS' and len(gv.vrtx_arr) > 0:
+                popup_dict = gs.write_collada(gv, out_filename)
 
             elif ext_str == 'VO' and gv.voxel_data.shape[0] > 1:
                 # Must use PNG because some files are too large
-                #popup_dict = gs.write_single_collada(gv, out_filename)
+                #popup_dict = gs.write_collada(gv, out_filename)
                 #gs.write_OBJ(gv, out_filename, filename_str)
                 popup_dict = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
             mask_idx+=1
@@ -156,16 +156,49 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             popup_dict = {}
             extent_list.append(gv.get_extent())
 
+    # For triangles and lines, place multiple GOCAD objects in one COLLADA file
+    elif ext_str in ['TS','PL']:
+        file_lines_list = de_concat(whole_file_lines)
+        gs.start_collada()
+        popup_dict = {}
+        for file_lines in file_lines_list:
+            gv = GOCAD_VESSEL((base_x, base_y, base_z))
+            gv.process_gocad(gocad_src_dir, filename_str, file_lines)
+
+            # Check that conversion worked and write out files
+            if ext_str == 'TS' and len(gv.vrtx_arr) > 0 and len(gv.trgl_arr) > 0:
+                popup_dict.update(gs.add_v_to_collada(gv))
+
+            elif ext_str == 'PL' and len(gv.vrtx_arr) > 0 and len(gv.seg_arr) > 0:
+                popup_dict.update(gs.add_v_to_collada(gv))
+            extent_list.append(gv.get_extent())
+        popup_dict_list.append(add_info2popup(popup_dict, fileName))
+        gs.end_collada(fileName)
+        
+
+    # Process group files, depending on the number of GOCAD objects inside
     elif ext_str == 'GP':
         gv_list=extract_gocad(gocad_src_dir, filename_str, whole_file_lines, (base_x, base_y, base_z))
-        file_idx = 0
-        for gv in gv_list:
-            out_filename = "{0}_{1:d}".format(fileName, file_idx)
-            p_dict = gs.write_single_collada(gv, out_filename)
-            popup_dict_list.append(add_info2popup(p_dict, out_filename))
+
+        # If there are too many entries in the GP file, then place everything in one COLLADA file
+        if len(gv_list) > GROUP_LIMIT:
+            gs.start_collada()
             popup_dict = {}
-            file_idx += 1
-            extent_list.append(gv.get_extent())
+            for gv in gv_list:
+                popup_dict.update(gs.add_v_to_collada(gv))
+                extent_list.append(gv.get_extent())
+            popup_dict_list.append(add_info2popup(popup_dict, fileName))
+            gs.end_collada(fileName)
+ 
+        # Else place each GOCAD object in a separate file
+        else:
+            file_idx = 0
+            for gv in gv_list:
+                out_filename = "{0}_{1:d}".format(fileName, file_idx)
+                p_dict = gs.write_collada(gv, out_filename)
+                popup_dict_list.append(add_info2popup(p_dict, out_filename))
+                file_idx += 1
+                extent_list.append(gv.get_extent())
 
     fp.close()
     return popup_dict_list, reduce_extents(extent_list)

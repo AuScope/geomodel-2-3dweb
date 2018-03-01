@@ -24,10 +24,19 @@ class GOCAD_KIT:
     SHADING="phong"
     ''' shading parameter for pycollada material effect '''
 
+    MAX_COLOURS = 256.0
+    ''' Maximum number of colours displayed in one COLLADA file '''
+
+    LINE_WIDTH = 1000
+    ''' Width of lines created for GOCAD PL files '''
 
     def __init__(self):
         ''' Initialise class
         '''
+        # Pycollada objects used to create a single COLLADA file using multiple input files
+        self.mesh_obj = None
+        self.geomnode_list = []
+        self.vobj_cnt = 0
 
     def write_OBJ(self, v_obj, fileName, src_file_str):
         ''' Writes out an OBJ file
@@ -206,6 +215,125 @@ class GOCAD_KIT:
         return ct_done
 
 
+    def start_collada(self):
+        ''' Initiate creation of a COLLADA file
+        '''
+        self.mesh_obj = Collada.Collada()
+        self.geomnode_list = []
+
+        
+    def add_v_to_collada(self, v_obj):
+        ''' Adds a vessel object to the pycollada mesh object
+            NB: Does not accept GOCAD vertex or volume files as they usually have (too) many node objects
+            v_obj - GOCAD vessel object
+            Returns a popup info dict or {} if you try to add a GOCAD VS (vertex) or VO (volume) file
+        '''
+        # Cannot do vertices *.VS or volumes *.VO
+        if v_obj.is_vs or v_obj.is_vo:
+          return {}
+        group_name = ""
+        if len(v_obj.group_name)>0:
+            group_name = v_obj.group_name+"-"
+        if len(v_obj.header_name)>0:
+            geometry_name = group_name + v_obj.header_name
+        else:
+            geometry_name = group_name + "geometry"
+        popup_dict = {}
+
+        # Triangles
+        if v_obj.is_ts:
+            if len(v_obj.rgba_tup)!=4:
+                v_obj.rgba_tup = (1,0,0,1.0)
+            effect = Collada.material.Effect("effect-{0:05d}".format(self.vobj_cnt), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=v_obj.rgba_tup, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
+            mat = Collada.material.Material("material-{0:05d}".format(self.vobj_cnt), "mymaterial-{0:05d}".format(self.vobj_cnt), effect)
+            self.mesh_obj.effects.append(effect)
+            self.mesh_obj.materials.append(mat)
+            matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.vobj_cnt), mat, inputs=[])
+            vert_floats = []
+            for v in v_obj.vrtx_arr:
+                vert_floats += [v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2]]
+            vert_src = Collada.source.FloatSource("triverts-array-{0:05d}".format(self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
+            geom = Collada.geometry.Geometry(self.mesh_obj, "geometry-{0:05d}".format(self.vobj_cnt), geometry_name, [vert_src])
+            input_list = Collada.source.InputList()
+            input_list.addInput(0, 'VERTEX', "#triverts-array-{0:05d}".format(self.vobj_cnt))
+
+            indices = []
+            for t in v_obj.trgl_arr:
+                indices += [t[0]-1, t[1]-1, t[2]-1]
+
+            triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.vobj_cnt))
+
+
+            geom.primitives.append(triset)
+            self.mesh_obj.geometries.append(geom)
+            self.geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+
+            popup_dict[geometry_name] = { 'title': v_obj.header_name, 'name': v_obj.header_name }
+
+        # Lines
+        elif v_obj.is_pl:
+            point_cnt = 0
+            yellow_colour = (1,1,0,1)
+            effect = Collada.material.Effect("effect-{0:05d}".format(self.vobj_cnt), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=yellow_colour, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
+            mat = Collada.material.Material("material-{0:05d}".format(self.vobj_cnt), "mymaterial-{0:05d}".format(self.vobj_cnt), effect)
+            self.mesh_obj.effects.append(effect)
+            self.mesh_obj.materials.append(mat)
+            matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.vobj_cnt), mat, inputs=[])
+
+            # Draw lines as a series of triangles
+            for l in v_obj.seg_arr:
+                v0 = v_obj.vrtx_arr[l[0]-1]
+                v1 = v_obj.vrtx_arr[l[1]-1]
+                bv0 = (v0[0]-v_obj.base_xyz[0], v0[1]-v_obj.base_xyz[1], v0[2]-v_obj.base_xyz[2])
+                bv1 = (v1[0]-v_obj.base_xyz[0], v1[1]-v_obj.base_xyz[1], v1[2]-v_obj.base_xyz[2])
+                vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
+                vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
+                geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
+                geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}-{1:05d}".format(point_cnt, self.vobj_cnt), geom_label, [vert_src])
+
+                input_list = Collada.source.InputList()
+                input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.vobj_cnt))
+
+                indices = [0, 2, 3, 3, 1, 0]
+
+                triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.vobj_cnt))
+                geom.primitives.append(triset)
+                self.mesh_obj.geometries.append(geom)
+                self.geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+                popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': v_obj.header_name }
+                point_cnt += 1
+
+        self.vobj_cnt += 1
+        return popup_dict
+
+
+
+    def end_collada(self, fileName):
+        ''' Close out a COLLADA, writing the mesh object to file
+            fileName - filename of COLLADA file, without extension
+            Returns a dictionary of popup info objects
+        '''
+        node = Collada.scene.Node("node0", children=self.geomnode_list)
+        myscene = Collada.scene.Scene("myscene", [node])
+        self.mesh_obj.scenes.append(myscene)
+        self.mesh_obj.scene = myscene
+        print("Writing COLLADA file")
+        self.mesh_obj.write(fileName+'.dae')
+
+
+    def write_collada(self, v_obj, fileName):
+        ''' Write out a COLLADA file
+            fileName - filename of COLLADA file, without extension
+            v_obj - vessel object that holds details of GOCAD file
+        '''
+        if v_obj.is_vo or v_obj.is_vs:
+            self.write_single_collada(v_obj, fileName)
+        else:
+            self.start_collada()
+            self.add_v_to_collada(v_obj)
+            self.end_collada(fileName)
+
+
     #
     # COLLADA is better than OBJ, but very bulky
     #
@@ -259,7 +387,6 @@ class GOCAD_KIT:
 
         # Lines
         elif v_obj.is_pl:
-            LINE_WIDTH = 1000
             point_cnt = 0
             node_list = []
             yellow_colour = (1,1,0,1)
@@ -270,12 +397,13 @@ class GOCAD_KIT:
             matnode = Collada.scene.MaterialNode("materialref-0", mat, inputs=[])
             geomnode_list = []
 
+            # Draw lines using triangles
             for l in v_obj.seg_arr:
                 v0 = v_obj.vrtx_arr[l[0]-1]
                 v1 = v_obj.vrtx_arr[l[1]-1]
                 bv0 = (v0[0]-v_obj.base_xyz[0], v0[1]-v_obj.base_xyz[1], v0[2]-v_obj.base_xyz[2])
                 bv1 = (v1[0]-v_obj.base_xyz[0], v1[1]-v_obj.base_xyz[1], v1[2]-v_obj.base_xyz[2])
-                vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+LINE_WIDTH]
+                vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
                 vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
                 geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
                 geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
@@ -305,8 +433,7 @@ class GOCAD_KIT:
         # Vertices
         elif v_obj.is_vs:
             # Limit to 256 colours
-            MAX_COLOURS = 256.0
-            self.make_colour_materials(mesh, MAX_COLOURS)
+            self.make_colour_materials(mesh, self.MAX_COLOURS)
             POINT_SIZE = 1000
             point_cnt = 0
             node_list = []
@@ -316,8 +443,10 @@ class GOCAD_KIT:
             triset_list = []
             vert_src_list = []
             prop_str = list(v_obj.prop_dict.keys())[0]
+
+            # Draw vertices as lop-sided tetrahedrons
             for v in v_obj.vrtx_arr:
-                colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], MAX_COLOURS)
+                colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
                 bv = (v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2])
 
                 vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
@@ -345,8 +474,7 @@ class GOCAD_KIT:
         # Volumes
         elif v_obj.is_vo:
             # Limit to 256 colours, only does tetrahedrons to save space
-            MAX_COLOURS = 256.0
-            self.make_colour_materials(mesh, MAX_COLOURS)
+            self.make_colour_materials(mesh, self.MAX_COLOURS)
 
             node_list = []
             point_cnt = 0
@@ -354,7 +482,7 @@ class GOCAD_KIT:
             for z in range(v_obj.vol_dims[2]):
                 for y in range(v_obj.vol_dims[1]):
                     for x in range(v_obj.vol_dims[0]):
-                        colour_num = self.calculate_colour_num(v_obj.voxel_data[x][y][z], v_obj.voxel_data_stats['max'], v_obj.voxel_data_stats['min'], MAX_COLOURS)
+                        colour_num = self.calculate_colour_num(v_obj.voxel_data[x][y][z], v_obj.voxel_data_stats['max'], v_obj.voxel_data_stats['min'], self.MAX_COLOURS)
                         # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
                         u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
                         v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
@@ -413,9 +541,11 @@ class GOCAD_KIT:
             max_colours_flt - maximum number of colours
             returns integer colour number
         '''
+        # Floating point arithmetic fails of the numbers are at limits
         if max_flt == abs(sys.float_info.max) or min_flt == abs(sys.float_info.max) or val_flt == abs(sys.float_info.max):
             return 0
-        if (max_flt - min_flt) > 0.1:
+        # Ensure denominator is not too large
+        if (max_flt - min_flt) > 0.0000001:
             return int((max_colours_flt-1)*(val_flt - min_flt)/(max_flt - min_flt))
         return 0
 

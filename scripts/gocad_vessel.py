@@ -283,7 +283,7 @@ class GOCAD_VESSEL:
             # Grab the vertices and properties
             # NB: Assumes vertices are numbered sequentially, will stop if they are not
             elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
-                is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4])
+                is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
                 if is_ok:
                     if self.invert_zaxis:
                         z_flt = -z_flt
@@ -401,9 +401,10 @@ class GOCAD_VESSEL:
                 sys.exit(1)
 
 
-    def parse_XYZ(self, is_float, x_str, y_str, z_str):
+    def parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):
         ''' Helpful function to read XYZ cooordinates
             x_str, y_str, z_str - X,Y,Z coordinates in string form
+            do_minmax - record the X,Y,Z coords for calculating extent
             Returns four parameters: success  - true if could convert the strings to floats
                                    x,y,z - floating point values
         '''
@@ -422,18 +423,21 @@ class GOCAD_VESSEL:
                 z = int(z_str)
             except (OverflowError, ValueError):
                 return False, None, None, None
-        if x > self.max_X:
-            self.max_X = x
-        if x < self.min_X:
-            self.min_X = x
-        if y > self.max_Y:
-            self.max_Y = y
-        if y < self.min_Y:
-            self.min_Y = y
-        if z > self.max_Z:
-            self.max_Z = z
-        if z < self.min_Z:
-            self.min_Z = z
+
+        # Calculate minimum and maximum XYZ
+        if do_minmax:
+            if x > self.max_X:
+                self.max_X = x
+            if x < self.min_X:
+                self.min_X = x
+            if y > self.max_Y:
+                self.max_Y = y
+            if y < self.min_Y:
+                self.min_Y = y
+            if z > self.max_Z:
+                self.max_Z = z
+            if z < self.min_Z:
+                self.min_Z = z
         return True, x, y, z
 
 
