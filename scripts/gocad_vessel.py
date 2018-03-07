@@ -26,6 +26,10 @@ class GOCAD_VESSEL:
     ''' List of file extensions to search for '''
 
 
+    COORD_OFFSETS = { 'FROM_SHAPE' : (535100.0, 0.0, 0.0) }
+    ''' Coordinate offsets, when file contains a coordinate system  that is not "DEFAULT" 
+        The named coordinate system and (X,Y,Z) offset will apply '''
+
     def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
         ''' Initialise class
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
@@ -127,7 +131,9 @@ class GOCAD_VESSEL:
 
         self.min_Z =  sys.float_info.max
         ''' Minimum Z coordinate, used to calculate extent '''
-
+        
+        self.coord_sys_name = "DEFAULT"
+        ''' Name of the GOCAD coordinate system '''
 
 
     def __repr__(self):
@@ -182,14 +188,25 @@ class GOCAD_VESSEL:
         ''' Extracts details from gocad file
             filename_str - filename of gocad file
             file_lines - array of strings of lines from gocad file
+             Returns true if could process file
         '''
         print("process_gocad(", filename_str, len(file_lines), ")")
 
+        # Reading first line
         firstLine = True
+        
+        # Within header
         inHeader = False
+        
+        # Within coordinate header
+        inCoord = False
+        
+        # Within property class header
         inPropClassHeader = False
+        
         v_idx = 0
         properties_list = []
+        usesDefaultCoords = True
         fileName, fileExt = os.path.splitext(filename_str)
         self.np_filename = os.path.basename(fileName)
         for line in file_lines:
@@ -202,39 +219,74 @@ class GOCAD_VESSEL:
                 firstLine = False
                 if not self.setType(fileExt, line_str):
                     print("SORRY - not a GOCAD file", line_str)
-                    sys.exit(1)
-
-            splitstr_arr = line_str.split(' ')
+                    return False
+                continue
 
             # Skip the subsets keywords
             if splitstr_arr[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
                 continue
 
-            # Get the colour
+            # Are we within coordinate system header?
+            elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
+                inCoord = True
+                print("inCoord True")
+            
+            # Are we leaving coordinate system header?
+            elif splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
+                inCoord = False
+                print("inCoord False")
+            
+            # Within coordinate system header and not using the default coordinate system
+            elif inCoord and splitstr_arr[0] == "NAME":
+                self.coord_sys_name = splitstr_arr[1]
+                if splitstr_arr[1] != "DEFAULT":
+                    usesDefaultCoords = False
+                    print("usesDefaultCoords False")
+                else:
+                    usesDefaultCoords = True
+                    print("usesDefaultCoords True")
+                    
+                
+            # Does coordinate system use inverted z-axis?
+            elif inCoord and splitstr_arr[0].upper() == "ZPOSITIVE" and splitstr_arr[1].upper() == "DEPTH":
+                self.invert_zaxis=True
+            
+            # Are we in the header?
             elif splitstr_arr[0] == "HEADER":
                 inHeader = True
 
-            if splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
+            # Are we in the property class header?
+            elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
                 self.prop_class_name = splitstr_arr[2]
                 inPropClassHeader = True
 
+            # Are we out of the header?    
             elif inHeader and splitstr_arr[0] == "}":
                 inHeader = False
 
+            # Leaving property class header
             elif inPropClassHeader and splitstr_arr[0] == "}":
                 inPropClassHeader = False
 
-            if inHeader:
+            # When in the HEADER get the colours
+            elif inHeader:
                 name_str, sep, value_str = line_str.partition(':')
-                if name_str=='*SOLID*COLOR':
-                    rgbsplit_arr = value_str.split(' ')
+                if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
+                    # Colour can either be spaced RGBA floats, or '#' + 6 digit hex string
                     try:
-                        self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
-                    except (ValueError, OverflowError):
+                        if value_str[0]!='#':
+                            rgbsplit_arr = value_str.split(' ')
+                            self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
+                        else:
+                            self.rgba_tup = (int(value_str[1:3],16), int(value_str[3:5],16), int(value_str[5:7],16)) 
+                    except (ValueError, OverflowError, IndexError):
                         self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
+           
                 if name_str=='NAME':
                     self.header_name = value_str.replace('/','-')
-            if inPropClassHeader:
+            
+            # When in the PROPERTY CLASS header, get the colours
+            elif inPropClassHeader:
                 name_str, sep, value_str = line_str.partition(':')
                 if name_str=='*COLORMAP*SIZE':
                     print("colourmap-size", value_str)
@@ -255,11 +307,7 @@ class GOCAD_VESSEL:
                         except (OverflowError, ValueError):
                             pass
 
-            # If depth is positive, them must invert the z-axis
-            if splitstr_arr[0].upper() == "ZPOSITIVE" and splitstr_arr[1].upper() == "DEPTH":
-                self.invert_zaxis=True
-
-            # Property names
+            # Property names - ideally this kind of thing should be a command line parameter
             elif splitstr_arr[0].upper() == "PROPERTIES":
                 properties_list = splitstr_arr[1:]
 
@@ -267,7 +315,7 @@ class GOCAD_VESSEL:
             elif splitstr_arr[0] == "ATOM":
                 v_idx += 1
                 try:
-                    if (int(splitstr_arr[1]))!=v_idx:
+                    if int(splitstr_arr[1])!=v_idx:
                         print("ERROR - atom ", splitstr_arr[0], " out of sequence in ", filename_str, "@", splitstr_arr[1], "!=", str(v_idx))
                         print("       line = ", line_str)
                         sys.exit(1)
@@ -283,7 +331,19 @@ class GOCAD_VESSEL:
             # Grab the vertices and properties
             # NB: Assumes vertices are numbered sequentially, will stop if they are not
             elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
-                is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
+                # Sometimes the coordinates need to have an offset added
+                if usesDefaultCoords:
+                    is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
+                else:
+                    # I can't support this feature yet
+                    return False 
+                    #is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
+                    #if self.coord_sys_name in self.COORD_OFFSETS:
+                    #  print("Adding offset")
+                    #  x_flt += self.COORD_OFFSETS[self.coord_sys_name][0]
+                    #  y_flt += self.COORD_OFFSETS[self.coord_sys_name][1]
+                    #  z_flt += self.COORD_OFFSETS[self.coord_sys_name][2]
+
                 if is_ok:
                     if self.invert_zaxis:
                         z_flt = -z_flt
@@ -365,6 +425,12 @@ class GOCAD_VESSEL:
                 if is_ok:
                     self.axis_max = (x_int, y_int, z_int)
 
+            # END OF TEXT PROCESSING LOOP
+
+        print("filename_str=", filename_str)
+        print("usesDefaultCoords=", usesDefaultCoords)
+
+            
         # Calculate max and min of properties rather than read them from file
         for prop_str in self.prop_dict:
             self.prop_meta.setdefault(prop_str,{})
@@ -372,9 +438,8 @@ class GOCAD_VESSEL:
             self.prop_meta[prop_str]['min'] = min(list(self.prop_dict[prop_str].values()))
 
 
-        # Open up and read voxel file
+        # Open up and read binary voxel file
         if self.is_vo and len(self.voxel_file)>0:
-            print("VOXEL FILE=", self.voxel_file)
             try:
                 # Check file size first
                 file_sz = os.path.getsize(self.voxel_file)
@@ -395,10 +460,11 @@ class GOCAD_VESSEL:
                                 self.voxel_data_stats['min'] = val
                             self.voxel_data[x][y][z] = val
                 fp.close()
-                print("min=", self.voxel_data_stats['min'], "max=", self.voxel_data_stats['max'])
             except IOError as e:
                 print("SORRY - Cannot process voxel file IOError", filename_str, str(e), e.args)
-                sys.exit(1)
+                return False
+
+        return True
 
 
     def parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):

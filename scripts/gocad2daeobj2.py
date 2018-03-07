@@ -12,6 +12,7 @@ import glob
 import json
 from json import JSONDecodeError
 import argparse
+import random
 
 from gocad_kit import GOCAD_KIT
 from gocad_vessel import GOCAD_VESSEL
@@ -80,8 +81,8 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
         elif inMember and line_str == "END":
             inGoCAD = False
             gv = GOCAD_VESSEL(base_xyz, os.path.basename(fileName).upper())
-            gv.process_gocad(src_dir, filename_str, gocad_lines)
-            gv_list.append(gv)
+            if gv.process_gocad(src_dir, filename_str, gocad_lines):
+                gv_list.append(gv)
             gocad_lines = []
         if inMember and inGoCAD:
             gocad_lines.append(line)
@@ -140,9 +141,9 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
             gv = GOCAD_VESSEL((base_x, base_y, base_z))
-            gv.process_gocad(gocad_src_dir, filename_str, file_lines)
-
             # Check that conversion worked and write out files
+            if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
+                continue
             if ext_str == 'VS' and len(gv.vrtx_arr) > 0:
                 popup_dict = gs.write_collada(gv, out_filename)
 
@@ -152,7 +153,11 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
                 #gs.write_OBJ(gv, out_filename, filename_str)
                 popup_dict = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
             mask_idx+=1
-            popup_dict_list.append(add_info2popup(popup_dict, out_filename))
+            if ext_str=='VS':
+                popup_dict_list.append(add_info2popup(popup_dict, out_filename))
+            else:
+                # *.VO files will produce a PNG file, not GLTF
+                popup_dict_list.append(add_info2popup(popup_dict, out_filename, '.PNG'))
             popup_dict = {}
             extent_list.append(gv.get_extent())
 
@@ -223,7 +228,7 @@ def reduce_extents(extent_list):
         
 
 
-def add_info2popup(popup_dict, fileName):
+def add_info2popup(popup_dict, fileName, file_ext='.gltf'):
     ''' Adds more information to popup dictionary
         popup_dict - information to display in popup window
         fileName - file and path without extension of source file
@@ -231,11 +236,14 @@ def add_info2popup(popup_dict, fileName):
     np_filename = os.path.basename(fileName)
     j_dict = {}
     j_dict['popups'] = popup_dict
-    j_dict['type'] = 'GLTFObject'
-    j_dict['model_url'] = np_filename+".gltf"
+    if file_ext.upper()==".PNG":
+        j_dict['type'] = 'ImagePlane'
+    else: 
+        j_dict['type'] = 'GLTFObject'
+    j_dict['model_url'] = np_filename + file_ext
     j_dict['display_name'] = np_filename.replace('_',' ')
     j_dict['include'] = True
-    j_dict['displayed'] = True
+    j_dict['displayed'] = False
     return j_dict
 
 
@@ -316,7 +324,7 @@ if __name__ == "__main__":
     parser.add_argument('--config_in', '-i', action='store', help='Input JSON config file', metavar='input config file')
     parser.add_argument('--config_out', '-o', action='store', help='Output JSON config file', metavar='output config file')
     parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file')
-    parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add boreholes to model')
+    parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add WFS boreholes to model')
     args = parser.parse_args()
 
     popup_list_dict = {}

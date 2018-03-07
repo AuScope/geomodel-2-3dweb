@@ -106,11 +106,20 @@ class GOCAD_KIT:
         pixel_cnt = 0
         for x in range(0, v_obj.vol_dims[0]):
             for y in range(0, v_obj.vol_dims[1]):
-                (r,g,b) = self.colour_map[int(v_obj.voxel_data[x][y][z])]
-                colour_arr.append(int(r*255.0))
-                colour_arr.append(int(g*255.0))
-                colour_arr.append(int(b*255.0))
+                try:
+                    # If colour table is provided within source file, use it
+                    if len(v_obj.colour_map.keys()) > 0:
+                        (r,g,b) = v_obj.colour_map[int(v_obj.voxel_data[x][y][z])]
+
+                    # Else use a false colour map
+                    else:
+                        (r,g,b,a) = self.make_colour_map(v_obj.voxel_data[x][y][z], v_obj.voxel_data_stats['min'], v_obj.voxel_data_stats['max'])      
+                    pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
+                except ValueError:
+                    pixel_colour=[0,0,0]
+                colour_arr.fromlist(pixel_colour)
                 pixel_cnt += 1
+                    
         img = PIL.Image.frombytes('RGB', (v_obj.vol_dims[1], v_obj.vol_dims[0]), colour_arr.tobytes())
         print(img)
         img.save(os.path.join(src_dir, fileName+".PNG"))
@@ -433,7 +442,6 @@ class GOCAD_KIT:
         # Vertices
         elif v_obj.is_vs:
             # Limit to 256 colours
-            self.make_colour_materials(mesh, self.MAX_COLOURS)
             POINT_SIZE = 1000
             point_cnt = 0
             node_list = []
@@ -442,11 +450,21 @@ class GOCAD_KIT:
             matnode_list = []
             triset_list = []
             vert_src_list = []
-            prop_str = list(v_obj.prop_dict.keys())[0]
+            colour_num = 0
+            # If there are many colours, make MAX_COLORS materials
+            if len(v_obj.prop_dict.keys()) > 0:
+                self.make_colour_materials(mesh, self.MAX_COLOURS)
+                prop_str = list(v_obj.prop_dict.keys())[0]
+            # If there is only one colour
+            else:
+                self.make_colour_material(mesh, v_obj.rgba_tup, colour_num)
+                prop_str = ""
 
             # Draw vertices as lop-sided tetrahedrons
             for v in v_obj.vrtx_arr:
-                colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
+                # Lookup the colour table
+                if prop_str!="":
+                    colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
                 bv = (v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2])
 
                 vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
@@ -462,7 +480,10 @@ class GOCAD_KIT:
                 matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
                 geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
 
-                popup_dict[geom_label] = { 'name': prop_str, 'val': v_obj.prop_dict[prop_str][v], 'title': geometry_name.replace('_',' ') }
+                if prop_str!="":
+                    popup_dict[geom_label] = { 'name': prop_str, 'val': v_obj.prop_dict[prop_str][v], 'title': geometry_name.replace('_',' ') }
+                else:
+                    popup_dict[geom_label] = { 'name': geometry_name.replace('_',' '), 'title': geometry_name.replace('_',' ') }
                 point_cnt += 1
 
             node = Collada.scene.Node("node0", children=geomnode_list)
@@ -563,6 +584,18 @@ class GOCAD_KIT:
             mesh.materials.append(mat)
 
 
+    def make_colour_material(self, mesh, colour_tup, colour_idx):
+        ''' Adds a colour material to COLLADA object
+            mash - Collada object
+            colour_tup - tuple of floats (R,G,B,A)
+            colour_idx - integer index, used to refer to the material
+        '''
+        effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=colour_tup, specular=self.SPECULAR, shininess=self.SHININESS)
+        mat = Collada.material.Material("material{0:010d}".format(colour_idx), "mymaterial{0:010d}".format(colour_idx), effect)
+        mesh.effects.append(effect)
+        mesh.materials.append(mat)
+
+
     def interpolate(self, x_flt, xmin_flt, xmax_flt, ymin_flt, ymax_flt):
         ''' Interpolates a floating point number
             x_flt - floating point number to be interpolated
@@ -576,7 +609,7 @@ class GOCAD_KIT:
 
 
     def make_colour_map(self, i_flt, imin_flt, imax_flt):
-        ''' This creates a false colour map, returns an RGBA tuple. A is set to the "SAT" global var.
+        ''' This creates a false colour map, returns an RGBA tuple.
             Maps a floating point value that varies between a min and max value to an RGBA tuple
             i_flt - floating point value to be mapped
             imax_flt - maximum range of the floating point value
