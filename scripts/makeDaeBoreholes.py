@@ -115,10 +115,6 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     node = Collada.scene.Node("node0", children=geomnode_list)
     node_list.append(node)
 
-    myscene = Collada.scene.Scene("myscene", node_list)
-    mesh.scenes.append(myscene)
-    mesh.scene = myscene
-
     print("Creating a scene")
     myscene = Collada.scene.Scene("myscene", node_list)
     mesh.scenes.append(myscene)
