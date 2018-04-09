@@ -2,6 +2,7 @@ import numpy
 import sys
 import os
 import struct
+from collections import namedtuple
 
 class GOCAD_VESSEL:
     ''' Class used to read gocad files and store their details
@@ -30,6 +31,30 @@ class GOCAD_VESSEL:
     ''' Coordinate offsets, when file contains a coordinate system  that is not "DEFAULT" 
         The named coordinate system and (X,Y,Z) offset will apply '''
 
+    VRTX = namedtuple('VRTX', 'n xyz')
+    ''' Immutable named tuple which stores vertex data
+        n = sequence number
+        xyz = coordinates
+    '''
+
+    ATOM = namedtuple('ATOM', 'n v')
+    ''' Immutable named tuple which stores atom data
+        n = sequence number
+        v = vertex it refers to
+    '''
+
+    TRGL = namedtuple('TRGL', 'n abc')
+    ''' Immutable named tuple which stores triangle data
+        n = sequence number
+        abc = triangle vertices
+    '''
+
+    SEG = namedtuple('SEG', 'n ab')
+    ''' Immutable named tuple which stores segment data
+        n = sequence number
+        ab = segment vertices
+    '''
+
     def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
         ''' Initialise class
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
@@ -43,73 +68,76 @@ class GOCAD_VESSEL:
         ''' Contents of the name field in the header '''
 
         self.vrtx_arr = []
-        '''Array to store vertex data'''
+        ''' Array of named tuples 'VRTX' used to store vertex data'''
+
+        self.atom_arr = []
+        ''' Array of named tuples 'ATOM' used to store atom data'''
 
         self.trgl_arr = []
-        '''Array to store triangle face data'''
+        ''' Array of named tuples 'TRGL' used store triangle face data '''
 
         self.seg_arr = []
-        '''Array to store line segment data'''
+        ''' Array of named tuples 'SEG' used to store line segment data '''
 
         self.invert_zaxis = False
-        '''Set to true if z-axis inversion is turned on in this GOCAD file'''
+        ''' Set to true if z-axis inversion is turned on in this GOCAD file '''
 
         self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
-        '''If one colour is specified in the file it is stored here'''
+        ''' If one colour is specified in the file it is stored here '''
 
         self.prop_dict = {}
-        '''Property dictionary for PVRTX lines'''
+        ''' Property dictionary for PVRTX lines '''
 
         self.is_ts = False
-        '''True iff it is a GOCAD TSURF file'''
+        ''' True iff it is a GOCAD TSURF file '''
 
         self.is_vs = False
-        '''True iff it is a GOCAD VSET file'''
+        ''' True iff it is a GOCAD VSET file '''
 
         self.is_pl = False
-        '''True iff it is a GOCAD PLINE file'''
+        ''' True iff it is a GOCAD PLINE file '''
 
         self.is_vo = False
-        '''True iff it is a GOCAD VOXEL file'''
+        ''' True iff it is a GOCAD VOXEL file '''
 
         self.prop_meta = {}
-        '''Property metadata '''
+        ''' Property metadata '''
 
         self.voxel_file = ""
-        '''Name of binary file associated with VOXEL file'''
+        ''' Name of binary file associated with VOXEL file '''
 
         self.axis_origin = None
-        '''Origin of XYZ axis'''
+        ''' Origin of XYZ axis '''
 
         self.axis_u = None
-        '''Length of u-axis'''
+        ''' Length of u-axis '''
 
         self.axis_v = None
-        '''Length of v-axis'''
+        ''' Length of v-axis '''
 
         self.axis_w = None
-        '''Length of w-axis'''
+        ''' Length of w-axis '''
 
         self.vol_dims = None
-        '''3 dimensional size of voxel volume'''
+        ''' 3 dimensional size of voxel volume '''
 
         self.axis_min = None
-        '''3 dimensional minimum point of voxel volume '''
+        ''' 3 dimensional minimum point of voxel volume '''
 
         self.axis_max = None
-        '''3 dimensional maximum point of voxel volume '''
+        ''' 3 dimensional maximum point of voxel volume '''
 
         self.voxel_data = numpy.zeros((1,1,1))
-        '''Voxel data collected from binary file, stored as a 3d numpy array'''
+        ''' Voxel data collected from binary file, stored as a 3d numpy array '''
 
         self.voxel_data_stats = { 'min': sys.float_info.max , 'max': -sys.float_info.max }
-        '''Voxel data statistics: min & max'''
+        ''' Voxel data statistics: min & max '''
 
         self.colour_map = {}
-        '''If colour map was specified, then it is stored here'''
+        ''' If colour map was specified, then it is stored here '''
 
         self.colourmap_name = ""
-        '''Name of colour map'''
+        ''' Name of colour map '''
 
         self.np_filename = ""
         ''' Filename of GOCAD file without path or extension '''
@@ -141,6 +169,39 @@ class GOCAD_VESSEL:
         '''
         return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self.vrtx_arr))
 
+
+    def make_vertex_dict(self):
+        ''' Make a dictionary to associate vertex insertion order with vertex sequence number
+            Ordinarily the vertex sequence number is the same as the insertion order in the vertex
+            array, but some GOCAD files have missing vertices etc.
+            The first element starts at '1'
+        '''
+        vert_dict = {}
+        idx = 1
+        # Assign vertices to dict
+        for v in self.vrtx_arr:
+            vert_dict[v.n] = idx
+            idx += 1
+
+        # Assign atoms to dict
+        for atom in self.atom_arr:
+            idx = 1
+            for vert in self.vrtx_arr:
+                if vert.n == atom.v:
+                    vert_dict[atom.n] = idx
+                    break
+                idx += 1
+        return vert_dict
+
+
+    def check_vertex(self, num):
+        ''' If vertex exists then returns true else false
+            num - vertex number to search for
+        '''
+        for vrtx in self.vrtx_arr:
+            if vrtx.n == num:
+                return True
+        return False
 
     def get_extent(self):
         ''' Returns estimate of the extent of the model, using max and min coordinate values
@@ -204,7 +265,8 @@ class GOCAD_VESSEL:
         # Within property class header
         inPropClassHeader = False
         
-        v_idx = 0
+        seq_no = 0
+        seq_no_prev = -1
         properties_list = []
         usesDefaultCoords = True
         fileName, fileExt = os.path.splitext(filename_str)
@@ -242,13 +304,17 @@ class GOCAD_VESSEL:
                 if splitstr_arr[1] != "DEFAULT":
                     usesDefaultCoords = False
                     print("usesDefaultCoords False")
+
+                    # I can't support this GOCAD feature yet
+                    print("SORRY - Does not support non-DEFAULT coordinates")
+                    return False 
                 else:
                     usesDefaultCoords = True
                     print("usesDefaultCoords True")
                     
                 
             # Does coordinate system use inverted z-axis?
-            elif inCoord and splitstr_arr[0].upper() == "ZPOSITIVE" and splitstr_arr[1].upper() == "DEPTH":
+            elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
                 self.invert_zaxis=True
             
             # Are we in the header?
@@ -304,87 +370,79 @@ class GOCAD_VESSEL:
                     for idx in range(0, len(lut_arr), 4):
                         try:
                             self.colour_map[int(lut_arr[idx])] = (float(lut_arr[idx+1]), float(lut_arr[idx+2]), float(lut_arr[idx+3]))
-                        except (OverflowError, ValueError):
+                        except (IndexError, OverflowError, ValueError):
                             pass
 
-            # Property names - ideally this kind of thing should be a command line parameter
-            elif splitstr_arr[0].upper() == "PROPERTIES":
+            # Property names
+            elif splitstr_arr[0] == "PROPERTIES":
                 properties_list = splitstr_arr[1:]
 
-            # Atoms
-            elif splitstr_arr[0] == "ATOM":
-                v_idx += 1
+            # Atoms, with or without properties
+            elif splitstr_arr[0] == "ATOM" or splitstr_arr[0] == 'PATOM':
+                seq_no_prev = seq_no
                 try:
-                    if int(splitstr_arr[1])!=v_idx:
-                        print("ERROR - atom ", splitstr_arr[0], " out of sequence in ", filename_str, "@", splitstr_arr[1], "!=", str(v_idx))
-                        print("       line = ", line_str)
-                        sys.exit(1)
+                    seq_no = int(splitstr_arr[1])
                     v_num = int(splitstr_arr[2])
-                    if v_num < len(self.vrtx_arr):
-                        self.vrtx_arr.append(self.vrtx_arr[v_num])
+                except (OverflowError, ValueError, IndexError):
+                    seq_no = seq_no_prev
+                else:
+                    if self.check_vertex(v_num):
+                        self.atom_arr.append(self.ATOM(seq_no, v_num))
                     else:
                         print("ERROR - ATOM refers to VERTEX that has not been defined yet")
+                        print("    seq_no = ", seq_no)
+                        print("    v_num = ", v_num)
+                        print("    line = ", line_str)
                         sys.exit(1)
-                except (OverflowError, ValueError, IndexError):
-                    v_idx -= 1
-                  
-            # Grab the vertices and properties
-            # NB: Assumes vertices are numbered sequentially, will stop if they are not
-            elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
-                # Sometimes the coordinates need to have an offset added
-                if usesDefaultCoords:
-                    is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
-                else:
-                    # I can't support this feature yet
-                    return False 
-                    #is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
-                    #if self.coord_sys_name in self.COORD_OFFSETS:
-                    #  print("Adding offset")
-                    #  x_flt += self.COORD_OFFSETS[self.coord_sys_name][0]
-                    #  y_flt += self.COORD_OFFSETS[self.coord_sys_name][1]
-                    #  z_flt += self.COORD_OFFSETS[self.coord_sys_name][2]
 
-                if is_ok:
-                    if self.invert_zaxis:
-                        z_flt = -z_flt
-                    self.vrtx_arr.append((x_flt, y_flt, z_flt))
-                    v_idx += 1
-                    if (int(splitstr_arr[1]))!=v_idx:
-                        print("ERROR - vertex ", splitstr_arr[0], " out of sequence in ", filename_str, "@", splitstr_arr[1], "!=", str(v_idx))
-                        print("       line = ", line_str)
-                        sys.exit(1)
-                    if splitstr_arr[0] == "PVRTX":
-                        for p_idx in range(len(splitstr_arr[5:])):
-                            try:
-                                property_name = properties_list[p_idx]
-                                self.prop_dict.setdefault(property_name, {})
-                                fp_str = splitstr_arr[p_idx+5]
-                                # Handle GOCAD's C++ floating point infinity for Windows and Linux
-                                if fp_str in ["1.#INF","inf"]:
-                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = sys.float_info.max
-                                elif fp_str in ["-1.#INF","-inf"]:
-                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = -sys.float_info.max
-                                else:
-                                    self.prop_dict[property_name][(x_flt, y_flt, z_flt)] = float(splitstr_arr[p_idx+5])
-                            except (OverflowError, ValueError, IndexError):
-                                if self.prop_dict[property_name] == {}:
-                                    del self.prop_dict[property_name]
+                    # Atoms with properties
+                    if splitstr_arr[0] == "PATOM":
+                        try:
+                            vert_dict = self.make_vertex_dict()
+                            self.parse_props(splitstr_arr, properties_list, self.vrtx_arr[vert_dict[v_num]].xyz)
+                        except IndexError:
+                            pass
+                  
+            # Grab the vertices and properties, does not care if there are gaps in the sequence number
+            elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
+                seq_no_prev = seq_no
+                try:
+                    seq_no = int(splitstr_arr[1])
+                    is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
+                except (IndexError, ValueError, OverflowError):
+                    seq_no = seq_no_prev
+                else:
+                    if is_ok:
+                        # Add vertex
+                        if self.invert_zaxis:
+                            z_flt = -z_flt
+                        self.vrtx_arr.append(self.VRTX(seq_no, (x_flt, y_flt, z_flt)))
+
+                        # Add properties to vertex at X,Y,Z
+                        if splitstr_arr[0] == "PVRTX":
+                            self.parse_props(splitstr_arr, properties_list, (x_flt, y_flt, z_flt))
 
             # Grab the triangular edges
             elif splitstr_arr[0] == "TRGL":
-                is_ok, a_int, b_int, c_int = self.parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
-                if is_ok:
-                    self.trgl_arr.append((a_int, b_int, c_int))
+                seq_no_prev = seq_no
+                try:
+                    seq_no = int(splitstr_arr[1])
+                    is_ok, a_int, b_int, c_int = self.parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                except (IndexError, ValueError, OverflowError):
+                    seq_no = seq_no_prev
+                else:
+                    if is_ok:
+                        self.trgl_arr.append(self.TRGL(seq_no, (a_int, b_int, c_int)))
 
             # Grab the segments
             elif splitstr_arr[0] == "SEG":
                 try:
                     a_int = int(splitstr_arr[1])
                     b_int = int(splitstr_arr[2])
-                except ValueError:
-                    pass
+                except (IndexError, ValueError):
+                    seq_no = seq_no_prev
                 else:
-                    self.seg_arr.append((a_int, b_int))
+                    self.seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
 
             # Voxel file attributes
             elif splitstr_arr[0] == "PROP_FILE":
@@ -428,8 +486,6 @@ class GOCAD_VESSEL:
             # END OF TEXT PROCESSING LOOP
 
         print("filename_str=", filename_str)
-        print("usesDefaultCoords=", usesDefaultCoords)
-
             
         # Calculate max and min of properties rather than read them from file
         for prop_str in self.prop_dict:
@@ -465,6 +521,23 @@ class GOCAD_VESSEL:
                 return False
 
         return True
+
+    def parse_props(self, splitstr_arr, properties_list, coord_tup):
+        for p_idx in range(len(splitstr_arr[5:])):
+            try:
+                property_name = properties_list[p_idx]
+                self.prop_dict.setdefault(property_name, {})
+                fp_str = splitstr_arr[p_idx+5]
+                # Handle GOCAD's C++ floating point infinity for Windows and Linux
+                if fp_str in ["1.#INF","inf"]:
+                    self.prop_dict[property_name][coord_tup] = sys.float_info.max
+                elif fp_str in ["-1.#INF","-inf"]:
+                    self.prop_dict[property_name][coord_tup] = -sys.float_info.max
+                else:
+                    self.prop_dict[property_name][coord_tup] = float(splitstr_arr[p_idx+5])
+            except (OverflowError, ValueError, IndexError):
+                if self.prop_dict[property_name] == {}:
+                    del self.prop_dict[property_name]
 
 
     def parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):

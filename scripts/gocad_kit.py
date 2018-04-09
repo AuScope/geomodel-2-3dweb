@@ -56,22 +56,24 @@ class GOCAD_KIT:
         out_fp = open(fileName+".OBJ", 'w')
         out_fp.write("# Wavefront OBJ file converted from '{0}'\n\n".format(src_file_str))
         ct_done = False
+        # This dictionary returns the insertion order of the vertex in the vrtx_arr given its sequence number
+        vert_dict = v_obj.make_vertex_dict()
         if v_obj.is_ts:
             if len(v_obj.rgba_tup)==4:
                 out_fp.write("mtllib "+fileName+".MTL\n")
         if v_obj.is_ts or v_obj.is_pl or v_obj.is_vs:
             for v in v_obj.vrtx_arr:
-                bv = (v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2])
+                bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
                 out_fp.write("v {0:f} {1:f} {2:f}\n".format(bv[0],bv[1],bv[2]))
         out_fp.write("g main\n")
         if v_obj.is_ts:
             out_fp.write("usemtl colouring\n")
             for f in v_obj.trgl_arr:
-                out_fp.write("f {0:d} {1:d} {2:d}\n".format(f[0],f[1],f[2]))
+                out_fp.write("f {0:d} {1:d} {2:d}\n".format(vert_dict[f[0]], vert_dict[f[1]], vert_dict[f[2]]))
 
         elif v_obj.is_pl:
             for s in v_obj.seg_arr:
-                out_fp.write("l {0:d} {1:d}\n".format(s[0],s[1]))
+                out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s[0]], vert_dict[s[1]]))
 
         elif v_obj.is_vs:
             out_fp.write("p");
@@ -239,7 +241,7 @@ class GOCAD_KIT:
         '''
         # Cannot do vertices *.VS or volumes *.VO
         if v_obj.is_vs or v_obj.is_vo:
-          return {}
+            return {}
         group_name = ""
         if len(v_obj.group_name)>0:
             group_name = v_obj.group_name+"-"
@@ -249,6 +251,9 @@ class GOCAD_KIT:
             geometry_name = group_name + "geometry"
         popup_dict = {}
 
+        # Make a vertex dictionary to associate the vertex sequence number with its position in 'vrtx_arr'
+        vert_dict = v_obj.make_vertex_dict()
+ 
         # Triangles
         if v_obj.is_ts:
             if len(v_obj.rgba_tup)!=4:
@@ -258,9 +263,11 @@ class GOCAD_KIT:
             self.mesh_obj.effects.append(effect)
             self.mesh_obj.materials.append(mat)
             matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.vobj_cnt), mat, inputs=[])
+            # Make floats array for inclusion in COLLADA file
             vert_floats = []
             for v in v_obj.vrtx_arr:
-                vert_floats += [v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2]]
+                vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
+
             vert_src = Collada.source.FloatSource("triverts-array-{0:05d}".format(self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(self.mesh_obj, "geometry-{0:05d}".format(self.vobj_cnt), geometry_name, [vert_src])
             input_list = Collada.source.InputList()
@@ -268,7 +275,8 @@ class GOCAD_KIT:
 
             indices = []
             for t in v_obj.trgl_arr:
-                indices += [t[0]-1, t[1]-1, t[2]-1]
+                indices += [vert_dict[t.abc[0]]-1, vert_dict[t.abc[1]]-1, vert_dict[t.abc[2]]-1]
+                #print[vert_dict[t.abc[0]], vert_dict[t.abc[1]], vert_dict[t.abc[2]]])
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.vobj_cnt))
 
@@ -291,10 +299,10 @@ class GOCAD_KIT:
 
             # Draw lines as a series of triangles
             for l in v_obj.seg_arr:
-                v0 = v_obj.vrtx_arr[l[0]-1]
-                v1 = v_obj.vrtx_arr[l[1]-1]
-                bv0 = (v0[0]-v_obj.base_xyz[0], v0[1]-v_obj.base_xyz[1], v0[2]-v_obj.base_xyz[2])
-                bv1 = (v1[0]-v_obj.base_xyz[0], v1[1]-v_obj.base_xyz[1], v1[2]-v_obj.base_xyz[2])
+                v0 = v_obj.vrtx_arr[vert_dict[l.ab[0]]-1]
+                v1 = v_obj.vrtx_arr[vert_dict[l.ab[1]]-1]
+                bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
+                bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
                 vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
                 vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
                 geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
@@ -360,6 +368,9 @@ class GOCAD_KIT:
             geometry_name = group_name + v_obj.header_name
         else:
             geometry_name = group_name + "geometry"
+ 
+        # Make a vertex dictionary to associate the vertex sequence number with its position in 'vrtx_arr'
+        vert_dict = v_obj.make_vertex_dict()
 
         # Triangles
         if v_obj.is_ts:
@@ -371,7 +382,7 @@ class GOCAD_KIT:
             mesh.materials.append(mat)
             vert_floats = []
             for v in v_obj.vrtx_arr:
-                vert_floats += [v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2]]
+                vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
             vert_src = Collada.source.FloatSource("triverts-array", numpy.array(vert_floats), ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(mesh, "geometry0", geometry_name, [vert_src])
             input_list = Collada.source.InputList()
@@ -379,7 +390,7 @@ class GOCAD_KIT:
 
             indices = []
             for t in v_obj.trgl_arr:
-                indices += [t[0]-1, t[1]-1, t[2]-1]
+                indices += [vert_dict[t[0]]-1, vert_dict[t[1]]-1, vert_dict[t[2]]-1]
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref")
             geom.primitives.append(triset)
@@ -408,10 +419,10 @@ class GOCAD_KIT:
 
             # Draw lines using triangles
             for l in v_obj.seg_arr:
-                v0 = v_obj.vrtx_arr[l[0]-1]
-                v1 = v_obj.vrtx_arr[l[1]-1]
-                bv0 = (v0[0]-v_obj.base_xyz[0], v0[1]-v_obj.base_xyz[1], v0[2]-v_obj.base_xyz[2])
-                bv1 = (v1[0]-v_obj.base_xyz[0], v1[1]-v_obj.base_xyz[1], v1[2]-v_obj.base_xyz[2])
+                v0 = v_obj.vrtx_arr[vert_dict[l[0]]-1]
+                v1 = v_obj.vrtx_arr[vert_dict[l[1]]-1]
+                bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
+                bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
                 vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
                 vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
                 geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
@@ -464,8 +475,8 @@ class GOCAD_KIT:
             for v in v_obj.vrtx_arr:
                 # Lookup the colour table
                 if prop_str!="":
-                    colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
-                bv = (v[0]-v_obj.base_xyz[0], v[1]-v_obj.base_xyz[1], v[2]-v_obj.base_xyz[2])
+                    colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v.xyz], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
+                bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
 
                 vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
                 input_list = Collada.source.InputList()
@@ -481,7 +492,7 @@ class GOCAD_KIT:
                 geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
 
                 if prop_str!="":
-                    popup_dict[geom_label] = { 'name': prop_str, 'val': v_obj.prop_dict[prop_str][v], 'title': geometry_name.replace('_',' ') }
+                    popup_dict[geom_label] = { 'name': prop_str, 'val': v_obj.prop_dict[prop_str][v.xyz], 'title': geometry_name.replace('_',' ') }
                 else:
                     popup_dict[geom_label] = { 'name': geometry_name.replace('_',' '), 'title': geometry_name.replace('_',' ') }
                 point_cnt += 1
