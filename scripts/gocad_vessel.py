@@ -215,9 +215,12 @@ class GOCAD_VESSEL:
             fileExt - the file extension
             firstLineStr - first line in the file
             Returns True if it could determine the type of file
+            Will return False when given the header of a GOCAD group file, since
+            cannot create a vessel object from the group file itself, only from the group members
         '''
         print("setType(", fileExt, firstLineStr, ")")
         ext_str = fileExt.lstrip('.').upper()
+        # Look for other GOCAD file types within a group file
         if ext_str=='GP':
             found = False
             for key in self.GOCAD_HEADERS:
@@ -276,11 +279,11 @@ class GOCAD_VESSEL:
             splitstr_arr_raw = line.rstrip(' \n\r').split(' ')
             splitstr_arr = line_str.split(' ')
 
-            # Check that we have a GOCAD file
+            # Check that we have a GOCAD file that we can process
+            # Nota bene: This will return if called for the header of a GOCAD group file
             if firstLine:
                 firstLine = False
                 if not self.setType(fileExt, line_str):
-                    print("SORRY - not a GOCAD file", line_str)
                     return False
                 continue
 
