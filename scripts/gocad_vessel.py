@@ -4,6 +4,7 @@ import os
 import struct
 from collections import namedtuple
 import logging
+import traceback
 
 class GOCAD_VESSEL:
     ''' Class used to read gocad files and store their details
@@ -57,8 +58,9 @@ class GOCAD_VESSEL:
 
 
 
-    def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
+    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name=""):
         ''' Initialise class
+            debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
                        before they are output
             group_name - optional string, name of group of this gocad file is within a group
@@ -67,7 +69,7 @@ class GOCAD_VESSEL:
         if not hasattr(GOCAD_VESSEL, 'logger'):
             GOCAD_VESSEL.logger = logging.getLogger(__name__)
 
-            # Create console handler and set level to debug
+            # Create console handler
             handler = logging.StreamHandler(sys.stdout)
 
             # Create formatter
@@ -76,9 +78,9 @@ class GOCAD_VESSEL:
             # Add formatter to ch
             handler.setFormatter(formatter)
 
-            # Add handler to logger
+            # Add handler to logger and set level
             GOCAD_VESSEL.logger.addHandler(handler)
-            # GOCAD_VESSEL.logger.setLevel(logging.NOTSET)
+            GOCAD_VESSEL.logger.setLevel(debug_level)
 
         self.logger = GOCAD_VESSEL.logger 
 
@@ -188,8 +190,12 @@ class GOCAD_VESSEL:
 
 
     def __handle_exc(self, exc):
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+
             self.logger.debug("DEBUG MODE: CAUGHT EXCEPTION:")
             self.logger.debug(exc)
+            self.logger.debug(repr(traceback.format_exception(exc_type, exc_value,
+                                          exc_traceback)))
             sys.exit(1)
 
     def __repr__(self):
@@ -381,11 +387,16 @@ class GOCAD_VESSEL:
             elif inHeader:
                 name_str, sep, value_str = line_str.partition(':')
                 if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
-                    # Colour can either be spaced RGBA floats, or '#' + 6 digit hex string
+                    # Colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
                     try:
                         if value_str[0]!='#':
                             rgbsplit_arr = value_str.split(' ')
-                            self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
+                            if len(rgbsplit_arr)==3:
+                                self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), 1.0)
+                            elif len(rgbsplit_arr)==4:
+                                self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
+                            else:
+                                self.logger.debug("Could not parse colour %s", value_str)
                         else:
                             self.rgba_tup = (int(value_str[1:3],16), int(value_str[3:5],16), int(value_str[5:7],16)) 
                     except (ValueError, OverflowError, IndexError) as exc:

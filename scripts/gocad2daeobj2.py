@@ -13,13 +13,20 @@ import json
 from json import JSONDecodeError
 import argparse
 import random
+import logging
 
 from gocad_kit import GOCAD_KIT
 from gocad_vessel import GOCAD_VESSEL
 from makeDaeBoreholes import get_boreholes
 import collada2gltf
 
+DEBUG_LVL = logging.NOTSET
+''' Set debug level to no debugging
+'''
+
 CONVERT_COLLADA = True
+''' Runs the collada2gltf program after creating COLLADA files
+'''
 
 GROUP_LIMIT = 8
 ''' If there are more than GROUP_LIMIT number of GOCAD objects in a group file then use one COLLADA file 
@@ -81,7 +88,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
             inGoCAD = True
         elif inMember and line_str == "END":
             inGoCAD = False
-            gv = GOCAD_VESSEL(base_xyz, os.path.basename(fileName).upper())
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz, os.path.basename(fileName).upper())
             if gv.process_gocad(src_dir, filename_str, gocad_lines):
                 gv_list.append(gv)
             gocad_lines = []
@@ -171,7 +178,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         for file_lines in file_lines_list:
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
-            gv = GOCAD_VESSEL((base_x, base_y, base_z))
+            gv = GOCAD_VESSEL(DEBUG_LVL, (base_x, base_y, base_z))
             # Check that conversion worked and write out files
             if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
                 continue
@@ -198,7 +205,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         gs.start_collada()
         popup_dict = {}
         for file_lines in file_lines_list:
-            gv = GOCAD_VESSEL((base_x, base_y, base_z))
+            gv = GOCAD_VESSEL(DEBUG_LVL, (base_x, base_y, base_z))
             gv.process_gocad(gocad_src_dir, filename_str, file_lines)
 
             # Check that conversion worked and write out files
@@ -246,7 +253,7 @@ def reduce_extents(extent_list):
         extent_list = list of extents
     '''
     # If only a single extent and not in a list, then return
-    if type(extent_list[0]) is float:
+    if len(extent_list)==0 or type(extent_list[0]) is float:
         return extent_list
         
     out_extent = [sys.float_info.max, -sys.float_info.max, sys.float_info.max, -sys.float_info.max]
@@ -360,12 +367,19 @@ if __name__ == "__main__":
     parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file')
     parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add WFS boreholes to model')
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
+    parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
     args = parser.parse_args()
 
     popup_list_dict = {}
     is_dir = False
     gocad_src = args.src
     geo_extent = [0.0, 0.0, 0.0, 0.0]
+
+    # Set debug level
+    if args.debug:
+        DEBUG_LVL = logging.DEBUG
+    else:
+        DEBUG_LVL = logging.NOTSET
 
     # Process a directory of files
     if os.path.isdir(gocad_src):
