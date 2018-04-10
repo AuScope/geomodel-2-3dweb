@@ -38,7 +38,7 @@ def convert_one_file(daefile_str):
         daefile_str - filename to be converted
     '''
     fileName, fileExt = os.path.splitext(daefile_str)
-    cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i "+daefile_str+" -o "+fileName+".gltf")
+    cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i '"+daefile_str+"' -o '"+fileName+".gltf'")
     print(cmd_str)
     os.system(cmd_str)
 
