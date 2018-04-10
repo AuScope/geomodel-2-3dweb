@@ -71,6 +71,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
             firstLine = False
             if fileExt.upper() != '.GP' or line_str not in GOCAD_VESSEL.GOCAD_HEADERS['GP']:
                 print("SORRY - not a GOCAD GP file", repr(line_str))
+                print("    filename_str = ", filename_str)
                 sys.exit(1)
         if line_str == "BEGIN_MEMBERS":
             inMember = True
@@ -89,14 +90,40 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
 
     return gv_list
 
+def find(gocad_src_dir):
+    ''' Searches for GOCAD files in all the subdirectories
+        gocad_src_dir - directory in which to begin the search
+        Returns a list of popup information and a list of geographical extents both can be used to
+        create a config file
+    '''
+    popup_list = []
+    geoext_list = []
+    walk_obj = os.walk(gocad_src_dir)
+    for root, subfolders, files in walk_obj:
+        print(root, subfolders, files)
+        done = False
+        for file in files:
+            name_str, ext_str = os.path.splitext(file)
+            for gocad_ext_str in GOCAD_VESSEL.SUPPORTED_EXTS:
+                if ext_str.lstrip('.').upper() == gocad_ext_str:
+                    p_list, g_list = find_and_process(root)
+                    popup_list += p_list
+                    geoext_list += g_list
+                    done = True
+                    break
+            if done:
+                break
 
+    return popup_list, reduce_extents(geoext_list)
+ 
 
 
 def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
-    ''' Searches for gocad files and processes them
+    ''' Searches for GOCAD files and processes them
         gocad_src_dir - source directory where there are gocad files
-        base_x, base_y, base_z - 3D coordinate offset, this is added to all
-                                 coordinates
+        base_x, base_y, base_z - optional 3D coordinate offset. This is added to all coordinates
+        Returns a list of popup information and a list of geographical extents both can be used to
+        create a config file
     '''
     ret_list = []
     extent_list = []
@@ -107,6 +134,10 @@ def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
             popup_dict_list, extent = process(filename_str, base_x, base_y, base_z)
             ret_list += popup_dict_list
             extent_list.append(extent)
+
+    # Convert all files from collada to GLTF v2
+    if CONVERT_COLLADA:
+        collada2gltf.convert_dir(gocad_src_dir)
     return ret_list, reduce_extents(extent_list)
 
 
@@ -214,6 +245,10 @@ def reduce_extents(extent_list):
     ''' Reduces a list of extents to just one extent
         extent_list = list of extents
     '''
+    # If only a single extent and not in a list, then return
+    if type(extent_list[0]) is float:
+        return extent_list
+        
     out_extent = [sys.float_info.max, -sys.float_info.max, sys.float_info.max, -sys.float_info.max]
     for extent in extent_list:
         if extent[0] < out_extent[0]:
@@ -225,7 +260,6 @@ def reduce_extents(extent_list):
         if extent[3] > out_extent[3]:
             out_extent[3] = extent[3]
     return out_extent
-        
 
 
 def add_info2popup(popup_dict, fileName, file_ext='.gltf'):
@@ -325,24 +359,30 @@ if __name__ == "__main__":
     parser.add_argument('--config_out', '-o', action='store', help='Output JSON config file', metavar='output config file')
     parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file')
     parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add WFS boreholes to model')
+    parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     args = parser.parse_args()
 
     popup_list_dict = {}
     is_dir = False
     gocad_src = args.src
-    extent = [0.0, 0.0, 0.0, 0.0]
+    geo_extent = [0.0, 0.0, 0.0, 0.0]
 
     # Process a directory of files
     if os.path.isdir(gocad_src):
         is_dir = True
-        popup_dict_list, extent = find_and_process(gocad_src)
-        # Convert all files from collada to GLTF v2
-        if CONVERT_COLLADA:
-            collada2gltf.convert_dir(gocad_src)
+
+        # Recursviely search subdirectories
+        if args.recursive:
+            popup_dict_list, geo_extent = find(gocad_src)
+
+        # Only search local directory
+        else: 
+            popup_dict_list, geo_extent = find_and_process(gocad_src)
 
     # Process a single file
     elif os.path.isfile(gocad_src):
         popup_dict_list, extent = process(gocad_src)
+
         # Convert all files from collada to GLTF v2
         if CONVERT_COLLADA:
             file_name, file_ext = os.path.splitext(gocad_src)
@@ -368,7 +408,7 @@ if __name__ == "__main__":
     # Create a config file
     elif args.create and args.config_out!=None:
         json_output = args.config_out
-        create_json_config(popup_dict_list, json_output, extent)
+        create_json_config(popup_dict_list, json_output, geo_extent)
 
     elif args.config_in!=None or args.config_out!=None or args.create:
         print("You must specify either input and output files or create flag and output file")
