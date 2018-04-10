@@ -3,11 +3,11 @@ import sys
 import os
 import struct
 from collections import namedtuple
+import logging
 
 class GOCAD_VESSEL:
     ''' Class used to read gocad files and store their details
     '''
-
     GOCAD_HEADERS = {
                  'TS':['GOCAD TSURF 1'],
                  'VS':['GOCAD VSET 1'],
@@ -55,12 +55,34 @@ class GOCAD_VESSEL:
         ab = segment vertices
     '''
 
+
+
     def __init__(self, base_xyz=(0.0, 0.0, 0.0), group_name=""):
         ''' Initialise class
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
                        before they are output
             group_name - optional string, name of group of this gocad file is within a group
         '''
+        # Set up logging, use class name so it is only called once
+        if not hasattr(GOCAD_VESSEL, 'logger'):
+            GOCAD_VESSEL.logger = logging.getLogger(__name__)
+
+            # Create console handler and set level to debug
+            handler = logging.StreamHandler(sys.stdout)
+
+            # Create formatter
+            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+
+            # Add formatter to ch
+            handler.setFormatter(formatter)
+
+            # Add handler to logger
+            GOCAD_VESSEL.logger.addHandler(handler)
+            # GOCAD_VESSEL.logger.setLevel(logging.NOTSET)
+
+        self.logger = GOCAD_VESSEL.logger 
+
+        # Initialise vars
         self.base_xyz = base_xyz
         self.group_name = group_name
 
@@ -164,6 +186,12 @@ class GOCAD_VESSEL:
         ''' Name of the GOCAD coordinate system '''
 
 
+
+    def __handle_exc(self, exc):
+            self.logger.debug("DEBUG MODE: CAUGHT EXCEPTION:")
+            self.logger.debug(exc)
+            sys.exit(1)
+
     def __repr__(self):
         ''' A very basic print friendly representation
         '''
@@ -218,7 +246,7 @@ class GOCAD_VESSEL:
             Will return False when given the header of a GOCAD group file, since
             cannot create a vessel object from the group file itself, only from the group members
         '''
-        print("setType(", fileExt, firstLineStr, ")")
+        self.logger.debug("setType(%s,%s)", fileExt, firstLineStr)
         ext_str = fileExt.lstrip('.').upper()
         # Look for other GOCAD file types within a group file
         if ext_str=='GP':
@@ -254,7 +282,7 @@ class GOCAD_VESSEL:
             file_lines - array of strings of lines from gocad file
              Returns true if could process file
         '''
-        print("process_gocad(", filename_str, len(file_lines), ")")
+        self.logger.debug("process_gocad(%s,%d)", filename_str, len(file_lines))
 
         # Reading first line
         firstLine = True
@@ -276,8 +304,14 @@ class GOCAD_VESSEL:
         self.np_filename = os.path.basename(fileName)
         for line in file_lines:
             line_str = line.rstrip(' \n\r').upper()
-            splitstr_arr_raw = line.rstrip(' \n\r').split(' ')
-            splitstr_arr = line_str.split(' ')
+            splitstr_arr_raw = line.rstrip(' \n\r').split()
+            splitstr_arr = line_str.split()
+
+            # Skip blank lines
+            if len(splitstr_arr)==0:
+                continue
+
+            self.logger.debug("splitstr_arr = %s", repr(splitstr_arr))
 
             # Check that we have a GOCAD file that we can process
             # Nota bene: This will return if called for the header of a GOCAD group file
@@ -289,53 +323,59 @@ class GOCAD_VESSEL:
 
             # Skip the subsets keywords
             if splitstr_arr[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
+                self.logger.debug("Skip subset keywords")
                 continue
 
             # Are we within coordinate system header?
             elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
                 inCoord = True
-                print("inCoord True")
+                self.logger.debug("inCoord True")
             
             # Are we leaving coordinate system header?
             elif splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
                 inCoord = False
-                print("inCoord False")
+                self.logger.debug("inCoord False")
             
             # Within coordinate system header and not using the default coordinate system
             elif inCoord and splitstr_arr[0] == "NAME":
                 self.coord_sys_name = splitstr_arr[1]
                 if splitstr_arr[1] != "DEFAULT":
                     usesDefaultCoords = False
-                    print("usesDefaultCoords False")
+                    self.logger.debug("usesDefaultCoords False")
 
                     # I can't support this GOCAD feature yet
                     print("SORRY - Does not support non-DEFAULT coordinates")
                     return False 
                 else:
                     usesDefaultCoords = True
-                    print("usesDefaultCoords True")
+                    self.logger.debug("usesDefaultCoords True")
                     
                 
             # Does coordinate system use inverted z-axis?
             elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
                 self.invert_zaxis=True
+                self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
             
             # Are we in the header?
             elif splitstr_arr[0] == "HEADER":
                 inHeader = True
+                self.logger.debug("inHeader = %s", repr(inHeader))
 
             # Are we in the property class header?
             elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
                 self.prop_class_name = splitstr_arr[2]
                 inPropClassHeader = True
+                self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
 
             # Are we out of the header?    
             elif inHeader and splitstr_arr[0] == "}":
                 inHeader = False
+                self.logger.debug("inHeader = %s", repr(inHeader))
 
             # Leaving property class header
             elif inPropClassHeader and splitstr_arr[0] == "}":
                 inPropClassHeader = False
+                self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
 
             # When in the HEADER get the colours
             elif inHeader:
@@ -348,37 +388,43 @@ class GOCAD_VESSEL:
                             self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
                         else:
                             self.rgba_tup = (int(value_str[1:3],16), int(value_str[3:5],16), int(value_str[5:7],16)) 
-                    except (ValueError, OverflowError, IndexError):
+                    except (ValueError, OverflowError, IndexError) as exc:
+                        self.__handle_exc(exc)
                         self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
+
+                    self.logger.debug("self.rgba_tup = %s", repr(self.rgba_tup))
            
                 if name_str=='NAME':
                     self.header_name = value_str.replace('/','-')
+                    self.logger.debug("self.header_name = %s", repr(self.header_name))
             
             # When in the PROPERTY CLASS header, get the colours
             elif inPropClassHeader:
                 name_str, sep, value_str = line_str.partition(':')
                 if name_str=='*COLORMAP*SIZE':
-                    print("colourmap-size", value_str)
+                    self.logger.debug("colourmap-size %s", value_str)
                 elif name_str=='*COLORMAP*NBCOLORS':
-                    print("numcolours", value_str)
+                    self.logger.debug("numcolours %s", value_str)
                 elif name_str=='HIGH_CLIP':
-                    print("highclip", value_str)
+                    self.logger.debug("highclip %s", value_str)
                 elif name_str=='LOW_CLIP':
-                    print("lowclip", value_str)
+                    self.logger.debug("lowclip %s", value_str)
                 elif name_str=='COLORMAP':
-                    print("colourmap id", value_str)
                     self.colourmap_name = value_str
+                    self.logger.debug("self.colourmap_name = %s", self.colourmap_name)
                 elif hasattr(self, 'colourmap_name') and name_str=='*COLORMAP*'+self.colourmap_name+'*COLORS':
                     lut_arr = value_str.split(' ')
                     for idx in range(0, len(lut_arr), 4):
                         try:
                             self.colour_map[int(lut_arr[idx])] = (float(lut_arr[idx+1]), float(lut_arr[idx+2]), float(lut_arr[idx+3]))
-                        except (IndexError, OverflowError, ValueError):
-                            pass
+                            self.logger.debug("self.colour_map = %s", self.colour_map)
+                        except (IndexError, OverflowError, ValueError) as exc:
+                            self.__handle_exc(exc)
 
             # Property names
             elif splitstr_arr[0] == "PROPERTIES":
                 properties_list = splitstr_arr[1:]
+                self.logger.debug(" properties_list = %s", repr(properties_list))
 
             # Atoms, with or without properties
             elif splitstr_arr[0] == "ATOM" or splitstr_arr[0] == 'PATOM':
@@ -386,16 +432,17 @@ class GOCAD_VESSEL:
                 try:
                     seq_no = int(splitstr_arr[1])
                     v_num = int(splitstr_arr[2])
-                except (OverflowError, ValueError, IndexError):
+                except (OverflowError, ValueError, IndexError) as exc:
+                    self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
                     if self.check_vertex(v_num):
                         self.atom_arr.append(self.ATOM(seq_no, v_num))
                     else:
-                        print("ERROR - ATOM refers to VERTEX that has not been defined yet")
-                        print("    seq_no = ", seq_no)
-                        print("    v_num = ", v_num)
-                        print("    line = ", line_str)
+                        self.logger.debug("ERROR - ATOM refers to VERTEX that has not been defined yet")
+                        self.logger.debug("    seq_no = %d", seq_no)
+                        self.logger.debug("    v_num = %d", v_num)
+                        self.logger.debug("    line = %s", line_str)
                         sys.exit(1)
 
                     # Atoms with properties
@@ -403,8 +450,8 @@ class GOCAD_VESSEL:
                         try:
                             vert_dict = self.make_vertex_dict()
                             self.parse_props(splitstr_arr, properties_list, self.vrtx_arr[vert_dict[v_num]].xyz)
-                        except IndexError:
-                            pass
+                        except IndexError as exc:
+                            self.__handle_exc(exc)
                   
             # Grab the vertices and properties, does not care if there are gaps in the sequence number
             elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
@@ -412,7 +459,8 @@ class GOCAD_VESSEL:
                 try:
                     seq_no = int(splitstr_arr[1])
                     is_ok, x_flt, y_flt, z_flt = self.parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
-                except (IndexError, ValueError, OverflowError):
+                except (IndexError, ValueError, OverflowError) as exc:
+                    self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
                     if is_ok:
@@ -431,7 +479,8 @@ class GOCAD_VESSEL:
                 try:
                     seq_no = int(splitstr_arr[1])
                     is_ok, a_int, b_int, c_int = self.parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
-                except (IndexError, ValueError, OverflowError):
+                except (IndexError, ValueError, OverflowError) as exc:
+                    self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
                     if is_ok:
@@ -442,7 +491,8 @@ class GOCAD_VESSEL:
                 try:
                     a_int = int(splitstr_arr[1])
                     b_int = int(splitstr_arr[2])
-                except (IndexError, ValueError):
+                except (IndexError, ValueError) as exc:
+                    self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
                     self.seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
@@ -488,7 +538,7 @@ class GOCAD_VESSEL:
 
             # END OF TEXT PROCESSING LOOP
 
-        print("filename_str=", filename_str)
+        self.logger.debug("filename_str = %s", filename_str)
             
         # Calculate max and min of properties rather than read them from file
         for prop_str in self.prop_dict:
@@ -538,7 +588,8 @@ class GOCAD_VESSEL:
                     self.prop_dict[property_name][coord_tup] = -sys.float_info.max
                 else:
                     self.prop_dict[property_name][coord_tup] = float(splitstr_arr[p_idx+5])
-            except (OverflowError, ValueError, IndexError):
+            except (OverflowError, ValueError, IndexError) as exc:
+                self.__handle_exc(exc)
                 if self.prop_dict[property_name] == {}:
                     del self.prop_dict[property_name]
 
@@ -556,14 +607,16 @@ class GOCAD_VESSEL:
                 x = float(x_str)
                 y = float(y_str)
                 z = float(z_str)
-            except (OverflowError, ValueError):
+            except (OverflowError, ValueError) as exc:
+                self.__handle_exc(exc)
                 return False, None, None, None
         else:
             try:
                 x = int(x_str)
                 y = int(y_str)
                 z = int(z_str)
-            except (OverflowError, ValueError):
+            except (OverflowError, ValueError) as exc:
+                self.__handle_exc(exc)
                 return False, None, None, None
 
         # Calculate minimum and maximum XYZ
