@@ -52,7 +52,7 @@ class GOCAD_KIT:
             I am only using it here because GOCAD VOXEL files are too big for COLLADA format
         '''
         # Output to OBJ file
-        print("Writing ",fileName+".OBJ")
+        print("Writing OBJ file: ",fileName+".OBJ")
         out_fp = open(fileName+".OBJ", 'w')
         out_fp.write("# Wavefront OBJ file converted from '{0}'\n\n".format(src_file_str))
         ct_done = False
@@ -123,7 +123,7 @@ class GOCAD_KIT:
                 pixel_cnt += 1
                     
         img = PIL.Image.frombytes('RGB', (v_obj.vol_dims[1], v_obj.vol_dims[0]), colour_arr.tobytes())
-        print(img)
+        print("Writing PNG file: ",fileName+".PNG")
         img.save(os.path.join(src_dir, fileName+".PNG"))
         popup_dict = { os.path.basename(fileName): { 'title': v_obj.header_name, 'name': v_obj.header_name } }
         return popup_dict
@@ -334,7 +334,7 @@ class GOCAD_KIT:
         myscene = Collada.scene.Scene("myscene", [node])
         self.mesh_obj.scenes.append(myscene)
         self.mesh_obj.scene = myscene
-        print("Writing COLLADA file")
+        print("Writing COLLADA file: ", fileName+'.dae')
         self.mesh_obj.write(fileName+'.dae')
 
 
@@ -554,12 +554,11 @@ class GOCAD_KIT:
                 if done:
                     break
 
-            print("Creating scene")
             myscene = Collada.scene.Scene("myscene", node_list)
             mesh.scenes.append(myscene)
             mesh.scene = myscene
 
-        print("Writing COLLADA file")
+        print("Writing COLLADA file: ", fileName+'.dae')
         mesh.write(fileName+'.dae')
 
         return popup_dict

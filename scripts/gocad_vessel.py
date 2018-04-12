@@ -241,6 +241,7 @@ class GOCAD_VESSEL:
         ''' Returns estimate of the extent of the model, using max and min coordinate values
             format is [min_x, max_x, min_y, max_y]
         '''
+        print("get_extent() returns:", repr( [self.min_X, self.max_X, self.min_Y, self.max_Y]))
         return [self.min_X, self.max_X, self.min_Y, self.max_Y]
 
 
@@ -589,16 +590,19 @@ class GOCAD_VESSEL:
     def parse_props(self, splitstr_arr, properties_list, coord_tup):
         for p_idx in range(len(splitstr_arr[5:])):
             try:
+                fp_str = splitstr_arr[p_idx+5]
+                # Skip GOCAD control nodes e.g. 'CNXYZ'
+                if fp_str[:2].upper()=='CN':
+                    continue
                 property_name = properties_list[p_idx]
                 self.prop_dict.setdefault(property_name, {})
-                fp_str = splitstr_arr[p_idx+5]
                 # Handle GOCAD's C++ floating point infinity for Windows and Linux
                 if fp_str in ["1.#INF","inf"]:
                     self.prop_dict[property_name][coord_tup] = sys.float_info.max
                 elif fp_str in ["-1.#INF","-inf"]:
                     self.prop_dict[property_name][coord_tup] = -sys.float_info.max
                 else:
-                    self.prop_dict[property_name][coord_tup] = float(splitstr_arr[p_idx+5])
+                    self.prop_dict[property_name][coord_tup] = float(fp_str)
             except (OverflowError, ValueError, IndexError) as exc:
                 self.__handle_exc(exc)
                 if self.prop_dict[property_name] == {}:

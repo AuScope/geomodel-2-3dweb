@@ -107,21 +107,21 @@ def find(gocad_src_dir):
     geoext_list = []
     walk_obj = os.walk(gocad_src_dir)
     for root, subfolders, files in walk_obj:
-        print(root, subfolders, files)
         done = False
         for file in files:
             name_str, ext_str = os.path.splitext(file)
             for gocad_ext_str in GOCAD_VESSEL.SUPPORTED_EXTS:
                 if ext_str.lstrip('.').upper() == gocad_ext_str:
                     p_list, g_list = find_and_process(root)
-                    popup_list += p_list
-                    geoext_list += g_list
+                    popup_list.append(p_list)
+                    geoext_list.append(g_list)
                     done = True
                     break
             if done:
                 break
 
-    return popup_list, reduce_extents(geoext_list)
+    reduced_geoext_list = reduce_extents(geoext_list)
+    return popup_list, reduced_geoext_list
  
 
 
@@ -155,6 +155,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         base_x, base_y, base_z - 3D coordinate offset, this is added to all
                                  coordinates
     '''
+    print("\nProcessing ", filename_str)
     popup_dict_list = []
     popup_dict = {}
     extent_list = []
@@ -167,7 +168,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         fp = open(filename_str,'r')
         whole_file_lines = fp.readlines()
     except(Exception):
-        print("Can't open or read - skipping file", filename_str)
+        print("ERROR - Can't open or read - skipping file", filename_str)
         return
 
     # VS and VO files have lots of data points and thus one COLLADA file for each GOCAD file
@@ -244,6 +245,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
                 extent_list.append(gv.get_extent())
 
     fp.close()
+    reduced_extent_list =  reduce_extents(extent_list)
     return popup_dict_list, reduce_extents(extent_list)
 
 
@@ -258,6 +260,8 @@ def reduce_extents(extent_list):
         
     out_extent = [sys.float_info.max, -sys.float_info.max, sys.float_info.max, -sys.float_info.max]
     for extent in extent_list:
+        if len(extent) < 4:
+            continue
         if extent[0] < out_extent[0]:
             out_extent[0] = extent[0]
         if extent[1] > out_extent[1]:
@@ -403,7 +407,7 @@ if __name__ == "__main__":
             collada2gltf.convert_file(file_name+".dae")
 
     else:
-        print(gocad_src, "does not exist")
+        print("ERROR - ", gocad_src, "does not exist")
         sys.exit(1)
        
     # Update a config file
@@ -416,7 +420,7 @@ if __name__ == "__main__":
             else:
                 update_json_config(popup_dict_list, json_template, json_output)
         else:
-            print(json_template, "does not exist")
+            print("ERROR - ", json_template, "does not exist")
             sys.exit(1)
 
     # Create a config file
