@@ -4,25 +4,26 @@ import PIL
 import sys
 import os
 import array
+import logging
 
 class GOCAD_KIT:
     ''' Class used to output GOCAD files as Wavefront OBJ or COLLADA files
     '''
 
     EMISSION = (0,0,0,1)
-    ''' emission parameter for pycollada material effect '''
+    ''' Emission parameter for pycollada material effect '''
 
     AMBIENT = (0,0,0,1)
-    ''' ambient parameter for pycollada material effect '''
+    ''' Ambient parameter for pycollada material effect '''
 
     SPECULAR=(0.7, 0.7, 0.7, 1)
-    ''' specular parameter for pycollada material effect '''
+    ''' Specular parameter for pycollada material effect '''
 
     SHININESS=50.0
-    ''' shininess parameter for pycollada material effect '''
+    ''' Shininess parameter for pycollada material effect '''
 
     SHADING="phong"
-    ''' shading parameter for pycollada material effect '''
+    ''' Shading parameter for pycollada material effect '''
 
     MAX_COLOURS = 256.0
     ''' Maximum number of colours displayed in one COLLADA file '''
@@ -30,9 +31,28 @@ class GOCAD_KIT:
     LINE_WIDTH = 1000
     ''' Width of lines created for GOCAD PL files '''
 
-    def __init__(self):
+    def __init__(self, debug_level):
         ''' Initialise class
         '''
+        # Set up logging, use an attribute of class name so it is only called once
+        if not hasattr(GOCAD_KIT, 'logger'):
+            GOCAD_KIT.logger = logging.getLogger(__name__)
+
+            # Create console handler
+            handler = logging.StreamHandler(sys.stdout)
+
+            # Create formatter
+            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+
+            # Add formatter to ch
+            handler.setFormatter(formatter)
+
+            # Add handler to logger and set level
+            GOCAD_KIT.logger.addHandler(handler)
+            GOCAD_KIT.logger.setLevel(debug_level)
+
+        self.logger = GOCAD_KIT.logger
+
         # Pycollada objects used to create a single COLLADA file using multiple input files
         self.mesh_obj = None
         self.geomnode_list = []
@@ -51,6 +71,8 @@ class GOCAD_KIT:
 
             I am only using it here because GOCAD VOXEL files are too big for COLLADA format
         '''
+        self.logger.debug("write_OBJ(%s,%s)", fileName, src_file_str)
+
         # Output to OBJ file
         print("Writing OBJ file: ",fileName+".OBJ")
         out_fp = open(fileName+".OBJ", 'w')
@@ -103,6 +125,8 @@ class GOCAD_KIT:
             fileName - filename of OBJ file, without extension
             src_filen_str - filename of source gocad file
         '''
+        self.logger.debug("write_voxel_png(%s,%s)", src_dir, fileName)
+
         colour_arr = array.array("B")
         z = v_obj.vol_dims[2]-1
         pixel_cnt = 0
@@ -139,6 +163,7 @@ class GOCAD_KIT:
             step_sz  - when stepping through the voxel block this is the step size
             use_full_cubes - will write out full cubes to file if true, else will remove non-visible faces
         '''
+        self.logger.debug("write_voxel_obj(%s,%s)",  fileName, src_file_str)
         # Limit to 256 colours
         mtl_fp = open(fileName+".MTL", 'w')
         for colour_idx in range(256):
@@ -229,6 +254,7 @@ class GOCAD_KIT:
     def start_collada(self):
         ''' Initiate creation of a COLLADA file
         '''
+        self.logger.debug("start_collada()")
         self.mesh_obj = Collada.Collada()
         self.geomnode_list = []
 
@@ -237,11 +263,16 @@ class GOCAD_KIT:
         ''' Adds a vessel object to the pycollada mesh object
             NB: Does not accept GOCAD vertex or volume files as they usually have (too) many node objects
             v_obj - GOCAD vessel object
-            Returns a popup info dict or {} if you try to add a GOCAD VS (vertex) or VO (volume) file
+            Returns a popup info dict or exits if you try to add a GOCAD VS (vertex) or VO (volume) file
+            popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
+        self.logger.debug("add_v_to_collada()")
+
         # Cannot do vertices *.VS or volumes *.VO
         if v_obj.is_vs or v_obj.is_vo:
-            return {}
+            print("ERROR - cannot process VS or VO file in a GP file?")
+            sys.exit(1)
+
         group_name = ""
         if len(v_obj.group_name)>0:
             group_name = v_obj.group_name+"-"
@@ -276,7 +307,6 @@ class GOCAD_KIT:
             indices = []
             for t in v_obj.trgl_arr:
                 indices += [vert_dict[t.abc[0]]-1, vert_dict[t.abc[1]]-1, vert_dict[t.abc[2]]-1]
-                #print[vert_dict[t.abc[0]], vert_dict[t.abc[1]], vert_dict[t.abc[2]]])
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.vobj_cnt))
 
@@ -329,12 +359,15 @@ class GOCAD_KIT:
         ''' Close out a COLLADA, writing the mesh object to file
             fileName - filename of COLLADA file, without extension
             Returns a dictionary of popup info objects
+            popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
+        self.logger.debug("end_collada(%s)", fileName)
+
         node = Collada.scene.Node("node0", children=self.geomnode_list)
         myscene = Collada.scene.Scene("myscene", [node])
         self.mesh_obj.scenes.append(myscene)
         self.mesh_obj.scene = myscene
-        print("Writing COLLADA file: ", fileName+'.dae')
+        print("2 Writing COLLADA file: ", fileName+'.dae')
         self.mesh_obj.write(fileName+'.dae')
 
 
@@ -343,6 +376,8 @@ class GOCAD_KIT:
             fileName - filename of COLLADA file, without extension
             v_obj - vessel object that holds details of GOCAD file
         '''
+        self.logger.debug("write_collada(%s)",  fileName)
+        self.logger.debug("write_collada() v_obj=%s", repr(v_obj))
         if v_obj.is_vo or v_obj.is_vs:
             self.write_single_collada(v_obj, fileName)
         else:
@@ -359,6 +394,13 @@ class GOCAD_KIT:
             fileName - filename of COLLADA file, without extension
             v_obj - vessel object that holds details of GOCAD file
         '''
+        self.logger.debug("write_single_collada(%s)", fileName)
+        self.logger.debug("write_single_collada() v_obj=%s", repr(v_obj))
+        
+        if not v_obj.is_vo and not v_obj.is_vs:
+            print("ERROR - Cannot use write_single_collada for PL, TS?")
+            sys.exit(1)
+
         mesh = Collada.Collada()
         popup_dict = {}
         group_name = ""
@@ -558,7 +600,7 @@ class GOCAD_KIT:
             mesh.scenes.append(myscene)
             mesh.scene = myscene
 
-        print("Writing COLLADA file: ", fileName+'.dae')
+        print("1 Writing COLLADA file: ", fileName+'.dae')
         mesh.write(fileName+'.dae')
 
         return popup_dict

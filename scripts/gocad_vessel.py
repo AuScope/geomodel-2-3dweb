@@ -56,16 +56,20 @@ class GOCAD_VESSEL:
         ab = segment vertices
     '''
 
+    STOP_ON_EXC = True
+    ''' Stop upon exception, regardless of debug level
+    '''
 
 
-    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name=""):
+    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False):
         ''' Initialise class
             debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
-                       before they are output
-            group_name - optional string, name of group of this gocad file is within a group
+                       before they are output, default is (0.0, 0.0, 0.0)
+            group_name - optional string, name of group of this gocad file is within a group, default is ""
+            nondefault_coords - optional flag, supports non-default coordinates, default is False
         '''
-        # Set up logging, use class name so it is only called once
+        # Set up logging, use an attribute of class name so it is only called once
         if not hasattr(GOCAD_VESSEL, 'logger'):
             GOCAD_VESSEL.logger = logging.getLogger(__name__)
 
@@ -87,6 +91,7 @@ class GOCAD_VESSEL:
         # Initialise vars
         self.base_xyz = base_xyz
         self.group_name = group_name
+        self.nondefault_coords = nondefault_coords
 
         self.header_name = ""
         ''' Contents of the name field in the header '''
@@ -110,7 +115,7 @@ class GOCAD_VESSEL:
         ''' If one colour is specified in the file it is stored here '''
 
         self.prop_dict = {}
-        ''' Property dictionary for PVRTX lines '''
+        ''' Property dictionary for PVRTX and PATOM lines '''
 
         self.is_ts = False
         ''' True iff it is a GOCAD TSURF file '''
@@ -187,15 +192,24 @@ class GOCAD_VESSEL:
         self.coord_sys_name = "DEFAULT"
         ''' Name of the GOCAD coordinate system '''
 
+        self.usesDefaultCoords = True
+        ''' Uses default coordinates '''
 
 
     def __handle_exc(self, exc):
+        ''' If STOP_ON_EXC is set or debug is on, print details of exception and stop
+            exc - exception
+        ''' 
+        if self.logger.getEffectiveLevel() == logging.DEBUG or self.STOP_ON_EXC:
             exc_type, exc_value, exc_traceback = sys.exc_info()
-
+            if self.STOP_ON_EXC:
+                print("DEBUG MODE: CAUGHT EXCEPTION:")
+                print(exc)
+                print(traceback.format_exception(exc_type, exc_value, exc_traceback))
+                sys.exit(1)
             self.logger.debug("DEBUG MODE: CAUGHT EXCEPTION:")
             self.logger.debug(exc)
-            self.logger.debug(repr(traceback.format_exception(exc_type, exc_value,
-                                          exc_traceback)))
+            self.logger.debug(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
             sys.exit(1)
 
     def __repr__(self):
@@ -241,7 +255,6 @@ class GOCAD_VESSEL:
         ''' Returns estimate of the extent of the model, using max and min coordinate values
             format is [min_x, max_x, min_y, max_y]
         '''
-        print("get_extent() returns:", repr( [self.min_X, self.max_X, self.min_Y, self.max_Y]))
         return [self.min_X, self.max_X, self.min_Y, self.max_Y]
 
 
@@ -289,7 +302,7 @@ class GOCAD_VESSEL:
             file_lines - array of strings of lines from gocad file
              Returns true if could process file
         '''
-        self.logger.debug("process_gocad(%s,%d)", filename_str, len(file_lines))
+        self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
 
         # Reading first line
         firstLine = True
@@ -306,7 +319,6 @@ class GOCAD_VESSEL:
         seq_no = 0
         seq_no_prev = -1
         properties_list = []
-        usesDefaultCoords = True
         fileName, fileExt = os.path.splitext(filename_str)
         self.np_filename = os.path.basename(fileName)
         for line in file_lines:
@@ -325,6 +337,7 @@ class GOCAD_VESSEL:
             if firstLine:
                 firstLine = False
                 if not self.setType(fileExt, line_str):
+                    self.logger.debug("process_gocad() return False")
                     return False
                 continue
 
@@ -347,16 +360,14 @@ class GOCAD_VESSEL:
             elif inCoord and splitstr_arr[0] == "NAME":
                 self.coord_sys_name = splitstr_arr[1]
                 if splitstr_arr[1] != "DEFAULT":
-                    usesDefaultCoords = False
+                    self.usesDefaultCoords = False
                     self.logger.debug("usesDefaultCoords False")
 
                     # I can't support this GOCAD feature yet
-                    print("SORRY - Does not support non-DEFAULT coordinates")
-                    return False 
-                else:
-                    usesDefaultCoords = True
-                    self.logger.debug("usesDefaultCoords True")
-                    
+                    if not self.nondefault_coords:
+                        print("SORRY - Does not support non-DEFAULT coordinates:", splitstr_arr[1])
+                        self.logger.debug("process_gocad() return False")
+                        return False 
                 
             # Does coordinate system use inverted z-axis?
             elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
@@ -539,18 +550,18 @@ class GOCAD_VESSEL:
                     self.vol_dims = (x_int, y_int, z_int)
 
             elif splitstr_arr[0] == "AXIS_MIN":
-                is_ok, x_int, y_int, z_int = self.parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_int, y_int, z_int = self.parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
                 if is_ok:
                     self.axis_min = (x_int, y_int, z_int)
 
             elif splitstr_arr[0] == "AXIS_MAX":
-                is_ok, x_int, y_int, z_int = self.parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_int, y_int, z_int = self.parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
                 if is_ok:
                     self.axis_max = (x_int, y_int, z_int)
 
             # END OF TEXT PROCESSING LOOP
 
-        self.logger.debug("filename_str = %s", filename_str)
+        self.logger.debug("process_gocad() filename_str = %s", filename_str)
             
         # Calculate max and min of properties rather than read them from file
         for prop_str in self.prop_dict:
@@ -583,8 +594,10 @@ class GOCAD_VESSEL:
                 fp.close()
             except IOError as e:
                 print("SORRY - Cannot process voxel file IOError", filename_str, str(e), e.args)
+                self.logger.debug("process_gocad() return False")
                 return False
 
+        self.logger.debug("process_gocad() return True")
         return True
 
     def parse_props(self, splitstr_arr, properties_list, coord_tup):
@@ -611,6 +624,7 @@ class GOCAD_VESSEL:
 
     def parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):
         ''' Helpful function to read XYZ cooordinates
+            is_float - if true parse x y z as floats else try integers
             x_str, y_str, z_str - X,Y,Z coordinates in string form
             do_minmax - record the X,Y,Z coords for calculating extent
             Returns four parameters: success  - true if could convert the strings to floats
