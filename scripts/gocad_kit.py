@@ -84,22 +84,22 @@ class GOCAD_KIT:
             if len(v_obj.rgba_tup)==4:
                 out_fp.write("mtllib "+fileName+".MTL\n")
         if v_obj.is_ts or v_obj.is_pl or v_obj.is_vs:
-            for v in v_obj.vrtx_arr:
+            for v in v_obj.get_vrtx_arr():
                 bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
                 out_fp.write("v {0:f} {1:f} {2:f}\n".format(bv[0],bv[1],bv[2]))
         out_fp.write("g main\n")
         if v_obj.is_ts:
             out_fp.write("usemtl colouring\n")
-            for f in v_obj.trgl_arr:
+            for f in v_obj.get_trgl_arr():
                 out_fp.write("f {0:d} {1:d} {2:d}\n".format(vert_dict[f[0]], vert_dict[f[1]], vert_dict[f[2]]))
 
         elif v_obj.is_pl:
-            for s in v_obj.seg_arr:
+            for s in v_obj.get_seg_arr():
                 out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s[0]], vert_dict[s[1]]))
 
         elif v_obj.is_vs:
             out_fp.write("p");
-            for p in range(len(v_obj.vrtx_arr)):
+            for p in range(len(v_obj.get_vrtx_arr())):
                 out_fp.write(" {0:d}".format(p+1))
             out_fp.write("\n")
 
@@ -120,36 +120,61 @@ class GOCAD_KIT:
 
 
     def write_voxel_png(self, v_obj, src_dir, fileName):
+        ''' Writes out PNG files from voxel data
+            v_obj - vessel object that holds voxel data
+            fileName - filename of OBJ file, without extension
+            src_filen_str - filename of source gocad file
+        '''
+        popup_dict = {}
+        self.logger.debug("write_voxel_png(%s,%s)", src_dir, fileName)
+        if len(v_obj.prop_dict) > 0:
+            for map_idx in v_obj.prop_dict:
+                popup_dict.update(self.write_single_voxel_png(v_obj, src_dir, fileName, map_idx))
+        return popup_dict 
+
+
+    def write_single_voxel_png(self, v_obj, src_dir, fileName, idx):
         ''' Writes out a PNG file of the top layer of the voxel data
             v_obj - vessel object that holds details of GOCAD file
             fileName - filename of OBJ file, without extension
             src_filen_str - filename of source gocad file
         '''
-        self.logger.debug("write_voxel_png(%s,%s)", src_dir, fileName)
-
+        self.logger.debug("write_single_voxel_png(%s, %s, %s)", src_dir, fileName, idx)
         colour_arr = array.array("B")
         z = v_obj.vol_dims[2]-1
         pixel_cnt = 0
-        for x in range(0, v_obj.vol_dims[0]):
-            for y in range(0, v_obj.vol_dims[1]):
-                try:
-                    # If colour table is provided within source file, use it
-                    if len(v_obj.colour_map.keys()) > 0:
-                        (r,g,b) = v_obj.colour_map[int(v_obj.voxel_data[x][y][z])]
-
-                    # Else use a false colour map
-                    else:
-                        (r,g,b,a) = self.make_colour_map(v_obj.voxel_data[x][y][z], v_obj.voxel_data_stats['min'], v_obj.voxel_data_stats['max'])      
+        prop_obj = v_obj.prop_dict[idx]
+        # If colour table is provided within source file, use it
+        if len(prop_obj.colour_map) > 0:
+            for x in range(0, v_obj.vol_dims[0]):
+                for y in range(0, v_obj.vol_dims[1]):
+                    try:
+                        (r,g,b) = prop_obj.colour_map[int(prop_obj.data[x][y][z])]
+                    except ValueError:
+                        (r,g,b) = (0.0, 0.0, 0.0)
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
-                except ValueError:
-                    pixel_colour=[0,0,0]
-                colour_arr.fromlist(pixel_colour)
-                pixel_cnt += 1
+                    colour_arr.fromlist(pixel_colour)
+                    pixel_cnt += 1
+        # Else use a false colour map
+        else:
+            for x in range(0, v_obj.vol_dims[0]):
+                for y in range(0, v_obj.vol_dims[1]):
+                    try:
+                        (r,g,b,a) = self.make_colour_map(prop_obj.data[x][y][z], prop_obj.data_stats['min'], prop_obj.data_stats['max'])      
+                    except ValueError:
+                        (r,g,b,a) = (0.0, 0.0, 0.0, 0.0) 
+                    pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
+                    colour_arr.fromlist(pixel_colour)
+                    pixel_cnt += 1
                     
         img = PIL.Image.frombytes('RGB', (v_obj.vol_dims[1], v_obj.vol_dims[0]), colour_arr.tobytes())
-        print("Writing PNG file: ",fileName+".PNG")
-        img.save(os.path.join(src_dir, fileName+".PNG"))
-        popup_dict = { os.path.basename(fileName): { 'title': v_obj.header_name, 'name': v_obj.header_name } }
+        print("Writing PNG file: ",fileName+"_"+idx+".PNG")
+        img.save(os.path.join(src_dir, fileName+"_"+idx+".PNG"))
+        if len(prop_obj.class_name) >0:
+            label_str = prop_obj.class_name
+        else:
+            label_str = v_obj.header_name
+        popup_dict = { os.path.basename(fileName+"_"+idx): { 'title': label_str, 'name': label_str } }
         return popup_dict
 
 
@@ -296,7 +321,7 @@ class GOCAD_KIT:
             matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.vobj_cnt), mat, inputs=[])
             # Make floats array for inclusion in COLLADA file
             vert_floats = []
-            for v in v_obj.vrtx_arr:
+            for v in v_obj.get_vrtx_arr():
                 vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
 
             vert_src = Collada.source.FloatSource("triverts-array-{0:05d}".format(self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
@@ -305,7 +330,7 @@ class GOCAD_KIT:
             input_list.addInput(0, 'VERTEX', "#triverts-array-{0:05d}".format(self.vobj_cnt))
 
             indices = []
-            for t in v_obj.trgl_arr:
+            for t in v_obj.get_trgl_arr():
                 indices += [vert_dict[t.abc[0]]-1, vert_dict[t.abc[1]]-1, vert_dict[t.abc[2]]-1]
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.vobj_cnt))
@@ -328,9 +353,10 @@ class GOCAD_KIT:
             matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.vobj_cnt), mat, inputs=[])
 
             # Draw lines as a series of triangles
-            for l in v_obj.seg_arr:
-                v0 = v_obj.vrtx_arr[vert_dict[l.ab[0]]-1]
-                v1 = v_obj.vrtx_arr[vert_dict[l.ab[1]]-1]
+            vrtx_arr = v_obj.get_vrtx_arr()
+            for l in v_obj.get_seg_arr():
+                v0 = vrtx_arr[vert_dict[l.ab[0]]-1]
+                v1 = vrtx_arr[vert_dict[l.ab[1]]-1]
                 bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
                 bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
                 vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
@@ -423,7 +449,7 @@ class GOCAD_KIT:
             mesh.effects.append(effect)
             mesh.materials.append(mat)
             vert_floats = []
-            for v in v_obj.vrtx_arr:
+            for v in v_obj.get_vrtx_arr():
                 vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
             vert_src = Collada.source.FloatSource("triverts-array", numpy.array(vert_floats), ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(mesh, "geometry0", geometry_name, [vert_src])
@@ -431,7 +457,7 @@ class GOCAD_KIT:
             input_list.addInput(0, 'VERTEX', "#triverts-array")
 
             indices = []
-            for t in v_obj.trgl_arr:
+            for t in v_obj.get_trgl_arr():
                 indices += [vert_dict[t[0]]-1, vert_dict[t[1]]-1, vert_dict[t[2]]-1]
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref")
@@ -460,9 +486,10 @@ class GOCAD_KIT:
             geomnode_list = []
 
             # Draw lines using triangles
-            for l in v_obj.seg_arr:
-                v0 = v_obj.vrtx_arr[vert_dict[l[0]]-1]
-                v1 = v_obj.vrtx_arr[vert_dict[l[1]]-1]
+            vrtx_arr = v_obj.get_vrtx_arr()
+            for l in v_obj.get_seg_arr():
+                v0 = vrtx_arr[vert_dict[l[0]]-1]
+                v1 = vrtx_arr[vert_dict[l[1]]-1]
                 bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
                 bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
                 vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
@@ -514,9 +541,12 @@ class GOCAD_KIT:
                 prop_str = ""
 
             # Draw vertices as lop-sided tetrahedrons
-            for v in v_obj.vrtx_arr:
+            for v in v_obj.get_vrtx_arr():
                 # Lookup the colour table
                 if prop_str!="":
+                    # If no data value for this vertex then skip to next one
+                    if v.xyz not in v_obj.prop_dict[prop_str]:
+                        continue               
                     colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v.xyz], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
                 bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
 
@@ -668,6 +698,8 @@ class GOCAD_KIT:
             imin_flt - minimum range of the floating point value
             Returns an RGBA tuple
         '''
+        if i_flt < imin_flt or i_flt > imax_flt:
+            return (0.0, 0.0, 0.0, 0.0)
         SAT = 0.8
         hue_flt = (i_flt - imin_flt)/ (imax_flt - imin_flt)
         vmin_flt = SAT * (1 - SAT)

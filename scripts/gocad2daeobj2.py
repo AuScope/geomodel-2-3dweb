@@ -205,11 +205,11 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             # Check that conversion worked and write out files
             if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
                 continue
-            if ext_str == 'VS' and len(gv.vrtx_arr) > 0:
+            if ext_str == 'VS' and len(gv.get_vrtx_arr()) > 0:
                 popup_dict = gs.write_collada(gv, out_filename)
                 has_result = True
 
-            elif ext_str == 'VO' and gv.voxel_data.shape[0] > 1:
+            elif ext_str == 'VO':
                 # Must use PNG because some files are too large
                 #popup_dict = gs.write_collada(gv, out_filename)
                 #gs.write_OBJ(gv, out_filename, filename_str)
@@ -236,10 +236,10 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             has_result = True
 
             # Check that conversion worked and write out files
-            if ext_str == 'TS' and len(gv.vrtx_arr) > 0 and len(gv.trgl_arr) > 0:
+            if ext_str == 'TS' and len(gv.get_vrtx_arr()) > 0 and len(gv.get_trgl_arr()) > 0:
                 popup_dict.update(gs.add_v_to_collada(gv))
 
-            elif ext_str == 'PL' and len(gv.vrtx_arr) > 0 and len(gv.seg_arr) > 0:
+            elif ext_str == 'PL' and len(gv.get_vrtx_arr()) > 0 and len(gv.get_seg_arr()) > 0:
                 popup_dict.update(gs.add_v_to_collada(gv))
             extent_list.append(gv.get_extent())
 
