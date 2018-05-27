@@ -125,12 +125,13 @@ class GOCAD_KIT:
             fileName - filename of OBJ file, without extension
             src_filen_str - filename of source gocad file
         '''
-        popup_dict = {}
+        popup_list = []
         self.logger.debug("write_voxel_png(%s,%s)", src_dir, fileName)
         if len(v_obj.prop_dict) > 0:
-            for map_idx in v_obj.prop_dict:
-                popup_dict.update(self.write_single_voxel_png(v_obj, src_dir, fileName, map_idx))
-        return popup_dict 
+            print(v_obj.prop_dict)
+            for map_idx in sorted(v_obj.prop_dict):
+                popup_list.append(self.write_single_voxel_png(v_obj, src_dir, fileName, map_idx))
+        return popup_list 
 
 
     def write_single_voxel_png(self, v_obj, src_dir, fileName, idx):

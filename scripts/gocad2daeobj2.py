@@ -208,20 +208,20 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
             if ext_str == 'VS' and len(gv.get_vrtx_arr()) > 0:
                 popup_dict = gs.write_collada(gv, out_filename)
                 has_result = True
+                model_dict_list.append(add_info2popup(popup_dict, out_filename))
 
             elif ext_str == 'VO':
                 # Must use PNG because some files are too large
                 #popup_dict = gs.write_collada(gv, out_filename)
                 #gs.write_OBJ(gv, out_filename, filename_str)
-                popup_dict = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
+                popup_list = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
                 has_result = True
-            mask_idx+=1
-            if ext_str=='VS':
-                model_dict_list.append(add_info2popup(popup_dict, out_filename))
-            else:
                 # *.VO files will produce a PNG file, not GLTF
-                model_dict_list.append(add_info2popup(popup_dict, out_filename, '.PNG'))
-            popup_dict = {}
+                file_idx=1
+                for popup_obj in popup_list:
+                    model_dict_list.append(add_info2popup(popup_obj, out_filename+"_{0}".format(file_idx), file_ext='.PNG', position=gv.axis_origin))
+                    file_idx+=1
+            mask_idx+=1
             extent_list.append(gv.get_extent())
 
     # For triangles and lines, place multiple GOCAD objects in one COLLADA file
@@ -307,7 +307,7 @@ def reduce_extents(extent_list):
     return out_extent
 
 
-def add_info2popup(popup_dict, fileName, file_ext='.gltf'):
+def add_info2popup(popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
     ''' Adds more information to popup dictionary
         popup_dict - information to display in popup window
             ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
@@ -320,6 +320,7 @@ def add_info2popup(popup_dict, fileName, file_ext='.gltf'):
     j_dict['popups'] = popup_dict
     if file_ext.upper()==".PNG":
         j_dict['type'] = 'ImagePlane'
+        j_dict['position'] = position;
     else: 
         j_dict['type'] = 'GLTFObject'
     j_dict['model_url'] = np_filename + file_ext
@@ -404,7 +405,7 @@ if __name__ == "__main__":
     parser.add_argument('src', help='GOCAD source directory or source file', metavar='GOCAD source dir or file')
     parser.add_argument('--config_in', '-i', action='store', help='Input JSON config file', metavar='input config file')
     parser.add_argument('--config_out', '-o', action='store', help='Output JSON config file', metavar='output config file')
-    parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file')
+    parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file, must be used with -o option')
     parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add WFS boreholes to model')
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
