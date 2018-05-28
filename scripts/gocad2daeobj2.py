@@ -326,7 +326,7 @@ def add_info2popup(popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0
     j_dict['model_url'] = np_filename + file_ext
     j_dict['display_name'] = np_filename.replace('_',' ')
     j_dict['include'] = True
-    j_dict['displayed'] = False
+    j_dict['displayed'] = True 
     return j_dict
 
 
