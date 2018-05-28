@@ -373,11 +373,13 @@ def create_json_config(model_dict_list, output_filename, geo_extent):
     except:
         print("ERROR - cannot open file", output_filename)
         return
+    # Sort by display name before saving to file
+    sorted_model_dict_list = sorted(model_dict_list, key=lambda x: x['display_name'])
     config_dict = { "properties": { "crs": "EPSG:3857", "extent": geo_extent,
                                     "name": "Name of model" },
                     "type": "GeologicalModel",
                     "version": 1.0,
-                    "groups": {"Group Name": model_dict_list }
+                    "groups": {"Group Name": sorted_model_dict_list }
                    }
     json.dump(config_dict, fp, indent=4, sort_keys=True)
     fp.close()
