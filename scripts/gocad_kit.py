@@ -522,7 +522,6 @@ class GOCAD_KIT:
 
         # Vertices
         elif v_obj.is_vs:
-            # Limit to 256 colours
             POINT_SIZE = 1000
             point_cnt = 0
             node_list = []
@@ -533,22 +532,34 @@ class GOCAD_KIT:
             vert_src_list = []
             colour_num = 0
             # If there are many colours, make MAX_COLORS materials
-            if len(v_obj.prop_dict.keys()) > 0:
+            if len(v_obj.local_props.keys()) > 0:
+                self.make_colour_materials(mesh, self.MAX_COLOURS)
+                prop_str = list(v_obj.local_props.keys())[0]
+                prop_dict = v_obj.local_props[prop_str].data
+                max_v = v_obj.local_props[prop_str].data_stats['max']
+                min_v = v_obj.local_props[prop_str].data_stats['min']
+            elif len(v_obj.prop_dict.keys()) > 0:
                 self.make_colour_materials(mesh, self.MAX_COLOURS)
                 prop_str = list(v_obj.prop_dict.keys())[0]
+                prop_dict = v_obj.prop_dict[prop_str]
+                max_v = v_obj.prop_meta[prop_str]['max']
+                min_v = v_obj.prop_meta[prop_str]['min']
             # If there is only one colour
             else:
                 self.make_colour_material(mesh, v_obj.rgba_tup, colour_num)
                 prop_str = ""
+                prop_dict = {}
+                min_v = 0.0
+                max_v = 0.0
 
             # Draw vertices as lop-sided tetrahedrons
             for v in v_obj.get_vrtx_arr():
                 # Lookup the colour table
                 if prop_str!="":
                     # If no data value for this vertex then skip to next one
-                    if v.xyz not in v_obj.prop_dict[prop_str]:
+                    if v.xyz not in prop_dict:
                         continue               
-                    colour_num = self.calculate_colour_num(v_obj.prop_dict[prop_str][v.xyz], v_obj.prop_meta[prop_str]['max'], v_obj.prop_meta[prop_str]['min'], self.MAX_COLOURS)
+                    colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
                 bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
 
                 vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
@@ -565,7 +576,7 @@ class GOCAD_KIT:
                 geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
 
                 if prop_str!="":
-                    popup_dict[geom_label] = { 'name': prop_str, 'val': v_obj.prop_dict[prop_str][v.xyz], 'title': geometry_name.replace('_',' ') }
+                    popup_dict[geom_label] = { 'name': prop_str, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
                 else:
                     popup_dict[geom_label] = { 'name': geometry_name.replace('_',' '), 'title': geometry_name.replace('_',' ') }
                 point_cnt += 1

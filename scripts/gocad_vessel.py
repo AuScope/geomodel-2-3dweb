@@ -210,7 +210,8 @@ class GOCAD_VESSEL:
         '''
 
         self.local_props = OrderedDict()
-        ''' OrderedDict of PROPS objects for attached PVRTX and PATOM  properties
+        ''' OrderedDict of PROPS objects for attached PVRTX and PATOM properties
+ 
         '''
 
         self.is_ts = False
@@ -472,8 +473,6 @@ class GOCAD_VESSEL:
                 # There are two kinds of PROPERTY_CLASS_HEADER
                 # First, properties attached to points
                 if splitstr_arr[2] == '{':
-                    #if propClassIndex not in self.local_props:
-                    #    self.local_props[propClassIndex] = PROPS(propClassIndex)
                     inLocalPropClassHeader = True
                 # Properties of binary files 
                 elif splitstr_arr[3] == '{':
