@@ -713,7 +713,7 @@ class GOCAD_KIT:
         if i_flt < imin_flt or i_flt > imax_flt:
             return (0.0, 0.0, 0.0, 0.0)
         SAT = 0.8
-        hue_flt = (i_flt - imin_flt)/ (imax_flt - imin_flt)
+        hue_flt = (imax_flt - i_flt)/ (imax_flt - imin_flt)
         vmin_flt = SAT * (1 - SAT)
         pix = [0.0,0.0,0.0,1.0]
 
