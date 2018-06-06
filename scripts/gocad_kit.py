@@ -552,7 +552,7 @@ class GOCAD_KIT:
                 min_v = 0.0
                 max_v = 0.0
 
-            # Draw vertices as lop-sided tetrahedrons
+            # Draw vertices as pyramids
             for v in v_obj.get_vrtx_arr():
                 # Lookup the colour table
                 if prop_str!="":
@@ -561,11 +561,16 @@ class GOCAD_KIT:
                         continue               
                     colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
                 bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
-
-                vert_floats = list(bv) + [bv[0]+POINT_SIZE, bv[1], bv[2]] + [bv[0], bv[1]+POINT_SIZE, bv[2]] + [bv[0], bv[1], bv[2]+POINT_SIZE]
+                # Vertices of the pyramid
+                vert_floats = [bv[0], bv[1], bv[2]+POINT_SIZE*2] + \
+                              [bv[0]+POINT_SIZE, bv[1]+POINT_SIZE, bv[2]] + \
+                              [bv[0]+POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
+                              [bv[0]-POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
+                              [bv[0]-POINT_SIZE, bv[1]+POINT_SIZE, bv[2]]
                 input_list = Collada.source.InputList()
                 input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-                indices = [0, 2, 1, 3, 0, 1, 3, 2, 0, 3, 1, 2]
+                # Define the faces of the pyramid as six triangles
+                indices = [0, 1, 2,  0, 4, 1,  0, 3, 4,  0, 2, 3,  4, 2, 1,  4, 3, 2]
                 vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
                 geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
                 geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
