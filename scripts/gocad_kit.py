@@ -570,7 +570,7 @@ class GOCAD_KIT:
                 input_list = Collada.source.InputList()
                 input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
                 # Define the faces of the pyramid as six triangles
-                indices = [0, 1, 2,  0, 4, 1,  0, 3, 4,  0, 2, 3,  4, 2, 1,  4, 3, 2]
+                indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
                 vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
                 geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
                 geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
