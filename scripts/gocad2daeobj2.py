@@ -376,7 +376,8 @@ def create_json_config(model_dict_list, output_filename, geo_extent):
     # Sort by display name before saving to file
     sorted_model_dict_list = sorted(model_dict_list, key=lambda x: x['display_name'])
     config_dict = { "properties": { "crs": "EPSG:3857", "extent": geo_extent,
-                                    "name": "Name of model" },
+                                    "name": "Name of model",
+                                    "init_cam_dist": 500000.0 },
                     "type": "GeologicalModel",
                     "version": 1.0,
                     "groups": {"Group Name": sorted_model_dict_list }
