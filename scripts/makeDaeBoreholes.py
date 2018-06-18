@@ -66,7 +66,7 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
         bv - base vertex, position of the object within the model [x,y,z]
     '''
     mesh = Collada.Collada()
-    BH_WIDTH = 25
+    BH_WIDTH = 75
     BH_HEIGHT = 10000
     BH_DEPTH = 20000
     node_list = []
@@ -95,14 +95,14 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     input_list = Collada.source.InputList()
     input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
 
-    indices = [0, 1, 2,
-               3, 4, 5,
+    indices = [0, 2, 1,
+               3, 5, 4,
                1, 2, 5,
                2, 4, 5,
-               0, 2, 4,
-               0, 4, 3,
-               0, 3, 1,
-               1, 3, 5]
+               0, 4, 2,
+               0, 3, 4,
+               0, 1, 3,
+               1, 5, 3]
 
     triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
 
