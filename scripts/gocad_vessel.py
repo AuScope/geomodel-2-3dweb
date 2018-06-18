@@ -410,6 +410,11 @@ class GOCAD_VESSEL:
         self.np_filename = os.path.basename(fileName)
         for line in file_lines:
             line_str = line.rstrip(' \n\r').upper()
+            # Look out for double-quoted strings
+            if line_str.count('"')==2:
+                before_tup = line_str.partition('"')
+                after_tup = before_tup[2].partition('"')
+                line_str = before_tup[0]+" "+after_tup[0].replace(' ','_')+" "+after_tup[2]
             splitstr_arr_raw = line.rstrip(' \n\r').split()
             splitstr_arr = line_str.split()
 
