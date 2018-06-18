@@ -127,7 +127,7 @@ def find(gocad_src_dir):
             for gocad_ext_str in GOCAD_VESSEL.SUPPORTED_EXTS:
                 if ext_str.lstrip('.').upper() == gocad_ext_str:
                     p_list, g_list = find_and_process(root)
-                    model_dict_list.append(p_list)
+                    model_dict_list += p_list
                     geoext_list.append(g_list)
                     done = True
                     break
