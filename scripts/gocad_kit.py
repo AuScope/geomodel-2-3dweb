@@ -408,7 +408,7 @@ class GOCAD_KIT:
         p_dict = {}
         if v_obj.is_vs:
             p_dict = self.write_vs_collada(v_obj, fileName)
-        if v_obj.is_vo:
+        elif v_obj.is_vo:
             print("ERROR - Cannot use write_collada for VO?")
             sys.exit(1)
         else:
@@ -423,8 +423,8 @@ class GOCAD_KIT:
             fileName - filename of COLLADA file, without extension
             v_obj - vessel object that holds details of GOCAD file
         '''
-        self.logger.debug("write_single_collada(%s)", fileName)
-        self.logger.debug("write_single_collada() v_obj=%s", repr(v_obj))
+        self.logger.debug("write_vs_collada(%s)", fileName)
+        self.logger.debug("write_vs_collada() v_obj=%s", repr(v_obj))
         
         if not v_obj.is_vs:
             print("ERROR - Cannot use write_single_collada for PL, TS, VO?")
@@ -513,7 +513,7 @@ class GOCAD_KIT:
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
-        print('returning ', popup_dict)
+        # print('returning ', popup_dict)
         return popup_dict
 
 
@@ -546,7 +546,7 @@ class GOCAD_KIT:
         # Increase sample size so we don't create too much data, to be improved later on
         step = 1
         n_elems3 = v_obj.vol_dims[0] * v_obj.vol_dims[1] * v_obj.vol_dims[2]
-        while n_elems3/(step*step*step) > 3000:
+        while n_elems3/(step*step*step) > 10000:
           step += 1
         print("step =", step)
         pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_dims[0]*2), 
@@ -630,7 +630,7 @@ class GOCAD_KIT:
             mesh = Collada.Collada()
 
  
-        print('returning ', popup_list)
+        # print('returning ', popup_list)
         return popup_list
 
 
