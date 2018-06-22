@@ -385,8 +385,6 @@ class GOCAD_KIT:
     def end_collada(self, fileName):
         ''' Close out a COLLADA, writing the mesh object to file
             fileName - filename of COLLADA file, without extension
-            Returns a dictionary of popup info objects
-            popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
         self.logger.debug("end_collada(%s)", fileName)
 
@@ -402,30 +400,34 @@ class GOCAD_KIT:
         ''' Write out a COLLADA file
             fileName - filename of COLLADA file, without extension
             v_obj - vessel object that holds details of GOCAD file
+            Returns a dictionary of popup info objects
+            popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
         self.logger.debug("write_collada(%s)",  fileName)
         self.logger.debug("write_collada() v_obj=%s", repr(v_obj))
-        if v_obj.is_vo or v_obj.is_vs:
-            self.write_single_collada(v_obj, fileName)
+        p_dict = {}
+        if v_obj.is_vs:
+            p_dict = self.write_vs_collada(v_obj, fileName)
+        if v_obj.is_vo:
+            print("ERROR - Cannot use write_collada for VO?")
+            sys.exit(1)
         else:
             self.start_collada()
-            self.add_v_to_collada(v_obj)
+            p_dict = self.add_v_to_collada(v_obj)
             self.end_collada(fileName)
+        return p_dict
 
 
-    #
-    # COLLADA is better than OBJ, but very bulky
-    #
-    def write_single_collada(self, v_obj, fileName):
-        ''' Write out a COLLADA file
+    def write_vs_collada(self, v_obj, fileName):
+        ''' Write out a COLLADA file from a vs file
             fileName - filename of COLLADA file, without extension
             v_obj - vessel object that holds details of GOCAD file
         '''
         self.logger.debug("write_single_collada(%s)", fileName)
         self.logger.debug("write_single_collada() v_obj=%s", repr(v_obj))
         
-        if not v_obj.is_vo and not v_obj.is_vs:
-            print("ERROR - Cannot use write_single_collada for PL, TS?")
+        if not v_obj.is_vs:
+            print("ERROR - Cannot use write_single_collada for PL, TS, VO?")
             sys.exit(1)
 
         mesh = Collada.Collada()
@@ -441,216 +443,198 @@ class GOCAD_KIT:
         # Make a vertex dictionary to associate the vertex sequence number with its position in 'vrtx_arr'
         vert_dict = v_obj.make_vertex_dict()
 
-        # Triangles
-        if v_obj.is_ts:
-            if len(v_obj.rgba_tup)!=4:
-                v_obj.rgba_tup = (1,0,0,1.0)
-            effect = Collada.material.Effect("effect0", [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=v_obj.rgba_tup, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
-            mat = Collada.material.Material("material0", "mymaterial", effect)
-            mesh.effects.append(effect)
-            mesh.materials.append(mat)
-            vert_floats = []
-            for v in v_obj.get_vrtx_arr():
-                vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
-            vert_src = Collada.source.FloatSource("triverts-array", numpy.array(vert_floats), ('X', 'Y', 'Z'))
-            geom = Collada.geometry.Geometry(mesh, "geometry0", geometry_name, [vert_src])
-            input_list = Collada.source.InputList()
-            input_list.addInput(0, 'VERTEX', "#triverts-array")
-
-            indices = []
-            for t in v_obj.get_trgl_arr():
-                indices += [vert_dict[t[0]]-1, vert_dict[t[1]]-1, vert_dict[t[2]]-1]
-
-            triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref")
-            geom.primitives.append(triset)
-            mesh.geometries.append(geom)
-
-            matnode = Collada.scene.MaterialNode("materialref", mat, inputs=[])
-            geomnode = Collada.scene.GeometryNode(geom, [matnode])
-            node = Collada.scene.Node("node0", children=[geomnode])
-
-            myscene = Collada.scene.Scene("myscene", [node])
-            mesh.scenes.append(myscene)
-            mesh.scene = myscene
-            popup_dict[geometry_name] = { 'title': v_obj.header_name, 'name': v_obj.header_name }
-
-        # Lines
-        elif v_obj.is_pl:
-            point_cnt = 0
-            node_list = []
-            yellow_colour = (1,1,0,1)
-            effect = Collada.material.Effect("effect0", [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=yellow_colour, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
-            mat = Collada.material.Material("material0", "mymaterial0", effect)
-            mesh.effects.append(effect)
-            mesh.materials.append(mat)
-            matnode = Collada.scene.MaterialNode("materialref-0", mat, inputs=[])
-            geomnode_list = []
-
-            # Draw lines using triangles
-            vrtx_arr = v_obj.get_vrtx_arr()
-            for l in v_obj.get_seg_arr():
-                v0 = vrtx_arr[vert_dict[l[0]]-1]
-                v1 = vrtx_arr[vert_dict[l[1]]-1]
-                bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
-                bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
-                vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
-                vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-                geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
-                geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
-
-                input_list = Collada.source.InputList()
-                input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}".format(point_cnt))
-
-                indices = [0, 2, 3, 3, 1, 0]
-
-                triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
-
-                geom.primitives.append(triset)
-                mesh.geometries.append(geom)
-                geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
-
-                popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': v_obj.header_name }
-
-                point_cnt += 1
-
-            node = Collada.scene.Node("node0", children=geomnode_list)
-            node_list.append(node)
-            myscene = Collada.scene.Scene("myscene", node_list)
-            mesh.scenes.append(myscene)
-            mesh.scene = myscene
-
-
-        # Vertices
-        elif v_obj.is_vs:
-            POINT_SIZE = 1000
-            point_cnt = 0
-            node_list = []
-            geomnode_list = []
-            vert_floats = []
-            matnode_list = []
-            triset_list = []
-            vert_src_list = []
-            colour_num = 0
-            # If there are many colours, make MAX_COLORS materials
-            if len(v_obj.local_props.keys()) > 0:
-                self.make_colour_materials(mesh, self.MAX_COLOURS)
-                prop_str = list(v_obj.local_props.keys())[0]
-                prop_dict = v_obj.local_props[prop_str].data
-                max_v = v_obj.local_props[prop_str].data_stats['max']
-                min_v = v_obj.local_props[prop_str].data_stats['min']
-            elif len(v_obj.prop_dict.keys()) > 0:
-                self.make_colour_materials(mesh, self.MAX_COLOURS)
-                prop_str = list(v_obj.prop_dict.keys())[0]
-                prop_dict = v_obj.prop_dict[prop_str]
-                max_v = v_obj.prop_meta[prop_str]['max']
-                min_v = v_obj.prop_meta[prop_str]['min']
-            # If there is only one colour
-            else:
-                self.make_colour_material(mesh, v_obj.rgba_tup, colour_num)
-                prop_str = ""
-                prop_dict = {}
-                min_v = 0.0
-                max_v = 0.0
-
-            # Draw vertices as pyramids
-            for v in v_obj.get_vrtx_arr():
-                # Lookup the colour table
-                if prop_str!="":
-                    # If no data value for this vertex then skip to next one
-                    if v.xyz not in prop_dict:
-                        continue               
-                    colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
-                bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
-                # Vertices of the pyramid
-                vert_floats = [bv[0], bv[1], bv[2]+POINT_SIZE*2] + \
-                              [bv[0]+POINT_SIZE, bv[1]+POINT_SIZE, bv[2]] + \
-                              [bv[0]+POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
-                              [bv[0]-POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
-                              [bv[0]-POINT_SIZE, bv[1]+POINT_SIZE, bv[2]]
-                input_list = Collada.source.InputList()
-                input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-                # Define the faces of the pyramid as six triangles
-                indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
-                vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
-                geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
-                geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
-                triset_list = [geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))]
-                geom.primitives = triset_list
-                mesh.geometries.append(geom)
-                matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
-                geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
-
-                if prop_str!="":
-                    popup_dict[geom_label] = { 'name': prop_str, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
-                else:
-                    popup_dict[geom_label] = { 'name': geometry_name.replace('_',' '), 'title': geometry_name.replace('_',' ') }
-                point_cnt += 1
-
-            node = Collada.scene.Node("node0", children=geomnode_list)
-            node_list.append(node)
-            myscene = Collada.scene.Scene("myscene", node_list)
-            mesh.scenes.append(myscene)
-            mesh.scene = myscene
-
-        # Volumes
-        elif v_obj.is_vo:
-            # Limit to 256 colours, only does tetrahedrons to save space
+        POINT_SIZE = 1000
+        point_cnt = 0
+        node_list = []
+        geomnode_list = []
+        vert_floats = []
+        matnode_list = []
+        triset_list = []
+        vert_src_list = []
+        colour_num = 0
+        # If there are many colours, make MAX_COLORS materials
+        if len(v_obj.local_props.keys()) > 0:
             self.make_colour_materials(mesh, self.MAX_COLOURS)
+            prop_str = list(v_obj.local_props.keys())[0]
+            prop_dict = v_obj.local_props[prop_str].data
+            max_v = v_obj.local_props[prop_str].data_stats['max']
+            min_v = v_obj.local_props[prop_str].data_stats['min']
+        elif len(v_obj.prop_dict.keys()) > 0:
+            self.make_colour_materials(mesh, self.MAX_COLOURS)
+            prop_str = list(v_obj.prop_dict.keys())[0]
+            prop_dict = v_obj.prop_dict[prop_str]
+            max_v = v_obj.prop_meta[prop_str]['max']
+            min_v = v_obj.prop_meta[prop_str]['min']
+        # If there is only one colour
+        else:
+            self.make_colour_material(mesh, v_obj.rgba_tup, colour_num)
+            prop_str = ""
+            prop_dict = {}
+            min_v = 0.0
+            max_v = 0.0
 
+        # Draw vertices as pyramids
+        for v in v_obj.get_vrtx_arr():
+            # Lookup the colour table
+            if prop_str!="":
+                # If no data value for this vertex then skip to next one
+                if v.xyz not in prop_dict:
+                    continue               
+                colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
+            bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
+            # Vertices of the pyramid
+            vert_floats = [bv[0], bv[1], bv[2]+POINT_SIZE*2] + \
+                          [bv[0]+POINT_SIZE, bv[1]+POINT_SIZE, bv[2]] + \
+                          [bv[0]+POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
+                          [bv[0]-POINT_SIZE, bv[1]-POINT_SIZE, bv[2]] + \
+                          [bv[0]-POINT_SIZE, bv[1]+POINT_SIZE, bv[2]]
+            input_list = Collada.source.InputList()
+            input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
+            # Define the faces of the pyramid as six triangles
+            indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
+            vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
+            geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
+            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
+            triset_list = [geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))]
+            geom.primitives = triset_list
+            mesh.geometries.append(geom)
+            matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
+            geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
+
+            if prop_str!="":
+                popup_dict[geom_label] = { 'name': prop_str, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
+            else:
+                popup_dict[geom_label] = { 'name': geometry_name.replace('_',' '), 'title': geometry_name.replace('_',' ') }
+            point_cnt += 1
+
+        node = Collada.scene.Node("node0", children=geomnode_list)
+        node_list.append(node)
+        myscene = Collada.scene.Scene("myscene", node_list)
+        mesh.scenes.append(myscene)
+        mesh.scene = myscene
+
+        print('returning ', popup_dict)
+        return popup_dict
+
+
+    def write_vo_collada(self, v_obj, fileName):
+        ''' Write out a COLLADA file from a vo file
+            fileName - filename of COLLADA file, without extension
+            v_obj - vessel object that holds details of GOCAD file
+        '''
+        self.logger.debug("write_vo_collada(%s)", fileName)
+        self.logger.debug("write_vo_collada() v_obj=%s", repr(v_obj))
+        
+        if not v_obj.is_vo:
+            print("ERROR - Cannot use write_collada_voxel for PL, TS, VO, VS?")
+            sys.exit(1)
+
+        mesh = Collada.Collada()
+        group_name = ""
+        if len(v_obj.group_name)>0:
+            group_name = v_obj.group_name+"-"
+        if len(v_obj.header_name)>0:
+            geometry_name = group_name + v_obj.header_name
+        else:
+            geometry_name = group_name + "geometry"
+ 
+        # Make a vertex dictionary to associate the vertex sequence number with its position in 'vrtx_arr'
+        vert_dict = v_obj.make_vertex_dict()
+        popup_list = []
+        popup_dict = {}
+        file_cnt = 1
+        # Increase sample size so we don't create too much data, to be improved later on
+        step = 1
+        n_elems3 = v_obj.vol_dims[0] * v_obj.vol_dims[1] * v_obj.vol_dims[2]
+        while n_elems3/(step*step*step) > 3000:
+          step += 1
+        print("step =", step)
+        pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_dims[0]*2), 
+                   (v_obj.axis_v[1]*step)/(v_obj.vol_dims[1]*2),
+                   (v_obj.axis_w[2]*step)/(v_obj.vol_dims[2]*2)]
+        # FIXME: Only does first one!
+        # print(v_obj.prop_dict)
+        print('pt_size = ' , pt_size)
+        # Put create a dict based on colour
+        bucket = {}
+        prop_obj = v_obj.prop_dict['1']
+        for z in range(0, v_obj.vol_dims[2], step):
+            for y in range(0, v_obj.vol_dims[1], step):
+                for x in range(0, v_obj.vol_dims[0], step):
+                    key = int(prop_obj.data[x][y][z])
+                    bucket.setdefault(key, []) 
+                    bucket[key].append((x,y,z))
+
+        for data_val, coord_list in bucket.items():
+            # Limit to 256 colours
+            self.make_colour_materials(mesh, self.MAX_COLOURS)
             node_list = []
             point_cnt = 0
-            done = False
-            for z in range(v_obj.vol_dims[2]):
-                for y in range(v_obj.vol_dims[1]):
-                    for x in range(v_obj.vol_dims[0]):
-                        colour_num = self.calculate_colour_num(v_obj.voxel_data[x][y][z], v_obj.voxel_data_stats['max'], v_obj.voxel_data_stats['min'], self.MAX_COLOURS)
-                        # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
-                        u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
-                        v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
-                        w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_dims[2]*v_obj.axis_w[2]
-                        v = (u_offset-v_obj.base_xyz[0], v_offset-v_obj.base_xyz[1], w_offset-v_obj.base_xyz[2])
-                        pt_size = (v_obj.axis_u[0]/v_obj.vol_dims[0], v_obj.axis_v[1]/v_obj.vol_dims[1], v_obj.axis_w[2]/v_obj.vol_dims[2])
-                        geomnode_list = []
-                        vert_floats = list(v) + [v[0]+pt_size[0], v[1], v[2]] + [v[0], v[1]+pt_size[1], v[2]] + [v[0], v[1], v[2]+pt_size[2]]
-                        vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-                        geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
-                        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
-                        input_list = Collada.source.InputList()
-                        input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
+            for x,y,z in coord_list:
+                # print(x,y,z,' data_val =', data_val )
+                if prop_obj.data[x][y][z] != prop_obj.no_data_marker:
+                    colour_num = self.calculate_colour_num(prop_obj.data[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
+                    # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
+                    u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
+                    v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
+                    w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_dims[2]*v_obj.axis_w[2]
+                    v = (u_offset-v_obj.base_xyz[0], v_offset-v_obj.base_xyz[1], w_offset-v_obj.base_xyz[2])
+                        
+                    geomnode_list = []
+                    vert_floats = [v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
+                                + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
+                                + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
+                                + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
+                                + [v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
+                                + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]] \
+                                + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
+                                + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]]
+                    vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
+                    geom_label = "{0}_{1}-{2:010d}".format(geometry_name, file_cnt, point_cnt)
+                    geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
+                    input_list = Collada.source.InputList()
+                    input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
 
-                        indices = [0, 2, 1,
-                                   3, 0, 1,
-                                   3, 2, 0,
-                                   3, 1, 2]
+                    indices = [ 1,3,7, 1,7,5, 0,4,6, 0,6,2, 2,6,7, 2,7,3,
+                               4,5,6, 5,7,6, 0,2,3, 0,3,1, 0,1,5, 0,5,4 ]
 
-                        triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))
-                        geom.primitives.append(triset)
-                        mesh.geometries.append(geom)
-                        matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])
-                        geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+                    triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))
+                    geom.primitives.append(triset)
+                    mesh.geometries.append(geom)
+                    matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])
+                    geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
-                        node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
-                        node_list.append(node)
-                        popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': v_obj.header_name }
-                        point_cnt += 1
-
-                        if (point_cnt>999000000):
-                            print("Stop - too much!")
-                            done = True
-                            break
-                    if done:
-                        break
-                if done:
-                    break
+                    node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
+                    node_list.append(node)
+                    if (x,y,z) in v_obj.flags_dict:
+                        popup_name = v_obj.flags_dict[(x,y,z)]
+                    else:
+                        popup_name =  v_obj.header_name
+                    popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': popup_name }
+                    point_cnt += 1
+                else:
+                    print(x,y,z, 'no data')
 
             myscene = Collada.scene.Scene("myscene", node_list)
             mesh.scenes.append(myscene)
             mesh.scene = myscene
 
-        print("1 Writing COLLADA file: ", fileName+'.dae')
-        mesh.write(fileName+'.dae')
+            print("1 Writing COLLADA file: ", fileName+'.dae')
+            out_filename = fileName+'_'+str(file_cnt)
+            mesh.write(out_filename+'.dae')
+            popup_list.append((popup_dict, out_filename))
+            popup_dict = {}
 
-        return popup_dict
+            file_cnt += 1
+
+            mesh = Collada.Collada()
+
+ 
+        print('returning ', popup_list)
+        return popup_list
+
+
+
 
 
     def calculate_colour_num(self, val_flt, max_flt, min_flt, max_colours_flt):

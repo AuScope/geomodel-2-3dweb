@@ -37,6 +37,10 @@ NONDEF_COORDS = False
 ''' Will tolerate non default coordinates
 '''
 
+OUTPUT_VOXEL_GLTF = False
+''' Will output voxel files as GLTF, use only for small voxel files
+'''
+
 # Set up debugging 
 logger = logging.getLogger(__name__)
 
@@ -211,16 +215,21 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
                 model_dict_list.append(add_info2popup(popup_dict, out_filename))
 
             elif ext_str == 'VO':
-                # Must use PNG because some files are too large
-                #popup_dict = gs.write_collada(gv, out_filename)
+                # By default must convert upper layer to PNG because some voxel files are too large
                 #gs.write_OBJ(gv, out_filename, filename_str)
-                popup_list = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
+                if OUTPUT_VOXEL_GLTF:
+                    # Produce a GLTF from voxel file
+                    popup_list = gs.write_vo_collada(gv, out_filename)
+                    for popup_dict, out_filename in popup_list:
+                        model_dict_list.append(add_info2popup(popup_dict, out_filename))
+                else:
+                    # *.VO files will produce a PNG file, not GLTF
+                    popup_list = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
+                    file_idx=1
+                    for popup_obj in popup_list:
+                        model_dict_list.append(add_info2popup(popup_obj, out_filename+"_{0}".format(file_idx), file_ext='.PNG', position=gv.axis_origin))
+                        file_idx+=1
                 has_result = True
-                # *.VO files will produce a PNG file, not GLTF
-                file_idx=1
-                for popup_obj in popup_list:
-                    model_dict_list.append(add_info2popup(popup_obj, out_filename+"_{0}".format(file_idx), file_ext='.PNG', position=gv.axis_origin))
-                    file_idx+=1
             mask_idx+=1
             extent_list.append(gv.get_extent())
 
@@ -413,6 +422,7 @@ if __name__ == "__main__":
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
     parser.add_argument('--nondefault_coord', '-x', action='store_true', help='Tolerate non-default GOCAD coordinate system')
+    parser.add_argument('--voxel_gltf', '-l', action='store_true', help='Write out voxels as GLTF instead of upper layer as PNG')
     args = parser.parse_args()
 
     model_dict_list = {}
@@ -428,8 +438,10 @@ if __name__ == "__main__":
 
     if args.nondefault_coord:
         NONDEF_COORDS = True
-    
 
+    if args.voxel_gltf:
+        OUTPUT_VOXEL_GLTF = True
+    
     # Create logging console handler
     handler = logging.StreamHandler(sys.stdout)
 

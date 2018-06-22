@@ -258,6 +258,34 @@ class GOCAD_VESSEL:
         ''' 3 dimensional maximum point of voxel volume
         '''
 
+        self.flags_array_length = 0
+        ''' Size of flags file
+        '''
+
+        self.flags_bit_length = 0
+        ''' Number of bit in use in flags file
+        '''
+
+        self.flags_bit_size = 0
+        ''' Size of each element in flags file
+        '''
+
+        self.flags_offset = 0
+        ''' Offset within the flags file  where data starts
+        '''
+
+        self.flags_file = ""
+        ''' Name of flags file associated with voxel file
+        '''
+
+        self.region_dict = {}
+        ''' Labels and bit numbers for each region in a flags file, key is number (as string)
+        '''
+
+        self.flags_dict = {}
+        '''  val is region name, key is (x,y,z) tuple
+        '''
+
         self.np_filename = ""
         ''' Filename of GOCAD file without path or extension
         '''
@@ -325,7 +353,6 @@ class GOCAD_VESSEL:
             if vrtx.n == num:
                 return True
         return False
-
 
     def get_vrtx_arr(self):
         ''' Returns array of VRTX objects after GOCAD file has been processed
@@ -534,7 +561,7 @@ class GOCAD_VESSEL:
                             else:
                                 self.logger.debug("Could not parse colour %s", repr(value_str))
                         else:
-                            self.rgba_tup = (int(value_str[1:3],16), int(value_str[3:5],16), int(value_str[5:7],16)) 
+                            self.rgba_tup = (float(int(value_str[1:3],16))/255.0, float(int(value_str[3:5],16))/255.0, float(int(value_str[5:7],16))/255.0, 1.0) 
                     except (ValueError, OverflowError, IndexError) as exc:
                         self.__handle_exc(exc)
                         self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
@@ -739,6 +766,32 @@ class GOCAD_VESSEL:
                 if is_ok:
                     self.axis_max = (x_int, y_int, z_int)
 
+            elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
+                is_ok, l = self.__parse_int(splitstr_arr[1])
+                if is_ok:
+                    self.flags_array_length = l
+
+            elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
+                is_ok, l = self.__parse_int(splitstr_arr[1])
+                if is_ok:
+                    self.flags_bit_length = l
+
+            elif splitstr_arr[0] == "FLAGS_ESIZE":
+                is_ok, l = self.__parse_int(splitstr_arr[1])
+                if is_ok:
+                    self.flags_bit_size = l
+
+            elif splitstr_arr[0] == "FLAGS_OFFSET":
+                is_ok, l = self.__parse_int(splitstr_arr[1])
+                if is_ok:
+                    self.flags_offset = l
+
+            elif splitstr_arr[0] == "FLAGS_FILE":
+                self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
+
+            elif splitstr_arr[0] == "REGION":
+                self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
+                
             # END OF TEXT PROCESSING LOOP
 
         self.logger.debug("process_gocad() filename_str = %s", filename_str)
@@ -752,9 +805,10 @@ class GOCAD_VESSEL:
                 prop_obj.data_stats['max'] = max(list(first_val_list))
                 prop_obj.data_stats['min'] = min(list(first_val_list))
 
-        self.logger.debug("process_gocad() return True")
+        self.logger.debug("process_gocad() returns")
+        # Read in any binary data files and flags files attached to voxel files
         retVal = self.__read_voxel_files()
-        return retVal 
+        return retVal
 
 
     def __setType(self, fileExt, firstLineStr):
@@ -863,12 +917,65 @@ class GOCAD_VESSEL:
                                     prop_obj.data_stats['max'] = prop_obj.data[x][y][z]
                                 if (prop_obj.data[x][y][z] < prop_obj.data_stats['min']):
                                     prop_obj.data_stats['min'] = prop_obj.data[x][y][z]
+                                self.__calc_minmax( self.axis_origin[0]+float(x)/self.vol_dims[0]*self.axis_u[0],
+                                                    self.axis_origin[1]+float(y)/self.vol_dims[1]*self.axis_v[1],
+                                                    self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
                                         
                 except IOError as e:
-                    print("SORRY - Cannot process voxel file IOError", filename_str, str(e), e.args)
+                    print("SORRY - Cannot process voxel file IOError", prop_obj.file_name, str(e), e.args)
                     self.logger.debug("process_gocad() return False")
                     return False
 
+            # Open up flags file and look for regions
+            if self.flags_file!='':
+                if self.flags_array_length != self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]:
+                    print("SORRY - Cannot process voxel flags file, inconsistent size between data file and flag file")
+                    self.logger.debug("process_gocad() return False")
+                    return False
+
+                try: 
+                    # Check file size first
+                    file_sz = os.path.getsize(self.flags_file)
+                    num_voxels = self.flags_bit_size*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
+                    if file_sz != num_voxels:
+                        print("SORRY - Cannot process voxel file - length (", repr(num_voxels), ") is not correct", self.flags_file)
+                        sys.exit(1)
+
+                    # Initialise data array to zeros
+                    flag_data = numpy.zeros((self.vol_dims[0], self.vol_dims[1], self.vol_dims[2]))
+
+                    # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
+                    dt =  numpy.dtype(('B',(self.flags_bit_size)))
+
+                    # Read entire file, assumes file small enough to store in memory
+                    print("Reading binary flags file: ", self.flags_file)
+                    f_arr = numpy.fromfile(self.flags_file, dtype=dt)
+                    f_idx = self.flags_offset
+                    # print('self.region_dict.keys() = ', self.region_dict.keys())
+                    for z in range(0,self.vol_dims[2]):
+                        for y in range(0, self.vol_dims[1]):
+                            for x in range(0, self.vol_dims[0]):
+                                # print(x, y, z, f_idx, ' => ', f_arr[f_idx])
+                                bit_mask = ''
+                                for b in range(self.flags_bit_size-1, -1, -1):
+                                    bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
+                                # print('bit_mask=', bit_mask)
+                                cnt = self.flags_bit_size*8-1
+                                for bit in bit_mask:
+                                    if str(cnt) in self.region_dict and bit=='1':
+                                        key = self.region_dict[str(cnt)]
+                                        # print('cnt =', cnt, ' bit = ', bit)
+                                        # print('key = ', key)
+                                        self.flags_dict[(x,y,z)] = key
+                                    cnt -= 1
+        
+                                f_idx += 1
+                    
+                except IOError as e:
+                    print("SORRY - Cannot process voxel file IOError", self.flags_file, str(e), e.args)
+                    self.logger.debug("process_gocad() return False")
+                    return False
+        #print('self.flags_dict=', self.flags_dict)
         return True
 
 
@@ -919,7 +1026,7 @@ class GOCAD_VESSEL:
             fp_str - string to convert to a float
             null_val - value representing 'no data'
             Returns a boolean and a float
-            If could not convert then return (False, 0.0) else if converts to 'null_val' return (False, null_val)
+            If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
         '''
         # Handle GOCAD's C++ floating point infinity for Windows and Linux
         if fp_str in ["1.#INF","inf"]:
@@ -936,6 +1043,20 @@ class GOCAD_VESSEL:
                 return False, 0.0
         return True, fp
            
+    def __parse_int(self, int_str, null_val=None):
+        ''' Converts a string to an int
+            int_str - string to convert to int
+            null_val - value representing 'no data'
+            Returns a boolean and an integer
+            If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
+        '''
+        try:
+            num = int(int_str)
+        except (OverflowError, ValueError) as exc:
+             self.__handle_exc(exc)
+             return False, null_val
+        return True, num 
+
 
     def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):
         ''' Helpful function to read XYZ cooordinates
@@ -963,19 +1084,25 @@ class GOCAD_VESSEL:
 
         # Calculate minimum and maximum XYZ
         if do_minmax:
-            if x > self.max_X:
-                self.max_X = x
-            if x < self.min_X:
-                self.min_X = x
-            if y > self.max_Y:
-                self.max_Y = y
-            if y < self.min_Y:
-                self.min_Y = y
-            if z > self.max_Z:
-                self.max_Z = z
-            if z < self.min_Z:
-                self.min_Z = z
+            self.__calc_minmax(x,y,z)
         return True, x, y, z
+
+    def __calc_minmax(self, x, y, z):
+        ''' Calculate the max and min of all x,y,z coords
+        '''
+        if x > self.max_X:
+            self.max_X = x
+        if x < self.min_X:
+            self.min_X = x
+        if y > self.max_Y:
+            self.max_Y = y
+        if y < self.min_Y:
+            self.min_Y = y
+        if z > self.max_Z:
+            self.max_Z = z
+        if z < self.min_Z:
+            self.min_Z = z
+
 
 
 #  END OF GOCAD_VESSEL CLASS
