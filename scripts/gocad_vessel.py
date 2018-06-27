@@ -267,7 +267,7 @@ class GOCAD_VESSEL:
         '''
 
         self.flags_bit_size = 0
-        ''' Size of each element in flags file
+        ''' Size (number of bytes) of each element in flags file
         '''
 
         self.flags_offset = 0
@@ -886,6 +886,11 @@ class GOCAD_VESSEL:
         '''
         if self.is_vo and len(self.prop_dict)>0:
             for file_idx, prop_obj in self.prop_dict.items():
+                # Sometimes filename needs a .vo on the end
+                if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:]=="@@" and \
+                                              os.path.isfile(prop_obj.file_name+".vo"):
+                    prop_obj.file_name += ".vo"
+
                 try:
                     # Check file size first
                     file_sz = os.path.getsize(prop_obj.file_name)
@@ -929,9 +934,13 @@ class GOCAD_VESSEL:
             # Open up flags file and look for regions
             if self.flags_file!='':
                 if self.flags_array_length != self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]:
-                    print("SORRY - Cannot process voxel flags file, inconsistent size between data file and flag file")
+                    print("SORRY - Cannot process voxel file, inconsistent size between data file and flag file")
                     self.logger.debug("process_gocad() return False")
                     return False
+                # Check file does not exist, sometimes needs a '.vo' on the end
+                if not os.path.isfile(self.flags_file) and self.flags_file[-2:]=="@@" and \
+                                                                os.path.isfile(self.flags_file+".vo"):
+                    self.flags_file += ".vo"
 
                 try: 
                     # Check file size first
@@ -957,8 +966,12 @@ class GOCAD_VESSEL:
                             for x in range(0, self.vol_dims[0]):
                                 # print(x, y, z, f_idx, ' => ', f_arr[f_idx])
                                 bit_mask = ''
-                                for b in range(self.flags_bit_size-1, -1, -1):
-                                    bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
+                                # Single bytes are not returned as arrays
+                                if self.flags_bit_size==1:
+                                    bit_mask = '{0:08b}'.format(f_arr[f_idx])
+                                else:
+                                    for b in range(self.flags_bit_size-1, -1, -1):
+                                        bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
                                 # print('bit_mask=', bit_mask)
                                 cnt = self.flags_bit_size*8-1
                                 for bit in bit_mask:
@@ -972,7 +985,7 @@ class GOCAD_VESSEL:
                                 f_idx += 1
                     
                 except IOError as e:
-                    print("SORRY - Cannot process voxel file IOError", self.flags_file, str(e), e.args)
+                    print("SORRY - Cannot process voxel flag file, IOError", self.flags_file, str(e), e.args)
                     self.logger.debug("process_gocad() return False")
                     return False
         #print('self.flags_dict=', self.flags_dict)
