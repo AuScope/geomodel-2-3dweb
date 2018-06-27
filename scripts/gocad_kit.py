@@ -513,6 +513,9 @@ class GOCAD_KIT:
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
+        print("3 Writing COLLADA file: ", fileName+'.dae')
+        mesh.write(fileName+'.dae')
+
         # print('returning ', popup_dict)
         return popup_dict
 
@@ -619,8 +622,8 @@ class GOCAD_KIT:
             mesh.scenes.append(myscene)
             mesh.scene = myscene
 
-            print("1 Writing COLLADA file: ", fileName+'.dae')
             out_filename = fileName+'_'+str(file_cnt)
+            print("1 Writing COLLADA file: ", out_filename+'.dae')
             mesh.write(out_filename+'.dae')
             popup_list.append((popup_dict, out_filename))
             popup_dict = {}
