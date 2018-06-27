@@ -634,7 +634,7 @@ class GOCAD_VESSEL:
                     if splitstr_arr[0] == "PATOM":
                         try:
                             vert_dict = self.make_vertex_dict()
-                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz)
+                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz, True)
                         except IndexError as exc:
                             self.__handle_exc(exc)
                   
@@ -980,13 +980,18 @@ class GOCAD_VESSEL:
 
 
 
-    def __parse_props(self, splitstr_arr, coord_tup):
+    def __parse_props(self, splitstr_arr, coord_tup, is_patom = False):
         ''' This parses a line of properties associated with a PVTRX or PATOM line
             splitstr_arr - array of strings representing line with properties
-            coord_tup - (X,Y,Z) float tuple of the coordinates 
+            coord_tup - (X,Y,Z) float tuple of the coordinates
+            is_patom - this is from a PATOM, default False
         '''
-        # Properties start at the 6th column
-        col_idx = 5
+        if is_patom:
+            # For PATOM, properties start at the 4th column
+            col_idx = 3
+        else:
+            # For PVRTX, properties start at the 6th column
+            col_idx = 5
 
         # Loop over each property in line
         for prop_obj in self.local_props.values():
