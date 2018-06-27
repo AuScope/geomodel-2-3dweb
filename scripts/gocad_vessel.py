@@ -633,7 +633,7 @@ class GOCAD_VESSEL:
                     # Atoms with attached properties
                     if splitstr_arr[0] == "PATOM":
                         try:
-                            vert_dict = self.__make_vertex_dict()
+                            vert_dict = self.make_vertex_dict()
                             self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz)
                         except IndexError as exc:
                             self.__handle_exc(exc)
