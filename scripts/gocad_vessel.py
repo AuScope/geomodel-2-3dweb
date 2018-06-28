@@ -576,15 +576,15 @@ class GOCAD_VESSEL:
                     self.header_name = value_str.replace('/','-')
                     self.logger.debug("self.header_name = %s", repr(self.header_name))
 
-            # Axis units
+            # Axis units - check if units are kilometres, and update coordinate multiplier
             elif splitstr_arr[0] == "AXIS_UNIT":
                 for idx in range(0,3):
-                    if splitstr_arr[idx+1].strip('"')=='KM':
+                    unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
+                    if unit_str=='KM':
                         self.xyz_mult[idx] =  1000.0
-                    # Sorry - only can do metres or kilometres or unitless
-                    elif splitstr_arr[idx+1].strip('"') not in ['M', 'UNITLESS']:
-                        print("ERROR - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
-                        sys.exit(1)
+                    # Warn if not metres or kilometres or unitless etc.
+                    elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
+                        print("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
 
             # Property names, this is not the class names
             elif splitstr_arr[0] == "PROPERTIES":
@@ -1116,7 +1116,7 @@ class GOCAD_VESSEL:
                 return False, None, None, None
 
         # Convert to metres if units are kms
-        if convert:
+        if convert and isinstance(x, float):
             x *= self.xyz_mult[0]
             y *= self.xyz_mult[1]
             z *= self.xyz_mult[2]
