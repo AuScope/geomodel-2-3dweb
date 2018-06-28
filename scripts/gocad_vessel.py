@@ -230,6 +230,10 @@ class GOCAD_VESSEL:
         ''' True iff it is a GOCAD VOXET file
         '''
 
+        self.xyz_mult = [1.0, 1.0, 1.0]
+        ''' Used to convert to metres if the units are in kilometres
+        '''
+
         self.axis_origin = None
         ''' Origin of XYZ axis
         '''
@@ -572,6 +576,16 @@ class GOCAD_VESSEL:
                     self.header_name = value_str.replace('/','-')
                     self.logger.debug("self.header_name = %s", repr(self.header_name))
 
+            # Axis units
+            elif splitstr_arr[0] == "AXIS_UNIT":
+                for idx in range(0,3):
+                    if splitstr_arr[idx+1].strip('"')=='KM':
+                        self.xyz_mult[idx] =  1000.0
+                    # Sorry - only can do metres or kilometres or unitless
+                    elif splitstr_arr[idx+1].strip('"') not in ['M', 'UNITLESS']:
+                        print("ERROR - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+                        sys.exit(1)
+
             # Property names, this is not the class names
             elif splitstr_arr[0] == "PROPERTIES":
                 if len(self.local_props) == 0:
@@ -663,7 +677,7 @@ class GOCAD_VESSEL:
                 seq_no_prev = seq_no
                 try:
                     seq_no = int(splitstr_arr[1])
-                    is_ok, a_int, b_int, c_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                    is_ok, a_int, b_int, c_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 except (IndexError, ValueError, OverflowError) as exc:
                     self.__handle_exc(exc)
                     seq_no = seq_no_prev
@@ -737,32 +751,32 @@ class GOCAD_VESSEL:
                     self.axis_origin = (x_flt, y_flt, z_flt)
 
             elif splitstr_arr[0] == "AXIS_U":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_u = (x_flt, y_flt, z_flt)
 
             elif splitstr_arr[0] == "AXIS_V":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_v = (x_flt, y_flt, z_flt)
 
             elif splitstr_arr[0] == "AXIS_W":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_w = (x_flt, y_flt, z_flt)
 
             elif splitstr_arr[0] == "AXIS_N":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.vol_dims = (x_int, y_int, z_int)
 
             elif splitstr_arr[0] == "AXIS_MIN":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_min = (x_int, y_int, z_int)
 
             elif splitstr_arr[0] == "AXIS_MAX":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_max = (x_int, y_int, z_int)
 
@@ -1076,13 +1090,14 @@ class GOCAD_VESSEL:
         return True, num 
 
 
-    def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False):
+    def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False, convert = True):
         ''' Helpful function to read XYZ cooordinates
             is_float - if true parse x y z as floats else try integers
             x_str, y_str, z_str - X,Y,Z coordinates in string form
             do_minmax - record the X,Y,Z coords for calculating extent
+            convert - convert from kms to metres if necessary
             Returns four parameters: success  - true if could convert the strings to floats
-                                   x,y,z - floating point values
+                                   x,y,z - floating point values, converted to metres if units are kms
         '''
         x = y = z = None
         if is_float:
@@ -1100,10 +1115,17 @@ class GOCAD_VESSEL:
                 self.__handle_exc(exc)
                 return False, None, None, None
 
+        # Convert to metres if units are kms
+        if convert:
+            x *= self.xyz_mult[0]
+            y *= self.xyz_mult[1]
+            z *= self.xyz_mult[2]
+
         # Calculate minimum and maximum XYZ
         if do_minmax:
             self.__calc_minmax(x,y,z)
-        return True, x, y, z
+
+        return True, x, y, z 
 
     def __calc_minmax(self, x, y, z):
         ''' Calculate the max and min of all x,y,z coords
@@ -1120,6 +1142,9 @@ class GOCAD_VESSEL:
             self.max_Z = z
         if z < self.min_Z:
             self.min_Z = z
+        if (x < 10000 or y < 10000):
+            print(x,y,z, "Too SMALL")
+            sys.exit(1)
 
 
 
