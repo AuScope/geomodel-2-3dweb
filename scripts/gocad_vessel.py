@@ -1142,9 +1142,6 @@ class GOCAD_VESSEL:
             self.max_Z = z
         if z < self.min_Z:
             self.min_Z = z
-        if (x < 10000 or y < 10000):
-            print(x,y,z, "Too SMALL")
-            sys.exit(1)
 
 
 
