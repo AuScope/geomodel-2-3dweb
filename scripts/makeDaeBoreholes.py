@@ -17,8 +17,43 @@ import http.client, urllib
 
 import collada2gltf
 
-# Bounding box of the area where boreholes are retrieved
-BBOX = (132.7052603, -28.3847194, 134.4664228, -26.9293133)
+MODEL = 'Tas'
+
+if MODEL=='NorthGawler':
+
+    # Bounding box of the area where boreholes are retrieved
+    BBOX = (132.7052603, -28.3847194, 134.4664228, -26.9293133)
+
+    AUSCOPE_PORTAL_URL = 'http://portal.auscope.org/portal/gmap.html?s=XQAAAQDvv4IBAAAAAAAAAD3vvojvvonvvqI3LO+/vzc7CwN/aO++rO+/kndiBe+/pCbvvoBgTu+/te++qk/vv73vvpDvvq9SEu+/pO++h++/uu+/uDIILSAM77+u776qIu+/oe++sg/vvqLvv6/vv6cWERE5Be+/se++sD1877+Qbn3vvrfvvqXvvpEyAmUy776DX2Xvv7Tvv4Am77+iV0jvvrt077+k776B77+TS0fvvqDvvqXvv5Yy77++776l77+/NTkZawHvv7Tvv7Tvv6/vvol0SUwH776iG++/g+++lTLvvojvv5rvvoVVOu+/tRBA77+Ff3RL77+nAGlRck9VQe++qW/vvrhhFe+/gkhQYWXvvqIj776NR+++j++/uEkYPH8f776ndxIb776dOShCPnlxQw4CaO++u0/vv7vvvrLvv598A++/kO++g3BtPWrvv5Pvv6M2776AZGvvvrgudHoC77+tbxzvvqt/Lw1hKgLvvqjvv5Lvv4rvvoRECH9kbGs/77+NcRoQfe++rO+/o+++rO++lu+/pe+/ikMT776CGe++gnvvv43vvqp/PGnvv6jvv6LvvqMz776577+k776I776ZZEnvv6M577+o776SVCzvvo/vvrEjN+++lmrvvrYAVgMj77+IEEQL776OBBV/77+0T++/lSbvvp9Hfe+/qu+/pVXvv6g2UBBp77+y77+rW++/gO+/jBLvv6Hvv53vv5/vvqEt77+o77+rNTMaNBnvv5Ai776777+DKjtC77+y77+w77++77+5776wEA==&v=4' 
+
+    # Geo model's CRS, all output is converted to this CRS
+    MODEL_CRS = "epsg:28352"
+
+    WFS_URL = 'http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs'
+
+    # CRS of the coordinates in the WFS response
+    BOREHOLE_TYPE='gsml:Borehole'
+    BOREHOLE_CRS = "epsg:4326"
+    WFS_VERSION='1.1.0'
+    BOREHOLE_CODESPACE='http://www.pir.sa.gov.au'
+
+elif MODEL == 'Tas':
+
+    BBOX = (144.5, -43.7, 148.5, -40.5)
+    AUSCOPE_PORTAL_URL = 'http://au-portal-2.it.csiro.au/portal/index.htm?state=XQAAAAJJCgAAAAAAAAA9776I776J77+H776j776DJO+/gT4/776VUi/vv4oW7761776j77+Q77+n776kCi3vv5Lvv4w1776KfO+/gWVT77+lPu++ku+/u+++mHlx776DKid577+/77+O776WCe++vO+/ihZGMO++ohTvv6oUbEY2fHnvvrnvv6oX77+rfO+/gO+/jF0ID1BXOO+/lxHvvoNX776L776xGu++oO++tO+/r1Em77+5He+/lO+/h+++lDdd77+1776reDLvvpAzRO++o++/tzTvvqTvv5B6T+++qQTvv4YbK3vvv6AdeAxk77+VG1bvvrrvv4QG776fLDlQ776V7768776gX+++qe+/kGtldncA776c77+5bVAd77+v776DJ1Q5KFliMBwf77+177+GeiTvvqTvvqjvv7/vv4lb776b77+Y7761776gRe+/qu++khzvvprvv4dq77+JS0ko776+77+W776I77+2C+++lQPvv4Uh776o77+DUzEj77+nAQVtPO++mm/vvoPvv77vvqrvv4Pvv7zvv6rvvrI1776hC0sjejbvvp5/776gTgLvv4J3aO+/hu++mu+/kCzvv7nvv4M077+d776h776377+W776qEO+/le+/g++/gBg/776eXjbvv5MZQTHvv7NRMUDvvpfvvqdnHnIt77+wP2nvvq7vv6Rj77+E77+N776sZ+++i++/te+/tO++ve++pu++lu++mO++nO++ve+/oO++re+/lDfvv4nvvrtb776e77+w77+dDu++tO++rO++sRAp7764f+++hxXvv5Pvv5BV776dBO+/nO++vilz77+o77+fbe++o0M7776d776bPu+/tO++je++jR4c776877+a77+PH+++su++mu++pAnvv6kwbO++mW5mOG1O77+q77+8M3DvvrhyD+++t3bvv6N1ce+/lO+/v+++ru++oe++onLvv6Pvv4s2776HSu+/ru+/h+++ge+/re++tWDvvpAJ776WIkfvv5Xvv4fvv5Pvvorvv54E776We2jvv4Xvv6Fv77+YKTQGIe++lO+/hzPvvpbvvppcP++/qm3vvqMoW++/nVzvv4Pvv6Ff776K776277+8YX0FfF/vvrvvvq7vv6EF776CCGU7Qy84776e77+h77+H77+FL17vvqzvvpM5Me+/t+++iRNE776xbu++j+++sXNZ7762776D77+577+v77+c77+X77+K776h776cQ++/ve+/kBJL77+J77+L77+qIe++i1Xvv5c2776hSFsN77+HckEx77+u776y776E7764X++/iO++jRUc776I776w77+jPXnvv5FnQSnvvrtFbkLvvqJI77+u77+JaO+/tl4t77+XTO+/h++/le++tu+/ryMjR+++iynvv5zvv7xB77+Z77+M77+JShDvvosm77+fRO+/t1Xvv7w6BnZDKO+/ve++sDERGUtN776X77+S77+iAe+/glPvv5J9776277+BOWciTljvv5ZD77+FIXDvvrVy776RR0tbYDNF77+p77+A77+u776M776P77+O7766Oe++ge++sV3vv40I77+577+0b++/rDfvvpvvv7Tvv5crB17vv7RYF+++ge++ie+/nR3vvo88aO+/je++oO++t1p0J+++hlfvvoDvv5FD77+x776cC+++vC3vvoNVSmAlDe++sGjvvrDvv4rvvqvvvqDvv7bvvpI2fQTvvroJ776Q776V77+3776ZDSQR77+377+/77+d77+xAnl/77+oZO+/k+++he+/pwZ3B++/q3FE77+BJ3vvvrbvv4k6O1p1776USu++pe+/khB777+k77+p776+e++/ou+/pkjvvrrvvpIqY+++tO++uu++gzbvv6Z0P++/mSXvvo/vvrMg77+L776M77+qaO+/nu+/tu++s1Lvv5zvvoMF776MJ++/gu+/pu++qjHvvqZtJ+++iFoFVVfvvrnvvqTvvpRXBO++iO++kVbvv5Lvv5wI77+ucu+/i08JF+++hXgL77+v77+A77+A77+w7769VEYx776DY++/v++/uBUB776G'
+
+    MODEL_CRS = 'epsg:3857'
+
+    WFS_URL = 'http://www.mrt.tas.gov.au:80/web-services/wfs'
+
+    # CRS of the coordinates in the WFS response
+    BOREHOLE_CRS = "epsg:4283"
+    BOREHOLE_TYPE = "nvcl:ScannedBoreholeCollection"
+    WFS_VERSION='1.1.0'
+    BOREHOLE_CODESPACE='http://www.mrt.tas.gov.au'
+
+elif MODEL == 'NorthQueensland':
+    pass
 
 # Namespaces for WFS Borehole response
 NS = { 'wfs':"http://www.opengis.net/wfs",
@@ -39,14 +74,9 @@ NS = { 'wfs':"http://www.opengis.net/wfs",
         'er':"urn:cgi:xmlns:GGIC:EarthResource:1.1",
         'xsi':"http://www.w3.org/2001/XMLSchema-instance" }
 
-# Geo model's CRS, all output is converted to this CRS
-MODEL_CRS = "epsg:28352"
-
-# CRS of the coordinates in the WFS response
-BOREHOLE_CRS = "epsg:4326"
 
 # Maximum number of boreholes processed
-MAX_BOREHOLES = 15
+MAX_BOREHOLES = 9999
 
 
 def convert_coords(input_crs, output_crs, xy):
@@ -75,7 +105,7 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     angl_rad = math.radians(30.0)
     cos_flt = math.cos(angl_rad)
     sin_flt = math.sin(angl_rad)
-    print(cos_flt, sin_flt)
+    #print(cos_flt, sin_flt)
     ptA_high = [bv[0], bv[1]+BH_WIDTH*cos_flt, bv[2]+BH_HEIGHT]
     ptB_high = [bv[0]+BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
     ptC_high = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
@@ -115,12 +145,12 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     node = Collada.scene.Node("node0", children=geomnode_list)
     node_list.append(node)
 
-    print("Creating a scene")
+    #print("Creating a scene")
     myscene = Collada.scene.Scene("myscene", node_list)
     mesh.scenes.append(myscene)
     mesh.scene = myscene
 
-    print("Writing mesh")
+    #print("Writing mesh")
     mesh.write(os.path.join(dest_dir,file_name+'.dae'))
 
 
@@ -152,15 +182,16 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
         Usually I would like to have it read in the NVCL hrefs and use them to find
         the borehole data (to be done in the near future)
     '''
-    response = wfs.getfeature(typename='gsml:Borehole', bbox=BBOX, srsname='EPSG:4326')
+    #print('get_borehole_data() wfs.contents =', list(wfs.contents))
+    response = wfs.getfeature(typename='gsml:Borehole', bbox=BBOX, srsname=BOREHOLE_CRS)
     response_str = bytes(response.read(), 'ascii')
     href_list = []
     borehole_list = []
-    #print(response_str)
+    #print('get_borehole_data() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
     for child in root.findall('./*/*/{http://www.opengis.net/gml}name'):
-        # print("2 2 child", child.tag, child.attrib, child.text)
+        #print("2 2 child", child.tag, child.attrib, child.text)
         if child.attrib['codeSpace']=='http://www.ietf.org/rfc/rfc2616':
             href_list.append(child.text)
             #print("borehole href=", child.text)
@@ -175,7 +206,7 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
             #print("namenode", namenode.tag, namenode.attrib, namenode.text)
             if namenode.attrib['codeSpace']=='http://www.ietf.org/rfc/rfc2616':
                 borehole_dict['href'] = namenode.text
-            if namenode.attrib['codeSpace']=='http://www.pir.sa.gov.au':
+            if namenode.attrib['codeSpace']==BOREHOLE_CODESPACE:
                 borehole_dict['id'] = namenode.text
 
         # Finds borehole collar x,y assumes units are degrees
@@ -209,6 +240,7 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
             borehole_list.append(borehole_dict)
         if borehole_cnt > max_boreholes:
             break
+    #print('get_borehole_data() returns ', borehole_list)
     return borehole_list
 
 
@@ -224,7 +256,7 @@ def get_json_popupinfo(borehole_dict):
                 'coreCustodian', 'inclinationType','coredInterval']:
         json_obj[key] = borehole_dict[key]
     json_obj['href'] = [ { 'label': 'WFS URL', 'URL': borehole_dict['href'] },
-                         { 'label': 'AuScope URL', 'URL': 'http://portal.auscope.org/portal/gmap.html?s=XQAAAQDvv4IBAAAAAAAAAD3vvojvvonvvqI3LO+/vzc7CwN/aO++rO+/kndiBe+/pCbvvoBgTu+/te++qk/vv73vvpDvvq9SEu+/pO++h++/uu+/uDIILSAM77+u776qIu+/oe++sg/vvqLvv6/vv6cWERE5Be+/se++sD1877+Qbn3vvrfvvqXvvpEyAmUy776DX2Xvv7Tvv4Am77+iV0jvvrt077+k776B77+TS0fvvqDvvqXvv5Yy77++776l77+/NTkZawHvv7Tvv7Tvv6/vvol0SUwH776iG++/g+++lTLvvojvv5rvvoVVOu+/tRBA77+Ff3RL77+nAGlRck9VQe++qW/vvrhhFe+/gkhQYWXvvqIj776NR+++j++/uEkYPH8f776ndxIb776dOShCPnlxQw4CaO++u0/vv7vvvrLvv598A++/kO++g3BtPWrvv5Pvv6M2776AZGvvvrgudHoC77+tbxzvvqt/Lw1hKgLvvqjvv5Lvv4rvvoRECH9kbGs/77+NcRoQfe++rO+/o+++rO++lu+/pe+/ikMT776CGe++gnvvv43vvqp/PGnvv6jvv6LvvqMz776577+k776I776ZZEnvv6M577+o776SVCzvvo/vvrEjN+++lmrvvrYAVgMj77+IEEQL776OBBV/77+0T++/lSbvvp9Hfe+/qu+/pVXvv6g2UBBp77+y77+rW++/gO+/jBLvv6Hvv53vv5/vvqEt77+o77+rNTMaNBnvv5Ai776777+DKjtC77+y77+w77++77+5776wEA==&v=4' } ]
+                         { 'label': 'AuScope URL', 'URL': AUSCOPE_PORTAL_URL } ]
     json_obj['elevation'] = "{0:6.3f}".format(borehole_dict['z'])
     json_obj['location'] = "{0:6.3f} {1:6.3f}".format(borehole_dict['x'], borehole_dict['y'])
     return json_obj
@@ -273,7 +305,8 @@ def get_boreholes(dest_dir):
     ''' Retrieves borehole data and writes 3D model files to a directory
         dest_dir - directory where 3D model files are written
     '''
-    wfs = WebFeatureService('http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs',version='1.1.0')
+    wfs = WebFeatureService(WFS_URL, version=WFS_VERSION, timeout=6000)
+    #print('wfs=', wfs)
     nvcl_href_list = get_scanned_borehole_hrefs(wfs)
     #print("nvcl_href_list=", nvcl_href_list)
     borehole_list = get_borehole_data(wfs, nvcl_href_list, MAX_BOREHOLES)
