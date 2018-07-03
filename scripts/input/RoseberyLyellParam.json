@@ -1,0 +1,19 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": "144.5", "south": "-43.7", "east": "148.5", "north": "-40.5" },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "url": "http://au-portal-2.it.csiro.au/portal/index.htm?state=XQAAAAJJCgAAAAAAAAA9776I776J77+H776j776DJO+/gT4/776VUi/vv4oW7761776j77+Q77+n776kCi3vv5Lvv4w1776KfO+/gWVT77+lPu++ku+/u+++mHlx776DKid577+/77+O776WCe++vO+/ihZGMO++ohTvv6oUbEY2fHnvvrnvv6oX77+rfO+/gO+/jF0ID1BXOO+/lxHvvoNX776L776xGu++oO++tO+/r1Em77+5He+/lO+/h+++lDdd77+1776reDLvvpAzRO++o++/tzTvvqTvv5B6T+++qQTvv4YbK3vvv6AdeAxk77+VG1bvvrrvv4QG776fLDlQ776V7768776gX+++qe+/kGtldncA776c77+5bVAd77+v776DJ1Q5KFliMBwf77+177+GeiTvvqTvvqjvv7/vv4lb776b77+Y7761776gRe+/qu++khzvvprvv4dq77+JS0ko776+77+W776I77+2C+++lQPvv4Uh776o77+DUzEj77+nAQVtPO++mm/vvoPvv77vvqrvv4Pvv7zvv6rvvrI1776hC0sjejbvvp5/776gTgLvv4J3aO+/hu++mu+/kCzvv7nvv4M077+d776h776377+W776qEO+/le+/g++/gBg/776eXjbvv5MZQTHvv7NRMUDvvpfvvqdnHnIt77+wP2nvvq7vv6Rj77+E77+N776sZ+++i++/te+/tO++ve++pu++lu++mO++nO++ve+/oO++re+/lDfvv4nvvrtb776e77+w77+dDu++tO++rO++sRAp7764f+++hxXvv5Pvv5BV776dBO+/nO++vilz77+o77+fbe++o0M7776d776bPu+/tO++je++jR4c776877+a77+PH+++su++mu++pAnvv6kwbO++mW5mOG1O77+q77+8M3DvvrhyD+++t3bvv6N1ce+/lO+/v+++ru++oe++onLvv6Pvv4s2776HSu+/ru+/h+++ge+/re++tWDvvpAJ776WIkfvv5Xvv4fvv5Pvvorvv54E776We2jvv4Xvv6Fv77+YKTQGIe++lO+/hzPvvpbvvppcP++/qm3vvqMoW++/nVzvv4Pvv6Ff776K776277+8YX0FfF/vvrvvvq7vv6EF776CCGU7Qy84776e77+h77+H77+FL17vvqzvvpM5Me+/t+++iRNE776xbu++j+++sXNZ7762776D77+577+v77+c77+X77+K776h776cQ++/ve+/kBJL77+J77+L77+qIe++i1Xvv5c2776hSFsN77+HckEx77+u776y776E7764X++/iO++jRUc776I776w77+jPXnvv5FnQSnvvrtFbkLvvqJI77+u77+JaO+/tl4t77+XTO+/h++/le++tu+/ryMjR+++iynvv5zvv7xB77+Z77+M77+JShDvvosm77+fRO+/t1Xvv7w6BnZDKO+/ve++sDERGUtN776X77+S77+iAe+/glPvv5J9776277+BOWciTljvv5ZD77+FIXDvvrVy776RR0tbYDNF77+p77+A77+u776M776P77+O7766Oe++ge++sV3vv40I77+577+0b++/rDfvvpvvv7Tvv5crB17vv7RYF+++ge++ie+/nR3vvo88aO+/je++oO++t1p0J+++hlfvvoDvv5FD77+x776cC+++vC3vvoNVSmAlDe++sGjvvrDvv4rvvqvvvqDvv7bvvpI2fQTvvroJ776Q776V77+3776ZDSQR77+377+/77+d77+xAnl/77+oZO+/k+++he+/pwZ3B++/q3FE77+BJ3vvvrbvv4k6O1p1776USu++pe+/khB777+k77+p776+e++/ou+/pkjvvrrvvpIqY+++tO++uu++gzbvv6Z0P++/mSXvvo/vvrMg77+L776M77+qaO+/nu+/tu++s1Lvv5zvvoMF776MJ++/gu+/pu++qjHvvqZtJ+++iFoFVVfvvrnvvqTvvpRXBO++iO++kVbvv5Lvv5wI77+ucu+/i08JF+++hXgL77+v77+A77+A77+w7769VEYx776DY++/v++/uBUB776G"
+                         },
+        "MODEL_CRS": "EPSG:3857",
+        "WFS_URL": "http://www.mrt.tas.gov.au:80/web-services/wfs",
+        "BOREHOLE_TYPE": "nvcl:ScannedBoreholeCollection",
+        "BOREHOLE_CRS": "EPSG:4283",
+        "WFS_VERSION": "1.1.0",
+        "BOREHOLE_CODESPACE": "http://www.mrt.tas.gov.au"
+     },
+     "ModelProperties": {
+        "crs": "EPSG:3857",
+        "init_cam_dist": 170000.0,
+        "name": "Rosebery Lyell"
+      }
+}

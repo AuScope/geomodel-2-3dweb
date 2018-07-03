@@ -1,0 +1,19 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": "132.7052603", "south": "-28.3847194", "east": "134.4664228", "north": "-26.9293133" },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": "http://portal.auscope.org/index.htm?state=XQAAAAJPCgAAAAAAAAA9776I776J77+H776j776DJO+/gT4/776VUi/vv4oW7761776j77+Q77+n776kCi3vv5Lvv4w1776KfO+/gWVT77+lPu++ku+/u+++mHlx776DKid577+/77+O776WCe++vO+/ihZGMO++ohTvv6oUbEY2fHnvvrnvv6oX77+rfO+/gO+/jF0ID1BXOO+/lxHvvoNX776L776xGu++oO++tO+/r1Em77+5He+/lO+/h+++lDdd77+1776reDLvvpAzRO++o++/tzTvvqTvv5B6T+++qQTvv4YbK3vvv6AdeAxk77+VG1bvvrrvv4QG776fLDlQ776V7768776gX+++qe+/kGtldncA776c77+5bVAd77+v776DJ1Q5KFliMBwf77+177+GeiTvvqTvvqjvv7/vv4lb776b77+Y7761776gRe+/qu++khzvvprvv4dq77+JS0ko776+77+W776I77+2C+++lQPvv4Uh776o77+DUzEj77+nAQVtPO++mm/vvoPvv77vvqrvv4Pvv7zvv6rvvrI1776hC0sjejbvvp5/776gTgLvv4J3aO+/hu++mu+/kCzvv7nvv4M077+d776h776377+W776qEO+/le+/g++/gBg/776eXjbvv5MZQTHvv7NRMUDvvpfvvqdnHnIt77+wP2nvvq7vv6Rj77+E77+N776sZ+++i++/te+/tO++ve++pu++lu++mO++nO++ve+/oO++re+/lDfvv4nvvrtb776e77+w77+dDu++tO++rO++sRAp7764f+++hxXvv5Pvv5BV776dBO+/nO++vilz77+o77+fbe++o0M7776d776bPu+/tO++je++jR4c776877+a77+PH+++su++mu++pAnvv6kwbO++mW5mOG1O77+q77+8M3DvvrhyD+++t3bvv6N1ce+/lO+/v+++ru++oe++onLvv6Pvv4s2776HSu+/ru+/h+++ge+/re++tWDvvpAJ776WIkfvv5Xvv4fvv5Pvvorvv54E776We2jvv4Xvv6Fv77+YKTQGIe++lO+/hzPvvpbvvppcP++/qm3vvqMoW2MCYu+/v+++hyzvvp0vPu++mzXvvpAe776r776bWO++vF4Yee++tO++mu+/uycdclhc776b77+heO+/oh93ZO+/i++/hO+/pBsX776X77+HW+++g0ceW++/ke++ke++jO++g+++ie+/tO+/iyBvM++/lu+/lu+/tu++nO+/qe++ju+/iSAE776YDDbvvr5ZKXAJfu++mCgUBxh3776/VO++tO+/rAkQPWfvv6/vvrfvv6vvvprvvonvv5fvvr9/Ke++ju++rmXvvqwoM0jvv7EEGe+/jWbvv57vvqbvvoDvv6Hvv5Hvv5fvvrjvvq4See+/u+++ljovBO+/p+++je++o++/lu++qDTvv6tZdR4m77+rH+++oUJBVlFn77+R77+l776WZnrvv5IL776VYe+/j++/qit877+dD++/lu++ku+/nx/vv4oXFhbvvpxs776v776J77+2Qe+/s+++skwqGUXvvoYLLO++tk/vv6Xvvprvv4lWX+++iu++sTTvvp85776jDkBk776QOznvv7xT776W776w776Gau+/qX56Me++kEYi77+UNe+/iu++vO++ke++o+++j++/klnvvqp97765dO+/gO+/um/vvo/vvq/vv6Be776aZ++/g++/mE4D776J776m77+HLlJL77+T776YX++/ru++liTvvqUe77+6SO+/hhzvv4AE77+K776N77+T77+W776o776MEu+/oe+/sTfvvrxmGO++nk9Y77+5Whrvvqxx77+v776F776HQu++iQF877+AanXvv5QlG+++tFjvvrBjdSTvv7bvv6JL77+SHE4t77+M776CC+++qArvv55g776P776/Fe++tGjvvqh3776t776g77+ONe+/jEhp77+ib+++ue+/sEJV776gKg95776ONFAu776bY2R7f00Sfe+/hlkp776gDhbvv"
+                         },
+        "MODEL_CRS": "EPSG:28352",
+        "WFS_URL": "http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs",
+        "BOREHOLE_TYPE": "gsml:Borehole",
+        "BOREHOLE_CRS": "EPSG:4326",
+        "WFS_VERSION": "1.1.0",
+        "BOREHOLE_CODESPACE": "http://www.pir.sa.gov.au"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:28352",
+        "name": "North Gawler",
+        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    }
+}
