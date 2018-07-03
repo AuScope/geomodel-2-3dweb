@@ -45,7 +45,7 @@ MAX_BOREHOLES = 9999
 
 WFS_TIMEOUT = 6000
 
-Config = SimpleNamespace()
+Param = SimpleNamespace()
 
 def convert_coords(input_crs, output_crs, xy):
     ''' Converts coordinate systems
@@ -151,7 +151,7 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
         the borehole data (to be done in the near future)
     '''
     #print('get_borehole_data() wfs.contents =', list(wfs.contents))
-    response = wfs.getfeature(typename='gsml:Borehole', bbox=Config.BBOX, srsname=Config.BOREHOLE_CRS)
+    response = wfs.getfeature(typename='gsml:Borehole', bbox=Param.BBOX, srsname=Param.BOREHOLE_CRS)
     response_str = bytes(response.read(), 'ascii')
     href_list = []
     borehole_list = []
@@ -174,7 +174,7 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
             #print("namenode", namenode.tag, namenode.attrib, namenode.text)
             if namenode.attrib['codeSpace']=='http://www.ietf.org/rfc/rfc2616':
                 borehole_dict['href'] = namenode.text
-            if namenode.attrib['codeSpace']==Config.BOREHOLE_CODESPACE:
+            if namenode.attrib['codeSpace']==Param.BOREHOLE_CODESPACE:
                 borehole_dict['id'] = namenode.text
 
         # Finds borehole collar x,y assumes units are degrees
@@ -224,7 +224,7 @@ def get_json_popupinfo(borehole_dict):
                 'coreCustodian', 'inclinationType','coredInterval']:
         json_obj[key] = borehole_dict[key]
     json_obj['href'] = [ { 'label': 'WFS URL', 'URL': borehole_dict['href'] },
-                         { 'label': 'AuScope URL', 'URL': Config.EXTERNAL_LINK['URL'] } ]
+                         { 'label': 'AuScope URL', 'URL': Param.EXTERNAL_LINK['URL'] } ]
     json_obj['elevation'] = "{0:6.3f}".format(borehole_dict['z'])
     json_obj['location'] = "{0:6.3f} {1:6.3f}".format(borehole_dict['x'], borehole_dict['y'])
     return json_obj
@@ -239,7 +239,7 @@ def get_config_borehole(borehole_list):
         j_dict = {}
         j_dict['popup_info'] = get_json_popupinfo(borehole_dict)
         j_dict['type'] = 'GLTFObject'
-        x_m, y_m = convert_coords(Config.BOREHOLE_CRS, Config.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+        x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
         j_dict['position'] = [x_m, y_m, borehole_dict['z']]
         j_dict['model_url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
         j_dict['display_name'] = borehole_dict['id']
@@ -271,36 +271,34 @@ def make_borehole_label(borehole_name):
     return "borehole-{0}".format(clean_borehole_name(borehole_name))
 
 
-def get_json_input_config(input_file):
-    ''' Reads the configuration from input JSON file
-        input_file - filename of input config file
+def get_json_input_param(input_file):
+    ''' Reads the parameters from input JSON file and stores them in global 'Param' object
+        input_file - filename of input parameter file
     '''
-    global Config
+    global Param
     fp = open(input_file, "r")
     try:
-        config_dict = json.load(fp)
+        param_dict = json.load(fp)
     except JSONDecodeError as exc:
-        config_dict = {}
         print("ERROR - cannot read JSON file\n", input_file, "\n", exc)
         fp.close()
         sys.exit(1)
     fp.close()
-    if 'BoreholeData' not in config_dict:
+    if 'BoreholeData' not in param_dict:
         print('ERROR - Cannot find "BoreholeData" key in input file', input_file);
         sys.exit(1)
 
-    Config = SimpleNamespace()
-    for field_name in ['BBOX','EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_TYPE', 'BOREHOLE_CRS', 'WFS_VERSION', 'BOREHOLE_CODESPACE']:
-        if field_name not in config_dict['BoreholeData']:
+    Param = SimpleNamespace()
+    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_TYPE', 'BOREHOLE_CRS', 'WFS_VERSION', 'BOREHOLE_CODESPACE']:
+        if field_name not in param_dict['BoreholeData']:
             print("ERROR - Cannot find '"+field_name+"' key in input file", input_file);
             sys.exit(1)
-        setattr(Config, field_name, config_dict['BoreholeData'][field_name])
+        setattr(Param, field_name, param_dict['BoreholeData'][field_name])
 
-    if 'west' not in Config.BBOX or 'south' not in Config.BBOX or 'east' not in Config.BBOX or 'north' not in Config.BBOX:
+    if 'west' not in Param.BBOX or 'south' not in Param.BBOX or 'east' not in Param.BBOX or 'north' not in Param.BBOX:
         print("ERROR - Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
         sys.exit(1)
-    Config.BBOX = [ Config.BBOX['west'], Config.BBOX['south'], Config.BBOX['east'], Config.BBOX['north'] ]
-    return config_dict
+    Param.BBOX = [ Param.BBOX['west'], Param.BBOX['south'], Param.BBOX['east'], Param.BBOX['north'] ]
     
 
 def get_boreholes(dest_dir, input_file):
@@ -308,8 +306,8 @@ def get_boreholes(dest_dir, input_file):
         dest_dir - directory where 3D model files are written
         input_file - file of input parameters
     '''
-    config = get_json_input_config(input_file)
-    wfs = WebFeatureService(Config.WFS_URL, version=Config.WFS_VERSION, timeout=WFS_TIMEOUT)
+    get_json_input_param(input_file)
+    wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, timeout=WFS_TIMEOUT)
     #print('wfs=', wfs)
     nvcl_href_list = get_scanned_borehole_hrefs(wfs)
     #print("nvcl_href_list=", nvcl_href_list)
@@ -320,7 +318,7 @@ def get_boreholes(dest_dir, input_file):
         #print(borehole_dict)
         if 'id' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
             file_name = make_borehole_filename(borehole_dict['id'])
-            x_m, y_m = convert_coords(Config.BOREHOLE_CRS, Config.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+            x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
             base_xyz = (x_m, y_m, borehole_dict['z'])
             write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['id'])
     # Convert COLLADA files to GLTF
