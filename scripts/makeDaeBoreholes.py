@@ -12,12 +12,12 @@ import xml.etree.ElementTree as ET
 import json
 from json import JSONDecodeError
 import math
+from types import SimpleNamespace
 
 from owslib.wfs import WebFeatureService
 import http.client, urllib
 
 import collada2gltf
-from types import SimpleNamespace
 
 
 # Namespaces for WFS Borehole response
@@ -64,9 +64,10 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
         bv - base vertex, position of the object within the model [x,y,z]
     '''
     mesh = Collada.Collada()
-    BH_WIDTH = 75
-    BH_HEIGHT = 10000
-    BH_DEPTH = 20000
+    BH_WIDTH_UPPER = 75
+    BH_WIDTH_LOWER = 10
+    BH_HEIGHT = 15000
+    BH_DEPTH = 2000
     node_list = []
 
     # Convert bv to an equilateral triangle of floats
@@ -74,14 +75,14 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     cos_flt = math.cos(angl_rad)
     sin_flt = math.sin(angl_rad)
     #print(cos_flt, sin_flt)
-    ptA_high = [bv[0], bv[1]+BH_WIDTH*cos_flt, bv[2]+BH_HEIGHT]
-    ptB_high = [bv[0]+BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
-    ptC_high = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]+BH_HEIGHT]
-    ptA_low = [bv[0], bv[1]+BH_WIDTH*cos_flt, bv[2]-BH_DEPTH]
-    ptB_low = [bv[0]+BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]-BH_DEPTH]
-    ptC_low = [bv[0]-BH_WIDTH*cos_flt, bv[1]-BH_WIDTH*sin_flt, bv[2]-BH_DEPTH]
+    ptA_high = [bv[0], bv[1]+BH_WIDTH_UPPER*cos_flt, bv[2]+BH_HEIGHT]
+    ptB_high = [bv[0]+BH_WIDTH_UPPER*cos_flt, bv[1]-BH_WIDTH_UPPER*sin_flt, bv[2]+BH_HEIGHT]
+    ptC_high = [bv[0]-BH_WIDTH_UPPER*cos_flt, bv[1]-BH_WIDTH_UPPER*sin_flt, bv[2]+BH_HEIGHT]
+    ptA_low = [bv[0], bv[1]+BH_WIDTH_LOWER*cos_flt, bv[2]-BH_DEPTH]
+    ptB_low = [bv[0]+BH_WIDTH_LOWER*cos_flt, bv[1]-BH_WIDTH_LOWER*sin_flt, bv[2]-BH_DEPTH]
+    ptC_low = [bv[0]-BH_WIDTH_LOWER*cos_flt, bv[1]-BH_WIDTH_LOWER*sin_flt, bv[2]-BH_DEPTH]
 
-    diffuse_colour = (0.7, 0.55, 0.35, 1)
+    diffuse_colour = (1.0, 0.0, 0.0, 1)
     effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
     mat = Collada.material.Material("material0", "mymaterial0", effect)
     mesh.effects.append(effect)
@@ -133,22 +134,18 @@ def get_scanned_borehole_hrefs(wfs):
 
     root = ET.fromstring(response_str)
     for child in root.iter('{http://www.auscope.org/nvcl}scannedBorehole'):
-        # print("child", child.tag, child.attrib)
+        #print("child", child.tag, child.attrib)
         href_list.append(child.attrib['{http://www.w3.org/1999/xlink}href'])
 
     return href_list
 
 
 def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
-    ''' Returns a list of borehole data
+    ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
+        and a flag to say whether there are NVCL boreholes in there or not
         wfs - handle of borehole's WFS service
         nvcl_href_list - list of links to NVCL boreholes
         max_boreholes - maximum number of boreholes to retrieve
-
-        NOTA BENE: I know that 'nvcl' href list is input, and it is not used
-        that is because there are no NVCL cores within the BBOX
-        Usually I would like to have it read in the NVCL hrefs and use them to find
-        the borehole data (to be done in the near future)
     '''
     #print('get_borehole_data() wfs.contents =', list(wfs.contents))
     response = wfs.getfeature(typename='gsml:Borehole', bbox=Param.BBOX, srsname=Param.BOREHOLE_CRS)
@@ -158,24 +155,24 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
     #print('get_borehole_data() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
-    for child in root.findall('./*/*/{http://www.opengis.net/gml}name'):
-        #print("2 2 child", child.tag, child.attrib, child.text)
-        if child.attrib['codeSpace']=='http://www.ietf.org/rfc/rfc2616':
-            href_list.append(child.text)
-            #print("borehole href=", child.text)
-    root = ET.fromstring(response_str)
 
+    has_nvcl = False
     for child in root.findall('./*/gsml:Borehole', NS):
         #print("borehole child", child.tag, child.attrib, child.text)
         borehole_dict = {}
+        borehole_dict['is_nvcl'] = False
 
         # Finds name and URL for borehole
         for namenode in child.findall('./gml:name', NS):
             #print("namenode", namenode.tag, namenode.attrib, namenode.text)
             if namenode.attrib['codeSpace']=='http://www.ietf.org/rfc/rfc2616':
+                if namenode.text in nvcl_href_list:
+                    borehole_dict['is_nvcl'] = True
+                    has_nvcl = True
                 borehole_dict['href'] = namenode.text
             if namenode.attrib['codeSpace']==Param.BOREHOLE_CODESPACE:
                 borehole_dict['id'] = namenode.text
+            
 
         # Finds borehole collar x,y assumes units are degrees
         for posnode in child.findall('./gsml:collarLocation/gsml:BoreholeCollar/gsml:location/gml:Point/gml:pos', NS):
@@ -209,7 +206,7 @@ def get_borehole_data(wfs, nvcl_href_list, max_boreholes):
         if borehole_cnt > max_boreholes:
             break
     #print('get_borehole_data() returns ', borehole_list)
-    return borehole_list
+    return borehole_list, has_nvcl
 
 
 def get_json_popupinfo(borehole_dict):
@@ -230,23 +227,27 @@ def get_json_popupinfo(borehole_dict):
     return json_obj
 
 
-def get_config_borehole(borehole_list):
+def get_config_borehole(borehole_list, has_nvcl):
     ''' Creates a config object of borehole GLTF objects to display in 3D
+        It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not
+        available
         borehole_list - list of boreholes
+        has_nvcl - this list contains NVCL boreholes
     '''
     config_obj = []
     for borehole_dict in borehole_list:
-        j_dict = {}
-        j_dict['popup_info'] = get_json_popupinfo(borehole_dict)
-        j_dict['type'] = 'GLTFObject'
-        x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
-        j_dict['position'] = [x_m, y_m, borehole_dict['z']]
-        j_dict['model_url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
-        j_dict['display_name'] = borehole_dict['id']
-        j_dict['3dobject_label'] = make_borehole_label(borehole_dict['id'])
-        j_dict['include'] = True
-        j_dict['displayed'] = True
-        config_obj.append(j_dict)
+        if not has_nvcl or borehole_dict['is_nvcl']:       
+            j_dict = {}
+            j_dict['popup_info'] = get_json_popupinfo(borehole_dict)
+            j_dict['type'] = 'GLTFObject'
+            x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+            j_dict['position'] = [x_m, y_m, borehole_dict['z']]
+            j_dict['model_url'] = make_borehole_filename(borehole_dict['id'])+".gltf"
+            j_dict['display_name'] = borehole_dict['id']
+            j_dict['3dobject_label'] = make_borehole_label(borehole_dict['id'])
+            j_dict['include'] = True
+            j_dict['displayed'] = True
+            config_obj.append(j_dict)
     return config_obj
 
 
@@ -306,17 +307,22 @@ def get_boreholes(dest_dir, input_file):
         dest_dir - directory where 3D model files are written
         input_file - file of input parameters
     '''
+    # Set up input parameters from input file
     get_json_input_param(input_file)
     wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, timeout=WFS_TIMEOUT)
     #print('wfs=', wfs)
+    # Get all NVCL boreholes with no BBOX constraints
     nvcl_href_list = get_scanned_borehole_hrefs(wfs)
     #print("nvcl_href_list=", nvcl_href_list)
-    borehole_list = get_borehole_data(wfs, nvcl_href_list, MAX_BOREHOLES)
+    # Get all boreholes within BBOX, NVCL boreholes are flagged
+    borehole_list, has_nvcl = get_borehole_data(wfs, nvcl_href_list, MAX_BOREHOLES)
 
     # Parse response for all boreholes, make COLLADA files
+    # Preference NVCL boreholes, if none are available then all boreholes
     for borehole_dict in borehole_list:
         #print(borehole_dict)
-        if 'id' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
+        if 'id' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict and \
+                                     (not has_nvcl or borehole_dict['is_nvcl']):
             file_name = make_borehole_filename(borehole_dict['id'])
             x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
             base_xyz = (x_m, y_m, borehole_dict['z'])
@@ -324,7 +330,7 @@ def get_boreholes(dest_dir, input_file):
     # Convert COLLADA files to GLTF
     collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
     # Return borehole objects
-    return get_config_borehole(borehole_list)
+    return get_config_borehole(borehole_list, has_nvcl)
 
 
 ### USED FOR TESTING ###
