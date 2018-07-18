@@ -6,10 +6,8 @@
                          },
         "MODEL_CRS": "EPSG:28352",
         "WFS_URL": "http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs",
-        "BOREHOLE_TYPE": "nvcl:ScannedBorehole",
-        "BOREHOLE_CRS": "EPSG:4326",
-        "WFS_VERSION": "1.1.0",
-        "BOREHOLE_CODESPACE": "http://www.pir.sa.gov.au"
+        "BOREHOLE_CRS": "EPSG:4283",
+        "WFS_VERSION": "1.1.0"
     },
     "ModelProperties": {
         "crs": "EPSG:28352",

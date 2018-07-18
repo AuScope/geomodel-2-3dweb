@@ -14,6 +14,7 @@ from json import JSONDecodeError
 import argparse
 import random
 import logging
+from types import SimpleNamespace
 
 from gocad_kit import GOCAD_KIT
 from gocad_vessel import GOCAD_VESSEL
@@ -43,6 +44,9 @@ OUTPUT_VOXEL_GLTF = False
 
 # Set up debugging 
 logger = logging.getLogger(__name__)
+
+# Input parameters are stored here
+Params = SimpleNamespace()
 
 
 def de_concat(filename_lines):
@@ -352,7 +356,7 @@ def update_json_config(model_dict_list, template_filename, output_filename, bore
     except:
         print("ERROR - cannot open file", output_filename)
         return
-    config_dict = read_json_config(template_filename)
+    config_dict = read_json_file(template_filename)
     if config_dict=={}:
         config_dict['groups'] = {}
     groups_obj = config_dict['groups']
@@ -384,29 +388,58 @@ def create_json_config(model_dict_list, output_filename, geo_extent):
         return
     # Sort by display name before saving to file
     sorted_model_dict_list = sorted(model_dict_list, key=lambda x: x['display_name'])
-    config_dict = { "properties": { "crs": "EPSG:3857", "extent": geo_extent,
-                                    "name": "Name of model",
-                                    "init_cam_dist": 500000.0 },
+    config_dict = { "properties": { "crs": Params.crs, "extent": geo_extent,
+                                    "name": Params.name,
+                                    "init_cam_dist": Params.init_cam_dist
+                                  },
                     "type": "GeologicalModel",
                     "version": 1.0,
                     "groups": {"Group Name": sorted_model_dict_list }
-                   }
+                   } 
+    if hasattr(Params, 'proj4_defn'):
+        config_dict["properties"]["proj4_defn"] = Params.proj4_defn
     json.dump(config_dict, fp, indent=4, sort_keys=True)
     fp.close()
 
      
-def read_json_config(file_name):
+def read_json_file(file_name):
     ''' Reads a JSON file and returns the contents
         file_name  - file name of JSON file
     '''
-    fp = open(file_name, "r")
     try:
-        config_dict = json.load(fp)
+        fp = open(file_name, "r")
+    except:
+        print("ERROR - Cannot open JSON file", file_name)
+        sys.exit(1)
+    try:
+        json_dict = json.load(fp)
     except JSONDecodeError:
-        config_dict = {}
+        json_dict = {}
         print("ERROR - cannot read JSON file", file_name)
+        sys.exit(1)
     fp.close()
-    return config_dict
+    return json_dict
+
+
+def initialise_params(param_file):
+    ''' Initialise the global 'Params' object from input parameter file
+        param_file - file name of input parameter file
+    '''
+    global Params
+    Params = SimpleNamespace()
+    param_dict = read_json_file(param_file)
+    if 'ModelProperties' not in param_dict:
+        print("ERROR - Cannot find 'ModelProperties' key in JSON file", param_file)
+        sys.exit(1)
+    # Mandatory parameters
+    for field_name in ['crs', 'name', 'init_cam_dist']:
+        if field_name not in param_dict['ModelProperties']:
+            print('ERROR - field', field_name, ' not in "ModelProperties" in JSON input parameter file', param_file)
+            sys.exit(1)
+        setattr(Params, field_name, param_dict['ModelProperties'][field_name])
+    # Optional parameter
+    if 'proj4_defn' in param_dict['ModelProperties']:
+        setattr(Params, 'proj4_defn', param_dict['ModelProperties']['proj4_defn'])
 
 
 # MAIN PART OF PROGRAMME
@@ -415,10 +448,11 @@ if __name__ == "__main__":
     # Parse the arguments
     parser = argparse.ArgumentParser(description='Convert GOCAD files into files used to display a geological model')
     parser.add_argument('src', help='GOCAD source directory or source file', metavar='GOCAD source dir or file')
+    parser.add_argument('param_file', help='Input parameters in JSON format', metavar='JSON input param file')
     parser.add_argument('--config_in', '-i', action='store', help='Input JSON config file', metavar='input config file')
     parser.add_argument('--config_out', '-o', action='store', help='Output JSON config file', metavar='output config file')
     parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file, must be used with -o option')
-    parser.add_argument('--no_bores', '-n', action='store_true', help='Do not add WFS boreholes to model')
+    parser.add_argument('--bores', '-b', action='store_true', help='Add WFS boreholes to model')
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
     parser.add_argument('--nondefault_coord', '-x', action='store_true', help='Tolerate non-default GOCAD coordinate system')
@@ -429,6 +463,8 @@ if __name__ == "__main__":
     is_dir = False
     gocad_src = args.src
     geo_extent = [0.0, 0.0, 0.0, 0.0]
+
+    initialise_params(args.param_file)
 
     # Set debug level
     if args.debug:
@@ -489,7 +525,7 @@ if __name__ == "__main__":
         json_template = args.config_in
         json_output = args.config_out
         if os.path.isfile(json_template):
-            if is_dir and not args.no_bores:
+            if is_dir and args.bores:
                 update_json_config(model_dict_list, json_template, json_output, gocad_src)
             else:
                 update_json_config(model_dict_list, json_template, json_output)

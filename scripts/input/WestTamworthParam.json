@@ -1,0 +1,17 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 149, "south": -33, "east": 153.67, "north": -28 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:20356",
+        "WFS_URL": "http://auscope.dpi.nsw.gov.au:80/geoserver/wfs",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
+        "WFS_VERSION": "1.1.0"
+     },
+     "ModelProperties": {
+        "crs": "EPSG:20356",
+        "init_cam_dist": 900000.0,
+        "name": "West Tamworth Belt"
+      }
+}
