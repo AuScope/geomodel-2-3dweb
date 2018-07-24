@@ -413,9 +413,9 @@ def read_json_file(file_name):
         sys.exit(1)
     try:
         json_dict = json.load(fp)
-    except JSONDecodeError:
+    except JSONDecodeError as e:
         json_dict = {}
-        print("ERROR - cannot read JSON file", file_name)
+        print("ERROR - cannot read JSON file", file_name, "\n", e)
         sys.exit(1)
     fp.close()
     return json_dict

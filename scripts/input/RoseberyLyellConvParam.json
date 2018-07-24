@@ -12,6 +12,6 @@
     "ModelProperties": {
         "crs": "EPSG:3857",
         "name": "Rosebery Lyell",
-        "init_cam_dist": 170000.0,
+        "init_cam_dist": 170000.0
     }
 }
