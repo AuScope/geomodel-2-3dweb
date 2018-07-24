@@ -1,0 +1,17 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 0, "south": 0, "east": 0, "north": 0 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:3857",
+        "WFS_URL": "http://www.mrt.tas.gov.au:80/web-services/wfs",
+        "BOREHOLE_CRS": "?",
+        "WFS_VERSION": "1.1.0"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:3857",
+        "name": "Rosebery Lyell",
+        "init_cam_dist": 170000.0,
+    }
+}
