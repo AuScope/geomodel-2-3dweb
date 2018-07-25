@@ -13,5 +13,43 @@
         "crs": "EPSG:3857",
         "name": "Rosebery Lyell",
         "init_cam_dist": 170000.0
-    }
+    },
+    "CoordOffsets": [
+        {
+            "filename": "Avebury.vs",
+            "offset": [0.0, 0.0, -2250.0]
+        },
+        {
+            "filename": "Hellyer.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        },
+        {
+            "filename": "Henty.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        },
+        {
+            "filename": "Mt_Lindsay.vs",
+            "offset": [0.0, 0.0, -1750.0]
+        },
+        {
+            "filename": "Queenstown.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        },
+        {
+            "filename": "Renison.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        },
+        {
+            "filename": "Rosebery.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        },
+        {
+            "filename": "Strahan.vs",
+            "offset": [0.0, 0.0, -2500.0]
+        },
+        {
+            "filename": "Zeehan.vs",
+            "offset": [0.0, 0.0, -2000.0]
+        }
+    ]
 }
