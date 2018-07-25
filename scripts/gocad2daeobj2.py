@@ -48,6 +48,9 @@ logger = logging.getLogger(__name__)
 # Input parameters are stored here
 Params = SimpleNamespace()
 
+# Coordinate Offsets are stores here, key is filename, value is (x,y,z)
+CoordOffset = {}
+
 
 def de_concat(filename_lines):
     ''' Separates joined GOCAD entries within a file 
@@ -147,10 +150,9 @@ def find(gocad_src_dir):
  
 
 
-def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
+def find_and_process(gocad_src_dir):
     ''' Searches for GOCAD files in local directory and processes them
         gocad_src_dir - source directory where there are GOCAD files
-        base_x, base_y, base_z - optional 3D coordinate offset. This is added to all coordinates
         Returns a list of model dicts
             (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
         and a list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
@@ -163,7 +165,7 @@ def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
         wildcard_str = os.path.join(gocad_src_dir, "*."+ext_str.lower())
         file_list = glob.glob(wildcard_str)
         for filename_str in file_list:
-            success, model_dict_list, extent = process(filename_str, base_x, base_y, base_z)
+            success, model_dict_list, extent = process(filename_str)
             if success:
                 ret_list += model_dict_list
                 extent_list.append(extent)
@@ -174,17 +176,22 @@ def find_and_process(gocad_src_dir, base_x=0.0, base_y=0.0, base_z=0.0):
     return ret_list, reduce_extents(extent_list)
 
 
-def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
+def process(filename_str):
     ''' Processes a GOCAD file
         This one GOCAD file can contain many parts and produce many output files
-        filename_str - filename of GOCAD file
-        base_x, base_y, base_z - 3D coordinate offset, this is added to all coordinates
+        filename_str - filename of GOCAD file, including path
         Returns success/failure flag, model dictionary list,
             (model dict list format: [ { model_attr:  { object_name: { 'attr_name': attr_val, ... } } } ] )
         and geographical extent [min_x, max_x, min_y, max_y]
     '''
+    global CoordOffset
     print("\nProcessing ", filename_str)
     logger.debug("process(%s)", filename_str)
+    # If there is an offset from the input parameter file, then apply it
+    base_xyz = (0.0, 0.0, 0.0)
+    basefile = os.path.basename(filename_str)
+    if basefile in CoordOffset:
+        base_xyz = CoordOffset[basefile]
     model_dict_list = []
     popup_dict = {}
     extent_list = []
@@ -209,7 +216,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         for file_lines in file_lines_list:
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
-            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=(base_x, base_y, base_z), nondefault_coords=NONDEF_COORDS)
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS)
             # Check that conversion worked and write out files
             if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
                 continue
@@ -243,7 +250,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
         gs.start_collada()
         popup_dict = {}
         for file_lines in file_lines_list:
-            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=(base_x, base_y, base_z), nondefault_coords=NONDEF_COORDS)
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS)
             if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
                 continue
             has_result = True
@@ -263,7 +270,7 @@ def process(filename_str, base_x=0.0, base_y=0.0, base_z=0.0):
 
     # Process group files, depending on the number of GOCAD objects inside
     elif ext_str == 'GP':
-        gv_list=extract_gocad(gocad_src_dir, filename_str, whole_file_lines, (base_x, base_y, base_z))
+        gv_list=extract_gocad(gocad_src_dir, filename_str, whole_file_lines, base_xyz)
 
         # If there are too many entries in the GP file, then place everything in one COLLADA file
         if len(gv_list) > GROUP_LIMIT:
@@ -426,6 +433,7 @@ def initialise_params(param_file):
         param_file - file name of input parameter file
     '''
     global Params
+    global CoordOffset
     Params = SimpleNamespace()
     param_dict = read_json_file(param_file)
     if 'ModelProperties' not in param_dict:
@@ -440,6 +448,12 @@ def initialise_params(param_file):
     # Optional parameter
     if 'proj4_defn' in param_dict['ModelProperties']:
         setattr(Params, 'proj4_defn', param_dict['ModelProperties']['proj4_defn'])
+    # Optional Coordinate Offsets
+    if 'CoordOffsets' in param_dict:
+        for coordOffsetObj in param_dict['CoordOffsets']:
+            print(coordOffsetObj)
+            CoordOffset[coordOffsetObj['filename']] = tuple(coordOffsetObj['offset'])
+        
 
 
 # MAIN PART OF PROGRAMME

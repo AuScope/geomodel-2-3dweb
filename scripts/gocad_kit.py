@@ -85,7 +85,7 @@ class GOCAD_KIT:
                 out_fp.write("mtllib "+fileName+".MTL\n")
         if v_obj.is_ts or v_obj.is_pl or v_obj.is_vs:
             for v in v_obj.get_vrtx_arr():
-                bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
+                bv = (v.xyz[0]+v_obj.base_xyz[0], v.xyz[1]+v_obj.base_xyz[1], v.xyz[2]+v_obj.base_xyz[2])
                 out_fp.write("v {0:f} {1:f} {2:f}\n".format(bv[0],bv[1],bv[2]))
         out_fp.write("g main\n")
         if v_obj.is_ts:
@@ -259,7 +259,7 @@ class GOCAD_KIT:
                     # Only write if there are indices to write
                     if len(indice_list)>0:
                         for vert in vert_list:
-                            bvert = (vert[0]-v_obj.base_xyz[0], vert[1]-v_obj.base_xyz[1], vert[2]-v_obj.base_xyz[2])
+                            bvert = (vert[0]+v_obj.base_xyz[0], vert[1]+v_obj.base_xyz[1], vert[2]+v_obj.base_xyz[2])
                             out_fp.write("v {0:f} {1:f} {2:f}\n".format(bvert[0],bvert[1],bvert[2]))
                         out_fp.write("g main-{0:010d}\n".format(vert_idx))
                         out_fp.write("usemtl colouring-{0:03d}\n".format(colour_num))
@@ -323,7 +323,7 @@ class GOCAD_KIT:
             # Make floats array for inclusion in COLLADA file
             vert_floats = []
             for v in v_obj.get_vrtx_arr():
-                vert_floats += [v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2]]
+                vert_floats += [v.xyz[0]+v_obj.base_xyz[0], v.xyz[1]+v_obj.base_xyz[1], v.xyz[2]+v_obj.base_xyz[2]]
 
             vert_src = Collada.source.FloatSource("triverts-array-{0:05d}".format(self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(self.mesh_obj, "geometry-{0:05d}".format(self.vobj_cnt), geometry_name, [vert_src])
@@ -358,8 +358,8 @@ class GOCAD_KIT:
             for l in v_obj.get_seg_arr():
                 v0 = vrtx_arr[vert_dict[l.ab[0]]-1]
                 v1 = vrtx_arr[vert_dict[l.ab[1]]-1]
-                bv0 = (v0.xyz[0]-v_obj.base_xyz[0], v0.xyz[1]-v_obj.base_xyz[1], v0.xyz[2]-v_obj.base_xyz[2])
-                bv1 = (v1.xyz[0]-v_obj.base_xyz[0], v1.xyz[1]-v_obj.base_xyz[1], v1.xyz[2]-v_obj.base_xyz[2])
+                bv0 = (v0.xyz[0]+v_obj.base_xyz[0], v0.xyz[1]+v_obj.base_xyz[1], v0.xyz[2]+v_obj.base_xyz[2])
+                bv1 = (v1.xyz[0]+v_obj.base_xyz[0], v1.xyz[1]+v_obj.base_xyz[1], v1.xyz[2]+v_obj.base_xyz[2])
                 vert_floats = list(bv0) + [bv0[0], bv0[1], bv0[2]+self.LINE_WIDTH] + list(bv1) + [bv1[0], bv1[1], bv1[2]+self.LINE_WIDTH]
                 vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.vobj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
                 geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
@@ -481,7 +481,7 @@ class GOCAD_KIT:
                 if v.xyz not in prop_dict:
                     continue               
                 colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
-            bv = (v.xyz[0]-v_obj.base_xyz[0], v.xyz[1]-v_obj.base_xyz[1], v.xyz[2]-v_obj.base_xyz[2])
+            bv = (v.xyz[0]+v_obj.base_xyz[0], v.xyz[1]+v_obj.base_xyz[1], v.xyz[2]+v_obj.base_xyz[2])
             # Vertices of the pyramid
             vert_floats = [bv[0], bv[1], bv[2]+POINT_SIZE*2] + \
                           [bv[0]+POINT_SIZE, bv[1]+POINT_SIZE, bv[2]] + \
@@ -581,7 +581,7 @@ class GOCAD_KIT:
                     u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
                     v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
                     w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_dims[2]*v_obj.axis_w[2]
-                    v = (u_offset-v_obj.base_xyz[0], v_offset-v_obj.base_xyz[1], w_offset-v_obj.base_xyz[2])
+                    v = (u_offset+v_obj.base_xyz[0], v_offset+v_obj.base_xyz[1], w_offset+v_obj.base_xyz[2])
                         
                     geomnode_list = []
                     vert_floats = [v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
