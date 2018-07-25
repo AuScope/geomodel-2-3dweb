@@ -208,7 +208,7 @@ def process(filename_str):
         return False, [], []
     has_result = False
 
-    # VS and VO files have lots of data points and thus one COLLADA file for each GOCAD file
+    # VS and VO files usually have lots of data points and thus one COLLADA file for each GOCAD file
     if ext_str in ['VS', 'VO']:
         file_lines_list = de_concat(whole_file_lines)
         mask_idx = 0  
@@ -227,8 +227,9 @@ def process(filename_str):
 
             elif ext_str == 'VO':
                 # By default must convert upper layer to PNG because some voxel files are too large
+                # Will always convert single layer voxel files to PNG
                 #gs.write_OBJ(gv, out_filename, filename_str)
-                if OUTPUT_VOXEL_GLTF:
+                if OUTPUT_VOXEL_GLTF and not gv.is_single_layer_vo():
                     # Produce a GLTF from voxel file
                     popup_list = gs.write_vo_collada(gv, out_filename)
                     for popup_dict, out_filename in popup_list:
@@ -451,7 +452,6 @@ def initialise_params(param_file):
     # Optional Coordinate Offsets
     if 'CoordOffsets' in param_dict:
         for coordOffsetObj in param_dict['CoordOffsets']:
-            print(coordOffsetObj)
             CoordOffset[coordOffsetObj['filename']] = tuple(coordOffsetObj['offset'])
         
 

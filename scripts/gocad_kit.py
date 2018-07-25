@@ -560,6 +560,9 @@ class GOCAD_KIT:
         print('pt_size = ' , pt_size)
         # Put create a dict based on colour
         bucket = {}
+        if '1' not in v_obj.prop_dict:
+            print("SORRY - can't do VOXELS with no properties")
+            return []
         prop_obj = v_obj.prop_dict['1']
         for z in range(0, v_obj.vol_dims[2], step):
             for y in range(0, v_obj.vol_dims[1], step):

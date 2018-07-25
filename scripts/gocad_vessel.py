@@ -7,6 +7,8 @@ from collections import OrderedDict
 import logging
 import traceback
 
+from model_geometries import MODEL_GEOMETRIES
+
 class PROPS:
     ''' This class holds GOCAD properties
         e.g. information about binary files (PROP_FILE)
@@ -85,7 +87,7 @@ class PROPS:
 
 
 
-class GOCAD_VESSEL:
+class GOCAD_VESSEL(MODEL_GEOMETRIES):
     ''' Class used to read gocad files and store their details
     '''
 
@@ -115,29 +117,6 @@ class GOCAD_VESSEL:
         The named coordinate system and (X,Y,Z) offset will apply
     '''
 
-    VRTX = namedtuple('VRTX', 'n xyz')
-    ''' Immutable named tuple which stores vertex data
-        n = sequence number
-        xyz = coordinates
-    '''
-
-    ATOM = namedtuple('ATOM', 'n v')
-    ''' Immutable named tuple which stores atom data
-        n = sequence number
-        v = vertex it refers to
-    '''
-
-    TRGL = namedtuple('TRGL', 'n abc')
-    ''' Immutable named tuple which stores triangle data
-        n = sequence number
-        abc = triangle vertices
-    '''
-
-    SEG = namedtuple('SEG', 'n ab')
-    ''' Immutable named tuple which stores segment data
-        n = sequence number
-        ab = segment vertices
-    '''
 
     STOP_ON_EXC = True
     ''' Stop upon exception, regardless of debug level
@@ -147,11 +126,12 @@ class GOCAD_VESSEL:
     def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False):
         ''' Initialise class
             debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
-            base_xyz - optional (x,y,z) floating point tuple, base_xyz is subtracted from all coordinates
+            base_xyz - optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
                        before they are output, default is (0.0, 0.0, 0.0)
             group_name - optional string, name of group of this gocad file is within a group, default is ""
             nondefault_coords - optional flag, supports non-default coordinates, default is False
         '''
+        super().__init__()
         # Set up logging, use an attribute of class name so it is only called once
         if not hasattr(GOCAD_VESSEL, 'logger'):
             GOCAD_VESSEL.logger = logging.getLogger(__name__)
@@ -178,22 +158,6 @@ class GOCAD_VESSEL:
 
         self.header_name = ""
         ''' Contents of the name field in the header
-        '''
-
-        self.__vrtx_arr = []
-        ''' Array of named tuples 'VRTX' used to store vertex data
-        '''
-
-        self.__atom_arr = []
-        ''' Array of named tuples 'ATOM' used to store atom data
-        '''
-
-        self.__trgl_arr = []
-        ''' Array of named tuples 'TRGL' used store triangle face data
-        '''
-
-        self.__seg_arr = []
-        ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
         self.prop_dict = {}
@@ -346,34 +310,15 @@ class GOCAD_VESSEL:
     def __repr__(self):
         ''' A very basic print friendly representation
         '''
-        return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self.__vrtx_arr))
+        return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self._vrtx_arr))
 
 
-    def __check_vertex(self, num):
-        ''' If vertex exists then returns true else false
-            num - vertex number to search for
+
+    def is_single_layer_vo(self):
+        ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer and should be converted into a PNG
+            instead of a GLTF
         '''
-        for vrtx in self.__vrtx_arr:
-            if vrtx.n == num:
-                return True
-        return False
-
-    def get_vrtx_arr(self):
-        ''' Returns array of VRTX objects after GOCAD file has been processed
-        '''
-        return self.__vrtx_arr 
-
-
-    def get_trgl_arr(self):
-        ''' Returns array of TRGL objects after GOCAD file has been processed
-        '''
-        return self.__trgl_arr
-
-
-    def get_seg_arr(self):
-        ''' Returns array of SEG objects after GOCAD file has been processed
-        '''
-        return self.__seg_arr
+        return self.is_vo and self.vol_dims[2]==1
 
 
     def get_extent(self):
@@ -392,14 +337,14 @@ class GOCAD_VESSEL:
         vert_dict = {}
         idx = 1
         # Assign vertices to dict
-        for v in self.__vrtx_arr:
+        for v in self._vrtx_arr:
             vert_dict[v.n] = idx
             idx += 1
 
         # Assign atoms to dict
-        for atom in self.__atom_arr:
+        for atom in self._atom_arr:
             idx = 1
-            for vert in self.__vrtx_arr:
+            for vert in self._vrtx_arr:
                 if vert.n == atom.v:
                     vert_dict[atom.n] = idx
                     break
@@ -442,10 +387,10 @@ class GOCAD_VESSEL:
         for line in file_lines:
             line_str = line.rstrip(' \n\r').upper()
             # Look out for double-quoted strings
-            if line_str.count('"')==2:
+            while line_str.count('"') >= 2:
                 before_tup = line_str.partition('"')
                 after_tup = before_tup[2].partition('"')
-                line_str = before_tup[0]+" "+after_tup[0].replace(' ','_')+" "+after_tup[2]
+                line_str = before_tup[0]+" "+after_tup[0].strip(' ').replace(' ','_')+" "+after_tup[2]
             splitstr_arr_raw = line.rstrip(' \n\r').split()
             splitstr_arr = line_str.split()
 
@@ -635,8 +580,8 @@ class GOCAD_VESSEL:
                     self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
-                    if self.__check_vertex(v_num):
-                        self.__atom_arr.append(self.ATOM(seq_no, v_num))
+                    if self._check_vertex(v_num):
+                        self._atom_arr.append(self.ATOM(seq_no, v_num))
                     else:
                         self.logger.debug("ERROR - ATOM refers to VERTEX that has not been defined yet")
                         self.logger.debug("    seq_no = %d", seq_no)
@@ -648,7 +593,7 @@ class GOCAD_VESSEL:
                     if splitstr_arr[0] == "PATOM":
                         try:
                             vert_dict = self.make_vertex_dict()
-                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz, True)
+                            self.__parse_props(splitstr_arr, self._vrtx_arr[vert_dict[v_num]].xyz, True)
                         except IndexError as exc:
                             self.__handle_exc(exc)
                   
@@ -666,7 +611,7 @@ class GOCAD_VESSEL:
                         # Add vertex
                         if self.invert_zaxis:
                             z_flt = -z_flt
-                        self.__vrtx_arr.append(self.VRTX(seq_no, (x_flt, y_flt, z_flt)))
+                        self._vrtx_arr.append(self.VRTX(seq_no, (x_flt, y_flt, z_flt)))
 
                         # Vertices with attached properties
                         if splitstr_arr[0] == "PVRTX":
@@ -683,7 +628,7 @@ class GOCAD_VESSEL:
                     seq_no = seq_no_prev
                 else:
                     if is_ok:
-                        self.__trgl_arr.append(self.TRGL(seq_no, (a_int, b_int, c_int)))
+                        self._trgl_arr.append(self.TRGL(seq_no, (a_int, b_int, c_int)))
 
             # Grab the segments
             elif splitstr_arr[0] == "SEG":
@@ -694,7 +639,7 @@ class GOCAD_VESSEL:
                     self.__handle_exc(exc)
                     seq_no = seq_no_prev
                 else:
-                    self.__seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
+                    self._seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
 
             # Extract binary file name
             elif splitstr_arr[0] == "PROP_FILE":
