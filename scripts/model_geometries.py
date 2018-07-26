@@ -1,5 +1,9 @@
+''' Class used to store abstract parts of a model
+    It should be independent as possible of any model's input format
+    All sequence numbers etc. start at 1
+'''
 
-
+import sys
 from collections import namedtuple
 
 class MODEL_GEOMETRIES:
@@ -45,6 +49,34 @@ class MODEL_GEOMETRIES:
         ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
+        self.max_X =  -sys.float_info.max
+        ''' Maximum X coordinate, used to calculate extent
+        '''
+
+        self.min_X =  sys.float_info.max
+        ''' Minimum X coordinate, used to calculate extent
+        '''
+
+        self.max_Y =  -sys.float_info.max
+        ''' Maximum Y coordinate, used to calculate extent
+        '''
+
+        self.min_Y =  sys.float_info.max
+        ''' Minimum Y coordinate, used to calculate extent
+        '''
+
+        self.max_Z =  -sys.float_info.max
+        ''' Maximum Z coordinate, used to calculate extent
+        '''
+
+        self.min_Z =  sys.float_info.max
+        ''' Minimum Z coordinate, used to calculate extent
+        '''
+
+        self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
+        ''' If one colour is specified then it is stored here
+        '''
+
     def get_vrtx_arr(self):
         ''' Returns array of VRTX objects
         '''
@@ -77,4 +109,28 @@ class MODEL_GEOMETRIES:
             if vrtx.n == num:
                 return True
         return False
+
+
+    def _calc_minmax(self, x, y, z):
+        ''' Calculate the max and min of all x,y,z coords
+        '''
+        if x > self.max_X:
+            self.max_X = x
+        if x < self.min_X:
+            self.min_X = x
+        if y > self.max_Y:
+            self.max_Y = y
+        if y < self.min_Y:
+            self.min_Y = y
+        if z > self.max_Z:
+            self.max_Z = z
+        if z < self.min_Z:
+            self.min_Z = z
+
+
+    def get_extent(self):
+        ''' Returns estimate of the geographic extent of the model, using max and min coordinate values
+            format is [min_x, max_x, min_y, max_y]
+        '''
+        return [self.min_X, self.max_X, self.min_Y, self.max_Y]
 

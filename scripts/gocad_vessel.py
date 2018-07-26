@@ -169,10 +169,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Set to true if z-axis inversion is turned on in this GOCAD file
         '''
 
-        self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
-        ''' If one colour is specified then it is stored here
-        '''
-
         self.local_props = OrderedDict()
         ''' OrderedDict of PROPS objects for attached PVRTX and PATOM properties
  
@@ -262,30 +258,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Filename of GOCAD file without path or extension
         '''
 
-        self.max_X =  -sys.float_info.max
-        ''' Maximum X coordinate, used to calculate extent
-        '''
-
-        self.min_X =  sys.float_info.max
-        ''' Minimum X coordinate, used to calculate extent
-        '''
-
-        self.max_Y =  -sys.float_info.max
-        ''' Maximum Y coordinate, used to calculate extent
-        '''
-
-        self.min_Y =  sys.float_info.max
-        ''' Minimum Y coordinate, used to calculate extent
-        '''
-
-        self.max_Z =  -sys.float_info.max
-        ''' Maximum Z coordinate, used to calculate extent
-        '''
-
-        self.min_Z =  sys.float_info.max
-        ''' Minimum Z coordinate, used to calculate extent
-        '''
-        
         self.coord_sys_name = "DEFAULT"
         ''' Name of the GOCAD coordinate system
         '''
@@ -317,19 +289,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self._vrtx_arr))
 
 
-
     def is_single_layer_vo(self):
         ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer and should be converted into a PNG
             instead of a GLTF
         '''
         return self.is_vo and self.vol_dims[2]==1
-
-
-    def get_extent(self):
-        ''' Returns estimate of the geographic extent of the model, using max and min coordinate values
-            format is [min_x, max_x, min_y, max_y]
-        '''
-        return [self.min_X, self.max_X, self.min_Y, self.max_Y]
 
 
     def make_vertex_dict(self):
@@ -889,7 +853,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                     prop_obj.data_stats['max'] = prop_obj.data[x][y][z]
                                 if (prop_obj.data[x][y][z] < prop_obj.data_stats['min']):
                                     prop_obj.data_stats['min'] = prop_obj.data[x][y][z]
-                                self.__calc_minmax( self.axis_origin[0]+float(x)/self.vol_dims[0]*self.axis_u[0],
+                                self._calc_minmax( self.axis_origin[0]+float(x)/self.vol_dims[0]*self.axis_u[0],
                                                     self.axis_origin[1]+float(y)/self.vol_dims[1]*self.axis_v[1],
                                                     self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
                                         
@@ -1076,25 +1040,9 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
         # Calculate minimum and maximum XYZ
         if do_minmax:
-            self.__calc_minmax(x,y,z)
+            self._calc_minmax(x,y,z)
 
         return True, x, y, z 
-
-    def __calc_minmax(self, x, y, z):
-        ''' Calculate the max and min of all x,y,z coords
-        '''
-        if x > self.max_X:
-            self.max_X = x
-        if x < self.min_X:
-            self.min_X = x
-        if y > self.max_Y:
-            self.max_Y = y
-        if y < self.min_Y:
-            self.min_Y = y
-        if z > self.max_Z:
-            self.max_Z = z
-        if z < self.min_Z:
-            self.min_Z = z
 
 
 
