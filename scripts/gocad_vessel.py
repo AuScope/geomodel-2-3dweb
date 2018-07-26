@@ -198,8 +198,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Used to convert to metres if the units are in kilometres
         '''
 
+        self.xyz_unit = [None, None, None]
+        ''' Units of XYZ axes
+        ''' 
+
         self.axis_origin = None
-        ''' Origin of XYZ axis
+        ''' Origin of XYZ axes
         '''
 
         self.axis_u = None
@@ -434,7 +438,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     # FIXME: I can't support non default coords yet - need to enter via command line?
                     # If does not support default coords then exit
                     if not self.nondefault_coords:
-                        print("SORRY - Does not support non-DEFAULT coordinates:", splitstr_arr[1])
+                        self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
                         self.logger.debug("process_gocad() return False")
                         return False 
                 
@@ -461,7 +465,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                         self.prop_dict[propClassIndex] = PROPS(splitstr_arr[2])
                     inPropClassHeader = True
                 else:
-                    print("ERROR - Cannot parse property header")
+                    self.logger.error("ERROR - Cannot parse property header")
                     sys.exit(1)
                 self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
 
@@ -498,6 +502,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 name_str, sep, value_str = line_str.partition(':')
                 name_str = name_str.strip()
                 value_str = value_str.strip()
+                self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
                 if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
                     # Colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
                     try:
@@ -519,7 +524,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
            
                 if name_str=='NAME':
                     self.header_name = value_str.replace('/','-')
-                    self.logger.debug("self.header_name = %s", repr(self.header_name))
+                    self.logger.debug("self.header_name = %s", self.header_name)
 
             # Axis units - check if units are kilometres, and update coordinate multiplier
             elif splitstr_arr[0] == "AXIS_UNIT":
@@ -529,7 +534,9 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                         self.xyz_mult[idx] =  1000.0
                     # Warn if not metres or kilometres or unitless etc.
                     elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
-                        print("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+                        self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+                    else:
+                        self.xyz_unit[idx] = unit_str
 
             # Property names, this is not the class names
             elif splitstr_arr[0] == "PROPERTIES":
@@ -659,7 +666,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 elif splitstr_arr[2] == "SHORT":
                     self.prop_dict[splitstr_arr[1]].data_type = "h"
                 else:
-                    print("ERROR - unknown storage type")
+                    self.logger.error("ERROR - unknown storage type")
+                    sys.exit(1)
 
             # Is property a signed integer ?
             elif splitstr_arr[0] == "PROP_SIGNED":
@@ -668,19 +676,19 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             # Cannot process IBM-style floats
             elif splitstr_arr[0] == "PROP_ETYPE":
                 if splitstr_arr[2] != "IEEE":
-                    print("ERROR - Cannot process ", splitstr_arr[1], " type floating points")
+                    self.logger.error("ERROR - Cannot process %s type floating points", splitstr_arr[1])
                     sys.exit(1)
 
             # Cannot process SEGY formats 
             elif splitstr_arr[0] == "PROP_EFORMAT":
                 if splitstr_arr[2] != "RAW":
-                    print("ERROR - Cannot process ", splitstr_arr[1], " format floating points")
+                    self.logger.error("ERROR - Cannot process %s format floating points", splitstr_arr[1])
                     sys.exit(1)
 
             # FIXME: Cannot do offsets within binary file
             elif splitstr_arr[0] == "PROP_OFFSET":
                 if int(splitstr_arr[2]) != 0:
-                    print("ERROR - Cannot process offsets of more than 0")
+                    self.logger.error("ERROR - Cannot process offsets of more than 0")
                     sys.exit(1)
 
             # The number that is used to represent 'no data'
@@ -855,7 +863,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     file_sz = os.path.getsize(prop_obj.file_name)
                     num_voxels = prop_obj.data_sz*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
                     if file_sz != num_voxels:
-                        print("SORRY - Cannot process voxel file - length (", repr(num_voxels), ") is not correct", prop_obj.file_name)
+                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is not correct %s", num_voxels, prop_obj.file_name)
                         sys.exit(1)
 
                     # Initialise data array to zeros
@@ -865,7 +873,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     dt = prop_obj.make_numpy_dtype()
 
                     # Read entire file, assumes file small enough to store in memory
-                    print("Reading binary file: ", prop_obj.file_name)
+                    self.logger.info("Reading binary file: %s", prop_obj.file_name)
                     f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt)
                     fl_idx = 0
                     prop_obj.data_stats = { 'max': -sys.float_info.max, 'min': sys.float_info.max }
@@ -886,14 +894,14 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                                     self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
                                         
                 except IOError as e:
-                    print("SORRY - Cannot process voxel file IOError", prop_obj.file_name, str(e), e.args)
+                    self.logger.warning("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
                     self.logger.debug("process_gocad() return False")
                     return False
 
             # Open up flags file and look for regions
             if self.flags_file!='':
                 if self.flags_array_length != self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]:
-                    print("SORRY - Cannot process voxel file, inconsistent size between data file and flag file")
+                    self.logger.warning("SORRY - Cannot process voxel file, inconsistent size between data file and flag file")
                     self.logger.debug("process_gocad() return False")
                     return False
                 # Check file does not exist, sometimes needs a '.vo' on the end
@@ -906,7 +914,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     file_sz = os.path.getsize(self.flags_file)
                     num_voxels = self.flags_bit_size*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
                     if file_sz != num_voxels:
-                        print("SORRY - Cannot process voxel file - length (", repr(num_voxels), ") is not correct", self.flags_file)
+                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is not correct %s", num_voxels, self.flags_file)
                         sys.exit(1)
 
                     # Initialise data array to zeros
@@ -916,14 +924,14 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     dt =  numpy.dtype(('B',(self.flags_bit_size)))
 
                     # Read entire file, assumes file small enough to store in memory
-                    print("Reading binary flags file: ", self.flags_file)
+                    self.logger.info("Reading binary flags file: %s", self.flags_file)
                     f_arr = numpy.fromfile(self.flags_file, dtype=dt)
                     f_idx = self.flags_offset
-                    # print('self.region_dict.keys() = ', self.region_dict.keys())
+                    # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())
                     for z in range(0,self.vol_dims[2]):
                         for y in range(0, self.vol_dims[1]):
                             for x in range(0, self.vol_dims[0]):
-                                # print(x, y, z, f_idx, ' => ', f_arr[f_idx])
+                                # self.logger.debug("%d %d %d %d => %s", x, y, z, f_idx, repr(f_arr[f_idx]))
                                 bit_mask = ''
                                 # Single bytes are not returned as arrays
                                 if self.flags_bit_size==1:
@@ -931,23 +939,23 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                 else:
                                     for b in range(self.flags_bit_size-1, -1, -1):
                                         bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
-                                # print('bit_mask=', bit_mask)
+                                # self.logger.debug('bit_mask= %s', bit_mask)
                                 cnt = self.flags_bit_size*8-1
                                 for bit in bit_mask:
                                     if str(cnt) in self.region_dict and bit=='1':
                                         key = self.region_dict[str(cnt)]
-                                        # print('cnt =', cnt, ' bit = ', bit)
-                                        # print('key = ', key)
+                                        # self.logger.debug('cnt = %d bit = %d', cnt, bit)
+                                        # self.logger.debug('key = %s', key)
                                         self.flags_dict[(x,y,z)] = key
                                     cnt -= 1
         
                                 f_idx += 1
                     
                 except IOError as e:
-                    print("SORRY - Cannot process voxel flag file, IOError", self.flags_file, str(e), e.args)
+                    self.logger.error("SORRY - Cannot process voxel flag file, IOError %s %s %s", self.flags_file, str(e), e.args)
                     self.logger.debug("process_gocad() return False")
                     return False
-        #print('self.flags_dict=', self.flags_dict)
+        self.logger.debug('self.flags_dict= %s', repr(self.flags_dict))
         return True
 
 
@@ -994,7 +1002,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     prop_obj.data[coord_tup] = (fpX, fpY, fpZ)
                 col_idx += 3
             else:
-                print("ERROR - Cannot process property size of != 3 and !=1: ", prop_obj.data_sz, prop_obj)
+                self.logger.error("ERROR - Cannot process property size of != 3 and !=1: %d %s", prop_obj.data_sz, repr(prop_obj))
                 sys.exit(1)
 
 

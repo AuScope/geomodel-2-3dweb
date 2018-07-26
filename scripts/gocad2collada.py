@@ -21,8 +21,8 @@ from gocad_vessel import GOCAD_VESSEL
 from makeDaeBoreholes import get_boreholes
 import collada2gltf
 
-DEBUG_LVL = logging.NOTSET
-''' Initialise debug level to no debugging
+DEBUG_LVL = logging.CRITICAL
+''' Initialise debug level to minimal debugging
 '''
 
 CONVERT_COLLADA = True
@@ -484,7 +484,7 @@ if __name__ == "__main__":
     if args.debug:
         DEBUG_LVL = logging.DEBUG
     else:
-        DEBUG_LVL = logging.NOTSET
+        DEBUG_LVL = logging.INFO
 
     if args.nondefault_coord:
         NONDEF_COORDS = True
