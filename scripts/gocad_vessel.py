@@ -88,7 +88,7 @@ class PROPS:
 
 
 class GOCAD_VESSEL(MODEL_GEOMETRIES):
-    ''' Class used to read gocad files and store their details
+    ''' Class used to read GOCAD files and store their details
     '''
 
     GOCAD_HEADERS = {
@@ -118,12 +118,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
     '''
 
 
-    STOP_ON_EXC = True
+    STOP_ON_EXC = True 
     ''' Stop upon exception, regardless of debug level
     '''
 
 
-    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False):
+    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False, stop_on_exc=True):
         ''' Initialise class
             debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
@@ -147,9 +147,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
             # Add handler to logger and set level
             GOCAD_VESSEL.logger.addHandler(handler)
-            GOCAD_VESSEL.logger.setLevel(debug_level)
+
+        GOCAD_VESSEL.logger.setLevel(debug_level)
 
         self.logger = GOCAD_VESSEL.logger 
+
+        self.STOP_ON_EXC = stop_on_exc
 
         # Initialise input vars
         self.base_xyz = base_xyz
@@ -382,6 +385,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 self.logger.debug("Skip subset keywords")
                 continue
 
+            # Skip control nodes (used to denote fixed points in GOCAD)
+            if splitstr_arr[0] == "CNP":
+                self.logger.debug("Skip control nodes")
+                continue
+
             # Are we within coordinate system header?
             elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
                 inCoord = True
@@ -536,6 +544,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                         converted, fp  = self.__parse_float(splitstr_arr[idx])
                         if converted:
                             prop_obj.no_data_marker = fp
+                            self.logger.debug("prop_obj.no_data_marker = %f", prop_obj.no_data_marker)
                     except IndexError as exc:
                         self.__handle_exc(exc)
                     idx += 1
@@ -554,10 +563,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     if self._check_vertex(v_num):
                         self._atom_arr.append(self.ATOM(seq_no, v_num))
                     else:
-                        self.logger.debug("ERROR - ATOM refers to VERTEX that has not been defined yet")
-                        self.logger.debug("    seq_no = %d", seq_no)
-                        self.logger.debug("    v_num = %d", v_num)
-                        self.logger.debug("    line = %s", line_str)
+                        self.logger.error("ERROR - ATOM refers to VERTEX that has not been defined yet")
+                        self.logger.error("    seq_no = %d", seq_no)
+                        self.logger.error("    v_num = %d", v_num)
+                        self.logger.error("    line = %s", line_str)
                         sys.exit(1)
 
                     # Atoms with attached properties
@@ -574,6 +583,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 try:
                     seq_no = int(splitstr_arr[1])
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
+                    self.logger.debug("ParseXYZ %s %f %f %f from %s %s %s", repr(is_ok), x_flt, y_flt, z_flt,  splitstr_arr[2], splitstr_arr[3], splitstr_arr[4])
                 except (IndexError, ValueError, OverflowError) as exc:
                     self.__handle_exc(exc)
                     seq_no = seq_no_prev
@@ -615,11 +625,13 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             # Extract binary file name
             elif splitstr_arr[0] == "PROP_FILE":
                 self.prop_dict[splitstr_arr[1]].file_name = os.path.join(src_dir, splitstr_arr_raw[2])
+                self.logger.debug("self.prop_dict[%s].file_name = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].file_name)
 
             # Size of each float in binary file (measured in bytes)
             elif splitstr_arr[0] == "PROP_ESIZE":
                 try:
                     self.prop_dict[splitstr_arr[1]].data_sz = int(splitstr_arr[2])
+                    self.logger.debug("self.prop_dict[%s].data_sz = %d", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_sz)
                 except (IndexError, ValueError) as exc:
                     self.__handle_exc(exc)
 
@@ -632,10 +644,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 else:
                     self.logger.error("ERROR - unknown storage type")
                     sys.exit(1)
+                self.logger.debug("self.prop_dict[%s].data_type = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_type)
 
             # Is property a signed integer ?
             elif splitstr_arr[0] == "PROP_SIGNED":
                 self.prop_dict[splitstr_arr[1]].signed_int = (splitstr_arr[2] == "1")
+                self.logger.debug("self.prop_dict[%s].signed_int = %s", splitstr_arr[1], repr(self.prop_dict[splitstr_arr[1]].signed_int))
 
             # Cannot process IBM-style floats
             elif splitstr_arr[0] == "PROP_ETYPE":
@@ -660,68 +674,82 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 converted, fp = self.__parse_float(splitstr_arr[2])
                 if converted:
                     self.prop_dict[splitstr_arr[1]].no_data_marker = fp
+                    self.logger.debug("self.prop_dict[%s].no_data_marker = %f", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].no_data_marker)
 
             # Layout of VOXET data
             elif splitstr_arr[0] == "AXIS_O":
                 is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
                 if is_ok:
                     self.axis_origin = (x_flt, y_flt, z_flt)
+                    self.logger.debug("self.axis_origin = %s", repr(self.axis_origin))
 
             elif splitstr_arr[0] == "AXIS_U":
                 is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_u = (x_flt, y_flt, z_flt)
+                    self.logger.debug("self.axis_u = %s", repr(self.axis_u))
 
             elif splitstr_arr[0] == "AXIS_V":
                 is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_v = (x_flt, y_flt, z_flt)
+                    self.logger.debug("self.axis_v = %s", repr(self.axis_v))
 
             elif splitstr_arr[0] == "AXIS_W":
                 is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_w = (x_flt, y_flt, z_flt)
+                    self.logger.debug("self.axis_w= %s", repr(self.axis_w))
 
             elif splitstr_arr[0] == "AXIS_N":
                 is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.vol_dims = (x_int, y_int, z_int)
+                    self.logger.debug("self.vol_dims= %s", repr(self.vol_dims))
 
             elif splitstr_arr[0] == "AXIS_MIN":
                 is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_min = (x_int, y_int, z_int)
+                    self.logger.debug("self.axis_min= %s", repr(self.axis_min))
 
             elif splitstr_arr[0] == "AXIS_MAX":
                 is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
                     self.axis_max = (x_int, y_int, z_int)
+                    self.logger.debug("self.axis_max= %s", repr(self.axis_max))
 
             elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
                 is_ok, l = self.__parse_int(splitstr_arr[1])
                 if is_ok:
                     self.flags_array_length = l
+                    self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
 
             elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
                 is_ok, l = self.__parse_int(splitstr_arr[1])
                 if is_ok:
                     self.flags_bit_length = l
+                    self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
 
             elif splitstr_arr[0] == "FLAGS_ESIZE":
                 is_ok, l = self.__parse_int(splitstr_arr[1])
                 if is_ok:
                     self.flags_bit_size = l
+                    self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
 
             elif splitstr_arr[0] == "FLAGS_OFFSET":
                 is_ok, l = self.__parse_int(splitstr_arr[1])
                 if is_ok:
                     self.flags_offset = l
+                    self.logger.debug("self.flags_offset= %d", self.flags_offset)
 
             elif splitstr_arr[0] == "FLAGS_FILE":
                 self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
+                self.logger.debug("self.flags_file= %s", self.flags_file)
 
             elif splitstr_arr[0] == "REGION":
                 self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
+                self.logger.debug("self.region_dict[%s] = %s", splitstr_arr[2], splitstr_arr[1])
                 
             # END OF TEXT PROCESSING LOOP
 
@@ -854,13 +882,13 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                 if (prop_obj.data[x][y][z] < prop_obj.data_stats['min']):
                                     prop_obj.data_stats['min'] = prop_obj.data[x][y][z]
                                 self._calc_minmax( self.axis_origin[0]+float(x)/self.vol_dims[0]*self.axis_u[0],
-                                                    self.axis_origin[1]+float(y)/self.vol_dims[1]*self.axis_v[1],
-                                                    self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
+                                                   self.axis_origin[1]+float(y)/self.vol_dims[1]*self.axis_v[1],
+                                                   self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
                                         
                 except IOError as e:
-                    self.logger.warning("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
-                    self.logger.debug("process_gocad() return False")
-                    return False
+                    self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
+                    sys.exit(1)
+                    
 
             # Open up flags file and look for regions
             if self.flags_file!='':
@@ -878,7 +906,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     file_sz = os.path.getsize(self.flags_file)
                     num_voxels = self.flags_bit_size*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
                     if file_sz != num_voxels:
-                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is not correct %s", num_voxels, self.flags_file)
+                        self.logger.error("SORRY - Cannot process voxel flags file - length (%d) is not correct %s", num_voxels, self.flags_file)
                         sys.exit(1)
 
                     # Initialise data array to zeros
@@ -916,7 +944,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                 f_idx += 1
                     
                 except IOError as e:
-                    self.logger.error("SORRY - Cannot process voxel flag file, IOError %s %s %s", self.flags_file, str(e), e.args)
+                    self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s", self.flags_file, str(e), e.args)
                     self.logger.debug("process_gocad() return False")
                     return False
         self.logger.debug('self.flags_dict= %s', repr(self.flags_dict))
@@ -949,6 +977,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 converted, fp = self.__parse_float(fp_str, prop_obj.no_data_marker)
                 if converted:
                     prop_obj.data[coord_tup] = fp
+                    self.logger.debug("prop_obj.data[%s] = %f", repr(coord_tup), fp)
                 col_idx += 1
             # Property has 3 floats i.e. XYZ
             elif prop_obj.data_sz == 3:
@@ -964,6 +993,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 convertedZ, fpZ = self.__parse_float(fp_strZ, prop_obj.no_data_marker)
                 if convertedZ and convertedY and convertedX:
                     prop_obj.data[coord_tup] = (fpX, fpY, fpZ)
+                    self.logger.debug("prop_obj.data[%s] = (%f,%f,%f)", repr(coord_tup), fpX, fpY, fpZ)
                 col_idx += 3
             else:
                 self.logger.error("ERROR - Cannot process property size of != 3 and !=1: %d %s", prop_obj.data_sz, repr(prop_obj))
@@ -978,9 +1008,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
         '''
         # Handle GOCAD's C++ floating point infinity for Windows and Linux
-        if fp_str in ["1.#INF","inf"]:
+        self.logger.debug("fp_str = %s", fp_str)
+        if fp_str in ["1.#INF","INF"]:
             fp = sys.float_info.max
-        elif fp_str in ["-1.#INF","-inf"]:
+        elif fp_str in ["-1.#INF","-INF"]:
             fp = -sys.float_info.max
         else:
             try:
@@ -991,6 +1022,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 self.__handle_exc(exc)
                 return False, 0.0
         return True, fp
+
            
     def __parse_int(self, int_str, null_val=None):
         ''' Converts a string to an int
@@ -1013,15 +1045,15 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             x_str, y_str, z_str - X,Y,Z coordinates in string form
             do_minmax - record the X,Y,Z coords for calculating extent
             convert - convert from kms to metres if necessary
-            Returns four parameters: success  - true if could convert the strings to floats
-                                   x,y,z - floating point values, converted to metres if units are kms
+            Returns four parameters: success - true if could convert the strings to floats
+                                     x,y,z - floating point values, converted to metres if units are kms
         '''
         x = y = z = None
         if is_float:
-            converted, x = self.__parse_float(x_str)
-            converted, y = self.__parse_float(y_str)
-            converted, z = self.__parse_float(z_str)
-            if not converted:
+            converted1, x = self.__parse_float(x_str)
+            converted2, y = self.__parse_float(y_str)
+            converted3, z = self.__parse_float(z_str)
+            if not converted1 or not converted2 or not converted3:
                 return False, None, None, None
         else:
             try:
