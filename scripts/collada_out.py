@@ -41,9 +41,9 @@ class COLLADA_OUT():
             file_cnt - file counter
             point_cnt - cube counter within this file
         '''
-        u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
-        v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
-        w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_dims[2]*v_obj.axis_w[2]
+        u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_sz[0]*v_obj.axis_u[0]
+        v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_sz[1]*v_obj.axis_v[1]
+        w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_sz[2]*v_obj.axis_w[2]
         v = (u_offset+v_obj.base_xyz[0], v_offset+v_obj.base_xyz[1], w_offset+v_obj.base_xyz[2])
             
         node_list = []

@@ -51,5 +51,11 @@
             "filename": "Zeehan.vs",
             "offset": [0.0, 0.0, -2000.0]
         }
+    ],
+    "VoxetColourTables": [
+        {
+            "filename": "Rosebery_Lyell_geophysics_lithologies@@",
+            "colour_table": "RL_Reclassification.csv"
+        }
     ]
 }

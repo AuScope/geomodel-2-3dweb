@@ -74,7 +74,6 @@ class GOCAD_KIT:
         popup_list = []
         self.logger.debug("write_voxel_png(%s,%s)", src_dir, fileName)
         if len(v_obj.prop_dict) > 0:
-            print(v_obj.prop_dict)
             for map_idx in sorted(v_obj.prop_dict):
                 popup_list.append(self.write_single_voxel_png(v_obj, src_dir, fileName, map_idx))
         return popup_list 
@@ -88,15 +87,15 @@ class GOCAD_KIT:
         '''
         self.logger.debug("write_single_voxel_png(%s, %s, %s)", src_dir, fileName, idx)
         colour_arr = array.array("B")
-        z = v_obj.vol_dims[2]-1
+        z = v_obj.vol_sz[2]-1
         pixel_cnt = 0
         prop_obj = v_obj.prop_dict[idx]
         # If colour table is provided within source file, use it
         if len(prop_obj.colour_map) > 0:
-            for x in range(0, v_obj.vol_dims[0]):
-                for y in range(0, v_obj.vol_dims[1]):
+            for x in range(0, v_obj.vol_sz[0]):
+                for y in range(0, v_obj.vol_sz[1]):
                     try:
-                        (r,g,b) = prop_obj.colour_map[int(prop_obj.data[x][y][z])]
+                        (r,g,b) = prop_obj.colour_map[int(prop_obj.data_3d[x][y][z])]
                     except ValueError:
                         (r,g,b) = (0.0, 0.0, 0.0)
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
@@ -104,18 +103,18 @@ class GOCAD_KIT:
                     pixel_cnt += 1
         # Else use a false colour map
         else:
-            for x in range(0, v_obj.vol_dims[0]):
-                for y in range(0, v_obj.vol_dims[1]):
+            for x in range(0, v_obj.vol_sz[0]):
+                for y in range(0, v_obj.vol_sz[1]):
                     try:
-                        (r,g,b,a) = self.make_colour_map(prop_obj.data[x][y][z], prop_obj.data_stats['min'], prop_obj.data_stats['max'])      
+                        (r,g,b,a) = self.make_colour_map(prop_obj.data_3d[x][y][z], prop_obj.data_stats['min'], prop_obj.data_stats['max'])      
                     except ValueError:
                         (r,g,b,a) = (0.0, 0.0, 0.0, 0.0) 
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
                     colour_arr.fromlist(pixel_colour)
                     pixel_cnt += 1
                     
-        img = PIL.Image.frombytes('RGB', (v_obj.vol_dims[1], v_obj.vol_dims[0]), colour_arr.tobytes())
-        print("Writing PNG file: ",fileName+"_"+idx+".PNG")
+        img = PIL.Image.frombytes('RGB', (v_obj.vol_sz[1], v_obj.vol_sz[0]), colour_arr.tobytes())
+        self.logger.info("Writing PNG file: %s", fileName+"_"+idx+".PNG")
         img.save(os.path.join(src_dir, fileName+"_"+idx+".PNG"))
         if len(prop_obj.class_name) >0:
             label_str = prop_obj.class_name
@@ -145,7 +144,7 @@ class GOCAD_KIT:
 
         # Cannot do vertices *.VS or volumes *.VO
         if v_obj.is_vs or v_obj.is_vo:
-            print("ERROR - cannot process VS or VO file in a GP file?")
+            self.logger.error("ERROR - cannot process VS or VO file in a GP file?")
             sys.exit(1)
 
         group_name = ""
@@ -241,7 +240,7 @@ class GOCAD_KIT:
         myscene = Collada.scene.Scene("myscene", [node])
         self.mesh_obj.scenes.append(myscene)
         self.mesh_obj.scene = myscene
-        print("2 Writing COLLADA file: ", fileName+'.dae')
+        self.logger.info("end_collada() Writing COLLADA file: %s", fileName+'.dae')
         self.mesh_obj.write(fileName+'.dae')
 
 
@@ -258,7 +257,7 @@ class GOCAD_KIT:
         if v_obj.is_vs:
             p_dict = self.write_vs_collada(v_obj, fileName)
         elif v_obj.is_vo:
-            print("ERROR - Cannot use write_collada for VO?")
+            self.logger.error("ERROR - Cannot use write_collada for VO?")
             sys.exit(1)
         else:
             self.start_collada()
@@ -276,7 +275,7 @@ class GOCAD_KIT:
         self.logger.debug("write_vs_collada() v_obj=%s", repr(v_obj))
         
         if not v_obj.is_vs:
-            print("ERROR - Cannot use write_single_collada for PL, TS, VO?")
+            self.logger.error("ERROR - Cannot use write_single_collada for PL, TS, VO?")
             sys.exit(1)
 
         mesh = Collada.Collada()
@@ -362,10 +361,9 @@ class GOCAD_KIT:
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
-        print("3 Writing COLLADA file: ", fileName+'.dae')
+        self.logger.info("write_vs_collada() Writing COLLADA file: %s", fileName+'.dae')
         mesh.write(fileName+'.dae')
 
-        # print('returning ', popup_dict)
         return popup_dict
 
 
@@ -378,12 +376,12 @@ class GOCAD_KIT:
         self.logger.debug("write_vo_collada() v_obj=%s", repr(v_obj))
         
         if not v_obj.is_vo:
-            print("ERROR - Cannot use write_collada_voxel for PL, TS, VO, VS?")
+            self.logger.error("ERROR - Cannot use write_collada_voxel for PL, TS, VO, VS?")
             sys.exit(1)
 
         # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
         if v_obj.axis_min != (0.0,0.0,0.0) and v_obj.axis_max != (1.0,1.0,1.0):
-            print("ERROR - Cannot process volumes where axis_min != 0.0 and axis_max != 1.0")
+            self.logger.error("ERROR - Cannot process volumes where axis_min != 0.0 and axis_max != 1.0")
             sys.exit(1)
 
         group_name = ""
@@ -401,27 +399,24 @@ class GOCAD_KIT:
         file_cnt = 1
         # Increase sample size so we don't create too much data, to be improved later on
         step = 1
-        n_elems3 = v_obj.vol_dims[0] * v_obj.vol_dims[1] * v_obj.vol_dims[2]
+        n_elems3 = v_obj.vol_sz[0] * v_obj.vol_sz[1] * v_obj.vol_sz[2]
         # TODO: Make this bigger later??
         while n_elems3/(step*step*step) > 10000: 
           step += 1
-        print("step =", step)
-        pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_dims[0]*2), 
-                   (v_obj.axis_v[1]*step)/(v_obj.vol_dims[1]*2),
-                   (v_obj.axis_w[2]*step)/(v_obj.vol_dims[2]*2)]
-        print('pt_size = ' , pt_size)
+        pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_sz[0]*2), 
+                   (v_obj.axis_v[1]*step)/(v_obj.vol_sz[1]*2),
+                   (v_obj.axis_w[2]*step)/(v_obj.vol_sz[2]*2)]
 
-        # print(v_obj.prop_dict)
         for prop_idx in v_obj.prop_dict:
             prop_obj = v_obj.prop_dict[prop_idx]
             self.logger.info("Writing files for voxel property %s", prop_idx)
 
             # Take the property data found in the voxel file and group it together       
             bucket = {}
-            for z in range(0, v_obj.vol_dims[2], step):
-                for y in range(0, v_obj.vol_dims[1], step):
-                    for x in range(0, v_obj.vol_dims[0], step):
-                        key = int(prop_obj.data[x][y][z])
+            for z in range(0, v_obj.vol_sz[2], step):
+                for y in range(0, v_obj.vol_sz[1], step):
+                    for x in range(0, v_obj.vol_sz[0], step):
+                        key = int(prop_obj.data_3d[x][y][z])
                         bucket.setdefault(key, []) 
                         bucket[key].append((x,y,z))
 
@@ -433,9 +428,9 @@ class GOCAD_KIT:
                 node_list = []
                 point_cnt = 0
                 for x,y,z in coord_list:
-                    self.logger.debug("%d %d %d data_val = %s", x,y,z, repr(data_val))
-                    if prop_obj.data[x][y][z] != prop_obj.no_data_marker:
-                        colour_num = self.calculate_colour_num(prop_obj.data[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
+                    #self.logger.debug("%d %d %d data_val = %s", x,y,z, repr(data_val))
+                    if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
+                        colour_num = self.calculate_colour_num(prop_obj.data_3d[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
                         cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
                         popup_dict.update(cube_popup_dict)
                         node_list += cube_node_list
@@ -448,16 +443,13 @@ class GOCAD_KIT:
                 mesh.scene = myscene
 
             out_filename = fileName+'_'+str(file_cnt)
-            self.logger.info("1 Writing COLLADA file: %s.dae", out_filename)
+            self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
             mesh.write(out_filename+'.dae')
             popup_list.append((popup_dict, out_filename))
             popup_dict = {}
 
             file_cnt += 1
-
-
  
-        # print('returning ', popup_list)
         return popup_list
 
 

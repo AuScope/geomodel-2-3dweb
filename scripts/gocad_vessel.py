@@ -6,86 +6,10 @@ from collections import namedtuple
 from collections import OrderedDict
 import logging
 import traceback
+import csv
 
 from model_geometries import MODEL_GEOMETRIES
-
-class PROPS:
-    ''' This class holds GOCAD properties
-        e.g. information about binary files (PROP_FILE)
-             information attached to XYZ points (PATOM, PVRTX)
-    '''
-
-    def __init__(self, class_name):
-
-        self.file_name = ""
-        ''' Name of binary file associated with GOCAD file
-        '''
-       
-        self.data_sz = 0 
-        ''' Number of bytes in floating point number in binary file
-        '''
-
-        self.data_type = "f"
-        ''' Type of data in binary file e.g. 'h' - short int, 'f' = float
-        '''
-
-        self.signed_int = False
-        ''' Is True iff binary data is a signed integer else False
-        '''
-
-        self.data = {}
-        ''' Property data collected from binary file, stored as a 3d numpy array.
-            or property data attached to XYZ points (index is XYZ coordinate)
-        '''
-
-        self.data_stats = {}
-        ''' Property data statistics: min & max
-        '''
-
-        self.colour_map = {}
-        ''' If colour map was specified, then it is stored here
-        '''
-
-        self.colourmap_name = ""
-        ''' Name of colour map
-        '''
-
-        self.class_name = class_name
-        ''' Property class names
-        '''
-
-        self.no_data_marker = None
-        ''' Value representing 'no data' values
-        '''
-
-    
-    def __repr__(self):
-        ''' A print friendly representation
-        '''
-        return "self = {:}\n".format(hex(id(self))) + \
-               "file_name = {:}\n".format(repr(self.file_name)) + \
-               "data_sz = {:d}\n".format(self.data_sz) + \
-               "data_type = {:}\n".format(repr(self.data_type)) + \
-               "signed_int = {:}\n".format(self.signed_int) + \
-               "data = {:}\n".format(repr(self.data)) + \
-               "data_stats = {:}\n".format(repr(self.data_stats)) + \
-               "colour_map = {:}\n".format(repr(self.colour_map)) + \
-               "colourmap_name = {:}\n".format(repr(self.colourmap_name)) + \
-               "class_name = {:}\n".format(repr(self.class_name)) + \
-               "no_data_marker = {:}\n".format(repr(self.no_data_marker))
-
-    def make_numpy_dtype(self):
-        ''' Returns a string that can be passed to 'numpy' to read a binary file
-        '''
-        # Prepare 'numpy' binary float integer signed/unsigned data types, always big-endian
-        if self.data_type == 'h' or self.data_type == 'b':
-            if not self.signed_int:
-                return numpy.dtype('>'+self.data_type.upper())
-            else:
-                return numpy.dtype('>'+self.data_type)
-        return numpy.dtype('>'+self.data_type+str(self.data_sz))
-
-
+from props import PROPS
 
 class GOCAD_VESSEL(MODEL_GEOMETRIES):
     ''' Class used to read GOCAD files and store their details
@@ -123,7 +47,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
     '''
 
 
-    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False, stop_on_exc=True):
+    def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False, stop_on_exc=True, ct_file_dict={}):
         ''' Initialise class
             debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
             base_xyz - optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
@@ -152,6 +76,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
         self.logger = GOCAD_VESSEL.logger 
 
+        # A dictionary of files which contain colour tables
+        # key is GOCAD filename, val is CSV file
+        self.ct_file_dict = ct_file_dict
+        self.logger.debug("self.ct_file_dict = %s", self.ct_file_dict)
+
         self.STOP_ON_EXC = stop_on_exc
 
         # Initialise input vars
@@ -167,6 +96,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Dictionary of PROPS objects, stores GOCAD "PROPERTY" objects
             Dictionary index is the PROPERTY number e.g. '1', '2', '3' ...
         '''
+        
+        self.flags_prop = None
+        ''' PROPS object used for the voxet flags file which has region data in it
+        '''
 
         self.invert_zaxis = False
         ''' Set to true if z-axis inversion is turned on in this GOCAD file
@@ -174,7 +107,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
         self.local_props = OrderedDict()
         ''' OrderedDict of PROPS objects for attached PVRTX and PATOM properties
- 
         '''
 
         self.is_ts = False
@@ -217,7 +149,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Length of w-axis
         '''
 
-        self.vol_dims = None
+        self.vol_sz = None
         ''' 3 dimensional size of voxel volume
         '''
 
@@ -253,8 +185,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Labels and bit numbers for each region in a flags file, key is number (as string)
         '''
 
+        self.region_colour_dict = {}
+        ''' Region colour dict, key is region name, value is RGB (float, float, float)
+        '''
+
         self.flags_dict = {}
-        '''  val is region name, key is (x,y,z) tuple
+        '''  val is a list of region names, key is (x,y,z) tuple
         '''
 
         self.np_filename = ""
@@ -267,6 +203,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
         self.usesDefaultCoords = True
         ''' Uses default coordinates
+        '''
+
+        self.rock_label_idx = {}
+        ''' Some voxet files have floats that are indexes to rock types
         '''
 
 
@@ -296,7 +236,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer and should be converted into a PNG
             instead of a GLTF
         '''
-        return self.is_vo and self.vol_dims[2]==1
+        return self.is_vo and self.vol_sz[2]==1
 
 
     def make_vertex_dict(self):
@@ -476,23 +416,13 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 value_str = value_str.strip()
                 self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
                 if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
-                    # Colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
-                    try:
-                        if value_str[0]!='#':
-                            rgbsplit_arr = value_str.split(' ')
-                            if len(rgbsplit_arr)==3:
-                                self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), 1.0)
-                            elif len(rgbsplit_arr)==4:
-                                self.rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
-                            else:
-                                self.logger.debug("Could not parse colour %s", repr(value_str))
-                        else:
-                            self.rgba_tup = (float(int(value_str[1:3],16))/255.0, float(int(value_str[3:5],16))/255.0, float(int(value_str[5:7],16))/255.0, 1.0) 
-                    except (ValueError, OverflowError, IndexError) as exc:
-                        self.__handle_exc(exc)
-                        self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
+                    self.rgba_tup = self.__parse_colour(value_str)
 
                     self.logger.debug("self.rgba_tup = %s", repr(self.rgba_tup))
+                elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
+                    region_name = name_str.split('*')[2] 
+                    self.region_colour_dict[region_name] = self.__parse_colour(value_str)
+                    self.logger.debug("region_colour_dict[%s] = %s", region_name, repr(self.region_colour_dict[region_name]))
            
                 if name_str=='NAME':
                     self.header_name = value_str.replace('/','-')
@@ -622,6 +552,22 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 else:
                     self._seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
 
+            # What kind of property is this? Is it a measurement, or a reference to a rock colour table?
+            elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
+                if len(splitstr_arr) > 2 and splitstr_arr[2] == "ROCK": 
+                    prop_idx = splitstr_arr[1]
+                    self.prop_dict[prop_idx].is_colour_table = True
+                    self.logger.debug("self.prop_dict[%s].is_colour_table = True", prop_idx) 
+                    # Sometimes there is an array of indexes and labels
+                    self.logger.debug(" len(splitstr_arr) = %d",  len(splitstr_arr))
+                    if len(splitstr_arr) > 4:
+                        for idx in range(4, len(splitstr_arr), 2):
+                            rock_label = splitstr_arr[idx] 
+                            rock_index = int(splitstr_arr[1+idx])
+                            self.rock_label_idx.setdefault(prop_idx, {})
+                            self.rock_label_idx[prop_idx][rock_index] = rock_label
+                        self.logger.debug("self.rock_label_idx[%s] = %s", prop_idx, repr(self.rock_label_idx[prop_idx]))
+                    
             # Extract binary file name
             elif splitstr_arr[0] == "PROP_FILE":
                 self.prop_dict[splitstr_arr[1]].file_name = os.path.join(src_dir, splitstr_arr_raw[2])
@@ -704,19 +650,19 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             elif splitstr_arr[0] == "AXIS_N":
                 is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
-                    self.vol_dims = (x_int, y_int, z_int)
-                    self.logger.debug("self.vol_dims= %s", repr(self.vol_dims))
+                    self.vol_sz = (x_int, y_int, z_int)
+                    self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
 
             elif splitstr_arr[0] == "AXIS_MIN":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
-                    self.axis_min = (x_int, y_int, z_int)
+                    self.axis_min = (x_flt, y_flt, z_flt)
                     self.logger.debug("self.axis_min= %s", repr(self.axis_min))
 
             elif splitstr_arr[0] == "AXIS_MAX":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                 if is_ok:
-                    self.axis_max = (x_int, y_int, z_int)
+                    self.axis_max = (x_flt, y_flt, z_flt)
                     self.logger.debug("self.axis_max= %s", repr(self.axis_max))
 
             elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
@@ -759,14 +705,15 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         for prop_obj in self.local_props.values():
             prop_obj.data_stats = { 'min': sys.float_info.max, 'max': -sys.float_info.max }
             # Some properties are XYZ, so only take X for calculating max and min
-            if len(prop_obj.data.values()) > 0:
-                first_val_list = list(map(lambda x: x if type(x) is float else x[0], prop_obj.data.values()))
+            if len(prop_obj.data_xyz.values()) > 0:
+                first_val_list = list(map(lambda x: x if type(x) is float else x[0], prop_obj.data_xyz.values()))
                 prop_obj.data_stats['max'] = max(list(first_val_list))
                 prop_obj.data_stats['min'] = min(list(first_val_list))
+            self.logger.debug("prop_obj.data_stats = %s", repr(prop_obj.data_stats))
 
         self.logger.debug("process_gocad() returns")
         # Read in any binary data files and flags files attached to voxel files
-        retVal = self.__read_voxel_files()
+        retVal = self.__read_voxel_binary_files()
         return retVal
 
 
@@ -829,7 +776,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             prop_obj.colourmap_name = value_str
             self.logger.debug("prop_obj.colourmap_name = %s", prop_obj.colourmap_name)
         # Read in the colour map for this property
-        elif name_str=='*COLORMAP*'+prop_obj.colourmap_name+'*COLORS':
+        elif name_str=='*COLORMAP*'+prop_obj.colourmap_name+'*COLORS' or name_str=='*'+prop_obj.colourmap_name+'*ROCK_COLORS':
             lut_arr = value_str.split(' ')
             for idx in range(0, len(lut_arr), 4):
                 try:
@@ -840,26 +787,37 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
 
 
-    def __read_voxel_files(self):
+    def __read_voxel_binary_files(self):
         ''' Open up and read binary voxel file
         '''
         if self.is_vo and len(self.prop_dict)>0:
+            if self.vol_sz==None:
+                self.logger.error("ERROR - Cannot process voxel file, cube size is not defined, missing 'AXIS_N'")
+                sys.exit(1)
             for file_idx, prop_obj in self.prop_dict.items():
                 # Sometimes filename needs a .vo on the end
                 if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:]=="@@" and \
                                               os.path.isfile(prop_obj.file_name+".vo"):
                     prop_obj.file_name += ".vo"
 
+                # If there is a colour table in CSV file then read it
+                bin_file = os.path.basename(prop_obj.file_name)
+                if bin_file in self.ct_file_dict:
+                    csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name), self.ct_file_dict[bin_file])
+                    prop_obj.colour_map = self.__read_colour_table_csv(csv_file_path)
+                    self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
+
+                # Read and process binary file
                 try:
                     # Check file size first
                     file_sz = os.path.getsize(prop_obj.file_name)
-                    num_voxels = prop_obj.data_sz*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
+                    num_voxels = prop_obj.data_sz*self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
                     if file_sz != num_voxels:
                         self.logger.error("SORRY - Cannot process voxel file - length (%d) is not correct %s", num_voxels, prop_obj.file_name)
                         sys.exit(1)
 
                     # Initialise data array to zeros
-                    prop_obj.data = numpy.zeros((self.vol_dims[0], self.vol_dims[1], self.vol_dims[2]))
+                    prop_obj.data_3d = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
 
                     # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
                     dt = prop_obj.make_numpy_dtype()
@@ -869,85 +827,106 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt)
                     fl_idx = 0
                     prop_obj.data_stats = { 'max': -sys.float_info.max, 'min': sys.float_info.max }
-                    for z in range(self.vol_dims[2]):
-                        for y in range(self.vol_dims[1]):
-                            for x in range(self.vol_dims[0]):
+                    mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
+                            (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
+                            (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
+                    for z in range(self.vol_sz[2]):
+                        for y in range(self.vol_sz[1]):
+                            for x in range(self.vol_sz[0]):
                                 converted, fp = self.__parse_float(f_arr[fl_idx], prop_obj.no_data_marker)
+                                # self.logger.debug("fp[%d, %d, %d] = %f", x,y,z, fp)
                                 fl_idx +=1
                                 if not converted:
                                     continue
-                                prop_obj.data[x][y][z] = fp
-                                if (prop_obj.data[x][y][z] > prop_obj.data_stats['max']):
-                                    prop_obj.data_stats['max'] = prop_obj.data[x][y][z]
-                                if (prop_obj.data[x][y][z] < prop_obj.data_stats['min']):
-                                    prop_obj.data_stats['min'] = prop_obj.data[x][y][z]
-                                self._calc_minmax( self.axis_origin[0]+float(x)/self.vol_dims[0]*self.axis_u[0],
-                                                   self.axis_origin[1]+float(y)/self.vol_dims[1]*self.axis_v[1],
-                                                   self.axis_origin[2]+float(z)/self.vol_dims[2]*self.axis_w[2] )
-                                        
+                                prop_obj.data_3d[x][y][z] = fp
+                                if (prop_obj.data_3d[x][y][z] > prop_obj.data_stats['max']):
+                                    prop_obj.data_stats['max'] = prop_obj.data_3d[x][y][z]
+                                if (prop_obj.data_3d[x][y][z] < prop_obj.data_stats['min']):
+                                    prop_obj.data_stats['min'] = prop_obj.data_3d[x][y][z]
+
+                                # Calculate the XYZ coords and their maxs & mins
+                                X_coord = self.axis_origin[0]+ \
+                                  (float(x)*self.axis_u[0]*mult[0] + float(y)*self.axis_u[1]*mult[1] + float(z)*self.axis_u[2]*mult[2])
+                                Y_coord = self.axis_origin[1]+ \
+                                  (float(x)*self.axis_v[0]*mult[0] + float(y)*self.axis_v[1]*mult[1] + float(z)*self.axis_v[2]*mult[2])
+                                Z_coord = self.axis_origin[2]+ \
+                                  (float(x)*self.axis_w[0]*mult[0] + float(y)*self.axis_w[1]*mult[1] + float(z)*self.axis_w[2]*mult[2]) 
+                                self._calc_minmax(X_coord, Y_coord, Z_coord)
+                                 
                 except IOError as e:
                     self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
                     sys.exit(1)
+
+            self.__read_flags_file()
+        return True
+
+
                     
+    def __read_flags_file(self):
+        ''' This reads the flags file and looks for regions.
+        '''
+        if self.flags_file!='':
+            if self.flags_array_length != self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]:
+                self.logger.warning("SORRY - Cannot process voxel flags file, inconsistent size between data file and flag file")
+                self.logger.debug("process_gocad() return False")
+                return False
+            # Check file does not exist, sometimes needs a '.vo' on the end
+            if not os.path.isfile(self.flags_file) and self.flags_file[-2:]=="@@" and \
+                                                            os.path.isfile(self.flags_file+".vo"):
+                self.flags_file += ".vo"
 
-            # Open up flags file and look for regions
-            if self.flags_file!='':
-                if self.flags_array_length != self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]:
-                    self.logger.warning("SORRY - Cannot process voxel file, inconsistent size between data file and flag file")
-                    self.logger.debug("process_gocad() return False")
-                    return False
-                # Check file does not exist, sometimes needs a '.vo' on the end
-                if not os.path.isfile(self.flags_file) and self.flags_file[-2:]=="@@" and \
-                                                                os.path.isfile(self.flags_file+".vo"):
-                    self.flags_file += ".vo"
+            try: 
+                # Check file size first
+                file_sz = os.path.getsize(self.flags_file)
+                num_voxels = self.flags_bit_size*self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
+                if file_sz != num_voxels:
+                    self.logger.error("SORRY - Cannot process voxel flags file - length (%d) is not correct %s", num_voxels, self.flags_file)
+                    sys.exit(1)
 
-                try: 
-                    # Check file size first
-                    file_sz = os.path.getsize(self.flags_file)
-                    num_voxels = self.flags_bit_size*self.vol_dims[0]*self.vol_dims[1]*self.vol_dims[2]
-                    if file_sz != num_voxels:
-                        self.logger.error("SORRY - Cannot process voxel flags file - length (%d) is not correct %s", num_voxels, self.flags_file)
-                        sys.exit(1)
+                # Initialise data array to zeros
+                flag_data = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
 
-                    # Initialise data array to zeros
-                    flag_data = numpy.zeros((self.vol_dims[0], self.vol_dims[1], self.vol_dims[2]))
+                # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
+                dt =  numpy.dtype(('B',(self.flags_bit_size)))
 
-                    # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
-                    dt =  numpy.dtype(('B',(self.flags_bit_size)))
+                # Read entire file, assumes file small enough to store in memory
+                self.logger.info("Reading binary flags file: %s", self.flags_file)
+                f_arr = numpy.fromfile(self.flags_file, dtype=dt)
+                f_idx = self.flags_offset
+                self.flags_prop = PROPS(self.flags_file)
+                # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())
+                for z in range(0,self.vol_sz[2]):
+                    for y in range(0, self.vol_sz[1]):
+                        for x in range(0, self.vol_sz[0]):
+                            # self.logger.debug("%d %d %d %d => %s", x, y, z, f_idx, repr(f_arr[f_idx]))
+                            # convert floating point number to a bit mask
+                            bit_mask = ''
+                            # NB: Single bytes are not returned as arrays
+                            if self.flags_bit_size==1:
+                                bit_mask = '{0:08b}'.format(f_arr[f_idx])
+                            else:
+                                for b in range(self.flags_bit_size-1, -1, -1):
+                                    bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
+                            # self.logger.debug('bit_mask= %s', bit_mask)
+                            # self.logger.debug('self.region_dict = %s', repr(self.region_dict))
+                            cnt = self.flags_bit_size*8-1
+                            # Examine the bit mask one bit at a time, starting at the highest bit
+                            for bit in bit_mask:
+                                if str(cnt) in self.region_dict and bit=='1':
+                                    key = self.region_dict[str(cnt)]
+                                    # self.logger.debug('cnt = %d bit = %d', cnt, bit)
+                                    # self.logger.debug('key = %s', key)
+                                    self.flags_prop.data_xyz.setdefault((x,y,z), [])
+                                    self.flags_prop.data_xyz[(x,y,z)].append(key)
+                                cnt -= 1
+                            f_idx += 1
+                
+            except IOError as e:
+                self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s", self.flags_file, str(e), e.args)
+                self.logger.debug("process_gocad() return False")
+                return False
 
-                    # Read entire file, assumes file small enough to store in memory
-                    self.logger.info("Reading binary flags file: %s", self.flags_file)
-                    f_arr = numpy.fromfile(self.flags_file, dtype=dt)
-                    f_idx = self.flags_offset
-                    # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())
-                    for z in range(0,self.vol_dims[2]):
-                        for y in range(0, self.vol_dims[1]):
-                            for x in range(0, self.vol_dims[0]):
-                                # self.logger.debug("%d %d %d %d => %s", x, y, z, f_idx, repr(f_arr[f_idx]))
-                                bit_mask = ''
-                                # Single bytes are not returned as arrays
-                                if self.flags_bit_size==1:
-                                    bit_mask = '{0:08b}'.format(f_arr[f_idx])
-                                else:
-                                    for b in range(self.flags_bit_size-1, -1, -1):
-                                        bit_mask += '{0:08b}'.format(f_arr[f_idx][b])
-                                # self.logger.debug('bit_mask= %s', bit_mask)
-                                cnt = self.flags_bit_size*8-1
-                                for bit in bit_mask:
-                                    if str(cnt) in self.region_dict and bit=='1':
-                                        key = self.region_dict[str(cnt)]
-                                        # self.logger.debug('cnt = %d bit = %d', cnt, bit)
-                                        # self.logger.debug('key = %s', key)
-                                        self.flags_dict[(x,y,z)] = key
-                                    cnt -= 1
-        
-                                f_idx += 1
-                    
-                except IOError as e:
-                    self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s", self.flags_file, str(e), e.args)
-                    self.logger.debug("process_gocad() return False")
-                    return False
-        self.logger.debug('self.flags_dict= %s', repr(self.flags_dict))
+        # self.logger.debug('self.flags_dict= %s', repr(self.flags_dict))
         return True
 
 
@@ -976,8 +955,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     fp_str = splitstr_arr[col_idx]
                 converted, fp = self.__parse_float(fp_str, prop_obj.no_data_marker)
                 if converted:
-                    prop_obj.data[coord_tup] = fp
-                    self.logger.debug("prop_obj.data[%s] = %f", repr(coord_tup), fp)
+                    prop_obj.data_xyz[coord_tup] = fp
+                    self.logger.debug("prop_obj.data_xyz[%s] = %f", repr(coord_tup), fp)
                 col_idx += 1
             # Property has 3 floats i.e. XYZ
             elif prop_obj.data_sz == 3:
@@ -992,8 +971,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 convertedY, fpY = self.__parse_float(fp_strY, prop_obj.no_data_marker)
                 convertedZ, fpZ = self.__parse_float(fp_strZ, prop_obj.no_data_marker)
                 if convertedZ and convertedY and convertedX:
-                    prop_obj.data[coord_tup] = (fpX, fpY, fpZ)
-                    self.logger.debug("prop_obj.data[%s] = (%f,%f,%f)", repr(coord_tup), fpX, fpY, fpZ)
+                    prop_obj.data_xyz[coord_tup] = (fpX, fpY, fpZ)
+                    self.logger.debug("prop_obj.data_xyz[%s] = (%f,%f,%f)", repr(coord_tup), fpX, fpY, fpZ)
                 col_idx += 3
             else:
                 self.logger.error("ERROR - Cannot process property size of != 3 and !=1: %d %s", prop_obj.data_sz, repr(prop_obj))
@@ -1008,7 +987,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
         '''
         # Handle GOCAD's C++ floating point infinity for Windows and Linux
-        self.logger.debug("fp_str = %s", fp_str)
         if fp_str in ["1.#INF","INF"]:
             fp = sys.float_info.max
         elif fp_str in ["-1.#INF","-INF"]:
@@ -1075,6 +1053,51 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             self._calc_minmax(x,y,z)
 
         return True, x, y, z 
+
+
+    
+    def __parse_colour(self, colour_str):
+        ''' Parse a colour string into RGBA tuple.
+            colour_str - colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
+            Returns a tuple with 4 floats
+        '''
+        rgba_tup = (1.0, 1.0, 1.0, 1.0)
+        try:
+            if colour_str[0]!='#':
+                rgbsplit_arr = colour_str.split(' ')
+                if len(rgbsplit_arr)==3:
+                    rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), 1.0)
+                elif len(rgbsplit_arr)==4:
+                    rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]), float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
+                else:
+                    self.logger.debug("Could not parse colour %s", repr(colour_str))
+            else:
+                rgba_tup = (float(int(colour_str[1:3],16))/255.0, float(int(colour_str[3:5],16))/255.0, float(int(colour_str[5:7],16))/255.0, 1.0) 
+        except (ValueError, OverflowError, IndexError) as exc:
+            self.__handle_exc(exc)
+            rgba_tup = (1.0, 1.0, 1.0, 1.0)
+        return rgba_tup
+
+
+
+    def __read_colour_table_csv(self, csv_file):
+        ''' Reads a colour table from CSV file for use in VOXET colours
+            csv_file - filename of  CSV file to read, without path
+        '''
+        ct = {}
+        if not os.path.isfile(csv_file):
+            self.logger.error("ERROR - cannot find CSV file: %s", csv_file)
+            sys.exit(1)
+        try:
+            csvfilehandle = open(csv_file, 'r')
+            spamreader = csv.reader(csvfilehandle)
+            for row in spamreader:
+                ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]))
+        except Exception as e:
+            self.logger.error("ERROR - cannot read CSV file %s %s", csv_file, e)
+            sys.exit(1)
+        return ct
+
 
 
 

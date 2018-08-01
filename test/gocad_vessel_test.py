@@ -19,7 +19,7 @@ def test_this(msg, test_str, test_file, assert_str, stop_on_exc=True):
     if stop_on_exc == False:
         gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=False)
     else:
-        gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=True) # DEBUG or ERROR
+        gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=True) # logging.DEBUG or logging.ERROR
     gv.process_gocad(".", test_file, split_str)
     try:
         assert(eval(assert_str))
@@ -41,15 +41,12 @@ Using GOCAD_VESSEL:
 Multiple whitespace in field separators
 Spaces in filenames and paths
 Control nodes in vertices and atoms with and without properties
-Property vertices and atoms (PATOM, PVRTX)
+Property vertices and atoms (PATOM)
 Skipped vertex ids
-Colour maps
 REGION keyword
 SEG
 TRGL
-property class header: COLOURMAP
-Max and min of properties
-Max and min of XYZ coords
+Voxet values
 """
    
 # MAIN PART OF PROGRAMME
@@ -166,7 +163,7 @@ PROPERTY_CLASSES AA BB CC
 ESIZES 1 1 1 
 PVRTX 1 641092.75 6983354.125 6304.10595703125 -110.087890625 -123.456 12.3456
     """
-    test_this("Read local property values", test_str, "test.vs", "'AA' in gv.local_props and gv.local_props['AA'].data[(641092.75, 6983354.125, 6304.10595703125)] == -110.087890625")
+    test_this("Read local property values", test_str, "test.vs", "'AA' in gv.local_props and gv.local_props['AA'].data_xyz[(641092.75, 6983354.125, 6304.10595703125)] == -110.087890625")
 
 
     #
@@ -192,7 +189,7 @@ AXIS_V 0 87000 0
 AXIS_W 0 0 51000 
 AXIS_MIN 0 0 0 
 AXIS_MAX 1 1 1 
-AXIS_N 0 0 0
+AXIS_N 1 1 1
 AXIS_NAME "axis-1" "axis-2" "axis-3"
 AXIS_UNIT " number" " number" " number" 
 AXIS_TYPE even even even
@@ -204,14 +201,14 @@ PROP_SIGNED 1 1
 PROP_ETYPE 1  IEEE
 PROP_FORMAT 1 RAW
 PROP_OFFSET 1 0
-PROP_FILE 1 empty_voxet_test_file@@
+PROP_FILE 1 tiny_voxet_test_file@@
     """
     test_this("Voxet properties and dimensions", test_str, "test.vo", 
           """'1' in gv.prop_dict and \
 gv.prop_dict['1'].no_data_marker == -9999.0 and \
 gv.prop_dict['1'].signed_int == True and \
 gv.prop_dict['1'].data_type == 'h' and \
-gv.prop_dict['1'].file_name == './empty_voxet_test_file@@' and \
+gv.prop_dict['1'].file_name == './tiny_voxet_test_file@@' and \
 gv.prop_dict['1'].data_sz == 2 and \
 gv.axis_origin == (696000.0, 6863000.0, -40000.0) and \
 gv.axis_u == (51000.0, 0.0, 0.0) and \
@@ -233,4 +230,112 @@ FLAGS_FILE 3D_geology_flags@@
     test_this("Voxet flags", test_str, "test.vo", "gv.flags_array_length ==  1856575 and gv.flags_bit_length == 27 and gv.flags_bit_size == 4 and gv.flags_offset == 0 and gv.flags_file == './3D_geology_flags@@'")
 
 
+    #
+    # Voxet rock table and color table
+    #
+    test_str = """GOCAD Voxet 1
+AXIS_O 405150 7534500 500
+AXIS_U 74400 0 0
+AXIS_V 0 179700 0
+AXIS_W 0 0 -3900
+AXIS_MIN 0 0 0
+AXIS_MAX 1 1 0.769230783
+AXIS_N 1 1 1
+AXIS_NAME axis-1 axis-2 axis-3
+AXIS_UNIT "number" "number" "number"
+AXIS_TYPE even even even
 
+PROPERTY 1 RockCode
+PROPERTY_CLASS 1 rockcode
+INTERPOLATION_METHOD  Block
+PROPERTY_KIND 1 RockCode
+PROPERTY_CLASS_HEADER 1 rockcode {
+kind: RockCode
+colormap: RockCode
+*colormap*size: 14
+*colormap*nbcolors: 14
+low_clip: 0
+high_clip: 13
+last_selected_folder: Property
+*RockCode*rock_colors: 0 0 0.807843 0.819608 1 0.690196 0.768627 0.870588 2 0.960784 0.870588 0.701961 3 0.415686 0.352941 0.803922 4 0.596078 0.984314 0.596078 5 0.823529 0.705882 0.54902 6 0.415686 0.352941 0.803922 7 1 0.843137 0 8 0.541176 0.168627 0.886275 9 0.909804 0.564706 0.203922 10 0.933333 0.509804 0.933333 11 0.184314 0.309804 0.309804 12 1 0 0 13 0 0 1
+}
+PROPERTY_SUBCLASS 1 ROCK 14  Air 0  Cover 1  Llewellyn_Repeat 2  Stavley_Repeat 3  TooleCreekVolcanics 4  Llewellyn 5  Stavley 6  Timberoo_etc_seds 7  MarrabaMaficVolcanics 8  BulongaVolcanics 9  Below_BulongaVolcanics 10  CrystallineBasement 11  Granites 12  DoubleCrossing 13
+PROP_ORIGINAL_UNIT 1 none
+PROP_UNIT 1 none
+PROP_NO_DATA_VALUE 1 -999
+PROP_SAMPLE_STATS 1 1999968 6.88733 15.2785 0 13
+PROP_STORAGE_TYPE 1 Short
+PROP_ESIZE 1 2
+PROP_SIGNED 1 1
+PROP_ETYPE 1  IEEE
+PROP_FORMAT 1 RAW
+PROP_OFFSET 1 0
+PROP_FILE 1 tiny_voxet_test_file@@
+
+
+    """
+    test_this("Voxet rock table and color table", test_str, "test.vo", "gv.prop_dict['1'].is_colour_table and gv.rock_label_idx['1'][2] == 'LLEWELLYN_REPEAT' and  gv.rock_label_idx['1'][13] == 'DOUBLECROSSING' and gv.prop_dict['1'].colourmap_name == 'ROCKCODE' and gv.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922)")
+
+
+    #
+    # Max & min of XYZ values
+    #
+    test_str = """GOCAD TSurf 1
+GOCAD_ORIGINAL_COORDINATE_SYSTEM
+NAME Default
+AXIS_NAME "X" "Y" "Z"
+AXIS_UNIT "m" "m" "m"
+ZPOSITIVE Depth
+END_ORIGINAL_COORDINATE_SYSTEM
+TFACE
+VRTX 1 868218.75 6936.609375 -354.82565307617187
+VRTX 2 868000.0 6936.765625 -354.44522094726562
+VRTX 3 868005.0 6934.1875 -352.19583129882812
+TRGL 1 2 3
+    """
+    test_this("Max & min of XYZ values", test_str, "test.ts", "gv.max_X ==868218.75 and gv.min_X == 868000.0 and gv.max_Y == 6936.765625 and gv.min_Y == 6934.1875 and gv.max_Z == -352.19583129882812 and gv.min_Z == -354.82565307617187")
+
+
+    #
+    # Max and min of property values
+    #
+    test_str = """GOCAD VSet 1
+HEADER {
+name:d-rift
+last_selected_folder:Info
+*atoms*size:2
+*atoms*color:0.184314 0.309804 0.309804
+*regions*Region_1*color:coral
+regions:on
+*regions*Region_1*visible:on
+*regions*region:Region_1
+comments:hrzr
+}
+GOCAD_ORIGINAL_COORDINATE_SYSTEM
+NAME Default
+AXIS_NAME "X" "Y" "Z"
+AXIS_UNIT "m" "m" "m"
+ZPOSITIVE Depth
+END_ORIGINAL_COORDINATE_SYSTEM
+PROPERTIES hrzr
+PROP_LEGAL_RANGES **none**  **none**
+NO_DATA_VALUES -99999
+PROPERTY_CLASSES hrzr
+PROPERTY_KINDS Height
+PROPERTY_SUBCLASSES LINEARFUNCTION Float 1  0
+ESIZES 1
+UNITS ms
+PVRTX 1 641092.75 6983354.125 6304.10595703125 -110.087890625
+PVRTX 2 724802 6951118.5 3429.085693359375 0.037109375
+PVRTX 3 656117.75 6958711.875 7724.6015625 -80.765625
+PVRTX 4 839535 7026529.25 3759.729248046875 -2.94384765625
+PVRTX 5 795505 6864642.125 2628.514404296875 -23.0419921875
+PVRTX 6 711395.875 6868385.75 4623.88916015625 23.025390625
+PVRTX 7 797100.125 7075255.875 1659.1844482421875 11.38916015625
+PVRTX 8 771451.75 6894106.5 2586.820556640625 13.34033203125
+PVRTX 9 854182 7008307.5 2984.093505859375 14.9970703125
+PVRTX 10 712464.5 6914876.5 2280.208251953125 8.8212890625
+    """
+    test_this("Max & min of property values", test_str, "test.vs", "gv.local_props['HRZR'].data_stats == {'min': -110.087890625, 'max': 23.025390625}")
+    
+    

@@ -48,8 +48,12 @@ logger = logging.getLogger(__name__)
 # Input parameters are stored here
 Params = SimpleNamespace()
 
-# Coordinate Offsets are stores here, key is filename, value is (x,y,z)
+# Coordinate Offsets are stored here, key is filename, value is (x,y,z)
 CoordOffset = {}
+
+# Colour table files: key is GOCAD filename, value is CSV colour table filename (without path)
+CtFileDict = {}
+
 
 
 def de_concat(filename_lines):
@@ -84,6 +88,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
         Returns a list of GOCAD_VESSEL objects
     '''
     logger.debug("extract_gocad(%s,%s)", src_dir, filename_str)
+    global CtFileDict
     gv_list = []
     firstLine = True
     inMember = False
@@ -97,8 +102,8 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
         if firstLine:
             firstLine = False
             if fileExt.upper() != '.GP' or line_str not in GOCAD_VESSEL.GOCAD_HEADERS['GP']:
-                print("SORRY - not a GOCAD GP file", repr(line_str))
-                print("    filename_str = ", filename_str)
+                logger.error("SORRY - not a GOCAD GP file %s", repr(line_str))
+                logger.error("    filename_str = %s", filename_str)
                 sys.exit(1)
         if line_str == "BEGIN_MEMBERS":
             inMember = True
@@ -108,7 +113,7 @@ def extract_gocad(src_dir, filename_str, file_lines, base_xyz):
             inGoCAD = True
         elif inMember and line_str == "END":
             inGoCAD = False
-            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, group_name=os.path.basename(fileName).upper(), nondefault_coords=NONDEF_COORDS)
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, group_name=os.path.basename(fileName).upper(), nondefault_coords=NONDEF_COORDS, ct_file_dict=CtFileDict)
             if gv.process_gocad(src_dir, filename_str, gocad_lines):
                 gv_list.append(gv)
             gocad_lines = []
@@ -185,8 +190,8 @@ def process(filename_str):
         and geographical extent [min_x, max_x, min_y, max_y]
     '''
     global CoordOffset
-    print("\nProcessing ", filename_str)
-    logger.debug("process(%s)", filename_str)
+    global CtFileDict
+    logger.info("\nProcessing ", filename_str)
     # If there is an offset from the input parameter file, then apply it
     base_xyz = (0.0, 0.0, 0.0)
     basefile = os.path.basename(filename_str)
@@ -203,8 +208,8 @@ def process(filename_str):
     try:
         fp = open(filename_str,'r')
         whole_file_lines = fp.readlines()
-    except(Exception):
-        print("ERROR - Can't open or read - skipping file", filename_str)
+    except Exception as e:
+        logger.error("ERROR - Can't open or read - skipping file %s %s", filename_str, e)
         return False, [], []
     has_result = False
 
@@ -216,7 +221,7 @@ def process(filename_str):
         for file_lines in file_lines_list:
             if len(file_lines_list)>1:
                 out_filename = "{0}_{1:d}".format(fileName, mask_idx)
-            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS)
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS, ct_file_dict=CtFileDict)
             # Check that conversion worked and write out files
             if not gv.process_gocad(gocad_src_dir, filename_str, file_lines):
                 continue
@@ -361,8 +366,8 @@ def update_json_config(model_dict_list, template_filename, output_filename, bore
     logger.debug("update_json_config(%s, %s, %s)", template_filename, output_filename, borehole_outdir) 
     try:
         fp = open(output_filename, "w")
-    except:
-        print("ERROR - cannot open file", output_filename)
+    except Exception as e:
+        logger.error("ERROR - cannot open file %s %s", output_filename, e)
         return
     config_dict = read_json_file(template_filename)
     if config_dict=={}:
@@ -391,8 +396,8 @@ def create_json_config(model_dict_list, output_filename, geo_extent):
     logger.debug("create_json_config(%s, %s)",  output_filename, repr(geo_extent))
     try:
         fp = open(output_filename, "w")
-    except:
-        print("ERROR - cannot open file", output_filename)
+    except Exception as e:
+        logger.error("ERROR - cannot open file %s %s", output_filename, e)
         return
     # Sort by display name before saving to file
     sorted_model_dict_list = sorted(model_dict_list, key=lambda x: x['display_name'])
@@ -416,14 +421,14 @@ def read_json_file(file_name):
     '''
     try:
         fp = open(file_name, "r")
-    except:
-        print("ERROR - Cannot open JSON file", file_name)
+    except Exception as e:
+        logger.error("ERROR - Cannot open JSON file %s %s", file_name, e)
         sys.exit(1)
     try:
         json_dict = json.load(fp)
     except JSONDecodeError as e:
         json_dict = {}
-        print("ERROR - cannot read JSON file", file_name, "\n", e)
+        logger.error("ERROR - cannot read JSON file %s %s", file_name, e)
         sys.exit(1)
     fp.close()
     return json_dict
@@ -435,15 +440,16 @@ def initialise_params(param_file):
     '''
     global Params
     global CoordOffset
+    global CtFileDict
     Params = SimpleNamespace()
     param_dict = read_json_file(param_file)
     if 'ModelProperties' not in param_dict:
-        print("ERROR - Cannot find 'ModelProperties' key in JSON file", param_file)
+        logger.error("ERROR - Cannot find 'ModelProperties' key in JSON file %s", param_file)
         sys.exit(1)
     # Mandatory parameters
     for field_name in ['crs', 'name', 'init_cam_dist']:
         if field_name not in param_dict['ModelProperties']:
-            print('ERROR - field', field_name, ' not in "ModelProperties" in JSON input parameter file', param_file)
+            logger.error('ERROR - field "%s" not in "ModelProperties" in JSON input parameter file %s', field_name, param_file)
             sys.exit(1)
         setattr(Params, field_name, param_dict['ModelProperties'][field_name])
     # Optional parameter
@@ -453,8 +459,13 @@ def initialise_params(param_file):
     if 'CoordOffsets' in param_dict:
         for coordOffsetObj in param_dict['CoordOffsets']:
             CoordOffset[coordOffsetObj['filename']] = tuple(coordOffsetObj['offset'])
+    # Optional colour table files for VOXET file
+    if 'VoxetColourTables' in param_dict:
+        for ctObj in param_dict['VoxetColourTables']:
+            colour_table = ctObj['colour_table']
+            filename = ctObj['filename']
+            CtFileDict[filename] = colour_table
         
-
 
 # MAIN PART OF PROGRAMME
 if __name__ == "__main__":
@@ -527,11 +538,11 @@ if __name__ == "__main__":
             collada2gltf.convert_file(file_name+".dae")
 
         if not success:
-            print("Could not convert file")
+            logger.error("Could not convert file")
             sys.exit(1)
 
     else:
-        print("ERROR - ", gocad_src, "does not exist")
+        logger.error("ERROR - %s does not exist", gocad_src)
         sys.exit(1)
        
     # Update a config file
@@ -544,7 +555,7 @@ if __name__ == "__main__":
             else:
                 update_json_config(model_dict_list, json_template, json_output)
         else:
-            print("ERROR - ", json_template, "does not exist")
+            logger.error("ERROR - %s does not exist", json_template)
             sys.exit(1)
 
     # Create a config file
@@ -553,5 +564,5 @@ if __name__ == "__main__":
         create_json_config(model_dict_list, json_output, geo_extent)
 
     elif args.config_in!=None or args.config_out!=None or args.create:
-        print("You must specify either input and output files or create flag and output file")
+        logger.error("You must specify either input and output files or create flag and output file")
         sys.exit(1)

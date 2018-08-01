@@ -52,16 +52,16 @@ class OBJ_OUT():
         out_fp.write("mtllib "+fileName+".MTL\n")
         vert_idx = 0
         breakOut = False
-        for z in range(0,v_obj.vol_dims[2],step_sz):
-            for y in range(0,v_obj.vol_dims[1],step_sz):
-                for x in range(0,v_obj.vol_dims[0],step_sz):
+        for z in range(0,v_obj.vol_sz[2],step_sz):
+            for y in range(0,v_obj.vol_sz[1],step_sz):
+                for x in range(0,v_obj.vol_sz[0],step_sz):
                     colour_num = int(255.0*(v_obj.voxel_data[x][y][z] - v_obj.voxel_data_stats['min'])/(v_obj.voxel_data_stats['max'] - v_obj.voxel_data_stats['min']))
                     # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
-                    u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_dims[0]*v_obj.axis_u[0]
-                    v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_dims[1]*v_obj.axis_v[1]
-                    w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_dims[2]*v_obj.axis_w[2]
+                    u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_sz[0]*v_obj.axis_u[0]
+                    v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_sz[1]*v_obj.axis_v[1]
+                    w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_sz[2]*v_obj.axis_w[2]
                     v = (u_offset, v_offset, w_offset)
-                    pt_size = (step_sz*v_obj.axis_u[0]/v_obj.vol_dims[0]/2, step_sz*v_obj.axis_v[1]/v_obj.vol_dims[1]/2, step_sz*v_obj.axis_w[2]/v_obj.vol_dims[2]/2)
+                    pt_size = (step_sz*v_obj.axis_u[0]/v_obj.vol_sz[0]/2, step_sz*v_obj.axis_v[1]/v_obj.vol_sz[1]/2, step_sz*v_obj.axis_w[2]/v_obj.vol_sz[2]/2)
                     vert_list = [ (v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]),
                                   (v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]),
                                   (v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]),
@@ -88,19 +88,19 @@ class OBJ_OUT():
                         if z==0:
                             indice_list.append((3, 7, 6, 2))
                         # TOP FACE
-                        if z==v_obj.vol_dims[2]-1:
+                        if z==v_obj.vol_sz[2]-1:
                             indice_list.append((5, 8, 4, 1))
                         # SOUTH FACE
                         if y==0:
                             indice_list.append((2, 6, 5, 1))
                         # NORTH FACE
-                        if y==v_obj.vol_dims[1]:
+                        if y==v_obj.vol_sz[1]:
                             indice_list.append((8, 7, 3, 4))
                         # EAST FACE
                         if x==0:
                             indice_list.append((6, 7, 8, 5))
                         # WEST FACE
-                        if x==v_obj.vol_dims[0]:
+                        if x==v_obj.vol_sz[0]:
                             indice_list.append((4, 3, 2, 1))
 
                     # Only write if there are indices to write

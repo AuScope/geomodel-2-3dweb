@@ -13,5 +13,12 @@
         "crs": "EPSG:3857",
         "init_cam_dist": 500000.0,
         "name": "Windimurra"
-      }
+      },
+    "VoxetColourTables": [
+        {
+            "filename": "3D_geology_Lithology@@",
+            "colour_table": "3D_geology_lithology_colours.csv"
+        }
+    ]
+
 }
