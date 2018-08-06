@@ -274,7 +274,7 @@ PROP_FILE 1 tiny_voxet_test_file@@
 
 
     """
-    test_this("Voxet rock table and color table", test_str, "test.vo", "gv.prop_dict['1'].is_colour_table and gv.rock_label_idx['1'][2] == 'LLEWELLYN_REPEAT' and  gv.rock_label_idx['1'][13] == 'DOUBLECROSSING' and gv.prop_dict['1'].colourmap_name == 'ROCKCODE' and gv.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922)")
+    test_this("Voxet rock table and color table", test_str, "test.vo", "gv.prop_dict['1'].is_index_data and gv.rock_label_idx['1'][2] == 'LLEWELLYN_REPEAT' and  gv.rock_label_idx['1'][13] == 'DOUBLECROSSING' and gv.prop_dict['1'].colourmap_name == 'ROCKCODE' and gv.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922)")
 
 
     #

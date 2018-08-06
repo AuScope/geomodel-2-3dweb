@@ -9,6 +9,8 @@ import logging
 from collada_out import COLLADA_OUT
 from obj_out import OBJ_OUT
 
+from false_colour import calculate_false_colour_num, make_false_colour_tup
+
 class GOCAD_KIT:
     ''' Class used to output GOCAD files as Wavefront OBJ or COLLADA files
     '''
@@ -106,7 +108,7 @@ class GOCAD_KIT:
             for x in range(0, v_obj.vol_sz[0]):
                 for y in range(0, v_obj.vol_sz[1]):
                     try:
-                        (r,g,b,a) = self.make_colour_map(prop_obj.data_3d[x][y][z], prop_obj.data_stats['min'], prop_obj.data_stats['max'])      
+                        (r,g,b,a) = make_false_colour_tup(prop_obj.data_3d[x][y][z], prop_obj.data_stats['min'], prop_obj.data_stats['max'])      
                     except ValueError:
                         (r,g,b,a) = (0.0, 0.0, 0.0, 0.0) 
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
@@ -302,17 +304,20 @@ class GOCAD_KIT:
         colour_num = 0
         # If there are many colours, make MAX_COLORS materials
         if len(v_obj.local_props.keys()) > 0:
-            self.make_colour_materials(mesh, self.MAX_COLOURS)
+            self.make_false_colour_materials(mesh, self.MAX_COLOURS)
             prop_str = list(v_obj.local_props.keys())[0]
-            prop_dict = v_obj.local_props[prop_str].data
+            prop_dict = v_obj.local_props[prop_str].data_3d
             max_v = v_obj.local_props[prop_str].data_stats['max']
             min_v = v_obj.local_props[prop_str].data_stats['min']
+
+        # NB: Choose the first property only
         elif len(v_obj.prop_dict.keys()) > 0:
-            self.make_colour_materials(mesh, self.MAX_COLOURS)
+            self.make_false_colour_materials(mesh, self.MAX_COLOURS)
             prop_str = list(v_obj.prop_dict.keys())[0]
             prop_dict = v_obj.prop_dict[prop_str]
             max_v = v_obj.prop_meta[prop_str]['max']
             min_v = v_obj.prop_meta[prop_str]['min']
+
         # If there is only one colour
         else:
             self.make_colour_material(mesh, v_obj.rgba_tup, colour_num)
@@ -328,7 +333,7 @@ class GOCAD_KIT:
                 # If no data value for this vertex then skip to next one
                 if v.xyz not in prop_dict:
                     continue               
-                colour_num = self.calculate_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
+                colour_num = calculate_false_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
             bv = (v.xyz[0]+v_obj.base_xyz[0], v.xyz[1]+v_obj.base_xyz[1], v.xyz[2]+v_obj.base_xyz[2])
             # Vertices of the pyramid
             vert_floats = [bv[0], bv[1], bv[2]+POINT_SIZE*2] + \
@@ -376,7 +381,7 @@ class GOCAD_KIT:
         self.logger.debug("write_vo_collada() v_obj=%s", repr(v_obj))
         
         if not v_obj.is_vo:
-            self.logger.error("ERROR - Cannot use write_collada_voxel for PL, TS, VO, VS?")
+            self.logger.error("ERROR - Cannot use write_vo_collada for PL, TS, VO, VS?")
             sys.exit(1)
 
         # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
@@ -409,74 +414,89 @@ class GOCAD_KIT:
 
         for prop_idx in v_obj.prop_dict:
             prop_obj = v_obj.prop_dict[prop_idx]
-            self.logger.info("Writing files for voxel property %s", prop_idx)
+            self.logger.info("Writing files for voxel property '%s'", prop_idx)
+          
+            # There are two kinds of voxel object
+            # One has index values that refer to rock types or colours, the other has values that refer to physical measurements
+            if prop_obj.is_index_data:
+                # Take the index data found in the voxel file and group it together       
+                bucket = {}
+                for z in range(0, v_obj.vol_sz[2], step):
+                    for y in range(0, v_obj.vol_sz[1], step):
+                        for x in range(0, v_obj.vol_sz[0], step):
+                            key = int(prop_obj.data_3d[x][y][z])
+                            bucket.setdefault(key, []) 
+                            bucket[key].append((x,y,z))
 
-            # Take the property data found in the voxel file and group it together       
-            bucket = {}
-            for z in range(0, v_obj.vol_sz[2], step):
-                for y in range(0, v_obj.vol_sz[1], step):
-                    for x in range(0, v_obj.vol_sz[0], step):
-                        key = int(prop_obj.data_3d[x][y][z])
-                        bucket.setdefault(key, []) 
-                        bucket[key].append((x,y,z))
-
-            # One file per property
-            for data_val, coord_list in bucket.items():
-                # Limit to 256 colours
+                # For each index value (usually rock type)
                 mesh = Collada.Collada()
-                self.make_colour_materials(mesh, self.MAX_COLOURS)
-                node_list = []
                 point_cnt = 0
-                for x,y,z in coord_list:
-                    #self.logger.debug("%d %d %d data_val = %s", x,y,z, repr(data_val))
-                    if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
-                        colour_num = self.calculate_colour_num(prop_obj.data_3d[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
-                        cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
-                        popup_dict.update(cube_popup_dict)
-                        node_list += cube_node_list
-                        point_cnt += 1
-                    else:
-                        self.logger.debug("%d %d %d no data", x,y,z)
+                node_list = []
+                self.make_mapped_colour_materials(mesh, prop_obj.colour_map)
+                for data_val, coord_list in bucket.items():
+                    self.logger.debug("Writing coords %s for key %s", repr(coord_list[:25]), repr(data_val))
+                    for x,y,z in coord_list:
+                        #self.logger.debug("%d %d %d data_val = %s", x,y,z, repr(data_val))
+                        if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
+                            colour_num = int(prop_obj.data_3d[x][y][z] - prop_obj.data_stats['min'])
+                            cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
+                            popup_dict.update(cube_popup_dict)
+                            node_list += cube_node_list
+                            point_cnt += 1
+                        else:
+                            self.logger.debug("%d %d %d no data", x,y,z)
                 
                 myscene = Collada.scene.Scene("myscene", node_list)
                 mesh.scenes.append(myscene)
                 mesh.scene = myscene
 
-            out_filename = fileName+'_'+str(file_cnt)
-            self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
-            mesh.write(out_filename+'.dae')
-            popup_list.append((popup_dict, out_filename))
-            popup_dict = {}
+                out_filename = fileName+'_'+str(file_cnt)
+                self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
+                mesh.write(out_filename+'.dae')
+                popup_list.append((popup_dict, out_filename))
+                popup_dict = {}
+                file_cnt += 1
 
-            file_cnt += 1
- 
+            # The physical measurements kind uses a false colour map, and written as one big VOXET file
+            else:
+                mesh = Collada.Collada()
+                # Limit to 256 colours
+                self.make_false_colour_materials(mesh, self.MAX_COLOURS)
+                point_cnt = 0
+                node_list = []
+                for z in range(0, v_obj.vol_sz[2], step):
+                    for y in range(0, v_obj.vol_sz[1], step):
+                        for x in range(0, v_obj.vol_sz[0], step):
+                            if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
+                                colour_num = calculate_false_colour_num(prop_obj.data_3d[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
+                                cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
+                                popup_dict.update(cube_popup_dict)
+                                node_list += cube_node_list
+                                point_cnt += 1
+                            else:
+                                self.logger.debug("%d %d %d no data", x,y,z)
+
+                myscene = Collada.scene.Scene("myscene", node_list)
+                mesh.scenes.append(myscene)
+                mesh.scene = myscene
+
+                out_filename = fileName+'_'+str(file_cnt)
+                self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
+                mesh.write(out_filename+'.dae')
+                popup_list.append((popup_dict, out_filename))
+                popup_dict = {}
+                file_cnt += 1
+                
         return popup_list
 
 
-    def calculate_colour_num(self, val_flt, max_flt, min_flt, max_colours_flt):
-        ''' Calculates a colour number via interpolation
-            val_flt - value used to calculate colour number
-            min_flt - lower bound of value
-            max_flt - upper bound of value
-            max_colours_flt - maximum number of colours
-            returns integer colour number
-        '''
-        # Floating point arithmetic fails of the numbers are at limits
-        if max_flt == abs(sys.float_info.max) or min_flt == abs(sys.float_info.max) or val_flt == abs(sys.float_info.max):
-            return 0
-        # Ensure denominator is not too large
-        if (max_flt - min_flt) > 0.0000001:
-            return int((max_colours_flt-1)*(val_flt - min_flt)/(max_flt - min_flt))
-        return 0
-
-
-    def make_colour_materials(self, mesh, max_colours_flt):
-        ''' Adds a list of coloured materials to COLLADA object
-            mesh - Collada object
+    def make_false_colour_materials(self, mesh, max_colours_flt):
+        ''' Adds a list of coloured materials to COLLADA object using a false colour map
+            mesh - COLLADA object
             max_colours_flt - number of colours to add
         '''
         for colour_idx in range(int(max_colours_flt)):
-            diffuse_colour = self.make_colour_map(float(colour_idx), 0.0, max_colours_flt - 1.0)
+            diffuse_colour = make_false_colour_tup(float(colour_idx), 0.0, max_colours_flt - 1.0)
             effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=diffuse_colour, specular=self.SPECULAR, shininess=self.SHININESS)
             mat = Collada.material.Material("material{0:010d}".format(colour_idx), "mymaterial{0:010d}".format(colour_idx), effect)
             mesh.effects.append(effect)
@@ -485,63 +505,25 @@ class GOCAD_KIT:
 
     def make_colour_material(self, mesh, colour_tup, colour_idx):
         ''' Adds a colour material to COLLADA object
-            mash - Collada object
+            mesh - COLLADA object
             colour_tup - tuple of floats (R,G,B,A)
             colour_idx - integer index, used to refer to the material
         '''
+        self.logger.debug("make_colour_material(%s, %s, %s)", repr(mesh), repr(colour_tup), repr(colour_idx))
         effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=colour_tup, specular=self.SPECULAR, shininess=self.SHININESS)
         mat = Collada.material.Material("material{0:010d}".format(colour_idx), "mymaterial{0:010d}".format(colour_idx), effect)
         mesh.effects.append(effect)
         mesh.materials.append(mat)
 
 
-    def interpolate(self, x_flt, xmin_flt, xmax_flt, ymin_flt, ymax_flt):
-        ''' Interpolates a floating point number
-            x_flt - floating point number to be interpolated
-            xmin_flt - minimum value within x_flt's range
-            xmax_flt - maximum value within x_flt's range
-            ymin_flt - minimum possible value to output
-            ymax_flt - maximum possible value to output
-            Returns interpolated value
+    def make_mapped_colour_materials(self, mesh, colour_map):
+        ''' Adds a list of coloured materials to COLLADA object using supplied colour_map
+            mesh - COLLADA object
+            colour_map - dict of colours, key is integer, value is RGBA tuple of 4 floats 
         '''
-        return (x_flt - xmin_flt) / (xmax_flt - xmin_flt) * (ymax_flt - ymin_flt) + ymin_flt
-
-
-    def make_colour_map(self, i_flt, imin_flt, imax_flt):
-        ''' This creates a false colour map, returns an RGBA tuple.
-            Maps a floating point value that varies between a min and max value to an RGBA tuple
-            i_flt - floating point value to be mapped
-            imax_flt - maximum range of the floating point value
-            imin_flt - minimum range of the floating point value
-            Returns an RGBA tuple
-        '''
-        if i_flt < imin_flt or i_flt > imax_flt:
-            return (0.0, 0.0, 0.0, 0.0)
-        SAT = 0.8
-        hue_flt = (imax_flt - i_flt)/ (imax_flt - imin_flt)
-        vmin_flt = SAT * (1 - SAT)
-        pix = [0.0,0.0,0.0,1.0]
-
-        if hue_flt < 0.25:
-            pix[0] = SAT
-            pix[1] = self.interpolate(hue_flt, 0.0, 0.25, vmin_flt, SAT)
-            pix[2] = vmin_flt
-
-        elif hue_flt < 0.5:
-            pix[0] = self.interpolate(hue_flt, 0.25, 0.5, SAT, vmin_flt)
-            pix[1] = SAT
-            pix[2] = vmin_flt
-
-        elif hue_flt < 0.75:
-            pix[0] = vmin_flt
-            pix[1] = SAT
-            pix[2] = self.interpolate(hue_flt, 0.5, 0.75, vmin_flt, SAT)
-
-        else:
-            pix[0] = vmin_flt
-            pix[1] = self.interpolate(hue_flt, 0.75, 1.0, SAT, vmin_flt)
-            pix[2] = SAT
-        return tuple(pix)
-
+        for key in colour_map:
+            self.make_colour_material(mesh, colour_map[key], key)
+            
+         
 
 #  END OF GOCAD_KIT CLASS

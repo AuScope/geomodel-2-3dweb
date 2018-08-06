@@ -41,6 +41,7 @@ class COLLADA_OUT():
             file_cnt - file counter
             point_cnt - cube counter within this file
         '''
+        #self.logger.debug("collada_cube(mesh=%s, colour_num=%s, x,y,z=%s, v_obj=%s, pt_size=%s, geometry_name=%s, file_cnt=%s, point_cnt=%s)",  repr(mesh), repr(colour_num), repr((x,y,z)), repr(v_obj), repr(pt_size), repr(geometry_name), repr(file_cnt), repr(point_cnt))
         u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_sz[0]*v_obj.axis_u[0]
         v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_sz[1]*v_obj.axis_v[1]
         w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_sz[2]*v_obj.axis_w[2]
@@ -66,10 +67,11 @@ class COLLADA_OUT():
         indices = [ 1,3,7, 1,7,5, 0,4,6, 0,6,2, 2,6,7, 2,7,3,
                    4,5,6, 5,7,6, 0,2,3, 0,3,1, 0,1,5, 0,5,4 ]
 
-        triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))
+        material_label = "materialref-{0:010d}".format(colour_num)
+        triset = geom.createTriangleSet(numpy.array(indices), input_list, material_label)
         geom.primitives.append(triset)
         mesh.geometries.append(geom)
-        matnode = Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])
+        matnode = Collada.scene.MaterialNode(material_label, mesh.materials[colour_num], inputs=[])
         geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
         node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)

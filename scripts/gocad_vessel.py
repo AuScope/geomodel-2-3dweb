@@ -280,7 +280,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         # For being within coordinate header
         inCoord = False
         
-        # Within attached binary file property class header (PROP_FILE)
+        # Within attached binary file property class header (PROPERTY_CLASS HEADER)
         inPropClassHeader = False
         
         # Within header for properties attached to points (PVRTX, PATOM)
@@ -556,8 +556,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
                 if len(splitstr_arr) > 2 and splitstr_arr[2] == "ROCK": 
                     prop_idx = splitstr_arr[1]
-                    self.prop_dict[prop_idx].is_colour_table = True
-                    self.logger.debug("self.prop_dict[%s].is_colour_table = True", prop_idx) 
+                    self.prop_dict[prop_idx].is_index_data = True
+                    self.logger.debug("self.prop_dict[%s].is_index_data = True", prop_idx) 
                     # Sometimes there is an array of indexes and labels
                     self.logger.debug(" len(splitstr_arr) = %d",  len(splitstr_arr))
                     if len(splitstr_arr) > 4:
@@ -582,6 +582,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     self.__handle_exc(exc)
 
             # Is property an integer ? What size?
+            # FIXME: Must support 'RGBA' storage type too
             elif splitstr_arr[0] == "PROP_STORAGE_TYPE":
                 if splitstr_arr[2] == "OCTET":
                     self.prop_dict[splitstr_arr[1]].data_type = "b"
@@ -1083,6 +1084,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
     def __read_colour_table_csv(self, csv_file):
         ''' Reads a colour table from CSV file for use in VOXET colours
             csv_file - filename of  CSV file to read, without path
+            Returns a dict, key is integer, keys start at 0, value is (R,G,B,A) tuple of floats
         '''
         ct = {}
         if not os.path.isfile(csv_file):
@@ -1092,10 +1094,16 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             csvfilehandle = open(csv_file, 'r')
             spamreader = csv.reader(csvfilehandle)
             for row in spamreader:
-                ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]))
+                ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]), 1.0)
         except Exception as e:
             self.logger.error("ERROR - cannot read CSV file %s %s", csv_file, e)
             sys.exit(1)
+        # Make sure it is zero-based
+        if min(ct.keys()) == 1:
+            ret_ct = {}
+            for key in ct:
+                ret_ct[key-1] = ct[key]
+            return ret_ct
         return ct
 
 

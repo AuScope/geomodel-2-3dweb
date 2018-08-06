@@ -191,7 +191,7 @@ def process(filename_str):
     '''
     global CoordOffset
     global CtFileDict
-    logger.info("\nProcessing ", filename_str)
+    logger.info("\nProcessing %s", filename_str)
     # If there is an offset from the input parameter file, then apply it
     base_xyz = (0.0, 0.0, 0.0)
     basefile = os.path.basename(filename_str)

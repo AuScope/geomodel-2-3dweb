@@ -3,7 +3,7 @@ import numpy
 class PROPS:
     ''' This class holds GOCAD properties
         e.g. information about binary files (PROP_FILE)
-             information attached to XYZ points (PATOM, PVRTX)
+             information attached to a set of XYZ points (PATOM, PVRTX)
     '''
 
     def __init__(self, class_name):
@@ -32,10 +32,6 @@ class PROPS:
         ''' Property data attached to XYZ points (index is XYZ coordinate)
         '''
 
-        self.colour_3d = {}
-        ''' Colours of properties, value is integer index to 'colour_map', stored as a 3d numpy array
-        '''
-
         self.data_stats = {}
         ''' Property data statistics: min & max
         '''
@@ -56,8 +52,8 @@ class PROPS:
         ''' Value representing 'no data' values
         '''
 
-        self.is_colour_table = False
-        ''' Uses 'colour_3d' to hold index to colour table
+        self.is_index_data = False
+        ''' Uses 'data_3d' to hold index to colour table or rock label table
         '''
 
     

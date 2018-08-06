@@ -1,6 +1,8 @@
 import sys
 import logging
 
+from false_colour import make_false_colour_tup
+
 class OBJ_OUT():
     ''' Class to output geometries to Wavefront OBJ format
     '''
@@ -26,6 +28,9 @@ class OBJ_OUT():
         OBJ_OUT.logger.setLevel(debug_level)
         self.logger = OBJ_OUT.logger
 
+        # Limit to 256 colours
+        self.MAX_COLOURS = 256.0
+
 
     def write_voxel_obj(self, v_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes):
         ''' Writes out voxel data to Wavefront OBJ and MTL files
@@ -37,10 +42,9 @@ class OBJ_OUT():
             use_full_cubes - will write out full cubes to file if true, else will remove non-visible faces
         '''
         self.logger.debug("write_voxel_obj(%s,%s)",  fileName, src_file_str)
-        # Limit to 256 colours
         mtl_fp = open(fileName+".MTL", 'w')
-        for colour_idx in range(256):
-            diffuse_colour = self.make_colour_map(float(colour_idx), 0.0, 255.0)
+        for colour_idx in range(int(self.MAX_COLOURS)):
+            diffuse_colour = make_false_colour_tup(float(colour_idx), 0.0, self.MAX_COLOURS)
             mtl_fp.write("# Wavefront MTL file converted from  '{0}'\n\n".format(src_file_str))
             mtl_fp.write("newmtl colouring-{0:03d}\n".format(colour_idx))
             mtl_fp.write("Ka {0:.3f} {1:.3f} {2:.3f}\n".format(diffuse_colour[0], diffuse_colour[1], diffuse_colour[2]))
