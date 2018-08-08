@@ -372,6 +372,23 @@ class GOCAD_KIT:
         return popup_dict
 
 
+    def compute_neighbours(self, xyz_list, step):
+        ret = {}
+        for xyz in xyz_list:
+            cnt = 0
+            for x,y,z in xyz_list:
+                if xyz != (x,y,z):
+                    if self.next_to(xyz[0], x, step) and self.next_to(xyz[1], y, step) and self.next_to(xyz[2], z, step):
+                        cnt += 1
+            ret[xyz] = cnt 
+        #self.logger.debug("compute_neighbours(%s) returns %s", repr(xyz_list), repr(ret))
+        return ret
+
+
+    def next_to(self, a,b, step):
+        return a == b or a == b+step or a == b-step
+
+
     def write_vo_collada(self, v_obj, fileName):
         ''' Write out a COLLADA file from a vo file
             fileName - filename of COLLADA file, without extension
@@ -405,12 +422,12 @@ class GOCAD_KIT:
         # Increase sample size so we don't create too much data, to be improved later on
         step = 1
         n_elems3 = v_obj.vol_sz[0] * v_obj.vol_sz[1] * v_obj.vol_sz[2]
-        # TODO: Make this bigger later??
-        while n_elems3/(step*step*step) > 10000: 
-          step += 1
+        while n_elems3/(step*step*step) > 1000: 
+            step += 1
         pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_sz[0]*2), 
                    (v_obj.axis_v[1]*step)/(v_obj.vol_sz[1]*2),
                    (v_obj.axis_w[2]*step)/(v_obj.vol_sz[2]*2)]
+        self.logger.debug("step = %d", step)
 
         for prop_idx in v_obj.prop_dict:
             prop_obj = v_obj.prop_dict[prop_idx]
@@ -428,23 +445,36 @@ class GOCAD_KIT:
                             bucket.setdefault(key, []) 
                             bucket[key].append((x,y,z))
 
+                self.logger.debug("Computed buckets")
+
+                # Computing neighbours
+                num_neighbours = {}
+                for data_val, coord_list in bucket.items():
+                    num_neighbours[data_val] = self.compute_neighbours(coord_list, step)
+
+                self.logger.debug("Computed neighbours")
+
                 # For each index value (usually rock type)
                 mesh = Collada.Collada()
                 point_cnt = 0
                 node_list = []
                 self.make_mapped_colour_materials(mesh, prop_obj.colour_map)
                 for data_val, coord_list in bucket.items():
-                    self.logger.debug("Writing coords %s for key %s", repr(coord_list[:25]), repr(data_val))
+                    self.logger.debug("Writing coords %s for key %s", repr(coord_list[:6]), repr(data_val))
+                    colour_num = data_val - int(prop_obj.data_stats['min'])
                     for x,y,z in coord_list:
-                        #self.logger.debug("%d %d %d data_val = %s", x,y,z, repr(data_val))
-                        if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
-                            colour_num = int(prop_obj.data_3d[x][y][z] - prop_obj.data_stats['min'])
-                            cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
-                            popup_dict.update(cube_popup_dict)
+                        #if num_neighbours[data_val][(x,y,z)]==26:
+                        #    self.logger.debug("%d %d %d data_val = %s num_neighbours = %d", x,y,z, repr(data_val), num_neighbours[data_val][(x,y,z)])
+                        if data_val != prop_obj.no_data_marker and num_neighbours[data_val][(x,y,z)] < 26:
+                            data_val_label = prop_obj.rock_label_table.get(colour_num, prop_obj.class_name)
+                            geom_label_stub = geometry_name+"-"+data_val_label
+                            cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geom_label_stub, file_cnt, point_cnt)
                             node_list += cube_node_list
                             point_cnt += 1
-                        else:
+                        elif prop_obj.data_3d[x][y][z] == prop_obj.no_data_marker:
                             self.logger.debug("%d %d %d no data", x,y,z)
+                    # Use a key with an asterisk
+                    popup_dict[geom_label_stub+"*"] = { 'title': v_obj.header_name, 'property name': prop_obj.class_name, 'property value': data_val_label }
                 
                 myscene = Collada.scene.Scene("myscene", node_list)
                 mesh.scenes.append(myscene)
@@ -469,8 +499,8 @@ class GOCAD_KIT:
                         for x in range(0, v_obj.vol_sz[0], step):
                             if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
                                 colour_num = calculate_false_colour_num(prop_obj.data_3d[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
-                                cube_node_list, cube_popup_dict = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
-                                popup_dict.update(cube_popup_dict)
+                                cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
+                                popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': prop_obj.class_name, 'value': "{:.3f}".format(prop_obj.data_3d[x][y][z]) }
                                 node_list += cube_node_list
                                 point_cnt += 1
                             else:

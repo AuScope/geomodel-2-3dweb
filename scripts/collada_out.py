@@ -30,8 +30,8 @@ class COLLADA_OUT():
 
 
     def collada_cube(self, mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt):
-        ''' Writes out a cube in COLLADA format
-            Returns a pycollada node list and popup dict
+        ''' Writes out a cube in COLLADA format, geometric object label
+            Returns a pycollada node list
             mesh - pycollada mesh object
             colour_num - index value for colour table
             x,y,z - integer xyz coords in volume
@@ -68,6 +68,7 @@ class COLLADA_OUT():
                    4,5,6, 5,7,6, 0,2,3, 0,3,1, 0,1,5, 0,5,4 ]
 
         material_label = "materialref-{0:010d}".format(colour_num)
+        # Triangles seem to be more efficient than polygons
         triset = geom.createTriangleSet(numpy.array(indices), input_list, material_label)
         geom.primitives.append(triset)
         mesh.geometries.append(geom)
@@ -76,10 +77,4 @@ class COLLADA_OUT():
 
         node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
         node_list.append(node)
-        if (x,y,z) in v_obj.flags_dict:
-            popup_name = v_obj.flags_dict[(x,y,z)]
-        else:
-            popup_name = v_obj.header_name
-        popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': popup_name }
-        return node_list, popup_dict
-
+        return node_list, geom_label

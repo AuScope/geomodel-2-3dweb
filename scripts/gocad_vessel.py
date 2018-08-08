@@ -6,7 +6,6 @@ from collections import namedtuple
 from collections import OrderedDict
 import logging
 import traceback
-import csv
 
 from model_geometries import MODEL_GEOMETRIES
 from props import PROPS
@@ -44,6 +43,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
     STOP_ON_EXC = True 
     ''' Stop upon exception, regardless of debug level
+    '''
+
+    SKIP_FLAGS_FILE = True
+    ''' Don't read flags file 
     '''
 
 
@@ -182,15 +185,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         '''
 
         self.region_dict = {}
-        ''' Labels and bit numbers for each region in a flags file, key is number (as string)
+        ''' Labels and bit numbers for each region in a flags file, key is number (as string), value is label
         '''
 
         self.region_colour_dict = {}
         ''' Region colour dict, key is region name, value is RGB (float, float, float)
-        '''
-
-        self.flags_dict = {}
-        '''  val is a list of region names, key is (x,y,z) tuple
         '''
 
         self.np_filename = ""
@@ -700,21 +699,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 
             # END OF TEXT PROCESSING LOOP
 
-        self.logger.debug("process_gocad() filename_str = %s", filename_str)
-            
-        # Calculate max and min of properties
-        for prop_obj in self.local_props.values():
-            prop_obj.data_stats = { 'min': sys.float_info.max, 'max': -sys.float_info.max }
-            # Some properties are XYZ, so only take X for calculating max and min
-            if len(prop_obj.data_xyz.values()) > 0:
-                first_val_list = list(map(lambda x: x if type(x) is float else x[0], prop_obj.data_xyz.values()))
-                prop_obj.data_stats['max'] = max(list(first_val_list))
-                prop_obj.data_stats['min'] = min(list(first_val_list))
-            self.logger.debug("prop_obj.data_stats = %s", repr(prop_obj.data_stats))
-
-        self.logger.debug("process_gocad() returns")
         # Read in any binary data files and flags files attached to voxel files
         retVal = self.__read_voxel_binary_files()
+
+        self.logger.debug("process_gocad() returns")
         return retVal
 
 
@@ -805,16 +793,17 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 bin_file = os.path.basename(prop_obj.file_name)
                 if bin_file in self.ct_file_dict:
                     csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name), self.ct_file_dict[bin_file])
-                    prop_obj.colour_map = self.__read_colour_table_csv(csv_file_path)
+                    prop_obj.read_colour_table_csv(csv_file_path)
                     self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
+                    self.logger.debug("prop_obj.rock_label_table = %s", repr(prop_obj.rock_label_table))
 
                 # Read and process binary file
                 try:
                     # Check file size first
                     file_sz = os.path.getsize(prop_obj.file_name)
                     num_voxels = prop_obj.data_sz*self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-                    if file_sz != num_voxels:
-                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is not correct %s", num_voxels, prop_obj.file_name)
+                    if file_sz < num_voxels:
+                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is less than data cube size (%d): %s", file_sz, num_voxels, prop_obj.file_name)
                         sys.exit(1)
 
                     # Initialise data array to zeros
@@ -825,9 +814,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
                     # Read entire file, assumes file small enough to store in memory
                     self.logger.info("Reading binary file: %s", prop_obj.file_name)
-                    f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt)
+                    f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels)
                     fl_idx = 0
-                    prop_obj.data_stats = { 'max': -sys.float_info.max, 'min': sys.float_info.max }
                     mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
                             (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
                             (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
@@ -839,11 +827,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                 fl_idx +=1
                                 if not converted:
                                     continue
-                                prop_obj.data_3d[x][y][z] = fp
-                                if (prop_obj.data_3d[x][y][z] > prop_obj.data_stats['max']):
-                                    prop_obj.data_stats['max'] = prop_obj.data_3d[x][y][z]
-                                if (prop_obj.data_3d[x][y][z] < prop_obj.data_stats['min']):
-                                    prop_obj.data_stats['min'] = prop_obj.data_3d[x][y][z]
+                                prop_obj.assign_to_3d(x,y,z, fp)
 
                                 # Calculate the XYZ coords and their maxs & mins
                                 X_coord = self.axis_origin[0]+ \
@@ -858,7 +842,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
                     sys.exit(1)
 
-            self.__read_flags_file()
+            if not self.SKIP_FLAGS_FILE:
+                self.__read_flags_file()
         return True
 
 
@@ -917,8 +902,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                                     key = self.region_dict[str(cnt)]
                                     # self.logger.debug('cnt = %d bit = %d', cnt, bit)
                                     # self.logger.debug('key = %s', key)
-                                    self.flags_prop.data_xyz.setdefault((x,y,z), [])
-                                    self.flags_prop.data_xyz[(x,y,z)].append(key)
+                                    self.flags_prop.append_to_xyz((x,y,z), key)
                                 cnt -= 1
                             f_idx += 1
                 
@@ -927,7 +911,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 self.logger.debug("process_gocad() return False")
                 return False
 
-        # self.logger.debug('self.flags_dict= %s', repr(self.flags_dict))
         return True
 
 
@@ -956,7 +939,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     fp_str = splitstr_arr[col_idx]
                 converted, fp = self.__parse_float(fp_str, prop_obj.no_data_marker)
                 if converted:
-                    prop_obj.data_xyz[coord_tup] = fp
+                    prop_obj.assign_to_xyz(coord_tup, fp)
                     self.logger.debug("prop_obj.data_xyz[%s] = %f", repr(coord_tup), fp)
                 col_idx += 1
             # Property has 3 floats i.e. XYZ
@@ -972,7 +955,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 convertedY, fpY = self.__parse_float(fp_strY, prop_obj.no_data_marker)
                 convertedZ, fpZ = self.__parse_float(fp_strZ, prop_obj.no_data_marker)
                 if convertedZ and convertedY and convertedX:
-                    prop_obj.data_xyz[coord_tup] = (fpX, fpY, fpZ)
+                    prop_obj.assign_to_xyz(coord_tup, (fpX, fpY, fpZ))
                     self.logger.debug("prop_obj.data_xyz[%s] = (%f,%f,%f)", repr(coord_tup), fpX, fpY, fpZ)
                 col_idx += 3
             else:
@@ -1078,35 +1061,6 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             self.__handle_exc(exc)
             rgba_tup = (1.0, 1.0, 1.0, 1.0)
         return rgba_tup
-
-
-
-    def __read_colour_table_csv(self, csv_file):
-        ''' Reads a colour table from CSV file for use in VOXET colours
-            csv_file - filename of  CSV file to read, without path
-            Returns a dict, key is integer, keys start at 0, value is (R,G,B,A) tuple of floats
-        '''
-        ct = {}
-        if not os.path.isfile(csv_file):
-            self.logger.error("ERROR - cannot find CSV file: %s", csv_file)
-            sys.exit(1)
-        try:
-            csvfilehandle = open(csv_file, 'r')
-            spamreader = csv.reader(csvfilehandle)
-            for row in spamreader:
-                ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]), 1.0)
-        except Exception as e:
-            self.logger.error("ERROR - cannot read CSV file %s %s", csv_file, e)
-            sys.exit(1)
-        # Make sure it is zero-based
-        if min(ct.keys()) == 1:
-            ret_ct = {}
-            for key in ct:
-                ret_ct[key-1] = ct[key]
-            return ret_ct
-        return ct
-
-
 
 
 #  END OF GOCAD_VESSEL CLASS
