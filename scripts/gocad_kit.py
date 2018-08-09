@@ -373,6 +373,10 @@ class GOCAD_KIT:
 
 
     def compute_neighbours(self, xyz_list, step):
+        ''' Counts the number of neighbours of each point in a 3d array
+            xyz_list - list of (X,Y,Z) coordinates
+            Returns dictionary: key is (X,Y,Z), vales is number of neighbours 
+        '''
         ret = {}
         for xyz in xyz_list:
             cnt = 0
@@ -386,6 +390,8 @@ class GOCAD_KIT:
 
 
     def next_to(self, a,b, step):
+        ''' Returns True iff a equals b or if a is exactly 'step' units away from b
+        '''
         return a == b or a == b+step or a == b-step
 
 
@@ -402,6 +408,7 @@ class GOCAD_KIT:
             sys.exit(1)
 
         # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
+        # TODO: Make it work for all values of AXIS_MIN & AXIS_MAX
         if v_obj.axis_min != (0.0,0.0,0.0) and v_obj.axis_max != (1.0,1.0,1.0):
             self.logger.error("ERROR - Cannot process volumes where axis_min != 0.0 and axis_max != 1.0")
             sys.exit(1)
@@ -422,7 +429,7 @@ class GOCAD_KIT:
         # Increase sample size so we don't create too much data, to be improved later on
         step = 1
         n_elems3 = v_obj.vol_sz[0] * v_obj.vol_sz[1] * v_obj.vol_sz[2]
-        while n_elems3/(step*step*step) > 1000: 
+        while n_elems3/(step*step*step) > 100000: 
             step += 1
         pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_sz[0]*2), 
                    (v_obj.axis_v[1]*step)/(v_obj.vol_sz[1]*2),
@@ -441,9 +448,10 @@ class GOCAD_KIT:
                 for z in range(0, v_obj.vol_sz[2], step):
                     for y in range(0, v_obj.vol_sz[1], step):
                         for x in range(0, v_obj.vol_sz[0], step):
-                            key = int(prop_obj.data_3d[x][y][z])
-                            bucket.setdefault(key, []) 
-                            bucket[key].append((x,y,z))
+                            if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
+                                key = int(prop_obj.data_3d[x][y][z])
+                                bucket.setdefault(key, []) 
+                                bucket[key].append((x,y,z))
 
                 self.logger.debug("Computed buckets")
 
@@ -455,37 +463,44 @@ class GOCAD_KIT:
                 self.logger.debug("Computed neighbours")
 
                 # For each index value (usually rock type)
-                mesh = Collada.Collada()
-                point_cnt = 0
-                node_list = []
-                self.make_mapped_colour_materials(mesh, prop_obj.colour_map)
                 for data_val, coord_list in bucket.items():
                     self.logger.debug("Writing coords %s for key %s", repr(coord_list[:6]), repr(data_val))
+                    mesh = Collada.Collada()
+                    self.make_mapped_colour_materials(mesh, prop_obj.colour_map)
+                    point_cnt = 0
+                    node_list = []
                     colour_num = data_val - int(prop_obj.data_stats['min'])
+                    data_val_label = prop_obj.rock_label_table.get(colour_num, prop_obj.class_name)
+                    geom_label_stub = geometry_name+"-"+data_val_label
                     for x,y,z in coord_list:
-                        #if num_neighbours[data_val][(x,y,z)]==26:
-                        #    self.logger.debug("%d %d %d data_val = %s num_neighbours = %d", x,y,z, repr(data_val), num_neighbours[data_val][(x,y,z)])
-                        if data_val != prop_obj.no_data_marker and num_neighbours[data_val][(x,y,z)] < 26:
-                            data_val_label = prop_obj.rock_label_table.get(colour_num, prop_obj.class_name)
-                            geom_label_stub = geometry_name+"-"+data_val_label
+                        # self.logger.debug("%d %d %d data_val = %s num_neighbours = %d", x,y,z, repr(data_val), num_neighbours[data_val][(x,y,z)])
+                        # If surrounded by other cubes, then omit
+                        if num_neighbours[data_val][(x,y,z)] < 26:
                             cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geom_label_stub, file_cnt, point_cnt)
                             node_list += cube_node_list
                             point_cnt += 1
-                        elif prop_obj.data_3d[x][y][z] == prop_obj.no_data_marker:
-                            self.logger.debug("%d %d %d no data", x,y,z)
-                    # Use a key with an asterisk
-                    popup_dict[geom_label_stub+"*"] = { 'title': v_obj.header_name, 'property name': prop_obj.class_name, 'property value': data_val_label }
-                
-                myscene = Collada.scene.Scene("myscene", node_list)
-                mesh.scenes.append(myscene)
-                mesh.scene = myscene
 
-                out_filename = fileName+'_'+str(file_cnt)
-                self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
-                mesh.write(out_filename+'.dae')
-                popup_list.append((popup_dict, out_filename))
-                popup_dict = {}
-                file_cnt += 1
+                    # Use a key with a regular expression to save writing thousands of properties to config file
+                    popup_dict["^"+geom_label_stub] = { 'title': v_obj.header_name, 'property name': prop_obj.class_name, 'property value': data_val_label }
+                
+                    myscene = Collada.scene.Scene("myscene", node_list)
+                    mesh.scenes.append(myscene)
+                    mesh.scene = myscene
+
+                    # If there are unique labels, then use these, else use the filename
+                    if data_val_label != prop_obj.class_name:
+                        popup_dict_key = data_val_label
+                    else:
+                        popup_dict_key = fileName+'_'+str(file_cnt)
+
+                    # Write out COLLADA file
+                    out_filename = fileName+'_'+str(file_cnt)
+                    self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
+                    mesh.write(out_filename+'.dae')
+
+                    popup_list.append((popup_dict_key, popup_dict, out_filename))
+                    popup_dict = {}
+                    file_cnt += 1
 
             # The physical measurements kind uses a false colour map, and written as one big VOXET file
             else:
@@ -513,7 +528,7 @@ class GOCAD_KIT:
                 out_filename = fileName+'_'+str(file_cnt)
                 self.logger.info("write_vo_collada() Writing COLLADA file: %s.dae", out_filename)
                 mesh.write(out_filename+'.dae')
-                popup_list.append((popup_dict, out_filename))
+                popup_list.append((prop_obj.class_name, popup_dict, out_filename))
                 popup_dict = {}
                 file_cnt += 1
                 

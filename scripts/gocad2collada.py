@@ -228,7 +228,7 @@ def process(filename_str):
             if ext_str == 'VS' and len(gv.get_vrtx_arr()) > 0:
                 popup_dict = gs.write_collada(gv, out_filename)
                 has_result = True
-                model_dict_list.append(add_info2popup(popup_dict, out_filename))
+                model_dict_list.append(add_info2popup(gv.header_name, popup_dict, out_filename))
 
             elif ext_str == 'VO':
                 # By default must convert upper layer to PNG because some voxel files are too large
@@ -237,14 +237,14 @@ def process(filename_str):
                 if OUTPUT_VOXEL_GLTF and not gv.is_single_layer_vo():
                     # Produce a GLTF from voxel file
                     popup_list = gs.write_vo_collada(gv, out_filename)
-                    for popup_dict, out_filename in popup_list:
-                        model_dict_list.append(add_info2popup(popup_dict, out_filename))
+                    for popup_dict_key, popup_dict, out_filename in popup_list:
+                        model_dict_list.append(add_info2popup(popup_dict_key, popup_dict, out_filename))
                 else:
                     # *.VO files will produce a PNG file, not GLTF
                     popup_list = gs.write_voxel_png(gv, gocad_src_dir, out_filename)
                     file_idx=1
                     for popup_obj in popup_list:
-                        model_dict_list.append(add_info2popup(popup_obj, out_filename+"_{0}".format(file_idx), file_ext='.PNG', position=gv.axis_origin))
+                        model_dict_list.append(add_info2popup("{0}_{1}".format(gv.header_name, file_idx), popup_obj, out_filename+"_{0}".format(file_idx), file_ext='.PNG', position=gv.axis_origin))
                         file_idx+=1
                 has_result = True
             mask_idx+=1
@@ -270,7 +270,7 @@ def process(filename_str):
             extent_list.append(gv.get_extent())
 
         if has_result:
-            model_dict_list.append(add_info2popup(popup_dict, fileName))
+            model_dict_list.append(add_info2popup(os.path.basename(fileName), popup_dict, fileName))
             gs.end_collada(fileName)
         
 
@@ -287,7 +287,7 @@ def process(filename_str):
                 extent_list.append(gv.get_extent())
                 has_result = True
             if has_result:
-                model_dict_list.append(add_info2popup(popup_dict, fileName))
+                model_dict_list.append(add_info2popup(os.path.basename(fileName), popup_dict, fileName))
                 gs.end_collada(fileName)
  
         # Else place each GOCAD object in a separate file
@@ -296,7 +296,7 @@ def process(filename_str):
             for gv in gv_list:
                 out_filename = "{0}_{1:d}".format(fileName, file_idx)
                 p_dict = gs.write_collada(gv, out_filename)
-                model_dict_list.append(add_info2popup(p_dict, out_filename))
+                model_dict_list.append(add_info2popup(gv.header_name, p_dict, out_filename))
                 file_idx += 1
                 extent_list.append(gv.get_extent())
                 has_result = True
@@ -333,14 +333,15 @@ def reduce_extents(extent_list):
     return out_extent
 
 
-def add_info2popup(popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
+def add_info2popup(label_str, popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
     ''' Adds more information to popup dictionary
+        label_str - string to use as a display name for this part of the model
         popup_dict - information to display in popup window
             ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
         fileName - file and path without extension of source file
         Returns a dict of model info, which includes the popup dict
     '''
-    logger.debug("add_info2popup(%s, %s)", fileName, file_ext)
+    logger.debug("add_info2popup(%s, %s, %s)", label_str, fileName, file_ext)
     np_filename = os.path.basename(fileName)
     j_dict = {}
     j_dict['popups'] = popup_dict
@@ -350,7 +351,7 @@ def add_info2popup(popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0
     else: 
         j_dict['type'] = 'GLTFObject'
     j_dict['model_url'] = np_filename + file_ext
-    j_dict['display_name'] = np_filename.replace('_',' ')
+    j_dict['display_name'] = label_str.replace('_',' ')
     j_dict['include'] = True
     j_dict['displayed'] = True 
     return j_dict
