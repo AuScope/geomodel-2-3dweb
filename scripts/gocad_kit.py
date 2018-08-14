@@ -306,7 +306,7 @@ class GOCAD_KIT:
         if len(v_obj.local_props.keys()) > 0:
             self.make_false_colour_materials(mesh, self.MAX_COLOURS)
             prop_str = list(v_obj.local_props.keys())[0]
-            prop_dict = v_obj.local_props[prop_str].data_3d
+            prop_dict = v_obj.local_props[prop_str].data_xyz
             max_v = v_obj.local_props[prop_str].data_stats['max']
             min_v = v_obj.local_props[prop_str].data_stats['min']
 
