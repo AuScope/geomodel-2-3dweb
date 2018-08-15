@@ -38,10 +38,6 @@ NONDEF_COORDS = False
 ''' Will tolerate non default coordinates
 '''
 
-OUTPUT_VOXEL_GLTF = False
-''' Will output voxel files as GLTF, use only for small voxel files
-'''
-
 # Set up debugging 
 logger = logging.getLogger(__name__)
 
@@ -231,10 +227,8 @@ def process(filename_str):
                 model_dict_list.append(add_info2popup(gv.header_name, popup_dict, out_filename))
 
             elif ext_str == 'VO':
-                # By default must convert upper layer to PNG because some voxel files are too large
-                # Will always convert single layer voxel files to PNG
                 #gs.write_OBJ(gv, out_filename, filename_str)
-                if OUTPUT_VOXEL_GLTF and not gv.is_single_layer_vo():
+                if not gv.is_single_layer_vo():
                     # Produce a GLTF from voxel file
                     popup_list = gs.write_vo_collada(gv, out_filename)
                     for popup_dict_key, popup_dict, out_filename in popup_list:
@@ -482,7 +476,6 @@ if __name__ == "__main__":
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
     parser.add_argument('--nondefault_coord', '-x', action='store_true', help='Tolerate non-default GOCAD coordinate system')
-    parser.add_argument('--voxel_gltf', '-l', action='store_true', help='Write out voxels as GLTF instead of upper layer as PNG')
     args = parser.parse_args()
 
     model_dict_list = {}
@@ -501,9 +494,6 @@ if __name__ == "__main__":
     if args.nondefault_coord:
         NONDEF_COORDS = True
 
-    if args.voxel_gltf:
-        OUTPUT_VOXEL_GLTF = True
-    
     # Create logging console handler
     handler = logging.StreamHandler(sys.stdout)
 
