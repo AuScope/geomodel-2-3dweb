@@ -62,6 +62,10 @@ class PROPS:
         self.rock_label_table = {}
         ''' Table specifying names of rocks 
         '''
+  
+        self.offset = 0
+        ''' Offset within binary file
+        '''
 
     
     def __repr__(self):

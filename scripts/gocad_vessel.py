@@ -329,374 +329,365 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 self.logger.debug("Skip control nodes")
                 continue
 
-            # Are we within coordinate system header?
-            elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
-                inCoord = True
-                self.logger.debug("inCoord True")
-            
-            # Are we leaving coordinate system header?
-            elif splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
-                inCoord = False
-                self.logger.debug("inCoord False")
-            
-            # Within coordinate system header and not using the default coordinate system
-            elif inCoord and splitstr_arr[0] == "NAME":
-                self.coord_sys_name = splitstr_arr[1]
-                if splitstr_arr[1] != "DEFAULT":
-                    self.usesDefaultCoords = False
-                    self.logger.debug("usesDefaultCoords False")
+            try:
 
-                    # FIXME: I can't support non default coords yet - need to enter via command line?
-                    # If does not support default coords then exit
-                    if not self.nondefault_coords:
-                        self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
-                        self.logger.debug("process_gocad() return False")
-                        return False 
+                # Are we within coordinate system header?
+                if splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
+                    inCoord = True
+                    self.logger.debug("inCoord True")
+            
+                # Are we leaving coordinate system header?
+                elif splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
+                    inCoord = False
+                    self.logger.debug("inCoord False")
+            
+                # Within coordinate system header and not using the default coordinate system
+                elif inCoord and splitstr_arr[0] == "NAME":
+                    self.coord_sys_name = splitstr_arr[1]
+                    if splitstr_arr[1] != "DEFAULT":
+                        self.usesDefaultCoords = False
+                        self.logger.debug("usesDefaultCoords False")
+
+                        # FIXME: I can't support non default coords yet - need to enter via command line?
+                        # If does not support default coords then exit
+                        if not self.nondefault_coords:
+                            self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
+                            self.logger.debug("process_gocad() return False")
+                            return False 
                 
-            # Does coordinate system use inverted z-axis?
-            elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
-                self.invert_zaxis=True
-                self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
+                # Does coordinate system use inverted z-axis?
+                elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
+                    self.invert_zaxis=True
+                    self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
             
-            # Are we in the header?
-            elif splitstr_arr[0] == "HEADER":
-                inHeader = True
-                self.logger.debug("inHeader = %s", repr(inHeader))
+                # Are we in the header?
+                elif splitstr_arr[0] == "HEADER":
+                    inHeader = True
+                    self.logger.debug("inHeader = %s", repr(inHeader))
 
-            # Are we in the property class header?
-            elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
-                propClassIndex = splitstr_arr[1]
-                # There are two kinds of PROPERTY_CLASS_HEADER
-                # First, properties attached to points
-                if splitstr_arr[2] == '{':
-                    inLocalPropClassHeader = True
-                # Properties of binary files 
-                elif splitstr_arr[3] == '{':
-                    if propClassIndex not in self.prop_dict:
-                        self.prop_dict[propClassIndex] = PROPS(splitstr_arr[2])
-                    inPropClassHeader = True
-                else:
-                    self.logger.error("ERROR - Cannot parse property header")
-                    sys.exit(1)
-                self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
-
-            # Are we out of the header?    
-            elif inHeader and splitstr_arr[0] == "}":
-                inHeader = False
-                self.logger.debug("inHeader = %s", repr(inHeader))
-
-            # Property class headers for binary files
-            elif inPropClassHeader:
-                # Leaving header
-                if splitstr_arr[0] == "}":
-                    inPropClassHeader = False
-                    propClassIndex = ''
-                    self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
-                else:
-                    # When in the PROPERTY CLASS headers, get the colour table
-                    self.__parse_property_header(self.prop_dict[propClassIndex], line_str)
-
-            # Property class headers for local points
-            elif inLocalPropClassHeader:
-                # Leaving header
-                if splitstr_arr[0] == "}":
-                    inLocalPropClassHeader = False
-                    propClassIndex = ''
-                    self.logger.debug("inLocalPropClassHeader = %s", repr(inLocalPropClassHeader))
-                else:
-                    # When in the PROPERTY CLASS headers, get the colour table
-                    if propClassIndex in self.local_props:
-                        self.__parse_property_header(self.local_props[propClassIndex], line_str)
-
-            # When in the HEADER get the colours
-            elif inHeader:
-                name_str, sep, value_str = line_str.partition(':')
-                name_str = name_str.strip()
-                value_str = value_str.strip()
-                self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
-                if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
-                    self.rgba_tup = self.__parse_colour(value_str)
-
-                    self.logger.debug("self.rgba_tup = %s", repr(self.rgba_tup))
-                elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
-                    region_name = name_str.split('*')[2] 
-                    self.region_colour_dict[region_name] = self.__parse_colour(value_str)
-                    self.logger.debug("region_colour_dict[%s] = %s", region_name, repr(self.region_colour_dict[region_name]))
-           
-                if name_str=='NAME':
-                    self.header_name = value_str.replace('/','-')
-                    self.logger.debug("self.header_name = %s", self.header_name)
-
-            # Axis units - check if units are kilometres, and update coordinate multiplier
-            elif splitstr_arr[0] == "AXIS_UNIT":
-                for idx in range(0,3):
-                    unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
-                    if unit_str=='KM':
-                        self.xyz_mult[idx] =  1000.0
-                    # Warn if not metres or kilometres or unitless etc.
-                    elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
-                        self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+                # Are we in the property class header?
+                elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
+                    propClassIndex = splitstr_arr[1]
+                    # There are two kinds of PROPERTY_CLASS_HEADER
+                    # First, properties attached to points
+                    if splitstr_arr[2] == '{':
+                        inLocalPropClassHeader = True
+                    # Properties of binary files 
+                    elif splitstr_arr[3] == '{':
+                        if propClassIndex not in self.prop_dict:
+                            self.prop_dict[propClassIndex] = PROPS(splitstr_arr[2])
+                        inPropClassHeader = True
                     else:
-                        self.xyz_unit[idx] = unit_str
-
-            # Property names, this is not the class names
-            elif splitstr_arr[0] == "PROPERTIES":
-                if len(self.local_props) == 0:
-                    for class_name in splitstr_arr[1:]:
-                        self.local_props[class_name] = PROPS(class_name)
-                self.logger.debug(" properties list = %s", repr(splitstr_arr[1:]))
-
-            # These are the property names for the point properties (e.g. PVRTX, PATOM)
-            elif splitstr_arr[0] == "PROPERTY_CLASSES":
-                if len(self.local_props) == 0:
-                    for class_name in splitstr_arr[1:]:
-                        self.local_props[class_name] = PROPS(class_name)
-                self.logger.debug(" property classes = %s", repr(splitstr_arr[1:]))
-
-            # This is the number of floats/ints for each property, usually it is '1',
-            # but XYZ values are '3'
-            elif splitstr_arr[0] == "ESIZES":
-                idx = 1
-                for prop_obj in self.local_props.values():
-                    try:
-                        prop_obj.data_sz = int(splitstr_arr[idx])
-                    except (ValueError, IndexError, OverflowError) as exc:
-                        self.__handle_exc(exc)
-                    idx += 1 
-                self.logger.debug(" property_sizes = %s", repr(splitstr_arr[1:]))
-
-            # Read values representing no data for this property at a coordinate point
-            elif splitstr_arr[0] == "NO_DATA_VALUES":
-                idx = 1
-                for prop_obj in self.local_props.values():
-                    try:
-                        converted, fp  = self.__parse_float(splitstr_arr[idx])
-                        if converted:
-                            prop_obj.no_data_marker = fp
-                            self.logger.debug("prop_obj.no_data_marker = %f", prop_obj.no_data_marker)
-                    except IndexError as exc:
-                        self.__handle_exc(exc)
-                    idx += 1
-                self.logger.debug(" property_nulls = %s", repr(splitstr_arr[1:]))
-                
-            # Atoms, with or without properties
-            elif splitstr_arr[0] == "ATOM" or splitstr_arr[0] == 'PATOM':
-                seq_no_prev = seq_no
-                try:
-                    seq_no = int(splitstr_arr[1])
-                    v_num = int(splitstr_arr[2])
-                except (OverflowError, ValueError, IndexError) as exc:
-                    self.__handle_exc(exc)
-                    seq_no = seq_no_prev
-                else:
-                    if self._check_vertex(v_num):
-                        self._atom_arr.append(self.ATOM(seq_no, v_num))
-                    else:
-                        self.logger.error("ERROR - ATOM refers to VERTEX that has not been defined yet")
-                        self.logger.error("    seq_no = %d", seq_no)
-                        self.logger.error("    v_num = %d", v_num)
-                        self.logger.error("    line = %s", line_str)
+                        self.logger.error("ERROR - Cannot parse property header")
                         sys.exit(1)
+                    self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
 
-                    # Atoms with attached properties
-                    if splitstr_arr[0] == "PATOM":
+                # Are we out of the header?    
+                elif inHeader and splitstr_arr[0] == "}":
+                    inHeader = False
+                    self.logger.debug("inHeader = %s", repr(inHeader))
+
+                # Property class headers for binary files
+                elif inPropClassHeader:
+                    # Leaving header
+                    if splitstr_arr[0] == "}":
+                        inPropClassHeader = False
+                        propClassIndex = ''
+                        self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
+                    else:
+                        # When in the PROPERTY CLASS headers, get the colour table
+                        self.__parse_property_header(self.prop_dict[propClassIndex], line_str)
+
+                # Property class headers for local points
+                elif inLocalPropClassHeader:
+                    # Leaving header
+                    if splitstr_arr[0] == "}":
+                        inLocalPropClassHeader = False
+                        propClassIndex = ''
+                        self.logger.debug("inLocalPropClassHeader = %s", repr(inLocalPropClassHeader))
+                    else:
+                        # When in the PROPERTY CLASS headers, get the colour table
+                        if propClassIndex in self.local_props:
+                            self.__parse_property_header(self.local_props[propClassIndex], line_str)
+
+                # When in the HEADER get the colours
+                elif inHeader:
+                    name_str, sep, value_str = line_str.partition(':')
+                    name_str = name_str.strip()
+                    value_str = value_str.strip()
+                    self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
+                    if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
+                        self.rgba_tup = self.__parse_colour(value_str)
+
+                        self.logger.debug("self.rgba_tup = %s", repr(self.rgba_tup))
+                    elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
+                        region_name = name_str.split('*')[2] 
+                        self.region_colour_dict[region_name] = self.__parse_colour(value_str)
+                        self.logger.debug("region_colour_dict[%s] = %s", region_name, repr(self.region_colour_dict[region_name]))
+           
+                    if name_str=='NAME':
+                        self.header_name = value_str.replace('/','-')
+                        self.logger.debug("self.header_name = %s", self.header_name)
+
+                # Axis units - check if units are kilometres, and update coordinate multiplier
+                elif splitstr_arr[0] == "AXIS_UNIT":
+                    for idx in range(0,3):
+                        unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
+                        if unit_str=='KM':
+                            self.xyz_mult[idx] =  1000.0
+                        # Warn if not metres or kilometres or unitless etc.
+                        elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
+                            self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+                        else:
+                            self.xyz_unit[idx] = unit_str
+
+                # Property names, this is not the class names
+                elif splitstr_arr[0] == "PROPERTIES":
+                    if len(self.local_props) == 0:
+                        for class_name in splitstr_arr[1:]:
+                            self.local_props[class_name] = PROPS(class_name)
+                    self.logger.debug(" properties list = %s", repr(splitstr_arr[1:]))
+
+                # These are the property names for the point properties (e.g. PVRTX, PATOM)
+                elif splitstr_arr[0] == "PROPERTY_CLASSES":
+                    if len(self.local_props) == 0:
+                        for class_name in splitstr_arr[1:]:
+                            self.local_props[class_name] = PROPS(class_name)
+                    self.logger.debug(" property classes = %s", repr(splitstr_arr[1:]))
+
+                # This is the number of floats/ints for each property, usually it is '1',
+                # but XYZ values are '3'
+                elif splitstr_arr[0] == "ESIZES":
+                    idx = 1
+                    for prop_obj in self.local_props.values():
+                        is_ok, l = self.__parse_int(splitstr_arr[idx])
+                        if is_ok:
+                            prop_obj.data_sz = l
+                        idx += 1 
+                    self.logger.debug(" property_sizes = %s", repr(splitstr_arr[1:]))
+
+                # Read values representing no data for this property at a coordinate point
+                elif splitstr_arr[0] == "NO_DATA_VALUES":
+                    idx = 1
+                    for prop_obj in self.local_props.values():
                         try:
-                            vert_dict = self.make_vertex_dict()
-                            self.__parse_props(splitstr_arr, self._vrtx_arr[vert_dict[v_num]].xyz, True)
+                            converted, fp  = self.__parse_float(splitstr_arr[idx])
+                            if converted:
+                                prop_obj.no_data_marker = fp
+                                self.logger.debug("prop_obj.no_data_marker = %f", prop_obj.no_data_marker)
                         except IndexError as exc:
                             self.__handle_exc(exc)
+                        idx += 1
+                    self.logger.debug(" property_nulls = %s", repr(splitstr_arr[1:]))
+                
+                # Atoms, with or without properties
+                elif splitstr_arr[0] == "ATOM" or splitstr_arr[0] == 'PATOM':
+                    seq_no_prev = seq_no
+                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
+                    is_ok, v_num = self.__parse_int(splitstr_arr[2])
+                    if not is_ok_s or not is_ok:
+                        seq_no = seq_no_prev
+                    else:
+                        if self._check_vertex(v_num):
+                            self._atom_arr.append(self.ATOM(seq_no, v_num))
+                        else:
+                            self.logger.error("ERROR - ATOM refers to VERTEX that has not been defined yet")
+                            self.logger.error("    seq_no = %d", seq_no)
+                            self.logger.error("    v_num = %d", v_num)
+                            self.logger.error("    line = %s", line_str)
+                            sys.exit(1)
+
+                        # Atoms with attached properties
+                        if splitstr_arr[0] == "PATOM":
+                            vert_dict = self.make_vertex_dict()
+                            self.__parse_props(splitstr_arr, self._vrtx_arr[vert_dict[v_num]].xyz, True)
                   
-            # Grab the vertices and properties, does not care if there are gaps in the sequence number
-            elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
-                seq_no_prev = seq_no
-                try:
-                    seq_no = int(splitstr_arr[1])
+                # Grab the vertices and properties, does not care if there are gaps in the sequence number
+                elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
+                    seq_no_prev = seq_no
+                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[2], splitstr_arr[3], splitstr_arr[4], True)
                     self.logger.debug("ParseXYZ %s %f %f %f from %s %s %s", repr(is_ok), x_flt, y_flt, z_flt,  splitstr_arr[2], splitstr_arr[3], splitstr_arr[4])
-                except (IndexError, ValueError, OverflowError) as exc:
-                    self.__handle_exc(exc)
-                    seq_no = seq_no_prev
-                else:
-                    if is_ok:
+                    if not is_ok_s or not is_ok:
+                        seq_no = seq_no_prev
+                    else:
                         # Add vertex
                         if self.invert_zaxis:
                             z_flt = -z_flt
                         self._vrtx_arr.append(self.VRTX(seq_no, (x_flt, y_flt, z_flt)))
-
+   
                         # Vertices with attached properties
                         if splitstr_arr[0] == "PVRTX":
                             self.__parse_props(splitstr_arr, (x_flt, y_flt, z_flt))
 
-            # Grab the triangular edges
-            elif splitstr_arr[0] == "TRGL":
-                seq_no_prev = seq_no
-                try:
-                    seq_no = int(splitstr_arr[1])
+                # Grab the triangular edges
+                elif splitstr_arr[0] == "TRGL":
+                    seq_no_prev = seq_no
+                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
                     is_ok, a_int, b_int, c_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                except (IndexError, ValueError, OverflowError) as exc:
-                    self.__handle_exc(exc)
-                    seq_no = seq_no_prev
-                else:
-                    if is_ok:
+                    if not is_ok or not is_ok_s:
+                        seq_no = seq_no_prev
+                    else:
                         self._trgl_arr.append(self.TRGL(seq_no, (a_int, b_int, c_int)))
 
-            # Grab the segments
-            elif splitstr_arr[0] == "SEG":
-                try:
-                    a_int = int(splitstr_arr[1])
-                    b_int = int(splitstr_arr[2])
-                except (IndexError, ValueError) as exc:
-                    self.__handle_exc(exc)
-                    seq_no = seq_no_prev
-                else:
-                    self._seg_arr.append(self.SEG(seq_no, (a_int, b_int)))
+                # Grab the segments
+                elif splitstr_arr[0] == "SEG":
+                    is_ok_a, a_int = self.__parse_int(splitstr_arr[1])
+                    is_ok_b, b_int = self.__parse_int(splitstr_arr[2])
+                    if is_ok_a and is_ok_b:
+                        self._seg_arr.append(self.SEG((a_int, b_int)))
 
-            # What kind of property is this? Is it a measurement, or a reference to a rock colour table?
-            elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
-                if len(splitstr_arr) > 2 and splitstr_arr[2] == "ROCK": 
-                    prop_idx = splitstr_arr[1]
-                    self.prop_dict[prop_idx].is_index_data = True
-                    self.logger.debug("self.prop_dict[%s].is_index_data = True", prop_idx) 
-                    # Sometimes there is an array of indexes and labels
-                    self.logger.debug(" len(splitstr_arr) = %d",  len(splitstr_arr))
-                    if len(splitstr_arr) > 4:
-                        for idx in range(4, len(splitstr_arr), 2):
-                            rock_label = splitstr_arr[idx] 
-                            rock_index = int(splitstr_arr[1+idx])
-                            self.rock_label_idx.setdefault(prop_idx, {})
-                            self.rock_label_idx[prop_idx][rock_index] = rock_label
-                        self.logger.debug("self.rock_label_idx[%s] = %s", prop_idx, repr(self.rock_label_idx[prop_idx]))
+                # What kind of property is this? Is it a measurement, or a reference to a rock colour table?
+                elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
+                    if len(splitstr_arr) > 2 and splitstr_arr[2] == "ROCK": 
+                        prop_idx = splitstr_arr[1]
+                        self.prop_dict[prop_idx].is_index_data = True
+                        self.logger.debug("self.prop_dict[%s].is_index_data = True", prop_idx) 
+                        # Sometimes there is an array of indexes and labels
+                        self.logger.debug(" len(splitstr_arr) = %d",  len(splitstr_arr))
+                        if len(splitstr_arr) > 4:
+                            for idx in range(4, len(splitstr_arr), 2):
+                                rock_label = splitstr_arr[idx] 
+                                is_ok, l = self.__parse_int(splitstr_arr[1+idx])
+                                if is_ok:
+                                    rock_index = l
+                                    self.rock_label_idx.setdefault(prop_idx, {})
+                                    self.rock_label_idx[prop_idx][rock_index] = rock_label
+                                    self.logger.debug("self.rock_label_idx[%s] = %s", prop_idx, repr(self.rock_label_idx[prop_idx]))
                     
-            # Extract binary file name
-            elif splitstr_arr[0] == "PROP_FILE":
-                self.prop_dict[splitstr_arr[1]].file_name = os.path.join(src_dir, splitstr_arr_raw[2])
-                self.logger.debug("self.prop_dict[%s].file_name = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].file_name)
+                # Extract binary file name
+                elif splitstr_arr[0] == "PROP_FILE":
+                    self.prop_dict[splitstr_arr[1]].file_name = os.path.join(src_dir, splitstr_arr_raw[2])
+                    self.logger.debug("self.prop_dict[%s].file_name = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].file_name)
 
-            # Size of each float in binary file (measured in bytes)
-            elif splitstr_arr[0] == "PROP_ESIZE":
-                try:
-                    self.prop_dict[splitstr_arr[1]].data_sz = int(splitstr_arr[2])
-                    self.logger.debug("self.prop_dict[%s].data_sz = %d", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_sz)
-                except (IndexError, ValueError) as exc:
-                    self.__handle_exc(exc)
+                # Size of each float in binary file (measured in bytes)
+                elif splitstr_arr[0] == "PROP_ESIZE":
+                    is_ok, l = self.__parse_int(splitstr_arr[2])
+                    if is_ok:
+                       self.prop_dict[splitstr_arr[1]].data_sz = l
+                       self.logger.debug("self.prop_dict[%s].data_sz = %d", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_sz)
 
-            # Is property an integer ? What size?
-            # FIXME: Must support 'RGBA' storage type too
-            elif splitstr_arr[0] == "PROP_STORAGE_TYPE":
-                if splitstr_arr[2] == "OCTET":
-                    self.prop_dict[splitstr_arr[1]].data_type = "b"
-                elif splitstr_arr[2] == "SHORT":
-                    self.prop_dict[splitstr_arr[1]].data_type = "h"
-                else:
-                    self.logger.error("ERROR - unknown storage type")
-                    sys.exit(1)
-                self.logger.debug("self.prop_dict[%s].data_type = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_type)
+                # Is property an integer ? What size?
+                # FIXME: Must support 'RGBA' storage type too
+                elif splitstr_arr[0] == "PROP_STORAGE_TYPE":
+                    if splitstr_arr[2] == "OCTET":
+                        self.prop_dict[splitstr_arr[1]].data_type = "b"
+                    elif splitstr_arr[2] == "SHORT":
+                        self.prop_dict[splitstr_arr[1]].data_type = "h"
+                    else:
+                        self.logger.error("ERROR - unknown storage type")
+                        sys.exit(1)
+                    self.logger.debug("self.prop_dict[%s].data_type = %s", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_type)
 
-            # Is property a signed integer ?
-            elif splitstr_arr[0] == "PROP_SIGNED":
-                self.prop_dict[splitstr_arr[1]].signed_int = (splitstr_arr[2] == "1")
-                self.logger.debug("self.prop_dict[%s].signed_int = %s", splitstr_arr[1], repr(self.prop_dict[splitstr_arr[1]].signed_int))
+                # Is property a signed integer ?
+                elif splitstr_arr[0] == "PROP_SIGNED":
+                    self.prop_dict[splitstr_arr[1]].signed_int = (splitstr_arr[2] == "1")
+                    self.logger.debug("self.prop_dict[%s].signed_int = %s", splitstr_arr[1], repr(self.prop_dict[splitstr_arr[1]].signed_int))
 
-            # Cannot process IBM-style floats
-            elif splitstr_arr[0] == "PROP_ETYPE":
-                if splitstr_arr[2] != "IEEE":
-                    self.logger.error("ERROR - Cannot process %s type floating points", splitstr_arr[1])
-                    sys.exit(1)
+                # Cannot process IBM-style floats
+                elif splitstr_arr[0] == "PROP_ETYPE":
+                    if splitstr_arr[2] != "IEEE":
+                        self.logger.error("ERROR - Cannot process %s type floating points", splitstr_arr[1])
+                        sys.exit(1)
 
-            # Cannot process SEGY formats 
-            elif splitstr_arr[0] == "PROP_EFORMAT":
-                if splitstr_arr[2] != "RAW":
-                    self.logger.error("ERROR - Cannot process %s format floating points", splitstr_arr[1])
-                    sys.exit(1)
+                # Cannot process SEGY formats 
+                elif splitstr_arr[0] == "PROP_EFORMAT":
+                    if splitstr_arr[2] != "RAW":
+                        self.logger.error("ERROR - Cannot process %s format floating points", splitstr_arr[1])
+                        sys.exit(1)
 
-            # FIXME: Cannot do offsets within binary file
-            elif splitstr_arr[0] == "PROP_OFFSET":
-                if int(splitstr_arr[2]) != 0:
-                    self.logger.error("ERROR - Cannot process offsets of more than 0")
-                    sys.exit(1)
+                # Offset in bytes within binary file
+                elif splitstr_arr[0] == "PROP_OFFSET":
+                     is_ok, l = self.__parse_int(splitstr_arr[2])
+                     if is_ok:
+                         self.prop_dict[splitstr_arr[1]].offset = l
+                         self.logger.debug("self.prop_dict[%s].offset = %d",  splitstr_arr[1], self.prop_dict[splitstr_arr[1]].offset)
 
-            # The number that is used to represent 'no data'
-            elif splitstr_arr[0] == "PROP_NO_DATA_VALUE":
-                converted, fp = self.__parse_float(splitstr_arr[2])
-                if converted:
-                    self.prop_dict[splitstr_arr[1]].no_data_marker = fp
-                    self.logger.debug("self.prop_dict[%s].no_data_marker = %f", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].no_data_marker)
+                # The number that is used to represent 'no data'
+                elif splitstr_arr[0] == "PROP_NO_DATA_VALUE":
+                    converted, fp = self.__parse_float(splitstr_arr[2])
+                    if converted:
+                        self.prop_dict[splitstr_arr[1]].no_data_marker = fp
+                        self.logger.debug("self.prop_dict[%s].no_data_marker = %f", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].no_data_marker)
 
-            # Layout of VOXET data
-            elif splitstr_arr[0] == "AXIS_O":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
-                if is_ok:
-                    self.axis_origin = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_origin = %s", repr(self.axis_origin))
+                # Layout of VOXET data
+                elif splitstr_arr[0] == "AXIS_O":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                    if is_ok:
+                        self.axis_origin = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_origin = %s", repr(self.axis_origin))
+    
+                elif splitstr_arr[0] == "AXIS_U":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.axis_u = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_u = %s", repr(self.axis_u))
 
-            elif splitstr_arr[0] == "AXIS_U":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.axis_u = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_u = %s", repr(self.axis_u))
+                elif splitstr_arr[0] == "AXIS_V":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.axis_v = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_v = %s", repr(self.axis_v))
 
-            elif splitstr_arr[0] == "AXIS_V":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.axis_v = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_v = %s", repr(self.axis_v))
+                elif splitstr_arr[0] == "AXIS_W":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.axis_w = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_w= %s", repr(self.axis_w))
 
-            elif splitstr_arr[0] == "AXIS_W":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.axis_w = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_w= %s", repr(self.axis_w))
+                elif splitstr_arr[0] == "AXIS_N":
+                    is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.vol_sz = (x_int, y_int, z_int)
+                        self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
 
-            elif splitstr_arr[0] == "AXIS_N":
-                is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.vol_sz = (x_int, y_int, z_int)
-                    self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
+                elif splitstr_arr[0] == "AXIS_MIN":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.axis_min = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_min= %s", repr(self.axis_min))
 
-            elif splitstr_arr[0] == "AXIS_MIN":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.axis_min = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_min= %s", repr(self.axis_min))
+                elif splitstr_arr[0] == "AXIS_MAX":
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                    if is_ok:
+                        self.axis_max = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_max= %s", repr(self.axis_max))
 
-            elif splitstr_arr[0] == "AXIS_MAX":
-                is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                if is_ok:
-                    self.axis_max = (x_flt, y_flt, z_flt)
-                    self.logger.debug("self.axis_max= %s", repr(self.axis_max))
+                elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
+                    is_ok, l = self.__parse_int(splitstr_arr[1])
+                    if is_ok:
+                        self.flags_array_length = l
+                        self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
 
-            elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
-                is_ok, l = self.__parse_int(splitstr_arr[1])
-                if is_ok:
-                    self.flags_array_length = l
-                    self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
+                elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
+                    is_ok, l = self.__parse_int(splitstr_arr[1])
+                    if is_ok:
+                        self.flags_bit_length = l
+                        self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
+    
+                elif splitstr_arr[0] == "FLAGS_ESIZE":
+                    is_ok, l = self.__parse_int(splitstr_arr[1])
+                    if is_ok:
+                        self.flags_bit_size = l
+                        self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
+    
+                elif splitstr_arr[0] == "FLAGS_OFFSET":
+                    is_ok, l = self.__parse_int(splitstr_arr[1])
+                    if is_ok:
+                        self.flags_offset = l
+                        self.logger.debug("self.flags_offset= %d", self.flags_offset)
 
-            elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
-                is_ok, l = self.__parse_int(splitstr_arr[1])
-                if is_ok:
-                    self.flags_bit_length = l
-                    self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
+                elif splitstr_arr[0] == "FLAGS_FILE":
+                    self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
+                    self.logger.debug("self.flags_file= %s", self.flags_file)
 
-            elif splitstr_arr[0] == "FLAGS_ESIZE":
-                is_ok, l = self.__parse_int(splitstr_arr[1])
-                if is_ok:
-                    self.flags_bit_size = l
-                    self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
+                elif splitstr_arr[0] == "REGION":
+                    self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
+                    self.logger.debug("self.region_dict[%s] = %s", splitstr_arr[2], splitstr_arr[1])
 
-            elif splitstr_arr[0] == "FLAGS_OFFSET":
-                is_ok, l = self.__parse_int(splitstr_arr[1])
-                if is_ok:
-                    self.flags_offset = l
-                    self.logger.debug("self.flags_offset= %d", self.flags_offset)
-
-            elif splitstr_arr[0] == "FLAGS_FILE":
-                self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
-                self.logger.debug("self.flags_file= %s", self.flags_file)
-
-            elif splitstr_arr[0] == "REGION":
-                self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
-                self.logger.debug("self.region_dict[%s] = %s", splitstr_arr[2], splitstr_arr[1])
-                
+            except IndexError as exc:
+                self.__handle_exc(exc)
+    
             # END OF TEXT PROCESSING LOOP
 
         # Read in any binary data files and flags files attached to voxel files
@@ -801,9 +792,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 try:
                     # Check file size first
                     file_sz = os.path.getsize(prop_obj.file_name)
-                    num_voxels = prop_obj.data_sz*self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-                    if file_sz < num_voxels:
-                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is less than data cube size (%d): %s", file_sz, num_voxels, prop_obj.file_name)
+                    num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
+                    self.logger.debug("num_voxels = %s", repr(num_voxels))
+                    est_sz = prop_obj.data_sz*num_voxels+prop_obj.offset
+                    if file_sz < est_sz:
+                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is less than estimated size (%d): %s", file_sz, est_sz, prop_obj.file_name)
                         sys.exit(1)
 
                     # Initialise data array to zeros
@@ -814,8 +807,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
                     # Read entire file, assumes file small enough to store in memory
                     self.logger.info("Reading binary file: %s", prop_obj.file_name)
-                    f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels)
-                    fl_idx = 0
+                    elem_offset = prop_obj.offset//prop_obj.data_sz
+                    self.logger.debug("elem_offset = %s", repr(elem_offset))
+                    f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels+elem_offset)
+                    fl_idx = elem_offset 
                     mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
                             (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
                             (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
@@ -864,9 +859,10 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             try: 
                 # Check file size first
                 file_sz = os.path.getsize(self.flags_file)
-                num_voxels = self.flags_bit_size*self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-                if file_sz != num_voxels:
-                    self.logger.error("SORRY - Cannot process voxel flags file - length (%d) is not correct %s", num_voxels, self.flags_file)
+                num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
+                est_sz =  self.flags_bit_size*num_voxels+self.flags_offset
+                if file_sz < est_sz:
+                    self.logger.error("SORRY - Cannot process voxel flags file %s - length (%d) is less than calculated size (%d)", self.flags_file, file_sz, est_sz)
                     sys.exit(1)
 
                 # Initialise data array to zeros
@@ -878,7 +874,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 # Read entire file, assumes file small enough to store in memory
                 self.logger.info("Reading binary flags file: %s", self.flags_file)
                 f_arr = numpy.fromfile(self.flags_file, dtype=dt)
-                f_idx = self.flags_offset
+                f_idx = self.flags_offset//self.flags_bit_size
                 self.flags_prop = PROPS(self.flags_file)
                 # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())
                 for z in range(0,self.vol_sz[2]):

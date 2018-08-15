@@ -161,11 +161,11 @@ class OBJ_OUT():
         if v_obj.is_ts:
             out_fp.write("usemtl colouring\n")
             for f in v_obj.get_trgl_arr():
-                out_fp.write("f {0:d} {1:d} {2:d}\n".format(vert_dict[f[0]], vert_dict[f[1]], vert_dict[f[2]]))
+                out_fp.write("f {0:d} {1:d} {2:d}\n".format(vert_dict[f.abc[0]], vert_dict[f.abc[1]], vert_dict[f.abc[2]]))
 
         elif v_obj.is_pl:
             for s in v_obj.get_seg_arr():
-                out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s[0]], vert_dict[s[1]]))
+                out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s.ab[0]], vert_dict[s.ab[1]]))
 
         elif v_obj.is_vs:
             out_fp.write("p");

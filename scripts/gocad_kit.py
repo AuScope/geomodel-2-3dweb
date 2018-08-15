@@ -92,12 +92,14 @@ class GOCAD_KIT:
         z = v_obj.vol_sz[2]-1
         pixel_cnt = 0
         prop_obj = v_obj.prop_dict[idx]
+        self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
+        self.logger.debug("prop_obj.data_stats = %s", repr(prop_obj.data_stats)) 
         # If colour table is provided within source file, use it
         if len(prop_obj.colour_map) > 0:
             for x in range(0, v_obj.vol_sz[0]):
                 for y in range(0, v_obj.vol_sz[1]):
                     try:
-                        (r,g,b) = prop_obj.colour_map[int(prop_obj.data_3d[x][y][z])]
+                        (r,g,b) = prop_obj.colour_map[int(prop_obj.data_3d[x][y][z] - prop_obj.data_stats['min'])]
                     except ValueError:
                         (r,g,b) = (0.0, 0.0, 0.0)
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
@@ -394,6 +396,23 @@ class GOCAD_KIT:
         '''
         return a == b or a == b+step or a == b-step
 
+    def calc_step_sz(self, v_obj, limit):
+        ''' With many voxets being so large, we have to increase sample size so we don't create too much data, 
+            to be improved later on.
+            v_obj - GOCAD_VESSEL object
+            limit - the higher this number the more cubes will be used to represent the voxet data
+            Returns step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]
+        '''
+        step = 1
+        n_elems3 = v_obj.vol_sz[0] * v_obj.vol_sz[1] * v_obj.vol_sz[2]
+        while n_elems3/(step*step*step) > limit: 
+            step += 1
+        pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_sz[0]*2), 
+                   (v_obj.axis_v[1]*step)/(v_obj.vol_sz[1]*2),
+                   (v_obj.axis_w[2]*step)/(v_obj.vol_sz[2]*2)]
+        return step, pt_size
+
+
 
     def write_vo_collada(self, v_obj, fileName):
         ''' Write out a COLLADA file from a vo file
@@ -426,23 +445,18 @@ class GOCAD_KIT:
         popup_list = []
         popup_dict = {}
         file_cnt = 1
-        # Increase sample size so we don't create too much data, to be improved later on
-        step = 1
-        n_elems3 = v_obj.vol_sz[0] * v_obj.vol_sz[1] * v_obj.vol_sz[2]
-        while n_elems3/(step*step*step) > 100000: 
-            step += 1
-        pt_size = [(v_obj.axis_u[0]*step)/(v_obj.vol_sz[0]*2), 
-                   (v_obj.axis_v[1]*step)/(v_obj.vol_sz[1]*2),
-                   (v_obj.axis_w[2]*step)/(v_obj.vol_sz[2]*2)]
-        self.logger.debug("step = %d", step)
 
         for prop_idx in v_obj.prop_dict:
             prop_obj = v_obj.prop_dict[prop_idx]
-            self.logger.info("Writing files for voxel property '%s'", prop_idx)
+            self.logger.info("Processing data for voxel property '%s'", prop_idx)
           
             # There are two kinds of voxel object
             # One has index values that refer to rock types or colours, the other has values that refer to physical measurements
             if prop_obj.is_index_data:
+                # Calculate size of each voxet cube
+                step, pt_size = self.calc_step_sz(v_obj, 100000)
+                self.logger.debug("step = %d", step)
+
                 # Take the index data found in the voxel file and group it together       
                 bucket = {}
                 for z in range(0, v_obj.vol_sz[2], step):
@@ -509,16 +523,22 @@ class GOCAD_KIT:
                 self.make_false_colour_materials(mesh, self.MAX_COLOURS)
                 point_cnt = 0
                 node_list = []
+
+                # Calculate size of each voxet cube
+                step, pt_size = self.calc_step_sz(v_obj, 800000)
+                self.logger.debug("step = %d", step)
+
                 for z in range(0, v_obj.vol_sz[2], step):
                     for y in range(0, v_obj.vol_sz[1], step):
                         for x in range(0, v_obj.vol_sz[0], step):
-                            if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker:
+                            if prop_obj.data_3d[x][y][z] != prop_obj.no_data_marker and \
+                                     (z == 0 or y == 0 or x == 0 or z == v_obj.vol_sz[2]-1 or y == v_obj.vol_sz[1]-1 or x == v_obj.vol_sz[0]-1):
                                 colour_num = calculate_false_colour_num(prop_obj.data_3d[x][y][z], prop_obj.data_stats['max'], prop_obj.data_stats['min'], self.MAX_COLOURS)
                                 cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt)
                                 popup_dict[geom_label] = { 'title': v_obj.header_name, 'name': prop_obj.class_name, 'value': "{:.3f}".format(prop_obj.data_3d[x][y][z]) }
                                 node_list += cube_node_list
                                 point_cnt += 1
-                            else:
+                            elif prop_obj.data_3d[x][y][z] == prop_obj.no_data_marker:
                                 self.logger.debug("%d %d %d no data", x,y,z)
 
                 myscene = Collada.scene.Scene("myscene", node_list)

@@ -25,9 +25,8 @@ class MODEL_GEOMETRIES:
         abc = triangle vertices
     '''
 
-    SEG = namedtuple('SEG', 'n ab')
+    SEG = namedtuple('SEG', 'ab')
     ''' Immutable named tuple which stores segment data
-        n = sequence number
         ab = segment vertices
     '''
 
