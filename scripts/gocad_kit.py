@@ -454,7 +454,7 @@ class GOCAD_KIT:
             # One has index values that refer to rock types or colours, the other has values that refer to physical measurements
             if prop_obj.is_index_data:
                 # Calculate size of each voxet cube
-                step, pt_size = self.calc_step_sz(v_obj, 100000)
+                step, pt_size = self.calc_step_sz(v_obj, 50000)
                 self.logger.debug("step = %d", step)
 
                 # Take the index data found in the voxel file and group it together       
@@ -525,7 +525,7 @@ class GOCAD_KIT:
                 node_list = []
 
                 # Calculate size of each voxet cube
-                step, pt_size = self.calc_step_sz(v_obj, 800000)
+                step, pt_size = self.calc_step_sz(v_obj, 100000)
                 self.logger.debug("step = %d", step)
 
                 for z in range(0, v_obj.vol_sz[2], step):
