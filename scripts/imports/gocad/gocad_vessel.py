@@ -7,8 +7,8 @@ from collections import OrderedDict
 import logging
 import traceback
 
-from model_geometries import MODEL_GEOMETRIES
-from props import PROPS
+from db.model_geometries import MODEL_GEOMETRIES
+from imports.gocad.props import PROPS
 
 class GOCAD_VESSEL(MODEL_GEOMETRIES):
     ''' Class used to read GOCAD files and store their details

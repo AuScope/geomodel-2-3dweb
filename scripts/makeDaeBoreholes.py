@@ -18,7 +18,7 @@ from owslib.wfs import WebFeatureService
 from owslib.fes import *
 import http.client, urllib
 
-import collada2gltf
+import exports.collada2gltf
 
 
 # Namespaces for WFS Borehole response

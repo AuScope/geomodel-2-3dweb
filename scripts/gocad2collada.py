@@ -16,10 +16,10 @@ import random
 import logging
 from types import SimpleNamespace
 
-from gocad_kit import GOCAD_KIT
-from gocad_vessel import GOCAD_VESSEL
+from imports.gocad.gocad_kit import GOCAD_KIT
+from imports.gocad.gocad_vessel import GOCAD_VESSEL
 from makeDaeBoreholes import get_boreholes
-import collada2gltf
+import exports.collada2gltf
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -173,7 +173,7 @@ def find_and_process(gocad_src_dir):
 
     # Convert all files from COLLADA to GLTF v2
     if CONVERT_COLLADA:
-        collada2gltf.convert_dir(gocad_src_dir)
+        exports.collada2gltf.convert_dir(gocad_src_dir)
     return ret_list, reduce_extents(extent_list)
 
 
@@ -526,7 +526,7 @@ if __name__ == "__main__":
         # Convert all files from collada to GLTF v2
         if success and CONVERT_COLLADA:
             file_name, file_ext = os.path.splitext(gocad_src)
-            collada2gltf.convert_file(file_name+".dae")
+            exports.collada2gltf.convert_file(file_name+".dae")
 
         if not success:
             logger.error("Could not convert file")

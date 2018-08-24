@@ -5,7 +5,7 @@ import logging
 
 sys.path.append('../scripts')
 
-from gocad_vessel import GOCAD_VESSEL
+from imports.gocad.gocad_vessel import GOCAD_VESSEL
 
 def test_this(msg, test_str, test_file, assert_str, stop_on_exc=True):
     ''' Function used to run a little test of GOCAD_VESSEL class
