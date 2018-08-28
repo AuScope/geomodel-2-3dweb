@@ -16,7 +16,7 @@ import random
 import logging
 from types import SimpleNamespace
 
-from imports.gocad.gocad_kit import GOCAD_KIT
+from exports.gocad_kit import GOCAD_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL
 from makeDaeBoreholes import get_boreholes
 import exports.collada2gltf

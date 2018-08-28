@@ -6,10 +6,10 @@ import os
 import array
 import logging
 
-from collada_out import COLLADA_OUT
-from obj_out import OBJ_OUT
+from exports.collada_out import COLLADA_OUT
+from exports.obj_out import OBJ_OUT
 
-from false_colour import calculate_false_colour_num, make_false_colour_tup
+from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class GOCAD_KIT:
     ''' Class used to output GOCAD files as Wavefront OBJ or COLLADA files
