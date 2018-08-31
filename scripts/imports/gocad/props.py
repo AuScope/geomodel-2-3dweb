@@ -27,7 +27,7 @@ class PROPS:
         ''' Is True iff binary data is a signed integer else False
         '''
 
-        self.data_3d = {}
+        self.data_3d = numpy.zeros((0,0,0))
         ''' Property data collected from binary file, value is float, stored as a 3d numpy array.
         '''
 
@@ -60,7 +60,7 @@ class PROPS:
         '''
         
         self.rock_label_table = {}
-        ''' Table specifying names of rocks 
+        ''' Table specifying names of rocks , key is an integer, value is the label
         '''
   
         self.offset = 0

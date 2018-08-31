@@ -29,24 +29,22 @@ class COLLADA_OUT():
         self.logger = COLLADA_OUT.logger
 
 
-    def collada_cube(self, mesh, colour_num, x,y,z, v_obj, pt_size, geometry_name, file_cnt, point_cnt):
+    def collada_cube(self, mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, file_cnt, point_cnt):
         ''' Writes out a cube in COLLADA format, geometric object label
             Returns a pycollada node list
             mesh - pycollada mesh object
             colour_num - index value for colour table
             x,y,z - integer xyz coords in volume
-            v_obj - GOCAD_VESSEL object
+            geom_obj - MODEL_GEOMETRY object
             pt_size - size of cube
             geometry_name - label for this cube
             file_cnt - file counter
             point_cnt - cube counter within this file
         '''
         #self.logger.debug("collada_cube(mesh=%s, colour_num=%s, x,y,z=%s, v_obj=%s, pt_size=%s, geometry_name=%s, file_cnt=%s, point_cnt=%s)",  repr(mesh), repr(colour_num), repr((x,y,z)), repr(v_obj), repr(pt_size), repr(geometry_name), repr(file_cnt), repr(point_cnt))
-        u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_sz[0]*v_obj.axis_u[0]
-        v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_sz[1]*v_obj.axis_v[1]
-        w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_sz[2]*v_obj.axis_w[2]
-        v = (u_offset+v_obj.base_xyz[0], v_offset+v_obj.base_xyz[1], w_offset+v_obj.base_xyz[2])
-            
+        v = (geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*geom_obj.vol_axis_u[0],
+             geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*geom_obj.vol_axis_v[1],
+             geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*geom_obj.vol_axis_w[2])
         node_list = []
         geomnode_list = []
         popup_dict = {}

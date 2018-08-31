@@ -32,10 +32,10 @@ class OBJ_OUT():
         self.MAX_COLOURS = 256.0
 
 
-    def write_voxel_obj(self, v_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes):
+    def write_voxel_obj(self, geom_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes):
         ''' Writes out voxel data to Wavefront OBJ and MTL files
             out_fp - open file handle of OBJ file
-            v_obj - vessel object that holds details of GOCAD file
+            geom_obj - model geometry object
             fileName - filename of OBJ file without the 'OBJ' extension
             src_file_str - filename of gocad file
             step_sz  - when stepping through the voxel block this is the step size
@@ -56,16 +56,17 @@ class OBJ_OUT():
         out_fp.write("mtllib "+fileName+".MTL\n")
         vert_idx = 0
         breakOut = False
-        for z in range(0,v_obj.vol_sz[2],step_sz):
-            for y in range(0,v_obj.vol_sz[1],step_sz):
-                for x in range(0,v_obj.vol_sz[0],step_sz):
-                    colour_num = int(255.0*(v_obj.voxel_data[x][y][z] - v_obj.voxel_data_stats['min'])/(v_obj.voxel_data_stats['max'] - v_obj.voxel_data_stats['min']))
+        for z in range(0,geom_obj.vol_sz[2],step_sz):
+            for y in range(0,geom_obj.vol_sz[1],step_sz):
+                for x in range(0,geom_obj.vol_sz[0],step_sz):
+                    colour_num = int(255.0*(geom_obj.voxel_data[x][y][z] - geom_obj.voxel_data_stats['min'])/(geom_obj.voxel_data_stats['max'] - geom_obj.voxel_data_stats['min']))
+
                     # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
-                    u_offset = v_obj.axis_origin[0]+ float(x)/v_obj.vol_sz[0]*v_obj.axis_u[0]
-                    v_offset = v_obj.axis_origin[1]+ float(y)/v_obj.vol_sz[1]*v_obj.axis_v[1]
-                    w_offset = v_obj.axis_origin[2]+ float(z)/v_obj.vol_sz[2]*v_obj.axis_w[2]
+                    u_offset = geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*geom_obj.vol_axis_u[0]
+                    v_offset = geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*geom_obj.vol_axis_v[1]
+                    w_offset = geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*geom_obj.vol_axis_w[2]
                     v = (u_offset, v_offset, w_offset)
-                    pt_size = (step_sz*v_obj.axis_u[0]/v_obj.vol_sz[0]/2, step_sz*v_obj.axis_v[1]/v_obj.vol_sz[1]/2, step_sz*v_obj.axis_w[2]/v_obj.vol_sz[2]/2)
+                    pt_size = (step_sz*geom_obj.vol_axis_u[0]/geom_obj.vol_sz[0]/2, step_sz*geom_obj.vol_axis_v[1]/geom_obj.vol_sz[1]/2, step_sz*geom_obj.vol_axis_w[2]/geom_obj.vol_sz[2]/2)
                     vert_list = [ (v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]),
                                   (v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]),
                                   (v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]),
@@ -92,26 +93,25 @@ class OBJ_OUT():
                         if z==0:
                             indice_list.append((3, 7, 6, 2))
                         # TOP FACE
-                        if z==v_obj.vol_sz[2]-1:
+                        if z==geom_obj.vol_sz[2]-1:
                             indice_list.append((5, 8, 4, 1))
                         # SOUTH FACE
                         if y==0:
                             indice_list.append((2, 6, 5, 1))
                         # NORTH FACE
-                        if y==v_obj.vol_sz[1]:
+                        if y==geom_obj.vol_sz[1]:
                             indice_list.append((8, 7, 3, 4))
                         # EAST FACE
                         if x==0:
                             indice_list.append((6, 7, 8, 5))
                         # WEST FACE
-                        if x==v_obj.vol_sz[0]:
+                        if x==geom_obj.vol_sz[0]:
                             indice_list.append((4, 3, 2, 1))
 
                     # Only write if there are indices to write
                     if len(indice_list)>0:
                         for vert in vert_list:
-                            bvert = (vert[0]+v_obj.base_xyz[0], vert[1]+v_obj.base_xyz[1], vert[2]+v_obj.base_xyz[2])
-                            out_fp.write("v {0:f} {1:f} {2:f}\n".format(bvert[0],bvert[1],bvert[2]))
+                            out_fp.write("v {0:f} {1:f} {2:f}\n".format(vert[0],vert[1],ert[2]))
                         out_fp.write("g main-{0:010d}\n".format(vert_idx))
                         out_fp.write("usemtl colouring-{0:03d}\n".format(colour_num))
                         for ind in indice_list:
@@ -128,9 +128,9 @@ class OBJ_OUT():
         return ct_done
 
 
-    def write_OBJ(self, v_obj, fileName, src_file_str):
+    def write_OBJ(self, geom_obj, fileName, src_file_str):
         ''' Writes out an OBJ file
-            v_obj - vessel object that holds details of GOCAD file
+            geom_obj - model geometry object
             fileName - filename of OBJ file, without extension
             src_file_str - filename of gocad file
 
@@ -149,41 +149,40 @@ class OBJ_OUT():
         out_fp.write("# Wavefront OBJ file converted from '{0}'\n\n".format(src_file_str))
         ct_done = False
         # This dictionary returns the insertion order of the vertex in the vrtx_arr given its sequence number
-        vert_dict = v_obj.make_vertex_dict()
-        if v_obj.is_ts:
-            if len(v_obj.rgba_tup)==4:
+        vert_dict = geom_obj.make_vertex_dict()
+        if geom_obj.is_trgl():
+            if len(style_obj.rgba_tup)==4:
                 out_fp.write("mtllib "+fileName+".MTL\n")
-        if v_obj.is_ts or v_obj.is_pl or v_obj.is_vs:
-            for v in v_obj.get_vrtx_arr():
-                bv = (v.xyz[0]+v_obj.base_xyz[0], v.xyz[1]+v_obj.base_xyz[1], v.xyz[2]+v_obj.base_xyz[2])
-                out_fp.write("v {0:f} {1:f} {2:f}\n".format(bv[0],bv[1],bv[2]))
+        if geom_obj.is_trgl() or geom_obj.is_line() or geom_obj.is_point():
+            for v in geom_obj.vrtx_arr:
+                out_fp.write("v {0:f} {1:f} {2:f}\n".format(v.xyz[0],v.xyz[1],v.xyz[2]))
         out_fp.write("g main\n")
-        if v_obj.is_ts:
+        if geom_obj.is_trgl():
             out_fp.write("usemtl colouring\n")
-            for f in v_obj.get_trgl_arr():
+            for f in geom_obj.trgl_arr:
                 out_fp.write("f {0:d} {1:d} {2:d}\n".format(vert_dict[f.abc[0]], vert_dict[f.abc[1]], vert_dict[f.abc[2]]))
 
-        elif v_obj.is_pl:
-            for s in v_obj.get_seg_arr():
+        elif geom_obj.is_line():
+            for s in geom_obj.seg_arr:
                 out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s.ab[0]], vert_dict[s.ab[1]]))
 
-        elif v_obj.is_vs:
+        elif geom_obj.is_point():
             out_fp.write("p");
-            for p in range(len(v_obj.get_vrtx_arr())):
+            for p in range(len(geom_obj.vrtx_arr)):
                 out_fp.write(" {0:d}".format(p+1))
             out_fp.write("\n")
 
-        elif v_obj.is_vo:
+        elif geom_obj.is_volume():
             ct_done=self.write_voxel_obj(out_fp, fileName, src_file_str, 64, False)
         out_fp.close()
 
         # Create an MTL file for the colour
-        if len(v_obj.rgba_tup)==4 and not ct_done:
+        if len(style_obj.rgba_tup)==4 and not ct_done:
             out_fp = open(fileName+".MTL", 'w')
             out_fp.write("# Wavefront MTL file converted from  '{0}'\n\n".format(src_file_str))
             out_fp.write("newmtl colouring\n")
-            out_fp.write("Ka {0:.3f} {1:.3f} {2:.3f}\n".format(v_obj.rgba_tup[0], v_obj.rgba_tup[1], v_obj.rgba_tup[2]))
-            out_fp.write("Kd {0:.3f} {1:.3f} {2:.3f}\n".format(v_obj.rgba_tup[0], v_obj.rgba_tup[1], v_obj.rgba_tup[2]))
+            out_fp.write("Ka {0:.3f} {1:.3f} {2:.3f}\n".format(style_obj.rgba_tup[0], style_obj.rgba_tup[1], style_obj.rgba_tup[2]))
+            out_fp.write("Kd {0:.3f} {1:.3f} {2:.3f}\n".format(style_obj.rgba_tup[0], style_obj.rgba_tup[1], style_obj.rgba_tup[2]))
             out_fp.write("Ks 0.000 0.000 0.000\n")
             out_fp.write("d 1.0\n")
             out_fp.close()

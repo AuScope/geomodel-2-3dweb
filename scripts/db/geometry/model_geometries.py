@@ -1,34 +1,14 @@
 ''' Class used to store abstract parts of a model
     It should be independent as possible of any model's input format
-    All sequence numbers etc. start at 1
+    All sequence numbers for *_arr start at 1
 '''
 
 import sys
 from collections import namedtuple
 
+from .types import VRTX, ATOM, TRGL, SEG
+
 class MODEL_GEOMETRIES:
-    VRTX = namedtuple('VRTX', 'n xyz')
-    ''' Immutable named tuple which stores vertex data
-        n = sequence number
-        xyz = coordinates
-    '''
-
-    ATOM = namedtuple('ATOM', 'n v')
-    ''' Immutable named tuple which stores atom data
-        n = sequence number
-        v = vertex it refers to
-    '''
-
-    TRGL = namedtuple('TRGL', 'n abc')
-    ''' Immutable named tuple which stores triangle data
-        n = sequence number
-        abc = triangle vertices
-    '''
-
-    SEG = namedtuple('SEG', 'ab')
-    ''' Immutable named tuple which stores segment data
-        ab = segment vertices
-    '''
 
     def __init__(self):
 
@@ -72,46 +52,109 @@ class MODEL_GEOMETRIES:
         ''' Minimum Z coordinate, used to calculate extent
         '''
 
-        self.rgba_tup = (1.0, 1.0, 1.0, 1.0)
-        ''' If one colour is specified then it is stored here
+        self.vol_origin = None
+        ''' Origin of volume's XYZ axes
         '''
 
-    def get_vrtx_arr(self):
+        self.vol_axis_u = None
+        ''' Full length U-axis volume vector
+        '''
+
+        self.vol_axis_v = None
+        ''' Full length V-axis volume vector
+        '''
+
+        self.vol_axis_w = None
+        ''' Full length W-axis volume vector
+        '''
+
+        self.vol_sz = None
+        ''' 3 dimensional size of voxel volume
+        '''
+
+        self.vol_data = None
+        ''' 3d numpy array of volume data
+        '''
+
+        self.xyz_data = {}
+        ''' Generic property data associated with XYZ points
+        '''
+ 
+        self.max_data = None
+        ''' Maximum value in 'xyz_data' or 'vol_data'
+        '''
+
+        self.min_data = None
+        ''' Minimum value in 'xyz_data' or 'vol_data'
+        '''
+
+    def __repr__(self):
+        ''' Print friendly representation
+        '''
+        ret_str = ''
+        for field in dir(self):
+            if field[-2:] != '__' and not callable(getattr(self, field)):
+                ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
+        return ret_str
+
+
+    # properties
+
+    @property
+    def vrtx_arr(self):
         ''' Returns array of VRTX objects
         '''
         return self._vrtx_arr 
 
 
-    def get_atom_arr(self):
+    @property
+    def atom_arr(self):
         ''' Returns array of ATOM objects 
         '''
-        return self._atom_arrr
+        return self._atom_arr
 
 
-    def get_trgl_arr(self):
+    @property
+    def trgl_arr(self):
         ''' Returns array of TRGL objects
         '''
         return self._trgl_arr
 
 
-    def get_seg_arr(self):
+    @property
+    def seg_arr(self):
         ''' Returns array of SEG objects
         '''
         return self._seg_arr
 
 
-    def _check_vertex(self, num):
-        ''' If vertex exists then returns true else false
-            num - vertex number to search for
+    def is_trgl(self):
+        ''' Returns True iff this contains triangle data
         '''
-        for vrtx in self._vrtx_arr:
-            if vrtx.n == num:
-                return True
-        return False
+        return len(self._trgl_arr) > 0
 
 
-    def _calc_minmax(self, x, y, z):
-        ''' Calculate the max and min of all x,y,z coords
+    def is_line(self):
+        ''' Returns True iff this contails line data
+        '''
+        return len(self._seg_arr) > 0
+
+
+    def is_point(self):
+        ''' Returns True iff this contains point data
+        '''
+        return (len(self._vrtx_arr) > 0 or len(self._atom_arr) > 0) and len(self._trgl_arr) == 0 and len(self._seg_arr) == 0
+
+
+    def is_volume(self):
+        ''' Returns True iff this contains volume data
+          
+        '''
+        return self.vol_sz != None
+
+
+    def calc_minmax(self, x, y, z):
+        ''' Calculates and stores the max and min of all x,y,z coords
         '''
         if x > self.max_X:
             self.max_X = x

@@ -3,7 +3,7 @@
 from pyassimp import *
 import ctypes
 
-from model_geometries import *
+from db.geometry.model_geometries import *
 
 import print_assimp as pa
 

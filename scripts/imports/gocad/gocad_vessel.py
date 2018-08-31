@@ -6,11 +6,92 @@ from collections import namedtuple
 from collections import OrderedDict
 import logging
 import traceback
+import numpy as np
+import copy
 
-from db.model_geometries import MODEL_GEOMETRIES
+from db.geometry.model_geometries import MODEL_GEOMETRIES
 from imports.gocad.props import PROPS
+from db.style.style import STYLE
+from db.geometry.types import VRTX, ATOM, TRGL, SEG
+from db.metadata.metadata import METADATA
 
-class GOCAD_VESSEL(MODEL_GEOMETRIES):
+# Set up debugging
+local_logger = logging.getLogger(__name__)
+
+
+def de_concat(filename_lines):
+    ''' Separates joined GOCAD entries within a file
+        filename_lines - lines from concatenated GOCAD file
+    '''
+    file_lines_list = []
+    part_list = []
+    in_file = False
+    for line in filename_lines:
+        line_str = line.rstrip(' \n\r').upper()
+        if not in_file:
+            for marker in GOCAD_VESSEL.GOCAD_HEADERS.values():
+                if line_str == marker[0]:
+                    in_file = True
+                    part_list.append(line)
+                    break
+        elif in_file:
+            part_list.append(line)
+            if line_str == 'END':
+                in_file = False
+                part_list.append(line)
+                file_lines_list.append(part_list)
+                part_list = []
+    return file_lines_list
+
+
+
+def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl, nondef_coords, ct_file_dict):
+    ''' Extracts GOCAD files from a GOCAD group file
+        filename_str - filename of GOCAD file
+        file_lines - lines extracted from GOCAD group file
+        Returns a list of (GOCAD_VESSEL, STYLE) objects
+    '''
+    local_logger.debug("extract_gocad(%s,%s)", src_dir, filename_str)
+    global CtFileDict
+    gvstm_list = []
+    firstLine = True
+    inMember = False
+    inGoCAD = False
+    gocad_lines = []
+    fileName, fileExt = os.path.splitext(filename_str)
+    for line in file_lines:
+        line_str = line.rstrip(' \n\r').upper()
+        splitstr_arr = line_str.split(' ')
+        if firstLine:
+            firstLine = False
+            if fileExt.upper() != '.GP' or line_str not in GOCAD_VESSEL.GOCAD_HEADERS['GP']:
+                local_logger.error("SORRY - not a GOCAD GP file %s", repr(line_str))
+                local_logger.error("    filename_str = %s", filename_str)
+                sys.exit(1)
+        if line_str == "BEGIN_MEMBERS":
+            inMember = True
+        elif line_str == "END_MEMBERS":
+            inMember = False
+        elif inMember and splitstr_arr[0]=="GOCAD":
+            inGoCAD = True
+        elif inMember and line_str == "END":
+            inGoCAD = False
+            gv = GOCAD_VESSEL(debug_lvl, base_xyz=base_xyz, group_name=os.path.basename(fileName).upper(), nondefault_coords=nondef_coords, ct_file_dict=ct_file_dict)
+            is_ok, gsm_list = gv.process_gocad(src_dir, filename_str, gocad_lines)
+            if is_ok:
+                gvstm_list += gsm_list
+            gocad_lines = []
+        if inMember and inGoCAD:
+            gocad_lines.append(line)
+
+    local_logger.debug("extract_gocad() returning len(gvst_list)=%d", len(gvst_list))
+    return gvstm_list
+
+
+
+
+
+class GOCAD_VESSEL():
     ''' Class used to read GOCAD files and store their details
     '''
 
@@ -96,7 +177,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         '''
 
         self.prop_dict = {}
-        ''' Dictionary of PROPS objects, stores GOCAD "PROPERTY" objects
+        ''' Dictionary of PROPS objects, stores GOCAD "PROPERTY" objects from VOXET files
             Dictionary index is the PROPERTY number e.g. '1', '2', '3' ...
         '''
         
@@ -112,19 +193,19 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' OrderedDict of PROPS objects for attached PVRTX and PATOM properties
         '''
 
-        self.is_ts = False
+        self.__is_ts = False
         ''' True iff it is a GOCAD TSURF file
         '''
 
-        self.is_vs = False
+        self.__is_vs = False
         ''' True iff it is a GOCAD VSET file
         '''
 
-        self.is_pl = False
+        self.__is_pl = False
         ''' True iff it is a GOCAD PLINE file
         '''
 
-        self.is_vo = False
+        self.__is_vo = False
         ''' True iff it is a GOCAD VOXET file
         '''
 
@@ -136,32 +217,48 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Units of XYZ axes
         ''' 
 
-        self.axis_origin = None
-        ''' Origin of XYZ axes
+        self.__vrtx_arr = []
+        ''' Array of named tuples 'VRTX' used to store vertex data
         '''
 
-        self.axis_u = None
-        ''' Length of u-axis
+        self.__atom_arr = []
+        ''' Array of named tuples 'ATOM' used to store atom data
         '''
 
-        self.axis_v = None
-        ''' Length of v-axis
+        self.__trgl_arr = []
+        ''' Array of named tuples 'TRGL' used store triangle face data
         '''
 
-        self.axis_w = None
-        ''' Length of w-axis
+        self.__seg_arr = []
+        ''' Array of named tuples 'SEG' used to store line segment data
+        '''
+
+        self.__axis_u = None
+        ''' U-axis volume vector
+        '''
+
+        self.__axis_v = None
+        ''' V-axis volume vector
+        '''
+
+        self.__axis_w = None
+        ''' W-axis volume vector
+        '''
+
+        self.__axis_o = None
+        ''' Volume's origin (X,Y,Z)
+        '''
+
+        self.__axis_min = None
+        ''' 3 dimensional minimum point of voxet volume
+        '''
+
+        self.__axis_max = None
+        ''' 3 dimensional maximum point of voxet volume
         '''
 
         self.vol_sz = None
-        ''' 3 dimensional size of voxel volume
-        '''
-
-        self.axis_min = None
-        ''' 3 dimensional minimum point of voxel volume
-        '''
-
-        self.axis_max = None
-        ''' 3 dimensional maximum point of voxel volume
+        ''' Size of voxet volume
         '''
 
         self.flags_array_length = 0
@@ -208,6 +305,17 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Some voxet files have floats that are indexes to rock types
         '''
 
+        
+        self.geom_obj = MODEL_GEOMETRIES()
+        self.style_obj = STYLE()
+        self.meta_obj = METADATA()
+        ''' Seed copies of MODEL_GEOMETRIES, STYLE, METADATA for data gathering purposes
+        '''
+
+        self.gsm_list = []
+        ''' List of (MODEL_GEOMETRIES, STYLE, METADATA)
+        '''
+
 
     def __handle_exc(self, exc):
         ''' If STOP_ON_EXC is set or debug is on, print details of exception and stop
@@ -226,19 +334,24 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             sys.exit(1)
 
     def __repr__(self):
-        ''' A very basic print friendly representation
+        ''' A basic print friendly representation
         '''
-        return "is_ts {0} is_vs {1} is_pl {2} is_vo {3} len(vrtx_arr)={4}\n".format(self.is_ts, self.is_vs, self.is_pl, self.is_vo, len(self._vrtx_arr))
+        ret_str = ''
+        for field in dir(self):
+            if '__' != field[-2:] and not callable(getattr(self,field)):
+                ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
+        return ret_str
+
 
 
     def is_single_layer_vo(self):
         ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer and should be converted into a PNG
             instead of a GLTF
         '''
-        return self.is_vo and self.vol_sz[2]==1
+        return self.__is_vo and self.vol_sz[2]==1
 
 
-    def make_vertex_dict(self):
+    def __make_vertex_dict(self):
         ''' Make a dictionary to associate vertex insertion order with vertex sequence number
             Ordinarily the vertex sequence number is the same as the insertion order in the vertex
             array, but some GOCAD files have missing vertices etc.
@@ -247,14 +360,14 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         vert_dict = {}
         idx = 1
         # Assign vertices to dict
-        for v in self._vrtx_arr:
+        for v in self.__vrtx_arr:
             vert_dict[v.n] = idx
             idx += 1
 
         # Assign atoms to dict
-        for atom in self._atom_arr:
+        for atom in self.__atom_arr:
             idx = 1
-            for vert in self._vrtx_arr:
+            for vert in self.__vrtx_arr:
                 if vert.n == atom.v:
                     vert_dict[atom.n] = idx
                     break
@@ -266,9 +379,11 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         ''' Extracts details from gocad file. This should be called before other functions!
             filename_str - filename of gocad file
             file_lines - array of strings of lines from gocad file
-            Returns true if could process file
+            Returns true if could process file, and a style object
         '''
         self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
+
+        ret_val = True
 
         # State variable for reading first line
         firstLine = True
@@ -417,9 +532,9 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     value_str = value_str.strip()
                     self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
                     if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
-                        self.rgba_tup = self.__parse_colour(value_str)
+                        self.style_obj.rgba_tup = self.__parse_colour(value_str)
 
-                        self.logger.debug("self.rgba_tup = %s", repr(self.rgba_tup))
+                        self.logger.debug("self.style_obj.rgba_tup = %s", repr(self.style_obj.rgba_tup))
                     elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
                         region_name = name_str.split('*')[2] 
                         self.region_colour_dict[region_name] = self.__parse_colour(value_str)
@@ -488,8 +603,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     if not is_ok_s or not is_ok:
                         seq_no = seq_no_prev
                     else:
-                        if self._check_vertex(v_num):
-                            self._atom_arr.append(self.ATOM(seq_no, v_num))
+                        if self.__check_vertex(v_num):
+                            self.__atom_arr.append(ATOM(seq_no, v_num))
                         else:
                             self.logger.error("ERROR - ATOM refers to VERTEX that has not been defined yet")
                             self.logger.error("    seq_no = %d", seq_no)
@@ -499,8 +614,8 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
                         # Atoms with attached properties
                         if splitstr_arr[0] == "PATOM":
-                            vert_dict = self.make_vertex_dict()
-                            self.__parse_props(splitstr_arr, self._vrtx_arr[vert_dict[v_num]].xyz, True)
+                            vert_dict = self.__make_vertex_dict()
+                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz, True)
                   
                 # Grab the vertices and properties, does not care if there are gaps in the sequence number
                 elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
@@ -514,7 +629,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                         # Add vertex
                         if self.invert_zaxis:
                             z_flt = -z_flt
-                        self._vrtx_arr.append(self.VRTX(seq_no, (x_flt, y_flt, z_flt)))
+                        self.__vrtx_arr.append(VRTX(seq_no, (x_flt, y_flt, z_flt)))
    
                         # Vertices with attached properties
                         if splitstr_arr[0] == "PVRTX":
@@ -528,14 +643,14 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                     if not is_ok or not is_ok_s:
                         seq_no = seq_no_prev
                     else:
-                        self._trgl_arr.append(self.TRGL(seq_no, (a_int, b_int, c_int)))
+                        self.__trgl_arr.append(TRGL(seq_no, (a_int, b_int, c_int)))
 
                 # Grab the segments
                 elif splitstr_arr[0] == "SEG":
                     is_ok_a, a_int = self.__parse_int(splitstr_arr[1])
                     is_ok_b, b_int = self.__parse_int(splitstr_arr[2])
                     if is_ok_a and is_ok_b:
-                        self._seg_arr.append(self.SEG((a_int, b_int)))
+                        self.__seg_arr.append(SEG((a_int, b_int)))
 
                 # What kind of property is this? Is it a measurement, or a reference to a rock colour table?
                 elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
@@ -612,28 +727,28 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
                 # Layout of VOXET data
                 elif splitstr_arr[0] == "AXIS_O":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3])
+                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], True)
                     if is_ok:
-                        self.axis_origin = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_origin = %s", repr(self.axis_origin))
+                        self.__axis_o = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.__axis_o = %s", repr(self.__axis_o))
     
                 elif splitstr_arr[0] == "AXIS_U":
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                     if is_ok:
-                        self.axis_u = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_u = %s", repr(self.axis_u))
+                        self.__axis_u = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.__axis_u = %s", repr(self.__axis_u))
 
                 elif splitstr_arr[0] == "AXIS_V":
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                     if is_ok:
-                        self.axis_v = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_v = %s", repr(self.axis_v))
+                        self.__axis_v = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.__axis_v = %s", repr(self.__axis_v))
 
                 elif splitstr_arr[0] == "AXIS_W":
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                     if is_ok:
-                        self.axis_w = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_w= %s", repr(self.axis_w))
+                        self.__axis_w = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.axis_w= %s", repr(self.__axis_w))
 
                 elif splitstr_arr[0] == "AXIS_N":
                     is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
@@ -644,14 +759,14 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 elif splitstr_arr[0] == "AXIS_MIN":
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                     if is_ok:
-                        self.axis_min = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_min= %s", repr(self.axis_min))
+                        self.__axis_min = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.__axis_min= %s", repr(self.__axis_min))
 
                 elif splitstr_arr[0] == "AXIS_MAX":
                     is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
                     if is_ok:
-                        self.axis_max = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_max= %s", repr(self.axis_max))
+                        self.__axis_max = (x_flt, y_flt, z_flt)
+                        self.logger.debug("self.__axis_max= %s", repr(self.__axis_max))
 
                 elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
                     is_ok, l = self.__parse_int(splitstr_arr[1])
@@ -690,12 +805,128 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
     
             # END OF TEXT PROCESSING LOOP
 
+
         # Read in any binary data files and flags files attached to voxel files
-        retVal = self.__read_voxel_binary_files()
+        if self.__is_vo and len(self.prop_dict)>0:
+            ret_val = self.__read_voxel_binary_files()
 
-        self.logger.debug("process_gocad() returns")
-        return retVal
+        # Complete initalisation of geometry object
+        if len(self.local_props)>0:
+            for propIdx in self.local_props:
+                geom_obj = copy.deepcopy(self.geom_obj)
+                style_obj = copy.deepcopy(self.style_obj)
+                meta_obj = copy.deepcopy(self.meta_obj)
+                self.__init_metadata(meta_obj, localPropIdx=propIdx)
+                self.__init_geometry(geom_obj, localPropIdx=propIdx)
+                self.__init_style(style_obj, localPropIdx=propIdx)
+                self.gsm_list.append((geom_obj, style_obj, meta_obj)) 
+        elif len(self.prop_dict)>0:
+            for propIdx in self.prop_dict:
+                geom_obj = copy.deepcopy(self.geom_obj)
+                style_obj = copy.deepcopy(self.style_obj)
+                meta_obj = copy.deepcopy(self.meta_obj)
+                self.__init_metadata(meta_obj, propIdx=propIdx)
+                self.__init_geometry(geom_obj, propIdx=propIdx)
+                self.__init_style(style_obj, propIdx=propIdx)
+                self.gsm_list.append((geom_obj, style_obj, meta_obj)) 
+                
+        else:
+            self.__init_metadata(self.meta_obj)
+            self.__init_geometry(self.geom_obj)
+            self.gsm_list.append((self.geom_obj, self.style_obj, self.meta_obj)) 
+            
+          
 
+        # Complete initialisation of metadata object
+
+        self.logger.debug("process_gocad() returns %s", repr(ret_val))
+        return ret_val, self.gsm_list
+
+
+    def __init_style(self, style_obj,  localPropIdx=None, propIdx=None):
+        ''' Extract style data from GOCAD_VESSEL
+        '''
+        if localPropIdx:
+            prop = self.local_props[localPropIdx]
+            style_obj.colour_map = prop.colour_map
+
+        if propIdx:
+            prop = self.prop_dict[propIdx]
+            style_obj.colour_map = prop.colour_map
+            
+
+
+    def __init_metadata(self, meta_obj, localPropIdx=None, propIdx=None):
+        ''' Extract metadata from GOCAD_VESSEL
+        '''
+        group_name = ''
+        if len(self.group_name)>0:
+            group_name = self.group_name+"-"
+        if len(self.header_name)>0:
+            meta_obj.name = group_name + self.header_name
+        else:
+            meta_obj.name = group_name + "geometry"
+        if localPropIdx:
+            meta_obj.property_name = localPropIdx
+        if propIdx:
+            meta_obj.property_name = self.prop_dict[propIdx].class_name
+            meta_obj.is_index_data = self.prop_dict[propIdx].is_index_data
+            if len(self.prop_dict[propIdx].rock_label_table) > 0:
+                meta_obj.rock_label_table = self.prop_dict[propIdx].rock_label_table
+
+
+    def __init_geometry(self, geom_obj, localPropIdx=None, propIdx=None):
+        ''' Convert GOCAD_VESSEL to MODEL_GEOMETRY version
+        '''
+        # Convert GOCAD's volume geometry spec 
+        if self.__is_vo:
+            geom_obj.vol_origin = self.__axis_o
+            geom_obj.vol_sz = self.vol_sz
+            min_vec = np.array(self.__axis_min)
+            max_vec = np.array(self.__axis_max)
+            mult_vec = max_vec - min_vec 
+        
+            geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.__axis_u)).tolist())
+            geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.__axis_v)).tolist())
+            geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.__axis_w)).tolist())
+
+        # Re-enumerate all geometries, because some GOCAD files have missing vertex numbers
+        vert_dict = self.__make_vertex_dict()
+        for v_old in self.__vrtx_arr:
+            v = VRTX(vert_dict[v_old.n], v_old.xyz)
+            geom_obj.vrtx_arr.append(v)
+
+        for t_old in self.__trgl_arr:
+            t = TRGL(t_old.n, (vert_dict[t_old.abc[0]], vert_dict[t_old.abc[1]], vert_dict[t_old.abc[2]]))
+            geom_obj.trgl_arr.append(t)
+
+        for s_old in self.__seg_arr:
+            s = SEG((vert_dict[s_old.ab[0]], vert_dict[s_old.ab[1]]))
+            geom_obj.seg_arr.append(s)
+
+        for a_old in self.__atom_arr:
+            a = ATOM(vert_dict[a_old.n], vert_dict[a_old.v])
+            geom_obj.atom_arr.append(a)
+        
+        # Add PVTRX, PATOM data (and eventually SGRID)
+        if localPropIdx:
+            prop = self.local_props[localPropIdx]
+            geom_obj.xyz_data = prop.data_xyz
+            geom_obj.max_data = prop.data_stats['max']
+            geom_obj.min_data = prop.data_stats['min']
+            geom_obj.no_data_marker = prop.no_data_marker
+
+        # Add volume data
+        if propIdx:
+            prop = self.prop_dict[propIdx]
+            geom_obj.vol_data = prop.data_3d
+            geom_obj.max_data = prop.data_stats['max']
+            geom_obj.min_data = prop.data_stats['min']
+            geom_obj.no_data_marker = prop.no_data_marker
+            
+        print(repr(self.geom_obj))
+        
+        
 
     def __setType(self, fileExt, firstLineStr):
         ''' Sets the type of GOCAD file: TSURF, VOXEL, PLINE etc.
@@ -720,16 +951,16 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
 
         if ext_str in self.GOCAD_HEADERS:
             if ext_str=='TS' and firstLineStr in self.GOCAD_HEADERS['TS']:
-                self.is_ts = True
+                self.__is_ts = True
                 return True
             elif ext_str=='VS' and firstLineStr in self.GOCAD_HEADERS['VS']:
-                self.is_vs = True
+                self.__is_vs = True
                 return True
             elif ext_str=='PL' and firstLineStr in self.GOCAD_HEADERS['PL']:
-                self.is_pl = True
+                self.__is_pl = True
                 return True
             elif ext_str=='VO' and firstLineStr in self.GOCAD_HEADERS['VO']:
-                self.is_vo = True
+                self.__is_vo = True
                 return True
 
         return False
@@ -770,75 +1001,74 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
     def __read_voxel_binary_files(self):
         ''' Open up and read binary voxel file
         '''
-        if self.is_vo and len(self.prop_dict)>0:
-            if self.vol_sz==None:
-                self.logger.error("ERROR - Cannot process voxel file, cube size is not defined, missing 'AXIS_N'")
-                sys.exit(1)
-            for file_idx, prop_obj in self.prop_dict.items():
-                # Sometimes filename needs a .vo on the end
-                if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:]=="@@" and \
-                                              os.path.isfile(prop_obj.file_name+".vo"):
-                    prop_obj.file_name += ".vo"
+        if self.vol_sz==None:
+            self.logger.error("ERROR - Cannot process voxel file, cube size is not defined, missing 'AXIS_N'")
+            sys.exit(1)
+        for file_idx, prop_obj in self.prop_dict.items():
+            # Sometimes filename needs a .vo on the end
+            if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:]=="@@" and \
+                                          os.path.isfile(prop_obj.file_name+".vo"):
+                prop_obj.file_name += ".vo"
 
-                # If there is a colour table in CSV file then read it
-                bin_file = os.path.basename(prop_obj.file_name)
-                if bin_file in self.ct_file_dict:
-                    csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name), self.ct_file_dict[bin_file])
-                    prop_obj.read_colour_table_csv(csv_file_path)
-                    self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
-                    self.logger.debug("prop_obj.rock_label_table = %s", repr(prop_obj.rock_label_table))
+            # If there is a colour table in CSV file then read it
+            bin_file = os.path.basename(prop_obj.file_name)
+            if bin_file in self.ct_file_dict:
+                csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name), self.ct_file_dict[bin_file])
+                prop_obj.read_colour_table_csv(csv_file_path)
+                self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
+                self.logger.debug("prop_obj.rock_label_table = %s", repr(prop_obj.rock_label_table))
 
-                # Read and process binary file
-                try:
-                    # Check file size first
-                    file_sz = os.path.getsize(prop_obj.file_name)
-                    num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-                    self.logger.debug("num_voxels = %s", repr(num_voxels))
-                    est_sz = prop_obj.data_sz*num_voxels+prop_obj.offset
-                    if file_sz < est_sz:
-                        self.logger.error("SORRY - Cannot process voxel file - length (%d) is less than estimated size (%d): %s", file_sz, est_sz, prop_obj.file_name)
-                        sys.exit(1)
-
-                    # Initialise data array to zeros
-                    prop_obj.data_3d = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
-
-                    # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
-                    dt = prop_obj.make_numpy_dtype()
-
-                    # Read entire file, assumes file small enough to store in memory
-                    self.logger.info("Reading binary file: %s", prop_obj.file_name)
-                    elem_offset = prop_obj.offset//prop_obj.data_sz
-                    self.logger.debug("elem_offset = %s", repr(elem_offset))
-                    f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels+elem_offset)
-                    fl_idx = elem_offset 
-                    mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
-                            (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
-                            (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
-                    for z in range(self.vol_sz[2]):
-                        for y in range(self.vol_sz[1]):
-                            for x in range(self.vol_sz[0]):
-                                converted, fp = self.__parse_float(f_arr[fl_idx], prop_obj.no_data_marker)
-                                # self.logger.debug("fp[%d, %d, %d] = %f", x,y,z, fp)
-                                fl_idx +=1
-                                if not converted:
-                                    continue
-                                prop_obj.assign_to_3d(x,y,z, fp)
-
-                                # Calculate the XYZ coords and their maxs & mins
-                                X_coord = self.axis_origin[0]+ \
-                                  (float(x)*self.axis_u[0]*mult[0] + float(y)*self.axis_u[1]*mult[1] + float(z)*self.axis_u[2]*mult[2])
-                                Y_coord = self.axis_origin[1]+ \
-                                  (float(x)*self.axis_v[0]*mult[0] + float(y)*self.axis_v[1]*mult[1] + float(z)*self.axis_v[2]*mult[2])
-                                Z_coord = self.axis_origin[2]+ \
-                                  (float(x)*self.axis_w[0]*mult[0] + float(y)*self.axis_w[1]*mult[1] + float(z)*self.axis_w[2]*mult[2]) 
-                                self._calc_minmax(X_coord, Y_coord, Z_coord)
-                                 
-                except IOError as e:
-                    self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
+            # Read and process binary file
+            try:
+                # Check file size first
+                file_sz = os.path.getsize(prop_obj.file_name)
+                num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
+                self.logger.debug("num_voxels = %s", repr(num_voxels))
+                est_sz = prop_obj.data_sz*num_voxels+prop_obj.offset
+                if file_sz < est_sz:
+                    self.logger.error("SORRY - Cannot process voxel file - length (%d) is less than estimated size (%d): %s", file_sz, est_sz, prop_obj.file_name)
                     sys.exit(1)
 
-            if not self.SKIP_FLAGS_FILE:
-                self.__read_flags_file()
+                # Initialise data array to zeros
+                prop_obj.data_3d = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
+
+                # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
+                dt = prop_obj.make_numpy_dtype()
+
+                # Read entire file, assumes file small enough to store in memory
+                self.logger.info("Reading binary file: %s", prop_obj.file_name)
+                elem_offset = prop_obj.offset//prop_obj.data_sz
+                self.logger.debug("elem_offset = %s", repr(elem_offset))
+                f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels+elem_offset)
+                fl_idx = elem_offset 
+                mult = [(self.__axis_max[0]-self.__axis_min[0])/self.vol_sz[0],
+                        (self.__axis_max[1]-self.__axis_min[1])/self.vol_sz[1],
+                        (self.__axis_max[2]-self.__axis_min[2])/self.vol_sz[2]]
+                for z in range(self.vol_sz[2]):
+                    for y in range(self.vol_sz[1]):
+                        for x in range(self.vol_sz[0]):
+                            converted, fp = self.__parse_float(f_arr[fl_idx], prop_obj.no_data_marker)
+                            # self.logger.debug("fp[%d, %d, %d] = %f", x,y,z, fp)
+                            fl_idx +=1
+                            if not converted:
+                                continue
+                            prop_obj.assign_to_3d(x,y,z, fp)
+
+                            # Calculate the XYZ coords and their maxs & mins
+                            X_coord = self.__axis_o[0]+ \
+                              (float(x)*self.__axis_u[0]*mult[0] + float(y)*self.__axis_u[1]*mult[1] + float(z)*self.__axis_u[2]*mult[2])
+                            Y_coord = self.__axis_o[1]+ \
+                              (float(x)*self.__axis_v[0]*mult[0] + float(y)*self.__axis_v[1]*mult[1] + float(z)*self.__axis_v[2]*mult[2])
+                            Z_coord = self.__axis_o[2]+ \
+                              (float(x)*self.__axis_w[0]*mult[0] + float(y)*self.__axis_w[1]*mult[1] + float(z)*self.__axis_w[2]*mult[2]) 
+                            self.geom_obj.calc_minmax(X_coord, Y_coord, Z_coord)
+                             
+            except IOError as e:
+                self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s", prop_obj.file_name, str(e), e.args)
+                sys.exit(1)
+
+        if not self.SKIP_FLAGS_FILE:
+            self.__read_flags_file()
         return True
 
 
@@ -849,7 +1079,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         if self.flags_file!='':
             if self.flags_array_length != self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]:
                 self.logger.warning("SORRY - Cannot process voxel flags file, inconsistent size between data file and flag file")
-                self.logger.debug("process_gocad() return False")
+                self.logger.debug("__read_flags_file() return False")
                 return False
             # Check file does not exist, sometimes needs a '.vo' on the end
             if not os.path.isfile(self.flags_file) and self.flags_file[-2:]=="@@" and \
@@ -904,7 +1134,7 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
                 
             except IOError as e:
                 self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s", self.flags_file, str(e), e.args)
-                self.logger.debug("process_gocad() return False")
+                self.logger.debug("__read_flags_file() return False")
                 return False
 
         return True
@@ -997,13 +1227,13 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
         return True, num 
 
 
-    def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False, convert = True):
+    def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True):
         ''' Helpful function to read XYZ cooordinates
             is_float - if true parse x y z as floats else try integers
             x_str, y_str, z_str - X,Y,Z coordinates in string form
-            do_minmax - record the X,Y,Z coords for calculating extent
+            do_minmax - calculate min/max of the X,Y,Z coords
             convert - convert from kms to metres if necessary
-            Returns four parameters: success - true if could convert the strings to floats
+            Returns four parameters: success - true if could convert the strings to floats/ints
                                      x,y,z - floating point values, converted to metres if units are kms
         '''
         x = y = z = None
@@ -1028,9 +1258,12 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             y *= self.xyz_mult[1]
             z *= self.xyz_mult[2]
 
-        # Calculate minimum and maximum XYZ
+        # Calculate and store minimum and maximum XYZ
         if do_minmax:
-            self._calc_minmax(x,y,z)
+            self.geom_obj.calc_minmax(x,y,z)
+            x += self.base_xyz[0]
+            y += self.base_xyz[1]
+            z += self.base_xyz[2]
 
         return True, x, y, z 
 
@@ -1057,6 +1290,17 @@ class GOCAD_VESSEL(MODEL_GEOMETRIES):
             self.__handle_exc(exc)
             rgba_tup = (1.0, 1.0, 1.0, 1.0)
         return rgba_tup
+
+
+    def __check_vertex(self, num):
+        ''' If vertex exists then returns true else false
+            num - vertex number to search for
+        '''
+        for vrtx in self.__vrtx_arr:
+            if vrtx.n == num:
+                return True
+        return False
+
 
 
 #  END OF GOCAD_VESSEL CLASS
