@@ -16,3 +16,6 @@ class METADATA():
         ''' Table specifying names of rocks , key is an integer, value is the label
         '''
 
+    def __repr__(self):
+        return("METADATA(): name={0} property_name={1} is_index_data={2} rock_label_table={3}".format(self.name, self.property_name, str(self.is_index_data), str(self.rock_label_table)))
+

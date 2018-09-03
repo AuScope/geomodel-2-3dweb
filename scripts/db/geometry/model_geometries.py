@@ -94,7 +94,7 @@ class MODEL_GEOMETRIES:
         ret_str = ''
         for field in dir(self):
             if field[-2:] != '__' and not callable(getattr(self, field)):
-                ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
+                ret_str += field + ": " + repr(getattr(self, field))[:500] + "\n"
         return ret_str
 
 

@@ -924,7 +924,7 @@ class GOCAD_VESSEL():
             geom_obj.min_data = prop.data_stats['min']
             geom_obj.no_data_marker = prop.no_data_marker
             
-        print(repr(self.geom_obj))
+        # print(repr(self.geom_obj))
         
         
 

@@ -13,6 +13,9 @@ class STYLE:
         ''' rgba_tup has been set
         '''
 
+    def __repr__(self):
+        return("STYLE(): rgba_tup={0}".format(str(self.rgba_tup)))
+
     @property
     def rgba_tup(self):
         return self.__rgba_tup

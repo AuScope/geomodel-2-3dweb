@@ -53,8 +53,6 @@ Using GOCAD_VESSEL:
 Multiple whitespace in field separators
 Spaces in filenames and paths
 Control nodes in vertices and atoms with and without properties
-Property vertices and atoms (PATOM)
-Skipped vertex ids
 REGION keyword
 SEG
 TRGL
@@ -212,5 +210,24 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     # Max and min of property values
     #
     test_this("Max & min of property values", "test027.vs", "gv.local_props['HRZR'].data_stats == {'min': -110.087890625, 'max': 23.025390625}")
-    
+
+    #
+    # Two sets of property values
+    #
+    test_this("Two sets of vertex properties", "test028.ts", "len(gsm_list)==2")
+
+    #
+    # Names of objects and properties 
+    #
+    test_this("Names of objects and properties", "test028.ts", "gsm_list[0][2].name == 'BASE' and gsm_list[0][2].property_name == 'I' and gsm_list[1][2].name == 'BASE' and gsm_list[1][2].property_name == 'J'")
+
+    #
+    # Values of properties
+    #
+    test_this("Values of properties", "test028.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
+
+    #
+    # Renumber skipped vertex ids
+    #
+    test_this("Renumber skipped vertex ids", "test028.ts", "gsm_list[0][0].vrtx_arr[5].n == 6 and gsm_list[0][0].trgl_arr[2].abc == (4, 5, 6)")
     
