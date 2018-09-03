@@ -379,7 +379,7 @@ class GOCAD_VESSEL():
         ''' Extracts details from gocad file. This should be called before other functions!
             filename_str - filename of gocad file
             file_lines - array of strings of lines from gocad file
-            Returns true if could process file, and a style object
+            Returns true if could process file, and a list of (geometry, style, metadata) objects
         '''
         self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
 
@@ -431,7 +431,7 @@ class GOCAD_VESSEL():
                 firstLine = False
                 if not self.__setType(fileExt, line_str):
                     self.logger.debug("process_gocad() Can't set type, return False")
-                    return False
+                    return False, []
                 continue
 
             # Skip the subsets keywords
@@ -468,7 +468,7 @@ class GOCAD_VESSEL():
                         if not self.nondefault_coords:
                             self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
                             self.logger.debug("process_gocad() return False")
-                            return False 
+                            return False, []
                 
                 # Does coordinate system use inverted z-axis?
                 elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":

@@ -1,0 +1,34 @@
+GOCAD Voxet 1
+PROPERTY 1 "Lithology"
+PROPERTY_CLASS 1 "lithologies"
+INTERPOLATION_METHOD  Block
+PROPERTY_KIND 1 "lithologies"
+PROPERTY_CLASS_HEADER 1 "lithologies" {
+colormap:lithologies
+*colormap*size:21
+*colormap*nbcolors:21
+low_clip:1
+high_clip:21
+*colormap*nodata:true
+*colormap*ndtransparency:1
+}
+AXIS_O 696000 6863000 -40000
+AXIS_U 51000 0 0
+AXIS_V 0 87000 0
+AXIS_W 0 0 51000
+AXIS_MIN 0 0 0
+AXIS_MAX 1 1 1
+AXIS_N 1 1 1
+AXIS_NAME "axis-1" "axis-2" "axis-3"
+AXIS_UNIT " number" " number" " number"
+AXIS_TYPE even even even
+PROPERTY_SUBCLASS 1 ROCK "lithologies"
+PROP_NO_DATA_VALUE 1 -9999
+PROP_STORAGE_TYPE 1 Short
+PROP_ESIZE 1 2
+PROP_SIGNED 1 1
+PROP_ETYPE 1  IEEE
+PROP_FORMAT 1 RAW
+PROP_OFFSET 1 0
+PROP_FILE 1 tiny_voxet_test_file@@
+

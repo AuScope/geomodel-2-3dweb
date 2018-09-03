@@ -1,0 +1,41 @@
+GOCAD Voxet 1
+AXIS_O 405150 7534500 500
+AXIS_U 74400 0 0
+AXIS_V 0 179700 0
+AXIS_W 0 0 -3900
+AXIS_MIN 0 0 0
+AXIS_MAX 1 1 0.769230783
+AXIS_N 1 1 1
+AXIS_NAME axis-1 axis-2 axis-3
+AXIS_UNIT "number" "number" "number"
+AXIS_TYPE even even even
+
+PROPERTY 1 RockCode
+PROPERTY_CLASS 1 rockcode
+INTERPOLATION_METHOD  Block
+PROPERTY_KIND 1 RockCode
+PROPERTY_CLASS_HEADER 1 rockcode {
+kind: RockCode
+colormap: RockCode
+*colormap*size: 14
+*colormap*nbcolors: 14
+low_clip: 0
+high_clip: 13
+last_selected_folder: Property
+*RockCode*rock_colors: 0 0 0.807843 0.819608 1 0.690196 0.768627 0.870588 2 0.960784 0.870588 0.701961 3 0.415686 0.352941 0.803922 4 0.596078 0.984314 0.596078 5 0.823529 0.705882 0.54902 6 0.415686 0.352941 0.803922 7 1 0.843137 0 8 0.541176 0.168627 0.886275 9 0.909804 0.564706 0.203922 10 0.933333 0.509804 0.933333 11 0.184314 0.309804 0.309804 12 1 0 0 13 0 0 1
+}
+PROPERTY_SUBCLASS 1 ROCK 14  Air 0  Cover 1  Llewellyn_Repeat 2  Stavley_Repeat 3  TooleCreekVolcanics 4  Llewellyn 5  Stavley 6  Timberoo_etc_seds 7  MarrabaMaficVolcanics 8  BulongaVolcanics 9  Below_BulongaVolcanics 10  CrystallineBasement 11  Granites 12  DoubleCrossing 13
+PROP_ORIGINAL_UNIT 1 none
+PROP_UNIT 1 none
+PROP_NO_DATA_VALUE 1 -999
+PROP_SAMPLE_STATS 1 1999968 6.88733 15.2785 0 13
+PROP_STORAGE_TYPE 1 Short
+PROP_ESIZE 1 2
+PROP_SIGNED 1 1
+PROP_ETYPE 1  IEEE
+PROP_FORMAT 1 RAW
+PROP_OFFSET 1 0
+PROP_FILE 1 tiny_voxet_test_file@@
+
+
+

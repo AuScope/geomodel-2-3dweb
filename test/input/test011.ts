@@ -1,0 +1,4 @@
+GOCAD TSurf 1 
+HEADER {
+*solid*color:0.486275 0.596078 0.827451 0.9
+}
