@@ -19,9 +19,9 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     '''
     split_str = []
     try:
-      fp = open(os.path.join(INPUT_DIR, test_file))
-      split_str = fp.readlines()
-      fp.close()
+        fp = open(os.path.join(INPUT_DIR, test_file))
+        split_str = fp.readlines()
+        fp.close()
     except FileNotFoundError:
         print("Cannot find file: '"+test_file+"' in '"+INPUT_DIR+"' directory")
         sys.exit(1)
@@ -30,6 +30,7 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     else:
         gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=True) # logging.DEBUG or logging.ERROR
     is_ok, gsm_list = gv.process_gocad(".", test_file, split_str)
+    # print("gsm_list=", repr(gsm_list))
     if not is_ok and not should_fail:
         print(msg, ": FAIL !!")
         sys.exit(1)
@@ -50,13 +51,8 @@ Parsing directories to find GOCAD files, parsing single files
 
 Using GOCAD_VESSEL:
 -------------------
-Multiple whitespace in field separators
-Spaces in filenames and paths
 Control nodes in vertices and atoms with and without properties
 REGION keyword
-SEG
-TRGL
-Voxet values
 """
    
 # MAIN PART OF PROGRAMME
@@ -78,6 +74,7 @@ if __name__ == "__main__":
     # Recognise file types - PLINE
     #
     test_this("Recognise PLINE file", "test003.pl", "gsm_list[0][0].is_line() == True")
+
 
     #
     # Recognise file types - VSET
@@ -119,18 +116,18 @@ if __name__ == "__main__":
     #
     # Solid colours: 4 floats
     #
-    test_this("Colour floats*4 test", "test011.ts", "gv.gsm_list[0][1].rgba_tup == (0.486275,0.596078,0.827451,0.9)")
+    test_this("Colour floats*4 test", "test011.ts", "gsm_list[0][1].rgba_tup == (0.486275,0.596078,0.827451,0.9)")
 
     #
     # Solid colours: hex
     #
-    test_this("Colour hex test", "test012.ts", "gv.gsm_list[0][1].rgba_tup == (0.5019607843137255,0.5019607843137255,0.5019607843137255,1.0)")
+    test_this("Colour hex test", "test012.ts", "gsm_list[0][1].rgba_tup == (0.5019607843137255,0.5019607843137255,0.5019607843137255,1.0)")
 
 
     #
-    # Header name
+    # Recognise header name, including forward slash
     #
-    test_this("Recognise header name", "test013.ts", "gv.header_name == 'TESTING12-3'")
+    test_this("Recognise header name, including forward slash", "test013.ts", "gsm_list[0][2].name == 'TESTING12-3'")
 
 
     #
@@ -199,6 +196,10 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     #
     test_this("Voxet rock table and color table", "test025.vo", "gv.prop_dict['1'].is_index_data and gv.rock_label_idx['1'][2] == 'LLEWELLYN_REPEAT' and  gv.rock_label_idx['1'][13] == 'DOUBLECROSSING' and gv.prop_dict['1'].colourmap_name == 'ROCKCODE' and gv.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922)")
 
+    #
+    # Voxet data
+    #
+    test_this("Voxet data", "test025.vo", "gsm_list[0][0].vol_data[0][0][0] == 1.0")
 
     #
     # Max & min of XYZ values
@@ -227,7 +228,22 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     test_this("Values of properties", "test028.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
 
     #
-    # Renumber skipped vertex ids
+    # Renumber skipped vertex ids, recognise TRGL keyword
     #
-    test_this("Renumber skipped vertex ids", "test028.ts", "gsm_list[0][0].vrtx_arr[5].n == 6 and gsm_list[0][0].trgl_arr[2].abc == (4, 5, 6)")
-    
+    test_this("Renumber skipped vertex ids, recognise TRGL keyword", "test028.ts", "gsm_list[0][0].vrtx_arr[5].n == 6 and gsm_list[0][0].trgl_arr[2].abc == (4, 5, 6)")
+
+    #
+    # Recognise SEG keyword
+    #
+    test_this("Recognise SEG keyword", "test003.pl", "gsm_list[0][0].seg_arr[0].ab == (1,2)")
+
+    #
+    # Spaces in fields
+    #
+    test_this("Spaces in fields", "test029.ts", "gsm_list[0][0].trgl_arr[0].abc == (1,2,3)")
+
+    #
+    # Labels with spaces in quotes
+    #
+    test_this("Labels with spaces in quotes", "test029.ts", "gsm_list[0][2].name == 'BLAH_1_2'")
+
