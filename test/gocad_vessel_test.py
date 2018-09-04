@@ -252,3 +252,8 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     #
     test_this("Region data in voxet file", "test030.vo", "gv.region_colour_dict['QUARTZ'] == (0.641993, 0.756863, 0.629236, 1.0) and gv.region_colour_dict['SLATE'] == (0.25, 0.25, 0.25, 1.0) and gv.region_dict['8'] == 'QUARTZ' and gv.region_dict['9'] == 'SLATE'")
 
+    #
+    # Handle control nodes
+    #
+    test_this("Handle control nodes", "test031.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
+
