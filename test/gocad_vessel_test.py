@@ -6,11 +6,13 @@ import os
 
 sys.path.append('../scripts')
 
-from imports.gocad.gocad_vessel import GOCAD_VESSEL
+from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
 
 from db.geometry.types import ATOM
 
 INPUT_DIR = 'input'
+
+
 
 def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     ''' Function used to run a little test of GOCAD_VESSEL class
@@ -43,20 +45,35 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
         print(msg, ": FAIL !!")
         sys.exit(1) 
     print(msg, ": PASS")
+
+
+
+def test_group(msg, test_file, assert_str):
+    ''' Opens up and parses a GOCAD group file
+        msg - name of test
+        test_file - name of GOCAD file
+        assert_str - string of python code used to evaluate success of test
+    '''
+    try:
+        fp = open(os.path.join(INPUT_DIR, test_file))
+        file_lines = fp.readlines()
+        fp.close()
+    except FileNotFoundError:
+        print("Cannot find file: '"+test_file+"' in '"+INPUT_DIR+"' directory")
+        sys.exit(1)
+    gsm_list = extract_from_grp(INPUT_DIR, test_file, file_lines, (0.0, 0.0, 0.0), logging.ERROR, False, {})
+    #print("gsm_list=", repr(gsm_list))
+    try:
+        assert(eval(assert_str))
+    except AssertionError:
+        print(msg, ": FAIL !!")
+        sys.exit(1) 
+    print(msg, ": PASS")
+
     
-"""
-TODO List:
 
-Using GOCAD_KIT:
-----------------
-Multiple GOCAD entries in GROUP and TSURF files
-Parsing directories to find GOCAD files, parsing single files
 
-Using GOCAD_VESSEL:
--------------------
-Atoms with and without properties
-"""
-   
+    
 # MAIN PART OF PROGRAMME
 if __name__ == "__main__":
     print("GOCAD_VESSEL Regression Test")
@@ -264,3 +281,7 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     #
     test_this("ATOMS with and without properties", "test032.ts", "gsm_list[0][0].xyz_data[(459876.3125, 8241554.9453125, -485.6229248046875)] == 1050.0 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr")
 
+    #
+    # Extract GOCAD objects from group file
+    #
+    test_group("Extract GOCAD objects from group file", "test033.gp","len(gsm_list)==30 and gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].property_name == 'OBJECTID' and gsm_list[0][0].xyz_data[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")

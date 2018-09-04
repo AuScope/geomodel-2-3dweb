@@ -49,11 +49,11 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl, non
     ''' Extracts GOCAD files from a GOCAD group file
         filename_str - filename of GOCAD file
         file_lines - lines extracted from GOCAD group file
-        Returns a list of (GOCAD_VESSEL, STYLE) objects
+        Returns a list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
     '''
     local_logger.debug("extract_gocad(%s,%s)", src_dir, filename_str)
     global CtFileDict
-    gvstm_list = []
+    main_gsm_list = []
     firstLine = True
     inMember = False
     inGoCAD = False
@@ -79,13 +79,13 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl, non
             gv = GOCAD_VESSEL(debug_lvl, base_xyz=base_xyz, group_name=os.path.basename(fileName).upper(), nondefault_coords=nondef_coords, ct_file_dict=ct_file_dict)
             is_ok, gsm_list = gv.process_gocad(src_dir, filename_str, gocad_lines)
             if is_ok:
-                gvstm_list += gsm_list
+                main_gsm_list += gsm_list
             gocad_lines = []
         if inMember and inGoCAD:
             gocad_lines.append(line)
 
-    local_logger.debug("extract_gocad() returning len(gvst_list)=%d", len(gvst_list))
-    return gvstm_list
+    local_logger.debug("extract_gocad() returning len(main_gsm_list)=%d", len(main_gsm_list))
+    return main_gsm_list
 
 
 
