@@ -615,7 +615,7 @@ class GOCAD_VESSEL():
                         # Atoms with attached properties
                         if splitstr_arr[0] == "PATOM":
                             vert_dict = self.__make_vertex_dict()
-                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num]].xyz, True)
+                            self.__parse_props(splitstr_arr, self.__vrtx_arr[vert_dict[v_num] - 1].xyz, True)
                   
                 # Grab the vertices and properties, does not care if there are gaps in the sequence number
                 elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":

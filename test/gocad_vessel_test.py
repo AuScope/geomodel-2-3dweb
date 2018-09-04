@@ -8,6 +8,8 @@ sys.path.append('../scripts')
 
 from imports.gocad.gocad_vessel import GOCAD_VESSEL
 
+from db.geometry.types import ATOM
+
 INPUT_DIR = 'input'
 
 def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
@@ -52,7 +54,7 @@ Parsing directories to find GOCAD files, parsing single files
 
 Using GOCAD_VESSEL:
 -------------------
-Control nodes in vertices and atoms with and without properties
+Atoms with and without properties
 """
    
 # MAIN PART OF PROGRAMME
@@ -256,4 +258,9 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     # Handle control nodes
     #
     test_this("Handle control nodes", "test031.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
+
+    #
+    # ATOMS with and without properties
+    #
+    test_this("ATOMS with and without properties", "test032.ts", "gsm_list[0][0].xyz_data[(459876.3125, 8241554.9453125, -485.6229248046875)] == 1050.0 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr")
 
