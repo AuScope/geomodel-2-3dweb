@@ -1,0 +1,28 @@
+GOCAD Voxet 1 
+HEADER {
+name:Region_test
+*regions*Quartz*solid*color:0.641993 0.756863 0.629236 1
+*regions*Quartz*visible:off
+*regions*Slate*solid*color:0.25 0.25 0.25 1
+*regions*Slate*visible:off
+}
+GOCAD_ORIGINAL_COORDINATE_SYSTEM
+NAME Default
+AXIS_NAME "X" "Y" "Z"
+AXIS_UNIT "m" "m" "m"
+ZPOSITIVE Elevation
+END_ORIGINAL_COORDINATE_SYSTEM
+AXIS_O 352000 5320000 1550 
+AXIS_U 48000 0 0 
+AXIS_V 0 75000 0 
+AXIS_W 0 0 -11500 
+AXIS_MIN 0 0 0 
+AXIS_MAX 1 1 1 
+AXIS_N 241 376 116 
+AXIS_NAME "axis-1" "axis-2" "axis-3"
+AXIS_UNIT " number" " number" " number" 
+AXIS_TYPE even even even
+
+REGION Quartz 8 
+REGION Slate 9 
+END

@@ -30,7 +30,8 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     else:
         gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=True) # logging.DEBUG or logging.ERROR
     is_ok, gsm_list = gv.process_gocad(".", test_file, split_str)
-    # print("gsm_list=", repr(gsm_list))
+    #print("gv=", repr(gv))
+    #print("gsm_list=", repr(gsm_list))
     if not is_ok and not should_fail:
         print(msg, ": FAIL !!")
         sys.exit(1)
@@ -52,7 +53,6 @@ Parsing directories to find GOCAD files, parsing single files
 Using GOCAD_VESSEL:
 -------------------
 Control nodes in vertices and atoms with and without properties
-REGION keyword
 """
    
 # MAIN PART OF PROGRAMME
@@ -246,4 +246,9 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     # Labels with spaces in quotes
     #
     test_this("Labels with spaces in quotes", "test029.ts", "gsm_list[0][2].name == 'BLAH_1_2'")
+
+    #
+    # Region data in voxet file
+    #
+    test_this("Region data in voxet file", "test030.vo", "gv.region_colour_dict['QUARTZ'] == (0.641993, 0.756863, 0.629236, 1.0) and gv.region_colour_dict['SLATE'] == (0.25, 0.25, 0.25, 1.0) and gv.region_dict['8'] == 'QUARTZ' and gv.region_dict['9'] == 'SLATE'")
 
