@@ -197,29 +197,10 @@ class COLLADA_KIT:
             mat = Collada.material.Material("material-{0:05d}".format(self.obj_cnt), "mymaterial-{0:05d}".format(self.obj_cnt), effect)
             self.mesh_obj.effects.append(effect)
             self.mesh_obj.materials.append(mat)
-            matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(self.obj_cnt), mat, inputs=[])
 
-            # Draw lines as a series of triangles
-            vrtx_arr = geom_obj.vrtx_arr
-            for l in geom_obj.seg_arr:
-                v0 = vrtx_arr[l.ab[0]-1]
-                v1 = vrtx_arr[l.ab[1]-1]
-                vert_floats = list(v0.xyz) + [v0.xyz[0], v0.xyz[1], v0.xyz[2]+self.LINE_WIDTH] + list(v1.xyz) + [v1.xyz[0], v1.xyz[1], v1.xyz[2]+self.LINE_WIDTH]
-                vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.obj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
-                geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
-                geom = Collada.geometry.Geometry(self.mesh_obj, "geometry{0:010d}-{1:05d}".format(point_cnt, self.obj_cnt), geom_label, [vert_src])
-
-                input_list = Collada.source.InputList()
-                input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, self.obj_cnt))
-
-                indices = [0, 2, 3, 3, 1, 0]
-
-                triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(self.obj_cnt))
-                geom.primitives.append(triset)
-                self.mesh_obj.geometries.append(geom)
-                self.geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+            geom_label_list = self.co.make_line(self.mesh_obj, geometry_name, self.geomnode_list, geom_obj.seg_arr, geom_obj.vrtx_arr, self.obj_cnt, self.LINE_WIDTH)
+            for geom_label in geom_label_list:
                 popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.name }
-                point_cnt += 1
 
         self.obj_cnt += 1
         return popup_dict

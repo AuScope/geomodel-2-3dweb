@@ -79,11 +79,10 @@ class COLLADA_OUT():
         ''' Makes a pyramid using pycollada objects
             Returns its geometry label
             mesh - pycollada 'Collada' object
-            geometry_name - generic label for all cubes
+            geometry_name - generic label for all pyramids
             geomnode_list - list of pycollada 'GeometryNode' objects
             vrtx - VTRX object
             point_cnt - pyramid counter within this file
-            
         '''
 
         # Vertices of the pyramid
@@ -103,8 +102,50 @@ class COLLADA_OUT():
         geom.primitives = triset_list
         mesh.geometries.append(geom)
         matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
-        geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
+        geomnode_list.append(Collada.scene.GeometryNode(geom, matnode_list))
 
+
+    def make_line(self, mesh, geometry_name, geomnode_list, seg_arr, vrtx_arr, obj_cnt, line_width):
+        ''' Makes a line using pycollada objects
+            Returns its geometry label
+            mesh - pycollada 'Collada' object
+            geometry_name - generic label for all cubes
+            geomnode_list - list of pycollada 'GeometryNode' objects
+            seg_arr - array of SEG objects, defines line segments
+            vrtx_arr - array of VRTX objects, all points along line
+            obj_cnt - object counter within this file (an object may contain many lines)
+            line_width - line width, float
+        '''
+        matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt), mesh.materials[0], inputs=[])
+        geom_label_list = []
+        point_cnt = 0
+
+        # Draw lines as a series of triangles
+        for l in seg_arr:
+            v0 = vrtx_arr[l.ab[0]-1]
+            v1 = vrtx_arr[l.ab[1]-1]
+
+            vert_floats = list(v0.xyz) + [v0.xyz[0], v0.xyz[1], v0.xyz[2]+line_width] + list(v1.xyz) + [v1.xyz[0], v1.xyz[1], v1.xyz[2]+line_width]
+            vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
+            geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
+            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}-{1:05d}".format(point_cnt, obj_cnt), geom_label, [vert_src])
+
+            input_list = Collada.source.InputList()
+            input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt))
+
+            indices = [0, 2, 3, 3, 1, 0]
+
+            triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(obj_cnt))
+            geom.primitives.append(triset)
+            mesh.geometries.append(geom)
+            # NB: Assumes only one colour - this will be improved later on
+            geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
+
+            geom_label_list.append(geom_label)
+            point_cnt += 1
+       
+        return geom_label_list 
+            
 
     def make_borehole(self):
         pass
