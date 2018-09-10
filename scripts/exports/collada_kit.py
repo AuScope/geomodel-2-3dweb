@@ -310,24 +310,7 @@ class COLLADA_KIT:
                 continue               
             # Lookup the colour table
             colour_num = calculate_false_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
-            # Vertices of the pyramid
-            vert_floats = [v.xyz[0], v.xyz[1], v.xyz[2]+POINT_SIZE*2] + \
-                          [v.xyz[0]+POINT_SIZE, v.xyz[1]+POINT_SIZE, v.xyz[2]] + \
-                          [v.xyz[0]+POINT_SIZE, v.xyz[1]-POINT_SIZE, v.xyz[2]] + \
-                          [v.xyz[0]-POINT_SIZE, v.xyz[1]-POINT_SIZE, v.xyz[2]] + \
-                          [v.xyz[0]-POINT_SIZE, v.xyz[1]+POINT_SIZE, v.xyz[2]]
-            input_list = Collada.source.InputList()
-            input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-            # Define the faces of the pyramid as six triangles
-            indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
-            vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
-            geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
-            geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
-            triset_list = [geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:010d}".format(colour_num))]
-            geom.primitives = triset_list
-            mesh.geometries.append(geom)
-            matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
-            geomnode_list += [Collada.scene.GeometryNode(geom, matnode_list)]
+            geom_label = self.co.make_pyramid(mesh, geometry_name, geomnode_list, v, point_cnt)
 
             popup_dict[geom_label] = { 'name': meta_obj.property_name, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
             point_cnt += 1
@@ -441,8 +424,10 @@ class COLLADA_KIT:
                     # self.logger.debug("%d %d %d data_val = %s num_neighbours = %d", x,y,z, repr(data_val), num_neighbours[data_val][(x,y,z)])
                     # If surrounded by other cubes, then omit
                     if num_neighbours[data_val][(x,y,z)] < 26:
-                        cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geom_label_stub, file_cnt, point_cnt)
-                        node_list += cube_node_list
+                        geomnode_list = []
+                        geom_label = self.co.make_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geom_label_stub, file_cnt, point_cnt, geomnode_list)
+                        node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
+                        node_list.append(node)
                         point_cnt += 1
 
                 # Use a key with a regular expression to save writing thousands of properties to config file
@@ -467,7 +452,7 @@ class COLLADA_KIT:
                 popup_dict = {}
                 file_cnt += 1
 
-        # The physical measurements kind uses a false colourmap, and written as one big VOXET file
+        # The physical measurements kind uses a false colourmap, and written as one big file
         else:
             mesh = Collada.Collada()
             # Limit to 256 colours
@@ -485,9 +470,11 @@ class COLLADA_KIT:
                         if geom_obj.vol_data[x][y][z] != geom_obj.no_data_marker and \
                                  (z == 0 or y == 0 or x == 0 or z == geom_obj.vol_sz[2]-1 or y == geom_obj.vol_sz[1]-1 or x == geom_obj.vol_sz[0]-1):
                             colour_num = calculate_false_colour_num(geom_obj.vol_data[x][y][z], geom_obj.max_data, geom_obj.min_data, self.MAX_COLOURS)
-                            cube_node_list, geom_label = self.co.collada_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, file_cnt, point_cnt)
+                            geomnode_list = []
+                            geom_label = self.co.make_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, file_cnt, point_cnt, geomnode_list)
+                            node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
                             popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.property_name, 'value': "{:.3f}".format(geom_obj.vol_data[x][y][z]) }
-                            node_list += cube_node_list
+                            node_list.append(node)
                             point_cnt += 1
                         elif geom_obj.vol_data[x][y][z] == geom_obj.no_data_marker:
                             self.logger.debug("%d %d %d no data", x,y,z)
