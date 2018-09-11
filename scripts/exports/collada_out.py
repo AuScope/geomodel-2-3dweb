@@ -209,6 +209,7 @@ class COLLADA_OUT():
         :param pos: x,y,z position of collar of borehole
         :param borehole_label: geometry label for this borehole stick
         :param geomnode_list: list of pycollada 'GeometryNode' objects
+        :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
         :param ht_reso: height resolution
         '''
         BH_WIDTH= 75 # Width of stick

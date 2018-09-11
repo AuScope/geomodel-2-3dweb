@@ -8,6 +8,7 @@ import logging
 
 from exports.collada_out import COLLADA_OUT
 from exports.obj_out import OBJ_OUT
+from exports.bh_utils import make_borehole_label
 
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
@@ -483,6 +484,39 @@ class COLLADA_KIT:
             file_cnt += 1
                 
         return popup_list
+
+
+    def write_collada_borehole(self, bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
+        ''' Write out a COLLADA file of a borehole stick
+
+        :param file_name: filename of COLLADA file, without extension
+        :param bv: base vertex, position of the object within the model [x,y,z]
+        :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
+        :param height_reso: height resolution for colour info dict
+        '''
+        print(" write_collada_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
+
+        mesh = Collada.Collada()
+        node_list = []
+
+        for depth, colour_info in colour_info_dict.items():
+            effect = Collada.material.Effect("effect_{:d}".format(int(depth)), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=colour_info['colour'], specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
+            mat = Collada.material.Material("material_{:d}".format(int(depth)), "mymaterial_{:d}".format(int(depth)), effect)
+            mesh.effects.append(effect)
+            mesh.materials.append(mat)
+
+        geomnode_list = []
+        borehole_label = make_borehole_label(borehole_name)
+        self.co.make_colour_borehole_marker(mesh, bv, borehole_label, geomnode_list, colour_info_dict, height_reso)
+        node = Collada.scene.Node("node0", children=geomnode_list)
+        node_list.append(node)
+
+        myscene = Collada.scene.Scene("myscene", node_list)
+        mesh.scenes.append(myscene)
+        mesh.scene = myscene
+
+        mesh.write(os.path.join(dest_dir,file_name+'.dae'))
+
 
 
     def make_false_colour_materials(self, mesh, max_colours_flt):

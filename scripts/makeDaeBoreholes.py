@@ -25,7 +25,8 @@ import urllib.parse
 
 import exports.collada2gltf
 
-from exports.collada_out import COLLADA_OUT
+from exports.collada_kit import COLLADA_KIT
+from exports.bh_utils import make_borehole_label, make_borehole_filename
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -89,48 +90,6 @@ def __clean_crs(crs):
     return pair[0]+':'+pair[1]
 
 
-def write_collada_borehole(bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
-    ''' Write out a COLLADA file
-
-    :param file_name: filename of COLLADA file, without extension
-    :param bv: base vertex, position of the object within the model [x,y,z]
-    :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
-    :param height_reso: height resolution for colour info dict
-    '''
-    print(" write_collada_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
-
-    mesh = Collada.Collada()
-    node_list = []
-
-    for depth, colour_info in colour_info_dict.items():
-        effect = Collada.material.Effect("effect_{:d}".format(int(depth)), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=colour_info['colour'], specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-        mat = Collada.material.Material("material_{:d}".format(int(depth)), "mymaterial_{:d}".format(int(depth)), effect)
-        mesh.effects.append(effect)
-        mesh.materials.append(mat)
-
-    co = COLLADA_OUT(DEBUG_LVL)
-    geomnode_list = []
-    borehole_label = make_borehole_label(borehole_name)
-    co.make_colour_borehole_marker(mesh, bv, borehole_label, geomnode_list, colour_info_dict, height_reso) 
-    node = Collada.scene.Node("node0", children=geomnode_list)
-    node_list.append(node)
-
-    #print("Creating a scene")
-    myscene = Collada.scene.Scene("myscene", node_list)
-    mesh.scenes.append(myscene)
-    mesh.scene = myscene
-
-    #print("Writing mesh")
-    mesh.write(os.path.join(dest_dir,file_name+'.dae'))
-
-
-"""    /* Converts BGR colour integer into hex RGB string for Javascript */ 
-_colourConvert : function (BGRColorNumber) {
-    // String.format("#%1$02x%2$02x%3$02x", (BGRColorNumber & 255), (BGRColorNumber & 65280) >> 8, (BGRColorNumber >> 16));
-    return "#"+Ext.String.leftPad((BGRColorNumber & 255).toString(16), 2, '0')+
-               Ext.String.leftPad(((BGRColorNumber & 65280) >> 8).toString(16), 2, '0')+
-               Ext.String.leftPad((BGRColorNumber >> 16).toString(16), 2, '0');
-}, """
 def bgr2rgba(bgr):
     ''' Converts BGR colour integer into an RGB tuple
 
@@ -316,30 +275,6 @@ def get_config_borehole(borehole_list):
     return config_obj
 
 
-def make_borehole_filename(borehole_name):
-    ''' Returns a string, formatted borehole file name with no filename extension
-
-    :param borehole_name: borehole identifier used to make file name
-    '''
-    return "Borehole_"+clean_borehole_name(borehole_name)
-
-
-def clean_borehole_name(borehole_name):
-    ''' Returns a clean version of the borehole name or id
-
-    :param borehole_name: borehole identifier
-    '''
-    return borehole_name.replace(' ','_').replace('/','_').replace(':','_')
-
-
-def make_borehole_label(borehole_name):
-    ''' Returns a label version of the borehole name or id
-
-    :param borehole_name: borehole name or identifier
-    '''
-    return "borehole-{0}".format(clean_borehole_name(borehole_name))
-
-
 def get_json_input_param(input_file):
     ''' Reads the parameters from input JSON file and stores them in global 'Param' object
 
@@ -408,7 +343,8 @@ def get_boreholes(dest_dir, input_file):
                     break
             # If there's data, then colour the borehole
             if len(bh_data_dict) > 0:
-                write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
+                ck = COLLADA_KIT(DEBUG_LVL)
+                ck.write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
     # Convert COLLADA files to GLTF
     exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
     # Return borehole objects

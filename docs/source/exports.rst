@@ -4,6 +4,14 @@ exports package
 Submodules
 ----------
 
+exports.bh_utils module
+-----------------------
+
+.. automodule:: exports.bh_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 exports.collada2gltf module
 ---------------------------
 
@@ -28,10 +36,10 @@ exports.collada_out module
     :undoc-members:
     :show-inheritance:
 
-exports.gltf_io module
-----------------------
+exports.gltf_out module
+-----------------------
 
-.. automodule:: exports.gltf_io
+.. automodule:: exports.gltf_out
     :members:
     :undoc-members:
     :show-inheritance:
