@@ -1,14 +1,14 @@
-''' Class used to store abstract parts of a model
-    It should be independent as possible of any model's input format
-    All sequence numbers for *_arr start at 1
-'''
-
 import sys
 from collections import namedtuple
 
 from .types import VRTX, ATOM, TRGL, SEG
 
 class MODEL_GEOMETRIES:
+    ''' Class used to store abstract parts of a model
+        It should be independent as possible of any model's input format
+        All sequence numbers for _arr start at 1
+    '''
+
 
     def __init__(self):
 
@@ -155,6 +155,8 @@ class MODEL_GEOMETRIES:
 
     def calc_minmax(self, x, y, z):
         ''' Calculates and stores the max and min of all x,y,z coords
+
+        :param x,y,z: x,y,z coords
         '''
         if x > self.max_X:
             self.max_X = x

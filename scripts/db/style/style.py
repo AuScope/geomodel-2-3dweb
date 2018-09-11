@@ -1,8 +1,8 @@
-''' Container class for style (colour, shading etc.) of objects
-'''
-
 
 class STYLE:
+    ''' Container class for style (colour, shading etc.) of objects
+    '''
+
     def __init__(self):
 
         self.__rgba_tup = (1.0, 1.0, 1.0, 1.0)
@@ -26,5 +26,6 @@ class STYLE:
         self.__is_set = True
 
     def has_single_colour(self):
+        ''' Returns True if this STYLE instance has only one colour, rather than a colour table '''
         return self.__is_set
         

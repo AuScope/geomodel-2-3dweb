@@ -1,0 +1,13 @@
+To generate .rst files for each of the .py source files:
+
+sphinx-apidoc -o source ../scripts/
+
+
+To generate html documentation:
+
+make html
+
+To remove html documentation:
+
+make clean
+

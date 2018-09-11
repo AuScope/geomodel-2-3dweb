@@ -6,7 +6,7 @@ import sys
 class PROPS:
     ''' This class holds generic 3d data and properties
         e.g. information extracted from 3d binary files (e.g. from GOCAD 'PROP_FILE')
-             information attached to a set of XYZ points (e.g. from GOCAD 'PATOM', 'PVRTX')
+        information attached to a set of XYZ points (e.g. from GOCAD 'PATOM', 'PVRTX')
     '''
 
     def __init__(self, class_name):

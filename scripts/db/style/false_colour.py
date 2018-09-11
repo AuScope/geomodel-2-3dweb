@@ -3,11 +3,12 @@ import sys
 
 def calculate_false_colour_num(val_flt, max_flt, min_flt, max_colours_flt):
     ''' Calculates a colour number via interpolation
-        val_flt - value used to calculate colour number
-        min_flt - lower bound of value
-        max_flt - upper bound of value
-        max_colours_flt - maximum number of colours
-        returns integer colour number
+
+    :param val_flt: value used to calculate colour number
+    :param min_flt: lower bound of value
+    :param max_flt: upper bound of value
+    :param max_colours_flt: maximum number of colours
+    :returns: integer colour number
     '''
     # Floating point arithmetic fails of the numbers are at limits
     if max_flt == abs(sys.float_info.max) or min_flt == abs(sys.float_info.max) or val_flt == abs(sys.float_info.max):
@@ -19,13 +20,14 @@ def calculate_false_colour_num(val_flt, max_flt, min_flt, max_colours_flt):
 
 
 def interpolate(x_flt, xmin_flt, xmax_flt, ymin_flt, ymax_flt):
-    ''' Interpolates a floating point number
-        x_flt - floating point number to be interpolated
-        xmin_flt - minimum value within x_flt's range
-        xmax_flt - maximum value within x_flt's range
-        ymin_flt - minimum possible value to output
-        ymax_flt - maximum possible value to output
-        Returns interpolated value
+    ''' Given x, linearly interpolates a y-value
+
+    :param x_flt: floating point number to be interpolated
+    :param xmin_flt: minimum value within x_flt's range
+    :param xmax_flt: maximum value within x_flt's range
+    :param ymin_flt: minimum possible value to output
+    :param ymax_flt: maximum possible value to output
+    :returns: interpolated y-value, float
     '''
     return (x_flt - xmin_flt) / (xmax_flt - xmin_flt) * (ymax_flt - ymin_flt) + ymin_flt
 
@@ -33,10 +35,11 @@ def interpolate(x_flt, xmin_flt, xmax_flt, ymin_flt, ymax_flt):
 def make_false_colour_tup(i_flt, imin_flt, imax_flt):
     ''' This creates a false colour map, returns an RGBA tuple.
         Maps a floating point value that varies between a min and max value to an RGBA tuple
-        i_flt - floating point value to be mapped
-        imax_flt - maximum range of the floating point value
-        imin_flt - minimum range of the floating point value
-        Returns an RGBA tuple
+
+    :param i_flt: floating point value to be mapped
+    :param imax_flt: maximum range of the floating point value
+    :param imin_flt: minimum range of the floating point value
+    :returns: returns an RGBA float tuple (R,G,B,A)
     '''
     if i_flt < imin_flt or i_flt > imax_flt:
         return (0.0, 0.0, 0.0, 0.0)
