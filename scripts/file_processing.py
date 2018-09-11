@@ -12,11 +12,12 @@ logger = logging.getLogger(__name__)
 
 def find(src_dir, ext_list, find_and_process):
     ''' Searches for 3rd party model files in all the subdirectories
-        src_dir - directory in which to begin the search
-        ext_list - list of supported file extensions
-        find_and_process - calls this when found something, fn(src_dir, ext_list)
-        Returns a list of model dict
-            (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
+
+    :param src_dir: directory in which to begin the search
+    :param ext_list: list of supported file extensions
+    :param find_and_process: calls this when found something, fn(src_dir, ext_list)
+    :returns: a list of model dict
+        (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
         and a list of geographical extents ( [ [min_x, max_x, min_y, max_y], ... ] )
         both can be used to create a config file
     '''
@@ -44,10 +45,11 @@ def find(src_dir, ext_list, find_and_process):
 
 def create_json_config(model_dict_list, output_filename, geo_extent, params):
     ''' Creates a JSON file of GLTF objects to display in 3D
-        model_dict_list - list of model dicts to write to JSON file
-        output_filename - name of file containing created config file
-        geo_extent - list of coords defining boundaries of model [min_x, max_x, min_y, max_y]
-        params - model input parameters, SimpleNamespace() object, keys are: 'name' 'crs' 'init_cam_dist'
+
+    :param model_dict_list: list of model dicts to write to JSON file
+    :param output_filename: name of file containing created config file
+    :param geo_extent: list of coords defining boundaries of model [min_x, max_x, min_y, max_y]
+    :param params: model input parameters, SimpleNamespace() object, keys are: 'name' 'crs' 'init_cam_dist'
                                                                     and optional 'proj4_defn'
     '''
     logger.debug("create_json_config(%s, %s)",  output_filename, repr(geo_extent))
@@ -73,7 +75,8 @@ def create_json_config(model_dict_list, output_filename, geo_extent, params):
 
 def read_json_file(file_name):
     ''' Reads a JSON file and returns the contents
-        file_name  - file name of JSON file
+
+    :param file_name: file name of JSON file
     '''
     try:
         fp = open(file_name, "r")
@@ -92,10 +95,11 @@ def read_json_file(file_name):
 
 def update_json_config(model_dict_list, template_filename, output_filename, borehole_outdir=""):
     ''' Updates a JSON file of GLTF objects to display in 3D
-        model_dict_list - list of model dicts to write to JSON file
-        template_filename - name of file which will be used as input for the update
-        output_filename - name of updated config file
-        borehole_outdir - optional name of diectory in which to save borehole GLTF files
+
+    :param model_dict_list: list of model dicts to write to JSON file
+    :param template_filename: name of file which will be used as input for the update
+    :param output_filename: name of updated config file
+    :param borehole_outdir: optional name of diectory in which to save borehole GLTF files
     '''
     logger.debug("update_json_config(%s, %s, %s)", template_filename, output_filename, borehole_outdir)
     try:
@@ -123,7 +127,8 @@ def update_json_config(model_dict_list, template_filename, output_filename, bore
 
 def reduce_extents(extent_list):
     ''' Reduces a list of extents to just one extent
-        extent_list - list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
+
+    :param extent_list: list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
     '''
     logger.debug("reduce_extents()")
     # If only a single extent and not in a list, then return
@@ -147,11 +152,12 @@ def reduce_extents(extent_list):
 
 def add_info2popup(label_str, popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
     ''' Adds more information to popup dictionary
-        label_str - string to use as a display name for this part of the model
-        popup_dict - information to display in popup window
+
+    :param label_str: string to use as a display name for this part of the model
+    :param popup_dict: information to display in popup window
             ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
-        fileName - file and path without extension of source file
-        Returns a dict of model info, which includes the popup dict
+    :param fileName:  file and path without extension of source file
+    :returns: a dict of model info, which includes the popup dict
     '''
     logger.debug("add_info2popup(%s, %s, %s)", label_str, fileName, file_ext)
     np_filename = os.path.basename(fileName)

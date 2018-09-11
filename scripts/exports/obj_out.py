@@ -9,6 +9,8 @@ class OBJ_OUT():
 
     def __init__(self, debug_level):
         ''' Initialise class
+
+        :param debug_level: debug level, using python's 'logging' module
         '''
         # Set up logging, use an attribute of class name so it is only called once
         if not hasattr(OBJ_OUT, 'logger'):
@@ -34,12 +36,13 @@ class OBJ_OUT():
 
     def write_voxel_obj(self, geom_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes):
         ''' Writes out voxel data to Wavefront OBJ and MTL files
-            out_fp - open file handle of OBJ file
-            geom_obj - model geometry object
-            fileName - filename of OBJ file without the 'OBJ' extension
-            src_file_str - filename of gocad file
-            step_sz  - when stepping through the voxel block this is the step size
-            use_full_cubes - will write out full cubes to file if true, else will remove non-visible faces
+
+        :param out_fp: open file handle of OBJ file
+        :param geom_obj: model geometry object
+        :param fileName: filename of OBJ file without the 'OBJ' extension
+        :param src_file_str: filename of gocad file
+        :param step_sz: when stepping through the voxel block this is the step size
+        :param use_full_cubes: will write out full cubes to file if true, else will remove non-visible faces
         '''
         self.logger.debug("write_voxel_obj(%s,%s)",  fileName, src_file_str)
         mtl_fp = open(fileName+".MTL", 'w')
@@ -130,16 +133,17 @@ class OBJ_OUT():
 
     def write_OBJ(self, geom_obj, fileName, src_file_str):
         ''' Writes out an OBJ file
-            geom_obj - model geometry object
-            fileName - filename of OBJ file, without extension
-            src_file_str - filename of gocad file
 
-            NOTES:
+        :param geom_obj: model geometry object
+        :param fileName: filename of OBJ file, without extension
+        :param src_file_str: filename of gocad file
+
+        NOTES:
             OBJ is very simple, and has shortcomings:
             1. Does not include annotations (only comments and a group name)
             2. Lines and points do not have a colour
 
-            I am only using it here because GOCAD VOXEL files are too big for COLLADA format
+        I am only using it here because GOCAD VOXEL files are too big for COLLADA format
         '''
         self.logger.debug("write_OBJ(%s,%s)", fileName, src_file_str)
 

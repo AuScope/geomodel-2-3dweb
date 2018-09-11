@@ -1,19 +1,17 @@
-db package
-==========
+imports package
+===============
 
 Subpackages
 -----------
 
 .. toctree::
 
-    db.geometry
-    db.metadata
-    db.style
+    imports.gocad
 
 Module contents
 ---------------
 
-.. automodule:: db
+.. automodule:: imports
     :members:
     :undoc-members:
     :show-inheritance:

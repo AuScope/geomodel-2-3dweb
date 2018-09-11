@@ -8,4 +8,5 @@ scripts
    exports
    file_processing
    gocad2collada
+   imports
    makeDaeBoreholes

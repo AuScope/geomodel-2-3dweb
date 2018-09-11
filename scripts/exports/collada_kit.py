@@ -38,6 +38,8 @@ class COLLADA_KIT:
 
     def __init__(self, debug_level):
         ''' Initialise class
+
+        :param debug_level: debug level taken from python's 'logging' module
         '''
         # Set up logging, use an attribute of class name so it is only called once
         if not hasattr(COLLADA_KIT, 'logger'):
@@ -69,9 +71,10 @@ class COLLADA_KIT:
 
     def write_vol_png(self, geom_obj, src_dir, fileName):
         ''' Writes out PNG files from voxel data
-            geom_obj - model geometry object that holds voxel data
-            fileName - filename of OBJ file, without extension
-            src_filen_str - filename of source gocad file
+
+        :param geom_obj: model geometry object that holds voxel data
+        :param fileName: filename of OBJ file, without extension
+        :param src_filen_str: filename of source gocad file
         '''
         popup_list = []
         self.logger.debug("write_vol_png(%s,%s)", src_dir, fileName)
@@ -83,10 +86,11 @@ class COLLADA_KIT:
 
     def write_single_voxel_png(self, geom_obj, style_obj, src_dir, fileName, idx):
         ''' Writes out a PNG file of the top layer of the voxel data
-            geom_obj - model geometry object that holds voxel data
-            style_obj - style object, contains colour map
-            fileName - filename of OBJ file, without extension
-            src_filen_str - filename of source gocad file
+
+        :param geom_obj: model geometry object that holds voxel data
+        :param style_obj: style object, contains colour map
+        :param fileName: filename of OBJ file, without extension
+        :param src_filen_str: filename of source gocad file
         '''
         self.logger.debug("write_single_voxel_png(%s, %s, %s)", src_dir, fileName, idx)
         colour_arr = array.array("B")
@@ -141,10 +145,11 @@ class COLLADA_KIT:
     def add_geom_to_collada(self, geom_obj, style_obj, meta_obj):
         ''' Adds a vessel object to the pycollada mesh object
             NB: Does not accept GOCAD vertex or volume files as they usually have (too) many node objects
-            geom_obj - model geometry object
-            style_obj - style object containing colour info
-            meta_obj - metadata object
-            Returns a popup info dict or exits if you try to add a GOCAD VS (vertex) or VO (volume) file
+
+        :param geom_obj: model geometry object
+        :param style_obj: style object containing colour info
+        :param meta_obj: metadata object
+        :returns: a popup info dict or exits if you try to add a GOCAD VS (vertex) or VO (volume) file
             popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
         self.logger.debug("add_geom_to_collada()")
@@ -209,7 +214,8 @@ class COLLADA_KIT:
 
     def end_collada(self, fileName):
         ''' Close out a COLLADA, writing the mesh object to file
-            fileName - filename of COLLADA file, without extension
+
+        :params fileName: filename of COLLADA file, without extension
         '''
         self.logger.debug("end_collada(%s)", fileName)
 
@@ -223,10 +229,11 @@ class COLLADA_KIT:
 
     def write_collada(self, geom_obj, style_obj, meta_obj, fileName):
         ''' Write out a COLLADA file
-            fileName - filename of COLLADA file, without extension
-            geom_obj - model geometry object that geometry and text
-            meta_obj - metadata object, used for labelling 
-            Returns a dictionary of popup info objects
+
+        :params fileName: filename of COLLADA file, without extension
+        :params geom_obj: model geometry object that geometry and text
+        :params meta_obj: metadata object, used for labelling 
+        :returns: a dictionary of popup info objects
             popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
         self.logger.debug("write_collada(%s)",  fileName)
@@ -246,9 +253,10 @@ class COLLADA_KIT:
 
     def write_point_collada(self, geom_obj, style_obj, meta_obj, fileName):
         ''' Write out a COLLADA file from a point geometry file
-            fileName - filename of COLLADA file, without extension
-            geom_obj - model geometry object that hold geometry and text
-            style_obj - style object containing colour info
+
+        :params fileName: filename of COLLADA file, without extension
+        :params geom_obj: model geometry object that hold geometry and text
+        :params style_obj: style object containing colour info
         '''
         self.logger.debug("write_point_collada(%s)", fileName)
         self.logger.debug("write_point_collada() geom_obj=%s", repr(geom_obj))
@@ -310,8 +318,9 @@ class COLLADA_KIT:
 
     def compute_neighbours(self, xyz_list, step):
         ''' Counts the number of neighbours of each point in a 3d array
-            xyz_list - list of (X,Y,Z) coordinates
-            Returns dictionary: key is (X,Y,Z), vales is number of neighbours 
+
+        :params xyz_listr: list of (X,Y,Z) coordinates
+        :returns: dictionary: key is (X,Y,Z), vales is number of neighbours 
         '''
         ret = {}
         for xyz in xyz_list:
@@ -333,9 +342,10 @@ class COLLADA_KIT:
     def calc_step_sz(self, geom_obj, limit):
         ''' With many voxets being so large, we have to increase sample size so we don't create too much data, 
             to be improved later on.
-            geom_obj - model geometry object
-            limit - the higher this number the more cubes will be used to represent the voxet data
-            Returns step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]
+
+        :params geom_obj: model geometry object
+        :params limit: the higher this number the more cubes will be used to represent the voxet data
+        :returns: step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]
         '''
         step = 1
         n_elems3 = geom_obj.vol_sz[0] * geom_obj.vol_sz[1] * geom_obj.vol_sz[2]
@@ -350,8 +360,9 @@ class COLLADA_KIT:
 
     def write_vol_collada(self, geom_obj, style_obj, meta_obj, fileName):
         ''' Write out a COLLADA file from a vo file
-            fileName - filename of COLLADA file, without extension
-            geom_obj - model geometry object 
+
+        :params fileName: filename of COLLADA file, without extension
+        :params geom_obj: model geometry object 
         '''
         self.logger.debug("write_vol_collada(%s)", fileName)
         self.logger.debug("write_vol_collada() geom_obj=%s", repr(geom_obj))
@@ -476,8 +487,9 @@ class COLLADA_KIT:
 
     def make_false_colour_materials(self, mesh, max_colours_flt):
         ''' Adds a list of coloured materials to COLLADA object using a false colour map
-            mesh - COLLADA object
-            max_colours_flt - number of colours to add
+
+        :params mesh: pycollada 'collada' object
+        :params max_colours_flt: number of colours to add, float
         '''
         for colour_idx in range(int(max_colours_flt)):
             diffuse_colour = make_false_colour_tup(float(colour_idx), 0.0, max_colours_flt - 1.0)
@@ -489,9 +501,10 @@ class COLLADA_KIT:
 
     def make_colour_material(self, mesh, colour_tup, colour_idx):
         ''' Adds a colour material to COLLADA object
-            mesh - COLLADA object
-            colour_tup - tuple of floats (R,G,B,A)
-            colour_idx - integer index, used to refer to the material
+
+        :params mesh: pycollada 'collada' object
+        :params colour_tup: tuple of floats (R,G,B,A)
+        :params colour_idx: integer index, used to refer to the material
         '''
         self.logger.debug("make_colour_material(%s, %s, %s)", repr(mesh), repr(colour_tup), repr(colour_idx))
         effect = Collada.material.Effect("effect{0:010d}".format(colour_idx), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=colour_tup, specular=self.SPECULAR, shininess=self.SHININESS)
@@ -502,8 +515,9 @@ class COLLADA_KIT:
 
     def make_mapped_colour_materials(self, mesh, colour_map):
         ''' Adds a list of coloured materials to COLLADA object using supplied colour_map
-            mesh - COLLADA object
-            colour_map - dict of colours, key is integer, value is RGBA tuple of 4 floats 
+
+        :params mesh: COLLADA object
+        :params colour_map: dict of colours, key is integer, value is RGBA tuple of 4 floats 
         '''
         for key in colour_map:
             self.make_colour_material(mesh, colour_map[key], key)

@@ -54,10 +54,11 @@ CtFileDict = {}
 
 def find_and_process(src_dir, ext_list):
     ''' Searches for files in local directory and processes them
-        src_dir - source directory where there are 3rd party model files
-        ext_list - list of supported file extensions
-        Returns a list of model dicts
-            (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
+
+    :param src_dir: source directory where there are 3rd party model files
+    :param ext_list: list of supported file extensions
+    :returns: a list of model dicts
+        (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
         and a list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
         both can be used to create a config file
     '''
@@ -80,11 +81,11 @@ def find_and_process(src_dir, ext_list):
 
 
 def process(filename_str):
-    ''' Processes a GOCAD file
-        This one GOCAD file can contain many parts and produce many output files
-        filename_str - filename of GOCAD file, including path
-        Returns success/failure flag, model dictionary list,
-            (model dict list format: [ { model_attr:  { object_name: { 'attr_name': attr_val, ... } } } ] )
+    ''' Processes a GOCAD file. This one GOCAD file can contain many parts and produce many output files
+
+    :param filename_str: filename of GOCAD file, including path
+    :returns: success/failure flag, model dictionary list,
+        (model dict list format: [ { model_attr:  { object_name: { 'attr_name': attr_val, ... } } } ] )
         and geographical extent [min_x, max_x, min_y, max_y]
     '''
     global CoordOffset
@@ -226,7 +227,8 @@ def process(filename_str):
 
 def initialise_params(param_file):
     ''' Initialise the global 'Params' object from input parameter file
-        param_file - file name of input parameter file
+
+    :param param_file: file name of input parameter file
     '''
     global Params
     global CoordOffset

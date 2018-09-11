@@ -5,7 +5,7 @@ import ctypes
 
 from db.geometry.model_geometries import *
 
-import print_assimp as pa
+import exports.print_assimp as pa
 
 
 def make_nodes(s):
@@ -106,14 +106,14 @@ if __name__ == "__main__":
     make_nodes(s)
     make_materials(s)
 
-    pa.print_scene(s)
+    #pa.print_scene(s)
 
 
     print("\nCreating GLTF")
     export(s, "home_made_test.gltf", "gltf2")
 
     #scene = load('tetra.obj')
-    #pa.print_scene(scene)
+    pa.print_scene(scene)
 
     #assert len(scene.mMeshes)
     #mesh = scene.mMeshes[0]

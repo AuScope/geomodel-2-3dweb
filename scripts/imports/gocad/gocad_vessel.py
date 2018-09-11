@@ -21,7 +21,8 @@ local_logger = logging.getLogger(__name__)
 
 def de_concat(filename_lines):
     ''' Separates joined GOCAD entries within a file
-        filename_lines - lines from concatenated GOCAD file
+
+    :param filename_lines: lines from concatenated GOCAD file
     '''
     file_lines_list = []
     part_list = []
@@ -47,9 +48,10 @@ def de_concat(filename_lines):
 
 def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl, nondef_coords, ct_file_dict):
     ''' Extracts GOCAD files from a GOCAD group file
-        filename_str - filename of GOCAD file
-        file_lines - lines extracted from GOCAD group file
-        Returns a list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
+
+    :param filename_str: filename of GOCAD file
+    :param file_lines: lines extracted from GOCAD group file
+    :returns: a list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
     '''
     local_logger.debug("extract_gocad(%s,%s)", src_dir, filename_str)
     global CtFileDict
@@ -133,11 +135,12 @@ class GOCAD_VESSEL():
 
     def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="", nondefault_coords=False, stop_on_exc=True, ct_file_dict={}):
         ''' Initialise class
-            debug_level - debug level taken from 'logging' module e.g. logging.DEBUG
-            base_xyz - optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
-                       before they are output, default is (0.0, 0.0, 0.0)
-            group_name - optional string, name of group of this gocad file is within a group, default is ""
-            nondefault_coords - optional flag, supports non-default coordinates, default is False
+
+        :param debug_level: debug level taken from 'logging' module e.g. logging.DEBUG
+        :param base_xyz: optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
+            before they are output, default is (0.0, 0.0, 0.0)
+        :param group_name: optional string, name of group of this gocad file is within a group, default is ""
+        :param nondefault_coords: optional flag, supports non-default coordinates, default is False
         '''
         super().__init__()
         # Set up logging, use an attribute of class name so it is only called once
@@ -319,7 +322,8 @@ class GOCAD_VESSEL():
 
     def __handle_exc(self, exc):
         ''' If STOP_ON_EXC is set or debug is on, print details of exception and stop
-            exc - exception
+
+        :param exc: exception
         ''' 
         if self.logger.getEffectiveLevel() == logging.DEBUG or self.STOP_ON_EXC:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -345,8 +349,8 @@ class GOCAD_VESSEL():
 
 
     def is_single_layer_vo(self):
-        ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer and should be converted into a PNG
-            instead of a GLTF
+        ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer
+            and should be converted into a PNG instead of a GLTF
         '''
         return self.__is_vo and self.vol_sz[2]==1
 
@@ -377,9 +381,10 @@ class GOCAD_VESSEL():
 
     def process_gocad(self, src_dir, filename_str, file_lines):
         ''' Extracts details from gocad file. This should be called before other functions!
-            filename_str - filename of gocad file
-            file_lines - array of strings of lines from gocad file
-            Returns true if could process file, and a list of (geometry, style, metadata) objects
+
+        :param filename_str: filename of gocad file
+        :param file_lines: array of strings of lines from gocad file
+        :returns: true if could process file, and a list of (geometry, style, metadata) objects
         '''
         self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
 
@@ -930,9 +935,10 @@ class GOCAD_VESSEL():
 
     def __setType(self, fileExt, firstLineStr):
         ''' Sets the type of GOCAD file: TSURF, VOXEL, PLINE etc.
-            fileExt - the file extension
-            firstLineStr - first line in the file
-            Returns True if it could determine the type of file
+
+        :param fileExt: the file extension
+        :param firstLineStr: first line in the file
+        :returns: returns True if it could determine the type of file
             Will return False when given the header of a GOCAD group file, since
             cannot create a vessel object from the group file itself, only from the group members
         '''
@@ -968,8 +974,9 @@ class GOCAD_VESSEL():
 
     def __parse_property_header(self, prop_obj, line_str):
         ''' Parses the PROPERTY header, extracting the colour table info and storing it in PROPS object
-            prop_obj - a PROPS object to store the data
-            line_str - current line
+
+        :params prop_obj: a PROPS object to store the data
+        :params line_str: current line
         '''
         name_str, sep, value_str = line_str.partition(':')
         name_str = name_str.strip()
@@ -1143,9 +1150,10 @@ class GOCAD_VESSEL():
 
     def __parse_props(self, splitstr_arr, coord_tup, is_patom = False):
         ''' This parses a line of properties associated with a PVTRX or PATOM line
-            splitstr_arr - array of strings representing line with properties
-            coord_tup - (X,Y,Z) float tuple of the coordinates
-            is_patom - this is from a PATOM, default False
+
+        :param splitstr_arr: array of strings representing line with properties
+        :param coord_tup: (X,Y,Z) float tuple of the coordinates
+        :param is_patom: optional, True if this is from a PATOM, default False
         '''
         if is_patom:
             # For PATOM, properties start at the 4th column
@@ -1191,9 +1199,10 @@ class GOCAD_VESSEL():
 
     def __parse_float(self, fp_str, null_val=None):
         ''' Converts a string to float, handles infinite values 
-            fp_str - string to convert to a float
-            null_val - value representing 'no data'
-            Returns a boolean and a float
+
+        :param fp_str: string to convert to a float
+        :param null_val: value representing 'no data'
+        :returns: a boolean and a float
             If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
         '''
         # Handle GOCAD's C++ floating point infinity for Windows and Linux
@@ -1214,9 +1223,10 @@ class GOCAD_VESSEL():
            
     def __parse_int(self, int_str, null_val=None):
         ''' Converts a string to an int
-            int_str - string to convert to int
-            null_val - value representing 'no data'
-            Returns a boolean and an integer
+
+        :param int_str: string to convert to int
+        :param null_val: value representing 'no data'
+        :returns: a boolean and an integer
             If could not convert then return (False, None) else if 'null_val' is defined return (False, null_val)
         '''
         try:
@@ -1229,12 +1239,13 @@ class GOCAD_VESSEL():
 
     def __parse_XYZ(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True):
         ''' Helpful function to read XYZ cooordinates
-            is_float - if true parse x y z as floats else try integers
-            x_str, y_str, z_str - X,Y,Z coordinates in string form
-            do_minmax - calculate min/max of the X,Y,Z coords
-            convert - convert from kms to metres if necessary
-            Returns four parameters: success - true if could convert the strings to floats/ints
-                                     x,y,z - floating point values, converted to metres if units are kms
+
+        :param is_float: if true parse x y z as floats else try integers
+        :param x_str, y_str, z_str: X,Y,Z coordinates in string form
+        :param do_minmax: calculate min/max of the X,Y,Z coords
+        :param convert: convert from kms to metres if necessary
+        :returns: returns tuple of four parameters: success - true if could convert the strings to floats/ints
+            x,y,z - floating point values, converted to metres if units are kms
         '''
         x = y = z = None
         if is_float:
@@ -1271,8 +1282,9 @@ class GOCAD_VESSEL():
     
     def __parse_colour(self, colour_str):
         ''' Parse a colour string into RGBA tuple.
-            colour_str - colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
-            Returns a tuple with 4 floats
+
+        :param colour_str: colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
+        :returns: a tuple with 4 floats, (R,G,B,A)
         '''
         rgba_tup = (1.0, 1.0, 1.0, 1.0)
         try:
@@ -1294,7 +1306,8 @@ class GOCAD_VESSEL():
 
     def __check_vertex(self, num):
         ''' If vertex exists then returns true else false
-            num - vertex number to search for
+
+        :param num: vertex number to search for
         '''
         for vrtx in self.__vrtx_arr:
             if vrtx.n == num:
