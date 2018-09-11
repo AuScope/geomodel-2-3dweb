@@ -7,7 +7,8 @@
         "MODEL_CRS": "EPSG:28352",
         "WFS_URL": "http://sarigdata.pir.sa.gov.au/nvcl/geoserver/wfs",
         "BOREHOLE_CRS": "EPSG:4283",
-        "WFS_VERSION": "1.1.0"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28352",

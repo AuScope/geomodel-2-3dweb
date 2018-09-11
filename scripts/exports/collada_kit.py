@@ -299,7 +299,7 @@ class COLLADA_KIT:
                 continue               
             # Lookup the colour table
             colour_num = calculate_false_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
-            geom_label = self.co.make_pyramid(mesh, geometry_name, geomnode_list, v, point_cnt)
+            geom_label = self.co.make_pyramid(mesh, geometry_name, geomnode_list, v, point_cnt, POINT_SIZE, colour_num)
 
             popup_dict[geom_label] = { 'name': meta_obj.property_name, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
             point_cnt += 1

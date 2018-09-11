@@ -11,15 +11,25 @@ from pyproj import Proj, transform
 import xml.etree.ElementTree as ET
 import json
 from json import JSONDecodeError
-import math
 from types import SimpleNamespace
+from collections import OrderedDict
+import itertools
+import logging
 
 from owslib.wfs import WebFeatureService
 from owslib.fes import *
 import http.client, urllib
+import urllib.parse
+import urllib.request
+import urllib.parse
 
 import exports.collada2gltf
 
+from exports.collada_out import COLLADA_OUT
+
+DEBUG_LVL = logging.CRITICAL
+''' Initialise debug level to minimal debugging
+'''
 
 # Namespaces for WFS Borehole response
 NS = { 'wfs':"http://www.opengis.net/wfs",
@@ -42,23 +52,27 @@ NS = { 'wfs':"http://www.opengis.net/wfs",
 
 
 # From GeoSciML BoreholeView 4.1
-GSMLP_IDS = [ 'identifier', 'name', 'description', 'purpose', 'status', 'drillingMethod', 'operator', 'driller', 'drillStartDate',
-          'drillEndDate', 'startPoint', 'inclinationType', 'boreholeMaterialCustodian', 'boreholeLength_m', 'elevation_m',
-          'elevation_srs', 'positionalAccuracy', 'source', 'parentBorehole_uri', 'metadata_uri', 'genericSymbolizer']
+GSMLP_IDS = [ 'identifier', 'name', 'description', 'purpose', 'status', 'drillingMethod', 'operator', 'driller',
+ 'drillStartDate', 'drillEndDate', 'startPoint', 'inclinationType', 'boreholeMaterialCustodian',
+ 'boreholeLength_m', 'elevation_m', 'elevation_srs', 'positionalAccuracy', 'source', 'parentBorehole_uri',
+ 'metadata_uri', 'genericSymbolizer']
 
 
 # Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
 
+# Timeout for querying WFS services (seconds)
 WFS_TIMEOUT = 6000
 
 Param = SimpleNamespace()
 
 def convert_coords(input_crs, output_crs, xy):
     ''' Converts coordinate systems
-        input_crs - coordinate reference system of input coordinates
-        output_crs - coordinate reference system of output coordinates
-        xy - input coordinates in [x,y] format
+
+    :param input_crs: coordinate reference system of input coordinates
+    :param output_crs: coordinate reference system of output coordinates
+    :param xy: input coordinates in [x,y] format
+    :returns: converted coordinates [x,y]
     '''
     p_in = Proj(init=__clean_crs(input_crs))
     p_out = Proj(init=__clean_crs(output_crs))
@@ -67,64 +81,37 @@ def convert_coords(input_crs, output_crs, xy):
 def __clean_crs(crs):
     ''' Removes namespace prefixes from a CRS:
           e.g. 'urn:x-ogc:def:crs:EPSG:4326' becomes 'EPSG:4326'
+
+    :param crs: crs string to be cleaned
+    :returns: cleaned crs string
     '''
     pair = crs.split(':')[-2:]
     return pair[0]+':'+pair[1]
 
 
-def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
+def write_collada_borehole(bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
     ''' Write out a COLLADA file
-        file_name - filename of COLLADA file, without extension
-        bv - base vertex, position of the object within the model [x,y,z]
+
+    :param file_name: filename of COLLADA file, without extension
+    :param bv: base vertex, position of the object within the model [x,y,z]
+    :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
+    :param height_reso: height resolution for colour info dict
     '''
+    print(" write_collada_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
+
     mesh = Collada.Collada()
-    BH_WIDTH_UPPER = 75
-    BH_WIDTH_LOWER = 10
-    BH_HEIGHT = 15000
-    BH_DEPTH = 2000
     node_list = []
 
-    # Convert bv to an equilateral triangle of floats
-    angl_rad = math.radians(30.0)
-    cos_flt = math.cos(angl_rad)
-    sin_flt = math.sin(angl_rad)
-    #print(cos_flt, sin_flt)
-    ptA_high = [bv[0], bv[1]+BH_WIDTH_UPPER*cos_flt, bv[2]+BH_HEIGHT]
-    ptB_high = [bv[0]+BH_WIDTH_UPPER*cos_flt, bv[1]-BH_WIDTH_UPPER*sin_flt, bv[2]+BH_HEIGHT]
-    ptC_high = [bv[0]-BH_WIDTH_UPPER*cos_flt, bv[1]-BH_WIDTH_UPPER*sin_flt, bv[2]+BH_HEIGHT]
-    ptA_low = [bv[0], bv[1]+BH_WIDTH_LOWER*cos_flt, bv[2]-BH_DEPTH]
-    ptB_low = [bv[0]+BH_WIDTH_LOWER*cos_flt, bv[1]-BH_WIDTH_LOWER*sin_flt, bv[2]-BH_DEPTH]
-    ptC_low = [bv[0]-BH_WIDTH_LOWER*cos_flt, bv[1]-BH_WIDTH_LOWER*sin_flt, bv[2]-BH_DEPTH]
+    for depth, colour_info in colour_info_dict.items():
+        effect = Collada.material.Effect("effect_{:d}".format(int(depth)), [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=colour_info['colour'], specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
+        mat = Collada.material.Material("material_{:d}".format(int(depth)), "mymaterial_{:d}".format(int(depth)), effect)
+        mesh.effects.append(effect)
+        mesh.materials.append(mat)
 
-    diffuse_colour = (1.0, 0.0, 0.0, 1)
-    effect = Collada.material.Effect("effect0", [], "phong", emission=(0,0,0,1), ambient=(0,0,0,1), diffuse=diffuse_colour, specular=(0.7, 0.7, 0.7, 1), shininess=50.0)
-    mat = Collada.material.Material("material0", "mymaterial0", effect)
-    mesh.effects.append(effect)
-    mesh.materials.append(mat)
-
-    vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
-    vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list), ('X', 'Y', 'Z'))
-    geom = Collada.geometry.Geometry(mesh, "geometry0", make_borehole_label(borehole_name), [vert_src])
-    input_list = Collada.source.InputList()
-    input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
-
-    indices = [0, 2, 1,
-               3, 5, 4,
-               1, 2, 5,
-               2, 4, 5,
-               0, 4, 2,
-               0, 3, 4,
-               0, 1, 3,
-               1, 5, 3]
-
-    triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
-
-    geom.primitives.append(triset)
-    mesh.geometries.append(geom)
-
-    matnode = Collada.scene.MaterialNode("materialref-0", mat, inputs=[])
-    geomnode_list = [Collada.scene.GeometryNode(geom, [matnode])]
-
+    co = COLLADA_OUT(DEBUG_LVL)
+    geomnode_list = []
+    borehole_label = make_borehole_label(borehole_name)
+    co.make_colour_borehole_marker(mesh, bv, borehole_label, geomnode_list, colour_info_dict, height_reso) 
     node = Collada.scene.Node("node0", children=geomnode_list)
     node_list.append(node)
 
@@ -137,12 +124,95 @@ def write_collada_borehole(bv, dest_dir, file_name, borehole_name):
     mesh.write(os.path.join(dest_dir,file_name+'.dae'))
 
 
+"""    /* Converts BGR colour integer into hex RGB string for Javascript */ 
+_colourConvert : function (BGRColorNumber) {
+    // String.format("#%1$02x%2$02x%3$02x", (BGRColorNumber & 255), (BGRColorNumber & 65280) >> 8, (BGRColorNumber >> 16));
+    return "#"+Ext.String.leftPad((BGRColorNumber & 255).toString(16), 2, '0')+
+               Ext.String.leftPad(((BGRColorNumber & 65280) >> 8).toString(16), 2, '0')+
+               Ext.String.leftPad((BGRColorNumber >> 16).toString(16), 2, '0');
+}, """
+def bgr2rgba(bgr):
+    ''' Converts BGR colour integer into an RGB tuple
 
-def get_borehole_data(wfs, max_boreholes):
+    :param bgr: BGR colour integer
+    :returns: RGB float tuple 
+    '''
+    return ((bgr & 255)/255.0, ((bgr & 65280) >> 8)/255.0, (bgr >> 16)/255.0, 1.0)
+
+
+def get_borehole_data(url, log_id, height_resol):
+    ''' Retrieves borehole mineral data for a borehole
+
+    :param url: URL of the NVCL Data Service 
+    :param log_id: borehole log identifier, string e.g. 'ce2df1aa-d3e7-4c37-97d5-5115fc3c33d'
+    :param height_resol: height resolution, float
+    :returns: a dict: key - depth, float; value - { 'colour': RGB colour string, 'classText': mineral name }
+    '''
+    print(" get_borehole_data(", url, log_id, ")")
+    # Send HTTP request, get response
+    params = {'logid' : log_id, 'outputformat': 'json', 'startdepth': 0.0, 'enddepth': 10000.0, 'interval': height_resol }
+    enc_params = urllib.parse.urlencode(params).encode('ascii')
+    req = urllib.request.Request(url, enc_params)
+    with urllib.request.urlopen(req, timeout=60) as response:
+        json_data = response.read()
+    #print('json_data = ', json_data)
+    meas_list = []
+    depth_dict = OrderedDict()
+    try:
+        meas_list = json.loads(json_data.decode('utf-8'))
+    except json.decoder.JSONDecodeError:
+        print("Logid not known")
+    else:
+        # Sort then group by depth
+        depth_dict = OrderedDict()
+        sorted_meas_list = sorted(meas_list, key=lambda x: x['roundedDepth'])
+        for depth, group in itertools.groupby(sorted_meas_list, lambda x: x['roundedDepth']):
+            # Filter out invalid values
+            filtered_group = itertools.filterfalse(lambda x: x['classText'] == 'INVALID', group)
+            # Make a dict keyed on depth, value is element with largest count
+            try:
+                max_elem = max(filtered_group, key = lambda x: x['classCount'])
+            except ValueError:
+                # Sometimes 'filtered_group' is empty
+                continue
+            col = bgr2rgba(max_elem['colour'])
+            depth_dict[depth] = { **max_elem, 'colour': col}
+            del depth_dict[depth]['roundedDepth']
+            del depth_dict[depth]['classCount']
+            
+    return depth_dict 
+
+
+def get_borehole_logids(url, nvcl_id):
+    ''' Retrieves a set of log ids for a particular borehole
+
+    :param url: URL for the NVCL 'getDataSetCollection' service
+    :param nvcl_id: NVCL 'holeidentifier' parameter
+    :returns: a list of [log id, log type, log name]
+    '''
+    params = {'holeidentifier' : nvcl_id }
+    enc_params = urllib.parse.urlencode(params).encode('ascii')
+    req = urllib.request.Request(url, enc_params)
+    with urllib.request.urlopen(req, timeout=60) as response:
+        response_str = response.read()
+    root = ET.fromstring(response_str)
+    logid_list = []
+    for child in root.findall('./*/Logs/Log'):
+        is_public = child.findtext('./ispublic', default='false')
+        log_name =  child.findtext('./logName', default='')
+        log_type = child.findtext('./logType', default='')
+        log_id = child.findtext('./LogID', default='')
+        if is_public == 'true' and log_name != '' and log_type != '' and log_id != '':
+            logid_list.append([log_id, log_type, log_name])
+    return logid_list
+      
+
+def get_boreholes_bbox(wfs, max_boreholes):
     ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
-        and a flag to say whether there are NVCL boreholes in there or not
-        wfs - handle of borehole's WFS service
-        max_boreholes - maximum number of boreholes to retrieve
+    and a flag to say whether there are NVCL boreholes in there or not
+
+    :param wfs: handle of borehole's WFS service
+    :param max_boreholes: maximum number of boreholes to retrieve
     '''
     # Can't filter for BBOX and nvclCollection==true at the same time [owslib's BBox uses 'ows:BoundingBox', not supported in WFS]
     # so is best to do the BBOX manually
@@ -153,15 +223,16 @@ def get_borehole_data(wfs, max_boreholes):
     response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
     response_str = bytes(response.read(), 'ascii')
     borehole_list = []
-    print('get_borehole_data() resp=', response_str)
+    #print('get_boreholes_bbox() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
 
     for child in root.findall('./*/gsmlp:BoreholeView', NS):
+        nvcl_id = child.attrib.get('{'+NS['gml']+'}id', '').split('.')[-1:][0]
         is_nvcl = child.findtext('./gsmlp:nvclCollection', default="false", namespaces=NS)
-        if is_nvcl == "true":
-            borehole_dict = {}
-            print("boreholeview: ", "tag:", child.tag, "attrib:", child.attrib, "text:", child.text)
+        if is_nvcl == "true" and nvcl_id.isdigit():
+            borehole_dict = { 'nvcl_id': nvcl_id }
+            # print("boreholeview: ", "tag:", child.tag, "attrib:", child.attrib, "text:", child.text)
 
             # Finds borehole collar x,y assumes units are degrees
             xy = child.findtext('./gsmlp:shape/gml:Point/gml:pos', default="? ?", namespaces=NS).split(' ')
@@ -189,28 +260,27 @@ def get_borehole_data(wfs, max_boreholes):
                 borehole_dict['z'] = 0.0
 
             # Only accept if within bounding box
-            print(Param.BBOX['west'], '<', borehole_dict['x'], 'and', Param.BBOX['east'], '>', borehole_dict['x'], 'and')
-            print(Param.BBOX['north'], '>', borehole_dict['y'], 'and', Param.BBOX['south'], '<', borehole_dict['y'])
+            # print(Param.BBOX['west'], '<', borehole_dict['x'], 'and', Param.BBOX['east'], '>', borehole_dict['x'], 'and')
+            # print(Param.BBOX['north'], '>', borehole_dict['y'], 'and', Param.BBOX['south'], '<', borehole_dict['y'])
             if Param.BBOX['west'] < borehole_dict['x'] and  Param.BBOX['east'] > borehole_dict['x'] and \
                Param.BBOX['north'] > borehole_dict['y'] and Param.BBOX['south'] < borehole_dict['y']:
                 borehole_cnt+=1
                 borehole_list.append(borehole_dict)
-                print('borehole_dict = ', borehole_dict)
-                print('ACCEPTED')
-            else:
-                print('REJECTED')
+                # print('borehole_dict = ', borehole_dict)
+                # print('ACCEPTED')
+            #else:
+            #    print('REJECTED')
             if borehole_cnt > max_boreholes:
                 break
-    #print('get_borehole_data() returns ', borehole_list)
+    #print('get_boreholes_bbox() returns ', borehole_list)
     return borehole_list
 
 
 def get_json_popupinfo(borehole_dict):
-    ''' Returns some JSON for displaying in a popup box when user clicks on
-        a borehole in the model
-        borehole_dict - dict of borehole information used to make JSON
-                        expected keys are: 'x', 'y', 'z', 'href' and GSMLP_IDS
-,
+    ''' Returns some JSON for displaying in a popup box when user clicks on a borehole in the model
+
+    :param borehole_dict: dict of borehole information used to make JSON
+        expected keys are: 'x', 'y', 'z', 'href' and GSMLP_IDS
     '''
     json_obj = {}
     json_obj['title'] = borehole_dict['name']
@@ -226,9 +296,9 @@ def get_json_popupinfo(borehole_dict):
 
 def get_config_borehole(borehole_list):
     ''' Creates a config object of borehole GLTF objects to display in 3D
-        It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not
-        available
-        borehole_list - list of boreholes
+    It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not available
+
+    :param borehole_list: list of boreholes
     '''
     config_obj = []
     for borehole_dict in borehole_list:
@@ -248,30 +318,35 @@ def get_config_borehole(borehole_list):
 
 def make_borehole_filename(borehole_name):
     ''' Returns a string, formatted borehole file name with no filename extension
-        borehole_name - borehole identifier used to make file name
+
+    :param borehole_name: borehole identifier used to make file name
     '''
     return "Borehole_"+clean_borehole_name(borehole_name)
 
 
 def clean_borehole_name(borehole_name):
     ''' Returns a clean version of the borehole name or id
-        borehole_name - borehole identifier
+
+    :param borehole_name: borehole identifier
     '''
     return borehole_name.replace(' ','_').replace('/','_').replace(':','_')
 
 
 def make_borehole_label(borehole_name):
     ''' Returns a label version of the borehole name or id
-        borehole_name - borehole name or identifier
+
+    :param borehole_name: borehole name or identifier
     '''
     return "borehole-{0}".format(clean_borehole_name(borehole_name))
 
 
 def get_json_input_param(input_file):
     ''' Reads the parameters from input JSON file and stores them in global 'Param' object
-        input_file - filename of input parameter file
+
+    :param input_file: filename of input parameter file
     '''
     global Param
+    print("Opening: ", input_file)
     fp = open(input_file, "r")
     try:
         param_dict = json.load(fp)
@@ -285,7 +360,7 @@ def get_json_input_param(input_file):
         sys.exit(1)
 
     Param = SimpleNamespace()
-    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION']:
+    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
         if field_name not in param_dict['BoreholeData']:
             print("ERROR - Cannot find '"+field_name+"' key in input file", input_file);
             sys.exit(1)
@@ -298,15 +373,18 @@ def get_json_input_param(input_file):
 
 def get_boreholes(dest_dir, input_file):
     ''' Retrieves borehole data and writes 3D model files to a directory
-        dest_dir - directory where 3D model files are written
-        input_file - file of input parameters
+
+    :param dest_dir: directory where 3D model files are written
+    :param input_filei: file of input parameters
     '''
+    print("get_boreholes(", dest_dir, input_file, ")")
     # Set up input parameters from input file
     get_json_input_param(input_file)
     wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, timeout=WFS_TIMEOUT)
     #print('wfs=', wfs)
     # Get all NVCL scanned boreholes within BBOX
-    borehole_list = get_borehole_data(wfs, MAX_BOREHOLES)
+    borehole_list = get_boreholes_bbox(wfs, MAX_BOREHOLES)
+    HEIGHT_RES = 10.0
 
     # Parse response for all boreholes, make COLLADA files
     for borehole_dict in borehole_list:
@@ -315,15 +393,32 @@ def get_boreholes(dest_dir, input_file):
             file_name = make_borehole_filename(borehole_dict['name'])
             x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
             base_xyz = (x_m, y_m, borehole_dict['z'])
-            write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'])
+            log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
+            # print('log_ids = ', log_ids)
+            url = Param.NVCL_URL + '/getDownsampledData.html'
+            # TODO: Make an info dict from all logids
+            bh_data_dict = [] 
+            for log_id, log_type, log_name in log_ids:
+                # For the moment, only process log type '1' and 'Grp1 uTSAS'
+                # Min1,2,3 = 1st, 2nd, 3rd most common mineral
+                # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
+                # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
+                if log_type == '1' and log_name == 'Grp1 uTSAS':
+                    bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
+                    break
+            # If there's data, then colour the borehole
+            if len(bh_data_dict) > 0:
+                write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
     # Convert COLLADA files to GLTF
-    collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
+    exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
     # Return borehole objects
     return get_config_borehole(borehole_list)
 
 
 ### USED FOR TESTING ###
 if __name__ == "__main__":
+    # url = 'https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices/getDownsampledData.html'
+    # get_borehole_data(url, 'ce2df1aa-d3e7-4c37-97d5-5115fc3c33d')
     if len(sys.argv) == 3:
         dest_dir = sys.argv[1]
         input_file = sys.argv[2]
@@ -332,6 +427,10 @@ if __name__ == "__main__":
         elif not os.path.isfile(input_file):
             print("Input file does not exist: "+input_file)
         else:
-            print(json.dumps(get_boreholes(dest_dir, input_file), indent=4, sort_keys=True))
+            out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
+            print("Writing to: ", out_filename)
+            fp = open(out_filename, 'w')
+            json.dump(get_boreholes(dest_dir, input_file), fp, indent=4, sort_keys=True)
+            fp.close()
     else:
         print("Command line parameters are: \n 1. a destination dir to place the output files\n 2. input config file\n\n")
