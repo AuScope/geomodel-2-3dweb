@@ -6,7 +6,7 @@ import ctypes
 
 def print_scene(scene):
     print("\nSCENE START:", repr(scene))
-    field_list = ['mAnimations', 'mCameras', 'mFlags', 'mLights', 'mMaterials', 'mMeshes', 'mNumAnimations', 'mNumCameras', 'mNumLights', 'mNumMaterials', 'mNumMeshes', 'mNumTextures', 'mRootNode', 'mTextures']
+    field_list = [ 'mNumAnimations', 'mAnimations', 'mNumCameras', 'mCameras', 'mFlags',  'mNumLights', 'mLights', 'mNumMaterials', 'mMaterials',  'mNumMeshes', 'mMeshes', 'mNumTextures', 'mTextures', 'mRootNode']
     for field in field_list:
         if getattr(scene, field, False):
             print(field, ':', getattr(scene, field))
@@ -14,10 +14,12 @@ def print_scene(scene):
                 print_node(scene.mRootNode.contents)
             elif field == 'mMeshes':
                 for m_idx in range(scene.mNumMeshes):
-                    print_mesh(scene.mMeshes[0][m_idx])
+                    print_mesh(scene.mMeshes[m_idx].contents)
             elif field == 'mMaterials':
                 for m_idx in range(scene.mNumMaterials):
-                    print_materials(scene.mMaterials[0][m_idx])
+                    print_materials(scene.mMaterials[m_idx].contents)
+        else:
+            print("field ?", field)
     print("SCENE END\n")
 
 
@@ -98,7 +100,7 @@ def print_node(node):
             elif field == 'mChildren':
                 print("CHILDREN START:")
                 for ch_idx in range(node.mNumChildren):
-                    print_node(node.mChildren[0][ch_idx])
+                    print_node(node.mChildren[ch_idx].contents)
                 print("CHILDREN END\n")
     print("NODE END\n")
 
@@ -111,18 +113,38 @@ def print_materials(mat):
             print(field, ':', getattr(mat, field))
             if field == 'mProperties':
                 for m_idx in range(mat.mNumProperties):
-                    print_properties(mat.mProperties[0][m_idx])
+                    print_properties(mat.mProperties[m_idx].contents)
     print("MATERIALS END\n")
 
 
 def print_properties(prop):
     print('\nPROPERTIES START:', repr(prop))
-    field_list = ['mData', 'mDataLength', 'mIndex', 'mKey', 'mSemantic', 'mType']
+    field_list = ['mDataLength', 'mIndex', 'mKey', 'mSemantic', 'mType']
     for field in field_list:
-        if getattr(prop, field, False):
+        if field == 'mKey':
+            print('mKey: ', prop.mKey.data)
+        elif getattr(prop, field, False) != False:
             print(field, ':', getattr(prop, field))
-            # if field == 'mData':
-            #print('mData: ', prop.mData.contents.value)
+    # Float
+    if prop.mType == 1:
+        arr_len = int(prop.mDataLength/4)
+        fp = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_float * arr_len))
+        print("Values: ", end='')
+        for idx in range(arr_len):
+            print(fp.contents[idx], ' ', end='')
+        print()
+    # String
+    elif prop.mType == 3:
+        class STRING_TYP(ctypes.Structure):
+            _fields_ = [ ("len", ctypes.c_int), ("value", ctypes.c_char * prop.mDataLength) ]
+        sp = ctypes.cast(prop.mData, ctypes.POINTER(STRING_TYP))
+        print("Values", sp.contents.len, sp.contents.value)
+    elif prop.mType == 5:
+        bp = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_char * prop.mDataLength)) 
+        print("Values: ", end='')
+        for idx in range(prop.mDataLength):
+            print(bp.contents[idx], ' ', end='')
+        print()
     print('PROPERTIES END\n')
 
 

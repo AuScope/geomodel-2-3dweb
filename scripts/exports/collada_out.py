@@ -3,6 +3,7 @@ import numpy
 import logging
 import sys
 import math
+from exports.geometry_gen import colour_borehole_gen, line_gen, pyramid_gen, cube_gen
 
 class COLLADA_OUT():
     ''' Class to output specific geometries as pycollada objects
@@ -47,26 +48,13 @@ class COLLADA_OUT():
         :returns: the geometry label of this cube
         '''
         #self.logger.debug("collada_cube(mesh=%s, colour_num=%s, x,y,z=%s, v_obj=%s, pt_size=%s, geometry_name=%s, file_cnt=%s, point_cnt=%s)",  repr(mesh), repr(colour_num), repr((x,y,z)), repr(v_obj), repr(pt_size), repr(geometry_name), repr(file_cnt), repr(point_cnt))
-        v = (geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*geom_obj.vol_axis_u[0],
-             geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*geom_obj.vol_axis_v[1],
-             geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*geom_obj.vol_axis_w[2])
-        popup_dict = {}
-        vert_floats = [v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
-                    + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
-                    + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
-                    + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
-                    + [v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
-                    + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]] \
-                    + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
-                    + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]]
+        gen = cube_gen(x, y, z, geom_obj, pt_size)
+        vert_floats, indices = next(gen)
         vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
         geom_label = "{0}_{1}-{2:010d}".format(geometry_name, file_cnt, point_cnt)
         geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, [vert_src])
         input_list = Collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
-
-        indices = [ 1,3,7, 1,7,5, 0,4,6, 0,6,2, 2,6,7, 2,7,3,
-                   4,5,6, 5,7,6, 0,2,3, 0,3,1, 0,1,5, 0,5,4 ]
 
         material_label = "materialref-{0:010d}".format(colour_num)
         # Triangles seem to be more efficient than polygons
@@ -90,16 +78,12 @@ class COLLADA_OUT():
         :returns: the pyramid's geometry label
         '''
 
-        # Vertices of the pyramid
-        vert_floats = [vrtx.xyz[0], vrtx.xyz[1], vrtx.xyz[2]+point_sz*2] + \
-                      [vrtx.xyz[0]+point_sz, vrtx.xyz[1]+point_sz, vrtx.xyz[2]] + \
-                      [vrtx.xyz[0]+point_sz, vrtx.xyz[1]-point_sz, vrtx.xyz[2]] + \
-                      [vrtx.xyz[0]-point_sz, vrtx.xyz[1]-point_sz, vrtx.xyz[2]] + \
-                      [vrtx.xyz[0]-point_sz, vrtx.xyz[1]+point_sz, vrtx.xyz[2]]
+        # Get pyramid geometry
+        gen = pyramid_gen(vrtx, point_sz)
+        vert_floats, indices = next(gen)
+
         input_list = Collada.source.InputList()
         input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-        # Define the faces of the pyramid as six triangles
-        indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
         vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))]
         geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
         geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt), geom_label, vert_src_list)
@@ -124,22 +108,15 @@ class COLLADA_OUT():
         '''
         matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt), mesh.materials[0], inputs=[])
         geom_label_list = []
-        point_cnt = 0
 
-        # Draw lines as a series of triangles
-        for l in seg_arr:
-            v0 = vrtx_arr[l.ab[0]-1]
-            v1 = vrtx_arr[l.ab[1]-1]
+        for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width):
 
-            vert_floats = list(v0.xyz) + [v0.xyz[0], v0.xyz[1], v0.xyz[2]+line_width] + list(v1.xyz) + [v1.xyz[0], v1.xyz[1], v1.xyz[2]+line_width]
             vert_src = Collada.source.FloatSource("lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt), numpy.array(vert_floats), ('X', 'Y', 'Z'))
             geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
             geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}-{1:05d}".format(point_cnt, obj_cnt), geom_label, [vert_src])
 
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt))
-
-            indices = [0, 2, 3, 3, 1, 0]
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{0:05d}".format(obj_cnt))
             geom.primitives.append(triset)
@@ -148,59 +125,9 @@ class COLLADA_OUT():
             geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
             geom_label_list.append(geom_label)
-            point_cnt += 1
        
         return geom_label_list 
             
-
-    def make_borehole_marker(self, mesh, pos, borehole_label, geomnode_list):
-        ''' Makes a borehole marker stick with triangular cross section using pycollada objects
-
-        :param mesh: pycollada 'Collada' object
-        :param pos: x,y,z position of collar of borehole
-        :param borehole_label: geometry label for this borehole stick
-        :param geomnode_list: list of pycollada 'GeometryNode' objects
-        '''
-        BH_WIDTH_UPPER = 75 # Width at uppermost point of stick
-        BH_WIDTH_LOWER = 10 # width at lowermost point of stick
-        BH_HEIGHT = 15000 # Height of stick above ground
-        BH_DEPTH = 2000 # Depth of stick below ground
-
-        # Convert bv to an equilateral triangle of floats
-        angl_rad = math.radians(30.0)
-        cos_flt = math.cos(angl_rad)
-        sin_flt = math.sin(angl_rad)
-        ptA_high = [pos[0], pos[1]+BH_WIDTH_UPPER*cos_flt, pos[2]+BH_HEIGHT]
-        ptB_high = [pos[0]+BH_WIDTH_UPPER*cos_flt, pos[1]-BH_WIDTH_UPPER*sin_flt, pos[2]+BH_HEIGHT]
-        ptC_high = [pos[0]-BH_WIDTH_UPPER*cos_flt, pos[1]-BH_WIDTH_UPPER*sin_flt, pos[2]+BH_HEIGHT]
-        ptA_low = [pos[0], pos[1]+BH_WIDTH_LOWER*cos_flt, pos[2]-BH_DEPTH]
-        ptB_low = [pos[0]+BH_WIDTH_LOWER*cos_flt, pos[1]-BH_WIDTH_LOWER*sin_flt, pos[2]-BH_DEPTH]
-        ptC_low = [pos[0]-BH_WIDTH_LOWER*cos_flt, pos[1]-BH_WIDTH_LOWER*sin_flt, pos[2]-BH_DEPTH]
-
-        vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
-        vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list), ('X', 'Y', 'Z'))
-        geom = Collada.geometry.Geometry(mesh, "geometry0", borehole_label, [vert_src])
-        input_list = Collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
-
-        indices = [0, 2, 1,
-                   3, 5, 4,
-                   1, 2, 5,
-                   2, 4, 5,
-                   0, 4, 2,
-                   0, 3, 4,
-                   0, 1, 3,
-                   1, 5, 3]
-
-        triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-0")
-        geom.primitives.append(triset)
-        mesh.geometries.append(geom)
-
-        # Assumes only one colour
-        matnode = Collada.scene.MaterialNode("materialref-0", mesh.materials[0], inputs=[])
-        geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
-
-
 
     def make_colour_borehole_marker(self, mesh, pos, borehole_label, geomnode_list, colour_info_dict, ht_resol):
         ''' Makes a borehole marker stick with triangular cross section using pycollada objects
@@ -212,38 +139,11 @@ class COLLADA_OUT():
         :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
         :param ht_reso: height resolution
         '''
-        BH_WIDTH= 75 # Width of stick
-        max_depth = max(colour_info_dict.keys())
-        min_depth = max(colour_info_dict.keys())
-
-        # Convert bv to an equilateral triangle of floats
-        angl_rad = math.radians(30.0)
-        cos_flt = math.cos(angl_rad)
-        sin_flt = math.sin(angl_rad)
-        colour_idx = 0
-        for depth, colour_info in colour_info_dict.items():
-            height = pos[2]+max_depth+ht_resol-depth
-            ptA_high = [pos[0], pos[1]+BH_WIDTH*cos_flt, height]
-            ptB_high = [pos[0]+BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
-            ptC_high = [pos[0]-BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
-            ptA_low = [pos[0], pos[1]+BH_WIDTH*cos_flt, height-ht_resol]
-            ptB_low = [pos[0]+BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height-ht_resol]
-            ptC_low = [pos[0]-BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height-ht_resol]
-
-            vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
+        for vert_list, indices, colour_idx, depth, colour_info in colour_borehole_gen(pos, colour_info_dict, ht_resol):
             vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list), ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(mesh, "geometry_{0}".format(int(depth)), "{0}_{1}".format(borehole_label, int(depth)), [vert_src])
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
-
-            indices = [0, 2, 1,
-                       3, 5, 4,
-                       1, 2, 5,
-                       2, 4, 5,
-                       0, 4, 2,
-                       0, 3, 4,
-                       0, 1, 3,
-                       1, 5, 3]
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list, "materialref-{:d}".format(int(depth)))
             geom.primitives.append(triset)
@@ -251,7 +151,4 @@ class COLLADA_OUT():
 
             matnode = Collada.scene.MaterialNode("materialref-{:d}".format(int(depth)), mesh.materials[colour_idx], inputs=[])
             geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
-            colour_idx += 1
-
-
 

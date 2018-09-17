@@ -5,6 +5,8 @@
 # upside down.
 #
 # This accepts most types of GOCAD files and support colours and 'ZPOSITIVE' flag etc.
+# 
+#  Dependencies: owslib, pyproj, pycollada, pyassimp
 #
 import sys
 import os
@@ -14,9 +16,10 @@ import random
 import logging
 from types import SimpleNamespace
 
+from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
-from makeDaeBoreholes import get_boreholes
+from makeBoreholes import get_boreholes
 import exports.collada2gltf
 from file_processing import find, create_json_config, read_json_file, update_json_config, reduce_extents, add_info2popup
 
@@ -103,6 +106,7 @@ def process(filename_str):
     ext_str = fileExt.lstrip('.').upper()
     src_dir = os.path.dirname(filename_str)
     ck = COLLADA_KIT(DEBUG_LVL)
+    pk = PNG_KIT(DEBUG_LVL)
     # Open GOCAD file an read all its contents, assume it fits in memory
     try:
         fp = open(filename_str,'r')
@@ -151,7 +155,7 @@ def process(filename_str):
                 else:
                     for geom_obj, style_obj, meta_obj in gsm_list:
                         # *.VO files will produce a PNG file, not GLTF
-                        popup_list = ck.write_vol_png(geom_obj, src_dir, out_filename+"_"+str(idx))
+                        popup_list = pk.write_vol_png(geom_obj, src_dir, out_filename+"_"+str(idx))
                         file_idx=1
                         for popup_obj in popup_list:
                             model_dict_list.append(add_info2popup("{0}_{1}".format(meta_obj.name, file_idx), popup_obj, out_filename+"_{1}_{0}".format(file_idx, idx), file_ext='.PNG', position=geom_obj.vol_origin))

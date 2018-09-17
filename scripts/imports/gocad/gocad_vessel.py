@@ -362,20 +362,16 @@ class GOCAD_VESSEL():
             The first element starts at '1'
         '''
         vert_dict = {}
-        idx = 1
         # Assign vertices to dict
-        for v in self.__vrtx_arr:
+        for idx, v in enumerate(self.__vrtx_arr, 1):
             vert_dict[v.n] = idx
-            idx += 1
 
         # Assign atoms to dict
         for atom in self.__atom_arr:
-            idx = 1
-            for vert in self.__vrtx_arr:
+            for idx, vert in enumerate(self.__vrtx_arr, 1):
                 if vert.n == atom.v:
                     vert_dict[atom.n] = idx
                     break
-                idx += 1
         return vert_dict
 
 
@@ -578,18 +574,15 @@ class GOCAD_VESSEL():
                 # This is the number of floats/ints for each property, usually it is '1',
                 # but XYZ values are '3'
                 elif splitstr_arr[0] == "ESIZES":
-                    idx = 1
-                    for prop_obj in self.local_props.values():
+                    for idx, prop_obj in enumerate(self.local_props.values(), 1):
                         is_ok, l = self.__parse_int(splitstr_arr[idx])
                         if is_ok:
                             prop_obj.data_sz = l
-                        idx += 1 
                     self.logger.debug(" property_sizes = %s", repr(splitstr_arr[1:]))
 
                 # Read values representing no data for this property at a coordinate point
                 elif splitstr_arr[0] == "NO_DATA_VALUES":
-                    idx = 1
-                    for prop_obj in self.local_props.values():
+                    for idx, prop_obj in enumerate(self.local_props.values(), 1):
                         try:
                             converted, fp  = self.__parse_float(splitstr_arr[idx])
                             if converted:
@@ -597,7 +590,6 @@ class GOCAD_VESSEL():
                                 self.logger.debug("prop_obj.no_data_marker = %f", prop_obj.no_data_marker)
                         except IndexError as exc:
                             self.__handle_exc(exc)
-                        idx += 1
                     self.logger.debug(" property_nulls = %s", repr(splitstr_arr[1:]))
                 
                 # Atoms, with or without properties

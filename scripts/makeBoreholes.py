@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# This code creates a set of DAE (COLLADA) files which represent BoreHoles in a 3D model
+# This code creates a set of COLLADA (.dae) or GLTF files which represent BoreHoles in a 3D model
 #
 import collada as Collada
 import numpy
@@ -26,7 +26,12 @@ import urllib.parse
 import exports.collada2gltf
 
 from exports.collada_kit import COLLADA_KIT
+from exports.gltf_kit import GLTF_KIT
 from exports.bh_utils import make_borehole_label, make_borehole_filename
+
+
+OUTPUT_MODE = 'GLTF' 
+''' When set to 'GLTF' outputs GLTF files, else outputs COLLADA (.dae) '''
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -168,7 +173,7 @@ def get_borehole_logids(url, nvcl_id):
 
 def get_boreholes_bbox(wfs, max_boreholes):
     ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
-    and a flag to say whether there are NVCL boreholes in there or not
+        and a flag to say whether there are NVCL boreholes in there or not
 
     :param wfs: handle of borehole's WFS service
     :param max_boreholes: maximum number of boreholes to retrieve
@@ -331,7 +336,6 @@ def get_boreholes(dest_dir, input_file):
             log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
             # print('log_ids = ', log_ids)
             url = Param.NVCL_URL + '/getDownsampledData.html'
-            # TODO: Make an info dict from all logids
             bh_data_dict = [] 
             for log_id, log_type, log_name in log_ids:
                 # For the moment, only process log type '1' and 'Grp1 uTSAS'
@@ -343,18 +347,20 @@ def get_boreholes(dest_dir, input_file):
                     break
             # If there's data, then colour the borehole
             if len(bh_data_dict) > 0:
-                ck = COLLADA_KIT(DEBUG_LVL)
-                ck.write_collada_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
-    # Convert COLLADA files to GLTF
-    exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
-    # Return borehole objects
+                if OUTPUT_MODE != 'GLTF':
+                    export_kit = COLLADA_KIT(DEBUG_LVL)
+                else:
+                    export_kit = GLTF_KIT(DEBUG_LVL)
+                export_kit.write_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
+                   
+    if OUTPUT_MODE != 'GLTF':
+        # Convert COLLADA files to GLTF
+        exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
+        # Return borehole objects
     return get_config_borehole(borehole_list)
 
 
-### USED FOR TESTING ###
 if __name__ == "__main__":
-    # url = 'https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices/getDownsampledData.html'
-    # get_borehole_data(url, 'ce2df1aa-d3e7-4c37-97d5-5115fc3c33d')
     if len(sys.argv) == 3:
         dest_dir = sys.argv[1]
         input_file = sys.argv[2]

@@ -70,71 +70,6 @@ class COLLADA_KIT:
         #self.oo = OBJ_OUT(debug_level)
 
 
-    def write_vol_png(self, geom_obj, src_dir, fileName):
-        ''' Writes out PNG files from voxel data
-
-        :param geom_obj: model geometry object that holds voxel data
-        :param fileName: filename of OBJ file, without extension
-        :param src_filen_str: filename of source gocad file
-        '''
-        popup_list = []
-        self.logger.debug("write_vol_png(%s,%s)", src_dir, fileName)
-        if len(geom_obj.prop_dict) > 0:
-            for map_idx in sorted(geom_obj.prop_dict):
-                popup_list.append(self.write_single_voxel_png(geom_obj, src_dir, fileName, map_idx))
-        return popup_list 
-
-
-    def write_single_voxel_png(self, geom_obj, style_obj, src_dir, fileName, idx):
-        ''' Writes out a PNG file of the top layer of the voxel data
-
-        :param geom_obj: model geometry object that holds voxel data
-        :param style_obj: style object, contains colour map
-        :param fileName: filename of OBJ file, without extension
-        :param src_filen_str: filename of source gocad file
-        '''
-        self.logger.debug("write_single_voxel_png(%s, %s, %s)", src_dir, fileName, idx)
-        colour_arr = array.array("B")
-        z = geom_obj.vol_sz[2]-1
-        pixel_cnt = 0
-        prop_obj = geom_obj.prop_dict[idx]
-        self.logger.debug("style_obj.colour_map = %s", repr(style_obj.colour_map))
-        self.logger.debug("geom_obj.min_data = %s", repr(geom_obj.min_data)) 
-        # If colour table is provided within source file, use it
-        if len(style_obj.colour_map) > 0:
-            for x in range(0, geom_obj.vol_sz[0]):
-                for y in range(0, geom_obj.vol_sz[1]):
-                    try:
-                        (r,g,b) = style_obj.colour_map[int(geom_obj.vol_data[x][y][z] - geom_obj.min_data)]
-                    except ValueError:
-                        (r,g,b) = (0.0, 0.0, 0.0)
-                    pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
-                    colour_arr.fromlist(pixel_colour)
-                    pixel_cnt += 1
-        # Else use a false colour map
-        else:
-            for x in range(0, geom_obj.vol_sz[0]):
-                for y in range(0, geom_obj.vol_sz[1]):
-                    try:
-                        (r,g,b,a) = make_false_colour_tup(geom_obj.vol_data[x][y][z], geom_obj.min_data, geom_obj.min_data)      
-                    except ValueError:
-                        (r,g,b,a) = (0.0, 0.0, 0.0, 0.0) 
-                    pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
-                    colour_arr.fromlist(pixel_colour)
-                    pixel_cnt += 1
-                    
-        img = PIL.Image.frombytes('RGB', (geom_obj.vol_sz[1], geom_obj.vol_sz[0]), colour_arr.tobytes())
-        self.logger.info("Writing PNG file: %s", fileName+"_"+idx+".PNG")
-        img.save(os.path.join(src_dir, fileName+"_"+idx+".PNG"))
-        if len(meta_obj.property_name) >0:
-            label_str = meta_obj.property_name
-        else:
-            label_str = meta_obj.name
-        popup_dict = { os.path.basename(fileName+"_"+idx): { 'title': label_str, 'name': label_str } }
-        return popup_dict
-
-
-
     def start_collada(self):
         ''' Initiate creation of a COLLADA file
         '''
@@ -271,7 +206,6 @@ class COLLADA_KIT:
         geometry_name = meta_obj.name
  
         POINT_SIZE = 1000
-        point_cnt = 0
         node_list = []
         geomnode_list = []
         vert_floats = []
@@ -294,7 +228,7 @@ class COLLADA_KIT:
             max_v = 0.0
 
         # Draw vertices as pyramids
-        for v in geom_obj.vrtx_arr:
+        for point_cnt, v in enumerate(geom_obj.vrtx_arr):
             # If no data value for this vertex then skip to next one
             if v.xyz not in prop_dict:
                 continue               
@@ -303,7 +237,6 @@ class COLLADA_KIT:
             geom_label = self.co.make_pyramid(mesh, geometry_name, geomnode_list, v, point_cnt, POINT_SIZE, colour_num)
 
             popup_dict[geom_label] = { 'name': meta_obj.property_name, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
-            point_cnt += 1
 
         node = Collada.scene.Node("node0", children=geomnode_list)
         node_list.append(node)
@@ -375,7 +308,6 @@ class COLLADA_KIT:
         geometry_name = meta_obj.name
         popup_list = []
         popup_dict = {}
-        file_cnt = 1
 
         # There are two kinds of voxel object
         # One has index values that refer to rock types or colours, the other has values that refer to physical measurements
@@ -404,7 +336,7 @@ class COLLADA_KIT:
             self.logger.debug("Computed neighbours")
 
             # For each index value (usually rock type)
-            for data_val, coord_list in bucket.items():
+            for file_cnt, (data_val, coord_list) in enumerate(bucket.items(), 1):
                 self.logger.debug("Writing coords %s for key %s", repr(coord_list[:6]), repr(data_val))
                 mesh = Collada.Collada()
                 self.make_mapped_colour_materials(mesh, style_obj.colour_map)
@@ -443,7 +375,6 @@ class COLLADA_KIT:
 
                 popup_list.append((popup_dict_key, popup_dict, out_filename))
                 popup_dict = {}
-                file_cnt += 1
 
         # The physical measurements kind uses a false colourmap, and written as one big file
         else:
@@ -464,7 +395,7 @@ class COLLADA_KIT:
                                  (z == 0 or y == 0 or x == 0 or z == geom_obj.vol_sz[2]-1 or y == geom_obj.vol_sz[1]-1 or x == geom_obj.vol_sz[0]-1):
                             colour_num = calculate_false_colour_num(geom_obj.vol_data[x][y][z], geom_obj.max_data, geom_obj.min_data, self.MAX_COLOURS)
                             geomnode_list = []
-                            geom_label = self.co.make_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, file_cnt, point_cnt, geomnode_list)
+                            geom_label = self.co.make_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, 1, point_cnt, geomnode_list)
                             node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
                             popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.property_name, 'value': "{:.3f}".format(geom_obj.vol_data[x][y][z]) }
                             node_list.append(node)
@@ -476,25 +407,24 @@ class COLLADA_KIT:
             mesh.scenes.append(myscene)
             mesh.scene = myscene
 
-            out_filename = fileName+'_'+str(file_cnt)
-            self.logger.info("write_vol_collada() Writing COLLADA file: %s.dae", out_filename)
-            mesh.write(out_filename+'.dae')
-            popup_list.append((meta_obj.property_name, popup_dict, out_filename))
-            popup_dict = {}
-            file_cnt += 1
+            self.logger.info("write_vol_collada() Writing COLLADA file: %s.dae", fileName)
+            mesh.write(fileName+'.dae')
+            popup_list.append((meta_obj.property_name, popup_dict, fileName))
                 
         return popup_list
 
 
-    def write_collada_borehole(self, bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
+    def write_borehole(self, bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
         ''' Write out a COLLADA file of a borehole stick
 
-        :param file_name: filename of COLLADA file, without extension
         :param bv: base vertex, position of the object within the model [x,y,z]
+        :param dest_dir: destination directory where COLLADA file is written
+        :param file_name: filename of COLLADA file, without extension
+        :param borehole_name: name of borehole
         :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
         :param height_reso: height resolution for colour info dict
         '''
-        print(" write_collada_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
+        print(" write_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
 
         mesh = Collada.Collada()
         node_list = []
