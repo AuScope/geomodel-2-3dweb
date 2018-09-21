@@ -414,17 +414,17 @@ class COLLADA_KIT:
         return popup_list
 
 
-    def write_borehole(self, bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
+    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir, file_name):
         ''' Write out a COLLADA file of a borehole stick
 
         :param bv: base vertex, position of the object within the model [x,y,z]
+        :param borehole_name: name of borehole
+        :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name } where R,G,B,A are floats
+        :param height_reso: height resolution for colour info dict
         :param dest_dir: destination directory where COLLADA file is written
         :param file_name: filename of COLLADA file, without extension
-        :param borehole_name: name of borehole
-        :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
-        :param height_reso: height resolution for colour info dict
         '''
-        print(" write_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
+        print(" write_borehole(", bv, borehole_name, "colour_info_dict=", colour_info_dict,  dest_dir, file_name, ")")
 
         mesh = Collada.Collada()
         node_list = []

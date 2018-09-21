@@ -154,3 +154,17 @@ def print_matrix4x4(matrix):
     print('    ', matrix.c1, matrix.c2, matrix.c3, matrix.c4)
     print('    ', matrix.d1, matrix.d2, matrix.d3, matrix.d4)
 
+def print_blob(blob):
+    while True:
+        print("blob =", blob)
+        print("blob.contents =", blob.contents)
+        print("blob.contents.size =", blob.contents.size)
+        print("blob.contents.data =", blob.contents.data)
+        print("blob.contents.name =", blob.contents.name.data)
+        print("blob.contents.next =", blob.contents.next)
+        if not blob.contents.next:
+            break
+        blob = blob.contents.next
+    print()
+
+

@@ -23,15 +23,17 @@ import urllib.parse
 import urllib.request
 import urllib.parse
 
-import exports.collada2gltf
-
-from exports.collada_kit import COLLADA_KIT
-from exports.gltf_kit import GLTF_KIT
-from exports.bh_utils import make_borehole_label, make_borehole_filename
-
-
 OUTPUT_MODE = 'GLTF' 
 ''' When set to 'GLTF' outputs GLTF files, else outputs COLLADA (.dae) '''
+
+if OUTPUT_MODE != 'GLTF':
+    import exports.collada2gltf
+    from exports.collada_kit import COLLADA_KIT
+else:
+    from exports.gltf_kit import GLTF_KIT
+
+from exports.bh_utils import make_borehole_label, make_borehole_filename
+
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -311,11 +313,12 @@ def get_json_input_param(input_file):
         sys.exit(1)
     
 
-def get_boreholes(dest_dir, input_file):
-    ''' Retrieves borehole data and writes 3D model files to a directory
+def get_boreholes(input_file, dest_dir=''):
+    ''' Retrieves borehole data and writes 3D model files to a directory or a blob
+        If 'dest_dir' is supplied, then files are written
 
-    :param dest_dir: directory where 3D model files are written
-    :param input_filei: file of input parameters
+    :param input_file: file of input parameters
+    :param dest_dir: optional directory where 3D model files are written
     '''
     print("get_boreholes(", dest_dir, input_file, ")")
     # Set up input parameters from input file
@@ -345,19 +348,24 @@ def get_boreholes(dest_dir, input_file):
                 if log_type == '1' and log_name == 'Grp1 uTSAS':
                     bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
                     break
-            # If there's data, then colour the borehole
+            # If there's data, then create the borehole
             if len(bh_data_dict) > 0:
-                if OUTPUT_MODE != 'GLTF':
-                    export_kit = COLLADA_KIT(DEBUG_LVL)
-                else:
+                if OUTPUT_MODE == 'GLTF':
                     export_kit = GLTF_KIT(DEBUG_LVL)
-                export_kit.write_borehole(base_xyz, dest_dir, file_name, borehole_dict['name'], bh_data_dict, HEIGHT_RES)
+                    blob_obj = export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                elif dest_dir != '':
+                    export_kit = COLLADA_KIT(DEBUG_LVL)
+                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    blob_obj = True
+                else:
+                    print("WARNING - COLLADA_KIT cannot write blobs")
+                    sys.exit(1)
                    
     if OUTPUT_MODE != 'GLTF':
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
-    return get_config_borehole(borehole_list)
+    return get_config_borehole(borehole_list), True
 
 
 if __name__ == "__main__":
@@ -372,7 +380,8 @@ if __name__ == "__main__":
             out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
             print("Writing to: ", out_filename)
             fp = open(out_filename, 'w')
-            json.dump(get_boreholes(dest_dir, input_file), fp, indent=4, sort_keys=True)
+            borehole_config, flag = get_boreholes(input_file, dest_dir)
+            json.dump(borehole_config, fp, indent=4, sort_keys=True)
             fp.close()
     else:
         print("Command line parameters are: \n 1. a destination dir to place the output files\n 2. input config file\n\n")

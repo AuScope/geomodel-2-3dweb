@@ -62,15 +62,17 @@ class GLTF_KIT:
         self.logger = GLTF_KIT.logger
 
 
-    def write_borehole(self, bv, dest_dir, file_name, borehole_name, colour_info_dict, height_reso):
-        ''' Write out a GLTF file of a borehole stick
+    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name=''):
+        ''' Write out a GLTF file or blob of a borehole stick
+            if 'dest_dir' and 'file_name' are supplied then writes a file and returns True/False
+            else returns a pointer to a 'structs.ExportDataBlob' object
 
         :param bv: base vertex, position of the object within the model [x,y,z]
-        :param dest_dir: destination directory, where GLTF file is written
-        :param file_name: filename of GLTF file, without extension
         :param borehole_name: name of borehole
-        :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }
+        :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }, where R,G,B,A are floats
         :param height_reso: height resolution for colour info dict
+        :param dest_dir: optional destination directory, where GLTF file is written
+        :param file_name: optional filename of GLTF file, without extension
         '''
         print(" write_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
 
@@ -93,7 +95,6 @@ class GLTF_KIT:
         sc.mMaterials = mat_arr_pp
         sc.mNumMaterials = bh_size
 
-
         for vert_list, indices, colour_idx, depth, colour_info in colour_borehole_gen(bv, colour_info_dict, height_reso):
             mesh_name = bytes(borehole_name+"_"+str(int(depth)), encoding='utf=8')
             mesh_obj = self.make_a_mesh(mesh_name, indices, colour_idx)
@@ -104,12 +105,23 @@ class GLTF_KIT:
 
         pa.print_scene(sc)
         sys.stdout.flush()
-        print("\nWriting GLTF: ", file_name+".gltf", end='')
-        export(sc, os.path.join(dest_dir, file_name+".gltf"), "gltf2")
-        print(" DONE.")
+        if dest_dir!='' and file_name !='':
+            print("\nWriting GLTF: ", file_name+".gltf", end='')
+            export(sc, os.path.join(dest_dir, file_name+".gltf"), "gltf2")
+            print(" DONE.")
+            sys.stdout.flush()
+            return True
+        else:
+            exp_blob = export_blob(sc, "gltf2", processing = None)
+            pa.print_blob(exp_blob)
+            return exp_blob
 
 
     def make_empty_node(self, node_name):
+        ''' Makes an empty node with a supplied name
+        :param node_name: name of node to be created
+        :returns: pyassimp 'Node' object
+        '''
         n = structs.Node()
         n.mName.data = node_name
         n.mName.length = len(node_name)
@@ -215,6 +227,10 @@ class GLTF_KIT:
         
 
     def make_material(self, diffuse_colour):
+        ''' Makes a material object with a certain diffuse colour
+        :param diffuse_colour: tuple of floating point values (R,G,B,A)
+        :returns pyassimp 'Material' object
+        '''
         m = structs.Material()
         m.mNumProperties = 1
         m.mNumAllocated = 1
