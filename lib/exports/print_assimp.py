@@ -155,16 +155,22 @@ def print_matrix4x4(matrix):
     print('    ', matrix.d1, matrix.d2, matrix.d3, matrix.d4)
 
 def print_blob(blob):
-    while True:
+    cntr = 0
+    while cntr < 10000:
         print("blob =", blob)
         print("blob.contents =", blob.contents)
         print("blob.contents.size =", blob.contents.size)
-        print("blob.contents.data =", blob.contents.data)
+        bcd = ctypes.cast(blob.contents.data, ctypes.POINTER(blob.contents.size * ctypes.c_char))
+        bcd_bytes = b''
+        for b in bcd.contents:
+            bcd_bytes += b
+        print("blob.contents.data = ", bcd_bytes)
         print("blob.contents.name =", blob.contents.name.data)
         print("blob.contents.next =", blob.contents.next)
         if not blob.contents.next:
             break
         blob = blob.contents.next
+        cntr += 1
     print()
 
 

@@ -189,7 +189,7 @@ def get_boreholes_bbox(wfs, max_boreholes):
     response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
     response_str = bytes(response.read(), 'ascii')
     borehole_list = []
-    #print('get_boreholes_bbox() resp=', response_str)
+    print('get_boreholes_bbox() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
 
@@ -238,7 +238,7 @@ def get_boreholes_bbox(wfs, max_boreholes):
             #    print('REJECTED')
             if borehole_cnt > max_boreholes:
                 break
-    #print('get_boreholes_bbox() returns ', borehole_list)
+    print('get_boreholes_bbox() returns ', borehole_list)
     return borehole_list
 
 
@@ -311,7 +311,20 @@ def get_json_input_param(input_file):
     if 'west' not in Param.BBOX or 'south' not in Param.BBOX or 'east' not in Param.BBOX or 'north' not in Param.BBOX:
         print("ERROR - Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
         sys.exit(1)
+    print("Closed: ", input_file)
     
+def get_boreholes_fast(input_file, dest_dir=''):
+    export_kit = GLTF_KIT(DEBUG_LVL)
+    import pickle
+    fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_params.pck'), 'rb')
+    base_xyz, borehole_name, bh_data_dict, HEIGHT_RES, dest_dir, file_name = pickle.load(fp)
+    fp.close()
+    blob_obj = export_kit.write_borehole(base_xyz, borehole_name, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+    fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_config.pck'), 'rb')
+    config = pickle.load(fp)
+    fp.close()
+    return config, blob_obj
+
 
 def get_boreholes(input_file, dest_dir=''):
     ''' Retrieves borehole data and writes 3D model files to a directory or a blob
@@ -319,16 +332,17 @@ def get_boreholes(input_file, dest_dir=''):
 
     :param input_file: file of input parameters
     :param dest_dir: optional directory where 3D model files are written
+    :returns: config object and optional GLTF blob object
     '''
     print("get_boreholes(", dest_dir, input_file, ")")
     # Set up input parameters from input file
     get_json_input_param(input_file)
     wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, timeout=WFS_TIMEOUT)
-    #print('wfs=', wfs)
+    print('wfs=', wfs)
     # Get all NVCL scanned boreholes within BBOX
     borehole_list = get_boreholes_bbox(wfs, MAX_BOREHOLES)
     HEIGHT_RES = 10.0
-
+    print("borehole_list = ", borehole_list)
     # Parse response for all boreholes, make COLLADA files
     for borehole_dict in borehole_list:
         #print(borehole_dict)
@@ -352,7 +366,12 @@ def get_boreholes(input_file, dest_dir=''):
             if len(bh_data_dict) > 0:
                 if OUTPUT_MODE == 'GLTF':
                     export_kit = GLTF_KIT(DEBUG_LVL)
+                    import pickle
+                    fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_params.pck'), 'wb')
+                    pickle.dump((base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name), fp)
+                    fp.close()
                     blob_obj = export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    break
                 elif dest_dir != '':
                     export_kit = COLLADA_KIT(DEBUG_LVL)
                     export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
@@ -365,7 +384,9 @@ def get_boreholes(input_file, dest_dir=''):
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
-    return get_config_borehole(borehole_list), True
+    config = get_config_borehole(borehole_list)
+    print("Returning: config = ", config, "blob_obj = ", blob_obj)
+    return config, blob_obj
 
 
 if __name__ == "__main__":

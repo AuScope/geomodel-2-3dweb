@@ -120,7 +120,7 @@ def update_json_config(model_dict_list, template_filename, output_filename, bore
                         p_dict['title'] = group_name + '-' + part['display_name']
                     break
     if borehole_outdir != "":
-        config_dict['groups']['Boreholes'] = get_boreholes(borehole_outdir)
+        config_dict['groups']['Boreholes'], flag = get_boreholes(borehole_outdir)
     json.dump(config_dict, fp, indent=4, sort_keys=True)
     fp.close()
 

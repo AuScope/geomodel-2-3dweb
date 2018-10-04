@@ -74,7 +74,7 @@ class GLTF_KIT:
         :param dest_dir: optional destination directory, where GLTF file is written
         :param file_name: optional filename of GLTF file, without extension
         '''
-        print(" write_borehole(", bv, dest_dir, file_name, borehole_name, "colour_info_dict=", colour_info_dict, ")")
+        print(" write_borehole(", bv, repr(dest_dir), repr(file_name), repr(borehole_name), "colour_info_dict=", repr(colour_info_dict), ")")
 
         sc = structs.Scene()
         sc.mMetadata = None
@@ -103,8 +103,8 @@ class GLTF_KIT:
             mat_obj = self.make_material(colour_info['colour'])
             mat_p_arr[colour_idx] = ctypes.pointer(mat_obj)
 
-        pa.print_scene(sc)
-        sys.stdout.flush()
+        #pa.print_scene(sc)
+        #sys.stdout.flush()
         if dest_dir!='' and file_name !='':
             print("\nWriting GLTF: ", file_name+".gltf", end='')
             export(sc, os.path.join(dest_dir, file_name+".gltf"), "gltf2")
