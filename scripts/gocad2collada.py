@@ -16,6 +16,9 @@ import random
 import logging
 from types import SimpleNamespace
 
+# Add in path to local library files
+sys.path.append(os.path.join('..','lib'))
+
 from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat

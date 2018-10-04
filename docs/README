@@ -1,3 +1,5 @@
+I use the 'sphinx' documentation generation to generate documentation for this project (http://www.sphinx-doc.org/en/master/index.html)
+
 To generate .rst files for each of the .py source files:
 
 sphinx-apidoc -o source ../scripts/
