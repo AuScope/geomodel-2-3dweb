@@ -2,7 +2,7 @@ I use the 'sphinx' documentation generation to generate documentation for this p
 
 To generate .rst files for each of the .py source files:
 
-sphinx-apidoc -o source ../scripts/
+sphinx-apidoc -f -o source ../lib/
 
 
 To generate html documentation:

@@ -36,10 +36,18 @@ exports.collada_out module
     :undoc-members:
     :show-inheritance:
 
-exports.gltf_out module
+exports.geometry_gen module
+---------------------------
+
+.. automodule:: exports.geometry_gen
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+exports.gltf_kit module
 -----------------------
 
-.. automodule:: exports.gltf_out
+.. automodule:: exports.gltf_kit
     :members:
     :undoc-members:
     :show-inheritance:
@@ -48,6 +56,14 @@ exports.obj_out module
 ----------------------
 
 .. automodule:: exports.obj_out
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+exports.png_kit module
+----------------------
+
+.. automodule:: exports.png_kit
     :members:
     :undoc-members:
     :show-inheritance:

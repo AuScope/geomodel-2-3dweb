@@ -1,5 +1,5 @@
-scripts
-=======
+lib
+===
 
 .. toctree::
    :maxdepth: 4
@@ -7,6 +7,5 @@ scripts
    db
    exports
    file_processing
-   gocad2collada
    imports
-   makeDaeBoreholes
+   makeBoreholes
