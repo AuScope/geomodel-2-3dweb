@@ -14,7 +14,7 @@ def colour_borehole_gen(pos, colour_info_dict, ht_resol):
         depth - depth of borehole segment, float;
         color_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label } 
     '''
-    BH_WIDTH= 75 # Width of stick
+    BH_WIDTH= 675 # Width of stick
     max_depth = max(colour_info_dict.keys())
     min_depth = max(colour_info_dict.keys())
 

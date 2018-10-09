@@ -11,10 +11,10 @@ from pyproj import Proj, transform
 import xml.etree.ElementTree as ET
 import json
 from json import JSONDecodeError
-from types import SimpleNamespace
 from collections import OrderedDict
 import itertools
 import logging
+
 
 from owslib.wfs import WebFeatureService
 from owslib.fes import *
@@ -38,6 +38,8 @@ from exports.bh_utils import make_borehole_label, make_borehole_filename
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
 '''
+
+EXPORT_KIT = GLTF_KIT(DEBUG_LVL)
 
 # Namespaces for WFS Borehole response
 NS = { 'wfs':"http://www.opengis.net/wfs",
@@ -69,10 +71,10 @@ GSMLP_IDS = [ 'identifier', 'name', 'description', 'purpose', 'status', 'drillin
 # Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
 
-# Timeout for querying WFS services (seconds)
-WFS_TIMEOUT = 6000
+WFS = None
 
-Param = SimpleNamespace()
+
+
 
 def convert_coords(input_crs, output_crs, xy):
     ''' Converts coordinate systems
@@ -173,13 +175,14 @@ def get_borehole_logids(url, nvcl_id):
     return logid_list
       
 
-def get_boreholes_bbox(wfs, max_boreholes):
+def get_boreholes_bbox(wfs, max_boreholes, Param):
     ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
         and a flag to say whether there are NVCL boreholes in there or not
 
     :param wfs: handle of borehole's WFS service
     :param max_boreholes: maximum number of boreholes to retrieve
     '''
+    print("get_boreholes_bbox(", wfs, max_boreholes, ")")
     # Can't filter for BBOX and nvclCollection==true at the same time [owslib's BBox uses 'ows:BoundingBox', not supported in WFS]
     # so is best to do the BBOX manually
     filter_ = PropertyIsLike(propertyname='gsmlp:nvclCollection', literal='true', wildCard='*')
@@ -198,7 +201,7 @@ def get_boreholes_bbox(wfs, max_boreholes):
         is_nvcl = child.findtext('./gsmlp:nvclCollection', default="false", namespaces=NS)
         if is_nvcl == "true" and nvcl_id.isdigit():
             borehole_dict = { 'nvcl_id': nvcl_id }
-            # print("boreholeview: ", "tag:", child.tag, "attrib:", child.attrib, "text:", child.text)
+            #print("boreholeview: ", "tag:", child.tag, "attrib:", child.attrib, "text:", child.text)
 
             # Finds borehole collar x,y assumes units are degrees
             xy = child.findtext('./gsmlp:shape/gml:Point/gml:pos', default="? ?", namespaces=NS).split(' ')
@@ -226,23 +229,24 @@ def get_boreholes_bbox(wfs, max_boreholes):
                 borehole_dict['z'] = 0.0
 
             # Only accept if within bounding box
-            # print(Param.BBOX['west'], '<', borehole_dict['x'], 'and', Param.BBOX['east'], '>', borehole_dict['x'], 'and')
-            # print(Param.BBOX['north'], '>', borehole_dict['y'], 'and', Param.BBOX['south'], '<', borehole_dict['y'])
+            #print(Param.BBOX['west'], '<', borehole_dict['x'], 'and', Param.BBOX['east'], '>', borehole_dict['x'], 'and')
+            #print(Param.BBOX['north'], '>', borehole_dict['y'], 'and', Param.BBOX['south'], '<', borehole_dict['y'])
             if Param.BBOX['west'] < borehole_dict['x'] and  Param.BBOX['east'] > borehole_dict['x'] and \
                Param.BBOX['north'] > borehole_dict['y'] and Param.BBOX['south'] < borehole_dict['y']:
                 borehole_cnt+=1
                 borehole_list.append(borehole_dict)
-                # print('borehole_dict = ', borehole_dict)
-                # print('ACCEPTED')
+                #print('borehole_dict = ', borehole_dict)
+                #print('ACCEPTED')
             #else:
             #    print('REJECTED')
             if borehole_cnt > max_boreholes:
+                #print("Too many, break")
                 break
     print('get_boreholes_bbox() returns ', borehole_list)
     return borehole_list
 
 
-def get_json_popupinfo(borehole_dict):
+def get_json_popupinfo(borehole_dict, Param):
     ''' Returns some JSON for displaying in a popup box when user clicks on a borehole in the model
 
     :param borehole_dict: dict of borehole information used to make JSON
@@ -259,8 +263,21 @@ def get_json_popupinfo(borehole_dict):
         json_obj['href'].append({'label': 'Metadata URI', 'URL': borehole_dict['metadata_uri']})
     return json_obj
 
+    
+def get_config_bh_dict(borehole_dict, Param):
+    j_dict = {}
+    j_dict['popup_info'] = get_json_popupinfo(borehole_dict, Param)
+    j_dict['type'] = 'GLTFObject'
+    x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+    j_dict['position'] = [x_m, y_m, borehole_dict['z']]
+    j_dict['model_url'] = make_borehole_filename(borehole_dict['name'])+".gltf"
+    j_dict['display_name'] = borehole_dict['name']
+    j_dict['3dobject_label'] = 'Borehole_'+str(borehole_dict['nvcl_id'])
+    j_dict['include'] = True
+    j_dict['displayed'] = True
+    return j_dict
 
-def get_config_borehole(borehole_list):
+def get_config_borehole(borehole_list, Param):
     ''' Creates a config object of borehole GLTF objects to display in 3D
     It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not available
 
@@ -268,65 +285,66 @@ def get_config_borehole(borehole_list):
     '''
     config_obj = []
     for borehole_dict in borehole_list:
-        j_dict = {}
-        j_dict['popup_info'] = get_json_popupinfo(borehole_dict)
-        j_dict['type'] = 'GLTFObject'
-        x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
-        j_dict['position'] = [x_m, y_m, borehole_dict['z']]
-        j_dict['model_url'] = make_borehole_filename(borehole_dict['name'])+".gltf"
-        j_dict['display_name'] = borehole_dict['name']
-        j_dict['3dobject_label'] = make_borehole_label(borehole_dict['name'])
-        j_dict['include'] = True
-        j_dict['displayed'] = True
+        j_dict = get_config_bh_dict(borehole_dict, Param)
         config_obj.append(j_dict)
     return config_obj
+    
 
-
-def get_json_input_param(input_file):
-    ''' Reads the parameters from input JSON file and stores them in global 'Param' object
-
-    :param input_file: filename of input parameter file
-    '''
-    global Param
-    print("Opening: ", input_file)
-    fp = open(input_file, "r")
-    try:
-        param_dict = json.load(fp)
-    except JSONDecodeError as exc:
-        print("ERROR - cannot read JSON file\n", input_file, "\n", exc)
-        fp.close()
-        sys.exit(1)
-    fp.close()
-    if 'BoreholeData' not in param_dict:
-        print('ERROR - Cannot find "BoreholeData" key in input file', input_file);
-        sys.exit(1)
-
-    Param = SimpleNamespace()
-    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
-        if field_name not in param_dict['BoreholeData']:
-            print("ERROR - Cannot find '"+field_name+"' key in input file", input_file);
-            sys.exit(1)
-        setattr(Param, field_name, param_dict['BoreholeData'][field_name])
-
-    if 'west' not in Param.BBOX or 'south' not in Param.BBOX or 'east' not in Param.BBOX or 'north' not in Param.BBOX:
-        print("ERROR - Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
-        sys.exit(1)
-    print("Closed: ", input_file)
     
 def get_boreholes_fast(input_file, dest_dir=''):
-    export_kit = GLTF_KIT(DEBUG_LVL)
     import pickle
     fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_params.pck'), 'rb')
     base_xyz, borehole_name, bh_data_dict, HEIGHT_RES, dest_dir, file_name = pickle.load(fp)
     fp.close()
-    blob_obj = export_kit.write_borehole(base_xyz, borehole_name, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_name, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
     fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_config.pck'), 'rb')
     config = pickle.load(fp)
     fp.close()
     return config, blob_obj
+    
+    
+def yield_boreholes(borehole_dict, Param):
+    ''' Retrieves borehole data and writes 3D model files to a blob
+
+    :param borehole_dict: 
+    :returns: GLTF blob object
+    '''
+    print("yield_boreholes(", borehole_dict, ")")
+    HEIGHT_RES = 10.0
+    if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
+        file_name = make_borehole_filename(borehole_dict['name'])
+        x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
+        base_xyz = (x_m, y_m, borehole_dict['z'])
+        log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
+        print('got log_ids = ', log_ids)
+        url = Param.NVCL_URL + '/getDownsampledData.html'
+        bh_data_dict = [] 
+        for log_id, log_type, log_name in log_ids:
+            # For the moment, only process log type '1' and 'Grp1 uTSAS'
+            # Min1,2,3 = 1st, 2nd, 3rd most common mineral
+            # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
+            # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
+            if log_type == '1' and log_name == 'Grp1 uTSAS':
+                bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
+                print('got bh_data_dict=', bh_data_dict)
+                break
+
+        # If there's data, then create the borehole
+        if len(bh_data_dict) > 0:
+            #import pickle
+            #fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_params.pck'), 'wb')
+            #pickle.dump((base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name), fp)
+            #fp.close()
+            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
+            print("Returning: blob_obj = ", blob_obj)
+            return blob_obj
+                
+    return None
+    
+    
 
 
-def get_boreholes(input_file, dest_dir=''):
+def get_boreholes(input_file, Param, dest_dir=''):
     ''' Retrieves borehole data and writes 3D model files to a directory or a blob
         If 'dest_dir' is supplied, then files are written
 
@@ -335,12 +353,9 @@ def get_boreholes(input_file, dest_dir=''):
     :returns: config object and optional GLTF blob object
     '''
     print("get_boreholes(", dest_dir, input_file, ")")
-    # Set up input parameters from input file
-    get_json_input_param(input_file)
-    wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, timeout=WFS_TIMEOUT)
-    print('wfs=', wfs)
+
     # Get all NVCL scanned boreholes within BBOX
-    borehole_list = get_boreholes_bbox(wfs, MAX_BOREHOLES)
+    borehole_list = get_boreholes_bbox(WFS, MAX_BOREHOLES)
     HEIGHT_RES = 10.0
     print("borehole_list = ", borehole_list)
     # Parse response for all boreholes, make COLLADA files
@@ -365,12 +380,7 @@ def get_boreholes(input_file, dest_dir=''):
             # If there's data, then create the borehole
             if len(bh_data_dict) > 0:
                 if OUTPUT_MODE == 'GLTF':
-                    export_kit = GLTF_KIT(DEBUG_LVL)
-                    import pickle
-                    fp = open(os.path.join('C:', os.sep, 'users', 'vjf', 'Desktop', 'bh_params.pck'), 'wb')
-                    pickle.dump((base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name), fp)
-                    fp.close()
-                    blob_obj = export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     break
                 elif dest_dir != '':
                     export_kit = COLLADA_KIT(DEBUG_LVL)
@@ -384,7 +394,7 @@ def get_boreholes(input_file, dest_dir=''):
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
-    config = get_config_borehole(borehole_list)
+    config = get_config_borehole(borehole_list, Param)
     print("Returning: config = ", config, "blob_obj = ", blob_obj)
     return config, blob_obj
 
