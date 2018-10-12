@@ -30,7 +30,7 @@ if OUTPUT_MODE != 'GLTF':
     import exports.collada2gltf
     from exports.collada_kit import COLLADA_KIT
 else:
-    from exports.gltf_kit import GLTF_KIT
+    from exports.assimp_kit import ASSIMP_KIT
 
 from exports.bh_utils import make_borehole_label, make_borehole_filename
 
@@ -39,7 +39,7 @@ DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
 '''
 
-EXPORT_KIT = GLTF_KIT(DEBUG_LVL)
+EXPORT_KIT = ASSIMP_KIT(DEBUG_LVL)
 
 # Namespaces for WFS Borehole response
 NS = { 'wfs':"http://www.opengis.net/wfs",
@@ -201,7 +201,6 @@ def get_boreholes_bbox(wfs, max_boreholes, Param):
         is_nvcl = child.findtext('./gsmlp:nvclCollection', default="false", namespaces=NS)
         if is_nvcl == "true" and nvcl_id.isdigit():
             borehole_dict = { 'nvcl_id': nvcl_id }
-            #print("boreholeview: ", "tag:", child.tag, "attrib:", child.attrib, "text:", child.text)
 
             # Finds borehole collar x,y assumes units are degrees
             xy = child.findtext('./gsmlp:shape/gml:Point/gml:pos', default="? ?", namespaces=NS).split(' ')
@@ -229,18 +228,11 @@ def get_boreholes_bbox(wfs, max_boreholes, Param):
                 borehole_dict['z'] = 0.0
 
             # Only accept if within bounding box
-            #print(Param.BBOX['west'], '<', borehole_dict['x'], 'and', Param.BBOX['east'], '>', borehole_dict['x'], 'and')
-            #print(Param.BBOX['north'], '>', borehole_dict['y'], 'and', Param.BBOX['south'], '<', borehole_dict['y'])
             if Param.BBOX['west'] < borehole_dict['x'] and  Param.BBOX['east'] > borehole_dict['x'] and \
                Param.BBOX['north'] > borehole_dict['y'] and Param.BBOX['south'] < borehole_dict['y']:
                 borehole_cnt+=1
                 borehole_list.append(borehole_dict)
-                #print('borehole_dict = ', borehole_dict)
-                #print('ACCEPTED')
-            #else:
-            #    print('REJECTED')
             if borehole_cnt > max_boreholes:
-                #print("Too many, break")
                 break
     print('get_boreholes_bbox() returns ', borehole_list)
     return borehole_list
@@ -277,6 +269,7 @@ def get_config_bh_dict(borehole_dict, Param):
     j_dict['displayed'] = True
     return j_dict
 
+
 def get_config_borehole(borehole_list, Param):
     ''' Creates a config object of borehole GLTF objects to display in 3D
     It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not available
@@ -289,7 +282,6 @@ def get_config_borehole(borehole_list, Param):
         config_obj.append(j_dict)
     return config_obj
     
-
     
 def get_boreholes_fast(input_file, dest_dir=''):
     import pickle
@@ -340,8 +332,6 @@ def yield_boreholes(borehole_dict, Param):
             return blob_obj
                 
     return None
-    
-    
 
 
 def get_boreholes(input_file, Param, dest_dir=''):

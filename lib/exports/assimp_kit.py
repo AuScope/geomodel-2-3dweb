@@ -12,30 +12,9 @@ from exports.bh_utils import make_borehole_label
 
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
-class GLTF_KIT:
-    ''' Class used to output GLTF files
+class ASSIMP_KIT:
+    ''' Class used to output export geometries to assimp lib
     '''
-
-    EMISSION = (0,0,0,1)
-    ''' Emission parameter for pycollada material effect '''
-
-    AMBIENT = (0,0,0,1)
-    ''' Ambient parameter for pycollada material effect '''
-
-    SPECULAR=(0.7, 0.7, 0.7, 1)
-    ''' Specular parameter for pycollada material effect '''
-
-    SHININESS=50.0
-    ''' Shininess parameter for pycollada material effect '''
-
-    SHADING="phong"
-    ''' Shading parameter for pycollada material effect '''
-
-    MAX_COLOURS = 256.0
-    ''' Maximum number of colours displayed in one COLLADA file '''
-
-    LINE_WIDTH = 1000
-    ''' Width of lines created for GOCAD PL files '''
 
     def __init__(self, debug_level):
         ''' Initialise class
@@ -43,8 +22,8 @@ class GLTF_KIT:
         :param debug_level: debug level taken from python's 'logging' module
         '''
         # Set up logging, use an attribute of class name so it is only called once
-        if not hasattr(GLTF_KIT, 'logger'):
-            GLTF_KIT.logger = logging.getLogger(__name__)
+        if not hasattr(ASSIMP_KIT, 'logger'):
+            ASSIMP_KIT.logger = logging.getLogger(__name__)
 
             # Create console handler
             handler = logging.StreamHandler(sys.stdout)
@@ -56,14 +35,14 @@ class GLTF_KIT:
             handler.setFormatter(formatter)
 
             # Add handler to logger and set level
-            GLTF_KIT.logger.addHandler(handler)
+            ASSIMP_KIT.logger.addHandler(handler)
 
-        GLTF_KIT.logger.setLevel(debug_level)
-        self.logger = GLTF_KIT.logger
+        ASSIMP_KIT.logger.setLevel(debug_level)
+        self.logger = ASSIMP_KIT.logger
 
 
-    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name=''):
-        ''' Write out a GLTF file or blob of a borehole stick
+    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name='', file_ext='.gltf', export_type="gltf2", ):
+        ''' Write out a file or blob of a borehole stick
             if 'dest_dir' and 'file_name' are supplied then writes a file and returns True/False
             else returns a pointer to a 'structs.ExportDataBlob' object
 
@@ -71,8 +50,10 @@ class GLTF_KIT:
         :param borehole_name: name of borehole
         :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }, where R,G,B,A are floats
         :param height_reso: height resolution for colour info dict
-        :param dest_dir: optional destination directory, where GLTF file is written
-        :param file_name: optional filename of GLTF file, without extension
+        :param dest_dir: optional destination directory, where file is written
+        :param file_name: optional filename of file, without extension
+        :param file_ext: optional extension of file, defaults to '.gltf'
+        :param export_type: optional export type for assimp API, defaults to 'gltf2'
         '''
         print(" write_borehole(", bv, repr(dest_dir), repr(file_name), repr(borehole_name), "colour_info_dict=", repr(colour_info_dict), ")")
 
@@ -97,6 +78,7 @@ class GLTF_KIT:
 
         for vert_list, indices, colour_idx, depth, colour_info in colour_borehole_gen(bv, colour_info_dict, height_reso):
             mesh_name = bytes(borehole_name+"_"+str(int(depth)), encoding='utf=8')
+            print("Mesh_name =", mesh_name)
             mesh_obj = self.make_a_mesh(mesh_name, indices, colour_idx)
             mesh_p_arr[colour_idx] = ctypes.pointer(mesh_obj)
             self.add_vertices_to_mesh(mesh_obj, vert_list)
@@ -106,13 +88,13 @@ class GLTF_KIT:
         #pa.print_scene(sc)
         #sys.stdout.flush()
         if dest_dir!='' and file_name !='':
-            print("\nWriting GLTF: ", file_name+".gltf", end='')
-            export(sc, os.path.join(dest_dir, file_name+".gltf"), "gltf2")
+            print("\nWriting GLTF: ", file_name+file_ext, end='')
+            export(sc, os.path.join(dest_dir, file_name+file_ext), export_type)
             print(" DONE.")
             sys.stdout.flush()
             return True
         else:
-            exp_blob = export_blob(sc, "gltf2", processing = None)
+            exp_blob = export_blob(sc, export_type, processing = None)
             pa.print_blob(exp_blob)
             return exp_blob
 
@@ -240,4 +222,4 @@ class GLTF_KIT:
         m.mProperties = ppp
         return m
 
-#  END OF GLTF_KIT CLASS
+#  END OF ASSIMP_KIT CLASS
