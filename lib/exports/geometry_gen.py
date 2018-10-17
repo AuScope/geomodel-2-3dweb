@@ -1,18 +1,18 @@
 import math
 
-def colour_borehole_gen(pos, colour_info_dict, ht_resol):
+def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     ''' A generator which is used to make a borehole marker stick with triangular cross section
 
     :param pos: x,y,z position of collar of borehole, tuple of 3 floats
-    :param borehole_label: geometry label for this borehole stick
-    :param geomnode_list: list of pycollada 'GeometryNode' objects
+    :param borehole_name: borehole's name
     :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
     :param ht_reso: height resolution, float
-    :returns vert_list, indices: vert_list - list of floats, (x,y,z) vertices;
+    :returns vert_list - list of floats, (x,y,z) vertices;
         indices - list of integers, index pointers to which vertices are joined as triangles;
         colour_idx - integer index pointing to material object array;
         depth - depth of borehole segment, float;
-        color_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label } 
+        color_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label } ;
+        mesh_name - used to label meshes during mesh generation (bytes object)
     '''
     BH_WIDTH= 675 # Width of stick
     max_depth = max(colour_info_dict.keys())
@@ -42,7 +42,9 @@ def colour_borehole_gen(pos, colour_info_dict, ht_resol):
                    0, 1, 3,
                    1, 5, 3]
 
-        yield vert_list, indices, colour_idx, depth, colour_info
+        mesh_name = bytes(borehole_name+"_"+str(int(depth)), encoding='utf=8')
+
+        yield vert_list, indices, colour_idx, depth, colour_info, mesh_name
 
 
 def line_gen(seg_arr, vrtx_arr, line_width):

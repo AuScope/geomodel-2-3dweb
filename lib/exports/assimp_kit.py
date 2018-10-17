@@ -76,9 +76,7 @@ class ASSIMP_KIT:
         sc.mMaterials = mat_arr_pp
         sc.mNumMaterials = bh_size
 
-        for vert_list, indices, colour_idx, depth, colour_info in colour_borehole_gen(bv, colour_info_dict, height_reso):
-            mesh_name = bytes(borehole_name+"_"+str(int(depth)), encoding='utf=8')
-            print("Mesh_name =", mesh_name)
+        for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(bv, borehole_name, colour_info_dict, height_reso):
             mesh_obj = self.make_a_mesh(mesh_name, indices, colour_idx)
             mesh_p_arr[colour_idx] = ctypes.pointer(mesh_obj)
             self.add_vertices_to_mesh(mesh_obj, vert_list)

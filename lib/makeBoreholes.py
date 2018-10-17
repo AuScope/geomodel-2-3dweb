@@ -12,8 +12,10 @@ import xml.etree.ElementTree as ET
 import json
 from json import JSONDecodeError
 from collections import OrderedDict
+from types import SimpleNamespace
 import itertools
 import logging
+
 
 
 from owslib.wfs import WebFeatureService
@@ -23,16 +25,10 @@ import urllib.parse
 import urllib.request
 import urllib.parse
 
-OUTPUT_MODE = 'GLTF' 
-''' When set to 'GLTF' outputs GLTF files, else outputs COLLADA (.dae) '''
-
-if OUTPUT_MODE != 'GLTF':
-    import exports.collada2gltf
-    from exports.collada_kit import COLLADA_KIT
-else:
-    from exports.assimp_kit import ASSIMP_KIT
-
 from exports.bh_utils import make_borehole_label, make_borehole_filename
+from exports.assimp_kit import ASSIMP_KIT
+from exports.geometry_gen import colour_borehole_gen
+from db.db_tables import QueryDB
 
 
 DEBUG_LVL = logging.CRITICAL
@@ -71,9 +67,41 @@ GSMLP_IDS = [ 'identifier', 'name', 'description', 'purpose', 'status', 'drillin
 # Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
 
-WFS = None
+# Timeout for querying WFS services (seconds)
+WFS_TIMEOUT = 6000
 
 
+
+def get_json_input_param(input_file):
+    ''' Reads the parameters from input JSON file and stores them in global 'Param' object
+
+    :param input_file: filename of input parameter file
+    '''
+    print("Opening: ", input_file)
+    fp = open(input_file, "r")
+    try:
+        param_dict = json.load(fp)
+    except JSONDecodeError as exc:
+        print("ERROR - cannot read JSON file\n", input_file, "\n", exc)
+        fp.close()
+        sys.exit(1)
+    fp.close()
+    if 'BoreholeData' not in param_dict:
+        print('ERROR - Cannot find "BoreholeData" key in input file', input_file);
+        sys.exit(1)
+
+    Param = SimpleNamespace()
+    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
+        if field_name not in param_dict['BoreholeData']:
+            print("ERROR - Cannot find '"+field_name+"' key in input file", input_file);
+            sys.exit(1)
+        setattr(Param, field_name, param_dict['BoreholeData'][field_name])
+
+    if 'west' not in Param.BBOX or 'south' not in Param.BBOX or 'east' not in Param.BBOX or 'north' not in Param.BBOX:
+        print("ERROR - Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
+        sys.exit(1)
+    print("Closed: ", input_file)
+    return Param
 
 
 def convert_coords(input_crs, output_crs, xy):
@@ -175,14 +203,14 @@ def get_borehole_logids(url, nvcl_id):
     return logid_list
       
 
-def get_boreholes_bbox(wfs, max_boreholes, Param):
+def get_boreholes_list(wfs, max_boreholes, Param):
     ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
         and a flag to say whether there are NVCL boreholes in there or not
 
     :param wfs: handle of borehole's WFS service
     :param max_boreholes: maximum number of boreholes to retrieve
     '''
-    print("get_boreholes_bbox(", wfs, max_boreholes, ")")
+    print("get_boreholes_list(", wfs, max_boreholes, Param, ")")
     # Can't filter for BBOX and nvclCollection==true at the same time [owslib's BBox uses 'ows:BoundingBox', not supported in WFS]
     # so is best to do the BBOX manually
     filter_ = PropertyIsLike(propertyname='gsmlp:nvclCollection', literal='true', wildCard='*')
@@ -192,7 +220,7 @@ def get_boreholes_bbox(wfs, max_boreholes, Param):
     response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
     response_str = bytes(response.read(), 'ascii')
     borehole_list = []
-    print('get_boreholes_bbox() resp=', response_str)
+    print('get_boreholes_list() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
 
@@ -234,53 +262,51 @@ def get_boreholes_bbox(wfs, max_boreholes, Param):
                 borehole_list.append(borehole_dict)
             if borehole_cnt > max_boreholes:
                 break
-    print('get_boreholes_bbox() returns ', borehole_list)
+    print('get_boreholes_list() returns ', borehole_list)
     return borehole_list
 
 
-def get_json_popupinfo(borehole_dict, Param):
-    ''' Returns some JSON for displaying in a popup box when user clicks on a borehole in the model
+def get_bh_info_dict(borehole_dict, Param):
+    ''' Returns a dict of borehole info for displaying in a popup box when user clicks on a borehole in the model
 
-    :param borehole_dict: dict of borehole information used to make JSON
+    :param borehole_dict: dict of borehole information 
         expected keys are: 'x', 'y', 'z', 'href' and GSMLP_IDS
     '''
-    json_obj = {}
-    json_obj['title'] = borehole_dict['name']
+    info_obj = {}
+    info_obj['title'] = borehole_dict['name']
     for key in GSMLP_IDS:
         if key not in ['name', 'identifier', 'metadata_uri'] and len(borehole_dict[key])>0:
-            json_obj[key] = borehole_dict[key]
-    json_obj['href'] = [ { 'label': 'WFS URL', 'URL': borehole_dict['href'] },
+            info_obj[key] = borehole_dict[key]
+    info_obj['href'] = [ { 'label': 'WFS URL', 'URL': borehole_dict['href'] },
                          { 'label': 'AuScope URL', 'URL': Param.EXTERNAL_LINK['URL'] } ]
     if len(borehole_dict['metadata_uri']) > 0:
-        json_obj['href'].append({'label': 'Metadata URI', 'URL': borehole_dict['metadata_uri']})
-    return json_obj
+        info_obj['href'].append({'label': 'Metadata URI', 'URL': borehole_dict['metadata_uri']})
+    return info_obj
 
     
-def get_config_bh_dict(borehole_dict, Param):
+def get_loadconfig_dict(borehole_dict, Param):
     j_dict = {}
-    j_dict['popup_info'] = get_json_popupinfo(borehole_dict, Param)
     j_dict['type'] = 'GLTFObject'
     x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
     j_dict['position'] = [x_m, y_m, borehole_dict['z']]
     j_dict['model_url'] = make_borehole_filename(borehole_dict['name'])+".gltf"
     j_dict['display_name'] = borehole_dict['name']
-    j_dict['3dobject_label'] = 'Borehole_'+str(borehole_dict['nvcl_id'])
     j_dict['include'] = True
     j_dict['displayed'] = True
     return j_dict
 
 
-def get_config_borehole(borehole_list, Param):
+def get_loadconfig(borehole_list, Param):
     ''' Creates a config object of borehole GLTF objects to display in 3D
-    It prefers to create a list of NVCL boreholes, but will create ordinary boreholes if NVCL ones are not available
+    It prefers to create a list of NVCL boreholes
 
     :param borehole_list: list of boreholes
     '''
-    config_obj = []
+    loadconfig_obj = []
     for borehole_dict in borehole_list:
-        j_dict = get_config_bh_dict(borehole_dict, Param)
-        config_obj.append(j_dict)
-    return config_obj
+        j_dict = get_loadconfig_dict(borehole_dict, Param)
+        loadconfig_obj.append(j_dict)
+    return loadconfig_obj
     
     
 def get_boreholes_fast(input_file, dest_dir=''):
@@ -295,13 +321,13 @@ def get_boreholes_fast(input_file, dest_dir=''):
     return config, blob_obj
     
     
-def yield_boreholes(borehole_dict, Param):
+def get_blob_boreholes(borehole_dict, Param):
     ''' Retrieves borehole data and writes 3D model files to a blob
 
     :param borehole_dict: 
     :returns: GLTF blob object
     '''
-    print("yield_boreholes(", borehole_dict, ")")
+    print("get_blob_boreholes(", borehole_dict, ")")
     HEIGHT_RES = 10.0
     if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
         file_name = make_borehole_filename(borehole_dict['name'])
@@ -334,23 +360,29 @@ def yield_boreholes(borehole_dict, Param):
     return None
 
 
-def get_boreholes(input_file, Param, dest_dir=''):
+def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
     ''' Retrieves borehole data and writes 3D model files to a directory or a blob
         If 'dest_dir' is supplied, then files are written
+        If output_mode != 'GLTF' then 'dest_dir' must not be ''
 
-    :param input_file: file of input parameters
-    :param dest_dir: optional directory where 3D model files are written
-    :returns: config object and optional GLTF blob object
-    '''
-    print("get_boreholes(", dest_dir, input_file, ")")
+    :param Param: input parameters
+    :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob, else outputs COLLADA (.dae) to file
+    :param dest_dir: optional directory where 3D model files are written :returns: config object and optional GLTF blob object '''
+    print("get_boreholes(", Param, output_mode, dest_dir, ")")
+
 
     # Get all NVCL scanned boreholes within BBOX
-    borehole_list = get_boreholes_bbox(WFS, MAX_BOREHOLES)
+    borehole_list = get_boreholes_list(wfs, MAX_BOREHOLES, Param)
     HEIGHT_RES = 10.0
     print("borehole_list = ", borehole_list)
     # Parse response for all boreholes, make COLLADA files
     for borehole_dict in borehole_list:
         #print(borehole_dict)
+
+        # Get borehole information dictionary, and add to query db
+        bh_info_dict = get_bh_info_dict(borehole_dict, Param)
+        p = qdb.add_part(json.dumps(bh_info_dict))
+
         if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
             file_name = make_borehole_filename(borehole_dict['name'])
             x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
@@ -369,24 +401,31 @@ def get_boreholes(input_file, Param, dest_dir=''):
                     break
             # If there's data, then create the borehole
             if len(bh_data_dict) > 0:
-                if OUTPUT_MODE == 'GLTF':
+                for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES):
+                    s = qdb.add_segment(json.dumps(colour_info))
+                    qdb.add_query(mesh_name.decode("utf-8"), 'model_name', s, p, None, None)
+                    print("ADD_QUERY(", mesh_name, 'model_name')
+                if output_mode == 'GLTF':
                     blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
-                    break
+                    
                 elif dest_dir != '':
+                    import exports.collada2gltf
+                    from exports.collada_kit import COLLADA_KIT
                     export_kit = COLLADA_KIT(DEBUG_LVL)
                     export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
-                    blob_obj = True
+                    blob_obj = None
                 else:
                     print("WARNING - COLLADA_KIT cannot write blobs")
                     sys.exit(1)
                    
-    if OUTPUT_MODE != 'GLTF':
+    if output_mode != 'GLTF':
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
-    config = get_config_borehole(borehole_list, Param)
-    print("Returning: config = ", config, "blob_obj = ", blob_obj)
-    return config, blob_obj
+    loadconfig = get_loadconfig(borehole_list, Param)
+
+    print("Returning: loadconfig = ", loadconfig, "blob_obj = ", blob_obj)
+    return loadconfig, blob_obj
 
 
 if __name__ == "__main__":
@@ -401,8 +440,13 @@ if __name__ == "__main__":
             out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
             print("Writing to: ", out_filename)
             fp = open(out_filename, 'w')
-            borehole_config, flag = get_boreholes(input_file, dest_dir)
-            json.dump(borehole_config, fp, indent=4, sort_keys=True)
+            Param = get_json_input_param(input_file)
+            wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, xml=None, timeout=WFS_TIMEOUT)
+            qdb = QueryDB()
+            qdb.open_db(create=True)
+            borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=dest_dir)
+            json.dump(borehole_loadconfig, fp, indent=4, sort_keys=True)
             fp.close()
+            print(qdb.query('GRANITE DOWNS DH 3_5', 'model_name'))
     else:
         print("Command line parameters are: \n 1. a destination dir to place the output files\n 2. input config file\n\n")
