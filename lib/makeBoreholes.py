@@ -210,7 +210,7 @@ def get_boreholes_list(wfs, max_boreholes, Param):
     :param wfs: handle of borehole's WFS service
     :param max_boreholes: maximum number of boreholes to retrieve
     '''
-    # print("get_boreholes_list(", wfs, max_boreholes, Param, ")")
+    print("get_boreholes_list(", wfs, max_boreholes, Param, ")")
     # Can't filter for BBOX and nvclCollection==true at the same time [owslib's BBox uses 'ows:BoundingBox', not supported in WFS]
     # so is best to do the BBOX manually
     filter_ = PropertyIsLike(propertyname='gsmlp:nvclCollection', literal='true', wildCard='*')
@@ -220,7 +220,7 @@ def get_boreholes_list(wfs, max_boreholes, Param):
     response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
     response_str = bytes(response.read(), 'ascii')
     borehole_list = []
-    # print('get_boreholes_list() resp=', response_str)
+    print('get_boreholes_list() resp=', response_str)
     borehole_cnt=0
     root = ET.fromstring(response_str)
 
@@ -262,7 +262,7 @@ def get_boreholes_list(wfs, max_boreholes, Param):
                 borehole_list.append(borehole_dict)
             if borehole_cnt > max_boreholes:
                 break
-    # print('get_boreholes_list() returns ', borehole_list)
+    print('get_boreholes_list() returns ', borehole_list)
     return borehole_list
 
 
@@ -327,14 +327,14 @@ def get_blob_boreholes(borehole_dict, Param):
     :param borehole_dict: 
     :returns: GLTF blob object
     '''
-    # print("get_blob_boreholes(", borehole_dict, ")")
+    print("get_blob_boreholes(", borehole_dict, ")")
     HEIGHT_RES = 10.0
     if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
         file_name = make_borehole_filename(borehole_dict['name'])
         x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
         log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
-        # print('got log_ids = ', log_ids)
+        print('got log_ids = ', log_ids)
         url = Param.NVCL_URL + '/getDownsampledData.html'
         bh_data_dict = [] 
         for log_id, log_type, log_name in log_ids:
@@ -344,7 +344,7 @@ def get_blob_boreholes(borehole_dict, Param):
             # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
             if log_type == '1' and log_name == 'Grp1 uTSAS':
                 bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
-                # print('got bh_data_dict=', bh_data_dict)
+                print('got bh_data_dict=', bh_data_dict)
                 break
 
         # If there's data, then create the borehole
@@ -354,7 +354,7 @@ def get_blob_boreholes(borehole_dict, Param):
             #pickle.dump((base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name), fp)
             #fp.close()
             blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
-            # print("Returning: blob_obj = ", blob_obj)
+            print("Returning: blob_obj = ", blob_obj)
             return blob_obj
                 
     return None
@@ -368,13 +368,13 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
     :param Param: input parameters
     :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob, else outputs COLLADA (.dae) to file
     :param dest_dir: optional directory where 3D model files are written :returns: config object and optional GLTF blob object '''
-    # print("get_boreholes(", Param, output_mode, dest_dir, ")")
+    print("get_boreholes(", Param, output_mode, dest_dir, ")")
 
 
     # Get all NVCL scanned boreholes within BBOX
     borehole_list = get_boreholes_list(wfs, MAX_BOREHOLES, Param)
     HEIGHT_RES = 10.0
-    # print("borehole_list = ", borehole_list)
+    print("borehole_list = ", borehole_list)
     # Parse response for all boreholes, make COLLADA files
     for borehole_dict in borehole_list:
         #print(borehole_dict)
@@ -405,10 +405,12 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
                 for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES):
                     if first_depth < 0:
                         first_depth = int(depth)
-                    s = qdb.add_segment(json.dumps(colour_info))
+                    popup_info = colour_info.copy()
+                    del popup_info['colour']
+                    s = qdb.add_segment(json.dumps(popup_info))
                     # This is the format that the label takes when a part of the GLTF file is clicked on. NB: Implementation dependent.
                     qdb.add_query("{0}_{1}_{2}".format(borehole_dict['name'], first_depth, colour_idx), 'model_name', s, p, None, None)
-                    # print("ADD_QUERY(", mesh_name, 'model_name')
+                    print("ADD_QUERY(", mesh_name, 'model_name')
                 if output_mode == 'GLTF':
                     blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     
