@@ -1,0 +1,7 @@
+numpy
+OWSLib
+Pillow
+pyassimp
+pycollada
+pyproj
+SQLAlchemy
