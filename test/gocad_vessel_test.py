@@ -4,7 +4,9 @@ import sys
 import logging
 import os
 
-sys.path.append('../scripts')
+# Add in path to local library files
+sys.path.append(os.path.join('..','lib'))
+
 
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
 
