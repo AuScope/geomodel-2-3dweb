@@ -167,8 +167,8 @@ def process(filename_str):
             mask_idx+=1
             extent_list.append(geom_obj.get_extent())
 
-    # For triangles and lines, place multiple GOCAD objects in one COLLADA file
-    elif ext_str in ['TS','PL']:
+    # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
+    elif ext_str in ['TS','PL', 'WL']:
         file_lines_list = de_concat(whole_file_lines)
         ck.start_collada()
         popup_dict = {}
@@ -178,16 +178,18 @@ def process(filename_str):
             if not is_ok:
                 logger.warning("WARNING - could not process %s", filename_str) 
                 continue
-            has_result = True
             for geom_obj, style_obj, meta_obj in gsm_list:
 
                 # Check that conversion worked and write out files
                 if ext_str == 'TS' and len(geom_obj.vrtx_arr) > 0 and len(geom_obj.trgl_arr) > 0:
                     popup_dict.update(ck.add_geom_to_collada(geom_obj, style_obj, meta_obj))
+                    extent_list.append(geom_obj.get_extent())
+                    has_result = True
 
-                elif ext_str == 'PL' and len(geom_obj.vrtx_arr) > 0 and len(geom_obj.seg_arr) > 0:
+                elif (ext_str in ['PL','WL']) and len(geom_obj.vrtx_arr) > 0 and len(geom_obj.seg_arr) > 0:
                     popup_dict.update(ck.add_geom_to_collada(geom_obj, style_obj, meta_obj))
-                extent_list.append(geom_obj.get_extent())
+                    extent_list.append(geom_obj.get_extent())
+                    has_result = True
 
         if has_result:
             model_dict_list.append(add_info2popup(os.path.basename(fileName), popup_dict, fileName))
@@ -227,7 +229,7 @@ def process(filename_str):
         reduced_extent_list =  reduce_extents(extent_list)
         return True, model_dict_list, reduce_extents(extent_list)
     else:
-        logger.debug("process() returns False")
+        logger.debug("process() returns False, no result")
         return False, [], []
 
 

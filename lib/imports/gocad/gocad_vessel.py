@@ -103,6 +103,7 @@ class GOCAD_VESSEL():
                  'PL':['GOCAD PLINE 1'],
                  'GP':['GOCAD HETEROGENEOUSGROUP 1', 'GOCAD HOMOGENEOUSGROUP 1'],
                  'VO':['GOCAD VOXET 1'],
+                 'WL':['GOCAD WELL 1'],
     }
     ''' Constant assigns possible headers to each flename extension
     '''
@@ -113,6 +114,7 @@ class GOCAD_VESSEL():
                     'PL',
                     'GP',
                     'VO',
+                    'WL'
     ]
     ''' List of file extensions to search for
     '''
@@ -210,6 +212,10 @@ class GOCAD_VESSEL():
 
         self.__is_vo = False
         ''' True iff it is a GOCAD VOXET file
+        '''
+
+        self.__is_wl = False
+        ''' True iff it is a GOCAD WELL file
         '''
 
         self.xyz_mult = [1.0, 1.0, 1.0]
@@ -375,41 +381,16 @@ class GOCAD_VESSEL():
         return vert_dict
 
 
-    def process_gocad(self, src_dir, filename_str, file_lines):
-        ''' Extracts details from gocad file. This should be called before other functions!
-
+    def line_gen(self, filename_str, file_lines):
+        ''' This is a Python generator function that processes lines of the GOCAD object file
+            and returns each line in various forms, from quite unprocessed to fully processed
         :param filename_str: filename of gocad file
         :param file_lines: array of strings of lines from gocad file
-        :returns: true if could process file, and a list of (geometry, style, metadata) objects
+        :returns array of field strings in upper case with double quotes removed from strings,
+                 array of field string in original case without double quotes removed,
+                 line of GOCAD file in upper case,
+                 boolean, True iff it is the last line of the file
         '''
-        self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
-
-        ret_val = True
-
-        # State variable for reading first line
-        firstLine = True
-        
-        # For being within header
-        inHeader = False
-        
-        # For being within coordinate header
-        inCoord = False
-        
-        # Within attached binary file property class header (PROPERTY_CLASS HEADER)
-        inPropClassHeader = False
-        
-        # Within header for properties attached to points (PVRTX, PATOM)
-        inLocalPropClassHeader = False
-
-        # Index for property class header currently being parsed
-        propClassIndex = ''
-        
-        # For keeping track of the ID of VRTX, ATOM, PVRTX, SEG etc.
-        seq_no = 0
-        seq_no_prev = -1
-
-        fileName, fileExt = os.path.splitext(filename_str)
-        self.np_filename = os.path.basename(fileName)
         for line in file_lines:
             line_str = line.rstrip(' \n\r').upper()
             # Look out for double-quoted strings
@@ -423,17 +404,44 @@ class GOCAD_VESSEL():
             # Skip blank lines
             if len(splitstr_arr)==0:
                 continue
+            yield splitstr_arr, splitstr_arr_raw, line_str, line == file_lines[-1:][0]
+        yield [], [], '', True
 
-            self.logger.debug("splitstr_arr = %s", repr(splitstr_arr))
 
-            # Check that we have a GOCAD file that we can process
-            # Nota bene: This will return if called for the header of a GOCAD group file
-            if firstLine:
-                firstLine = False
-                if not self.__setType(fileExt, line_str):
-                    self.logger.debug("process_gocad() Can't set type, return False")
-                    return False, []
-                continue
+
+    def process_gocad(self, src_dir, filename_str, file_lines):
+        ''' Extracts details from gocad file. This should be called before other functions!
+
+        :param filename_str: filename of gocad file
+        :param file_lines: array of strings of lines from gocad file
+        :returns: true if could process file, and a list of (geometry, style, metadata) objects
+        '''
+        self.logger.debug("process_gocad(%s,%s,%d)", src_dir, filename_str, len(file_lines))
+
+        ret_val = True
+
+        # For keeping track of the ID of VRTX, ATOM, PVRTX, SEG etc.
+        seq_no = 0
+        seq_no_prev = -1
+
+        fileName, fileExt = os.path.splitext(filename_str)
+        self.np_filename = os.path.basename(fileName)
+
+        # Check that we have a GOCAD file that we can process
+        # Nota bene: This will return if called for the header of a GOCAD group file
+        if not self.__setType(fileExt, file_lines[0].rstrip(' \n\r').upper()):
+            self.logger.error("process_gocad() Can't detect GOCAD file object type, return False")
+            return False, []
+
+        line_gen = self.line_gen(filename_str, file_lines)
+        is_last = False
+        while not is_last:
+            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+    
+            if is_last and len(splitstr_arr)==0:
+                break
+
+            self.logger.debug("splitstr_arr = %s line_str = %s is_last = %s", repr(splitstr_arr), repr(line_str), repr(is_last))
 
             # Skip the subsets keywords
             if splitstr_arr[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
@@ -446,116 +454,24 @@ class GOCAD_VESSEL():
                 continue
 
             try:
+                # Are we in the main header?
+                if splitstr_arr[0] == "HEADER":
+                    self.logger.debug("Processing header")
+                    is_last = self.__process_header(line_gen)
 
                 # Are we within coordinate system header?
-                if splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
-                    inCoord = True
-                    self.logger.debug("inCoord True")
+                elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
+                    self.logger.debug("Processing coordinate system")
+                    # Process coordinate header fields
+                    is_last, is_error = self.__process_coord_hdr(line_gen)
+                    if is_error:
+                        self.logger.debug("process_gocad() return False")
+                        return False, []
             
-                # Are we leaving coordinate system header?
-                elif splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
-                    inCoord = False
-                    self.logger.debug("inCoord False")
-            
-                # Within coordinate system header and not using the default coordinate system
-                elif inCoord and splitstr_arr[0] == "NAME":
-                    self.coord_sys_name = splitstr_arr[1]
-                    if splitstr_arr[1] != "DEFAULT":
-                        self.usesDefaultCoords = False
-                        self.logger.debug("usesDefaultCoords False")
-
-                        # FIXME: I can't support non default coords yet - need to enter via command line?
-                        # If does not support default coords then exit
-                        if not self.nondefault_coords:
-                            self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
-                            self.logger.debug("process_gocad() return False")
-                            return False, []
-                
-                # Does coordinate system use inverted z-axis?
-                elif inCoord and splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
-                    self.invert_zaxis=True
-                    self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
-            
-                # Are we in the header?
-                elif splitstr_arr[0] == "HEADER":
-                    inHeader = True
-                    self.logger.debug("inHeader = %s", repr(inHeader))
-
                 # Are we in the property class header?
                 elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
-                    propClassIndex = splitstr_arr[1]
-                    # There are two kinds of PROPERTY_CLASS_HEADER
-                    # First, properties attached to points
-                    if splitstr_arr[2] == '{':
-                        inLocalPropClassHeader = True
-                    # Properties of binary files 
-                    elif splitstr_arr[3] == '{':
-                        if propClassIndex not in self.prop_dict:
-                            self.prop_dict[propClassIndex] = PROPS(splitstr_arr[2])
-                        inPropClassHeader = True
-                    else:
-                        self.logger.error("ERROR - Cannot parse property header")
-                        sys.exit(1)
-                    self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
-
-                # Are we out of the header?    
-                elif inHeader and splitstr_arr[0] == "}":
-                    inHeader = False
-                    self.logger.debug("inHeader = %s", repr(inHeader))
-
-                # Property class headers for binary files
-                elif inPropClassHeader:
-                    # Leaving header
-                    if splitstr_arr[0] == "}":
-                        inPropClassHeader = False
-                        propClassIndex = ''
-                        self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
-                    else:
-                        # When in the PROPERTY CLASS headers, get the colour table
-                        self.__parse_property_header(self.prop_dict[propClassIndex], line_str)
-
-                # Property class headers for local points
-                elif inLocalPropClassHeader:
-                    # Leaving header
-                    if splitstr_arr[0] == "}":
-                        inLocalPropClassHeader = False
-                        propClassIndex = ''
-                        self.logger.debug("inLocalPropClassHeader = %s", repr(inLocalPropClassHeader))
-                    else:
-                        # When in the PROPERTY CLASS headers, get the colour table
-                        if propClassIndex in self.local_props:
-                            self.__parse_property_header(self.local_props[propClassIndex], line_str)
-
-                # When in the HEADER get the colours
-                elif inHeader:
-                    name_str, sep, value_str = line_str.partition(':')
-                    name_str = name_str.strip()
-                    value_str = value_str.strip()
-                    self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
-                    if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
-                        self.style_obj.rgba_tup = self.__parse_colour(value_str)
-
-                        self.logger.debug("self.style_obj.rgba_tup = %s", repr(self.style_obj.rgba_tup))
-                    elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
-                        region_name = name_str.split('*')[2] 
-                        self.region_colour_dict[region_name] = self.__parse_colour(value_str)
-                        self.logger.debug("region_colour_dict[%s] = %s", region_name, repr(self.region_colour_dict[region_name]))
-           
-                    if name_str=='NAME':
-                        self.header_name = value_str.replace('/','-')
-                        self.logger.debug("self.header_name = %s", self.header_name)
-
-                # Axis units - check if units are kilometres, and update coordinate multiplier
-                elif splitstr_arr[0] == "AXIS_UNIT":
-                    for idx in range(0,3):
-                        unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
-                        if unit_str=='KM':
-                            self.xyz_mult[idx] =  1000.0
-                        # Warn if not metres or kilometres or unitless etc.
-                        elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
-                            self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
-                        else:
-                            self.xyz_unit[idx] = unit_str
+                    self.logger.debug("Processing property class header")
+                    is_last = self.__process_prop_class_hdr(line_gen, splitstr_arr)
 
                 # Property names, this is not the class names
                 elif splitstr_arr[0] == "PROPERTIES":
@@ -723,79 +639,87 @@ class GOCAD_VESSEL():
                         self.logger.debug("self.prop_dict[%s].no_data_marker = %f", splitstr_arr[1], self.prop_dict[splitstr_arr[1]].no_data_marker)
 
                 # Layout of VOXET data
-                elif splitstr_arr[0] == "AXIS_O":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], True)
-                    if is_ok:
-                        self.__axis_o = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.__axis_o = %s", repr(self.__axis_o))
+                elif self.__is_vo:
+                    if splitstr_arr[0] == "AXIS_O":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], True)
+                        if is_ok:
+                            self.__axis_o = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.__axis_o = %s", repr(self.__axis_o))
     
-                elif splitstr_arr[0] == "AXIS_U":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.__axis_u = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.__axis_u = %s", repr(self.__axis_u))
+                    elif splitstr_arr[0] == "AXIS_U":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.__axis_u = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.__axis_u = %s", repr(self.__axis_u))
 
-                elif splitstr_arr[0] == "AXIS_V":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.__axis_v = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.__axis_v = %s", repr(self.__axis_v))
+                    elif splitstr_arr[0] == "AXIS_V":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.__axis_v = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.__axis_v = %s", repr(self.__axis_v))
 
-                elif splitstr_arr[0] == "AXIS_W":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.__axis_w = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.axis_w= %s", repr(self.__axis_w))
+                    elif splitstr_arr[0] == "AXIS_W":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.__axis_w = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.axis_w= %s", repr(self.__axis_w))
 
-                elif splitstr_arr[0] == "AXIS_N":
-                    is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.vol_sz = (x_int, y_int, z_int)
-                        self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
+                    elif splitstr_arr[0] == "AXIS_N":
+                        is_ok, x_int, y_int, z_int = self.__parse_XYZ(False, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.vol_sz = (x_int, y_int, z_int)
+                            self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
 
-                elif splitstr_arr[0] == "AXIS_MIN":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.__axis_min = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.__axis_min= %s", repr(self.__axis_min))
+                    elif splitstr_arr[0] == "AXIS_MIN":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.__axis_min = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.__axis_min= %s", repr(self.__axis_min))
 
-                elif splitstr_arr[0] == "AXIS_MAX":
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
-                    if is_ok:
-                        self.__axis_max = (x_flt, y_flt, z_flt)
-                        self.logger.debug("self.__axis_max= %s", repr(self.__axis_max))
+                    elif splitstr_arr[0] == "AXIS_MAX":
+                        is_ok, x_flt, y_flt, z_flt = self.__parse_XYZ(True, splitstr_arr[1], splitstr_arr[2], splitstr_arr[3], False, False)
+                        if is_ok:
+                            self.__axis_max = (x_flt, y_flt, z_flt)
+                            self.logger.debug("self.__axis_max= %s", repr(self.__axis_max))
 
-                elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
-                    is_ok, l = self.__parse_int(splitstr_arr[1])
-                    if is_ok:
-                        self.flags_array_length = l
-                        self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
+                    elif splitstr_arr[0] == "AXIS_UNIT":
+                        self.__process_axis_unit(splitstr_arr)
 
-                elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
-                    is_ok, l = self.__parse_int(splitstr_arr[1])
-                    if is_ok:
-                        self.flags_bit_length = l
-                        self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
+                    elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
+                        is_ok, l = self.__parse_int(splitstr_arr[1])
+                        if is_ok:
+                            self.flags_array_length = l
+                            self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
+
+                    elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
+                        is_ok, l = self.__parse_int(splitstr_arr[1])
+                        if is_ok:
+                            self.flags_bit_length = l
+                            self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
     
-                elif splitstr_arr[0] == "FLAGS_ESIZE":
-                    is_ok, l = self.__parse_int(splitstr_arr[1])
-                    if is_ok:
-                        self.flags_bit_size = l
-                        self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
+                    elif splitstr_arr[0] == "FLAGS_ESIZE":
+                        is_ok, l = self.__parse_int(splitstr_arr[1])
+                        if is_ok:
+                            self.flags_bit_size = l
+                            self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
     
-                elif splitstr_arr[0] == "FLAGS_OFFSET":
-                    is_ok, l = self.__parse_int(splitstr_arr[1])
-                    if is_ok:
-                        self.flags_offset = l
-                        self.logger.debug("self.flags_offset= %d", self.flags_offset)
+                    elif splitstr_arr[0] == "FLAGS_OFFSET":
+                        is_ok, l = self.__parse_int(splitstr_arr[1])
+                        if is_ok:
+                            self.flags_offset = l
+                            self.logger.debug("self.flags_offset= %d", self.flags_offset)
 
-                elif splitstr_arr[0] == "FLAGS_FILE":
-                    self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
-                    self.logger.debug("self.flags_file= %s", self.flags_file)
+                    elif splitstr_arr[0] == "FLAGS_FILE":
+                        self.flags_file =  os.path.join(src_dir, splitstr_arr_raw[1])
+                        self.logger.debug("self.flags_file= %s", self.flags_file)
 
-                elif splitstr_arr[0] == "REGION":
-                    self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
-                    self.logger.debug("self.region_dict[%s] = %s", splitstr_arr[2], splitstr_arr[1])
+                    elif splitstr_arr[0] == "REGION":
+                        self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
+                        self.logger.debug("self.region_dict[%s] = %s", splitstr_arr[2], splitstr_arr[1])
+
+                # If a well object
+                elif self.__is_wl:
+                    pass
 
             except IndexError as exc:
                 self.__handle_exc(exc)
@@ -876,7 +800,7 @@ class GOCAD_VESSEL():
         ''' Convert GOCAD_VESSEL to MODEL_GEOMETRY version
         '''
         # Convert GOCAD's volume geometry spec 
-        if self.__is_vo:
+        if self.__is_vo and self.vol_sz:
             geom_obj.vol_origin = self.__axis_o
             geom_obj.vol_sz = self.vol_sz
             min_vec = np.array(self.__axis_min)
@@ -920,9 +844,6 @@ class GOCAD_VESSEL():
             geom_obj.max_data = prop.data_stats['max']
             geom_obj.min_data = prop.data_stats['min']
             geom_obj.no_data_marker = prop.no_data_marker
-            
-        # print(repr(self.geom_obj))
-        
         
 
     def __setType(self, fileExt, firstLineStr):
@@ -959,6 +880,9 @@ class GOCAD_VESSEL():
                 return True
             elif ext_str=='VO' and firstLineStr in self.GOCAD_HEADERS['VO']:
                 self.__is_vo = True
+                return True
+            elif ext_str=='WL' and firstLineStr in self.GOCAD_HEADERS['WL']:
+                self.__is_wl = True
                 return True
 
         return False
@@ -1305,6 +1229,151 @@ class GOCAD_VESSEL():
             if vrtx.n == num:
                 return True
         return False
+
+
+    def __process_coord_hdr(self, line_gen):
+        ''' Process fields within coordinate header.
+        :param line_gen: line generator
+        :returns: two booleans, the first is True iff reached end of sequence,
+                  the second is True iff there is an unrecoverable error
+        '''
+        while True:
+            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen) 
+            
+            # End of sequence?
+            if is_last:
+                return True, False
+
+            # Are we leaving coordinate system header?
+            if splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
+                self.logger.debug("Coord System End")
+                return False, False
+
+            # Within coordinate system header and not using the default coordinate system
+            if splitstr_arr[0] == "NAME":
+                self.coord_sys_name = splitstr_arr[1]
+                if splitstr_arr[1] != "DEFAULT":
+                    self.usesDefaultCoords = False
+                    self.logger.debug("usesDefaultCoords False")
+
+                    # FIXME: I can't support non default coords yet - need to enter via command line?
+                    # If does not support default coords then exit
+                    if not self.nondefault_coords:
+                        self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s", repr(splitstr_arr[1]))
+                        return False, True
+
+            # Does coordinate system use inverted z-axis?
+            elif splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
+                self.invert_zaxis=True
+                self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
+
+            # Axis units - check if units are kilometres, and update coordinate multiplier
+            elif splitstr_arr[0] == "AXIS_UNIT":
+                self.__process_axis_unit(splitstr_arr)
+
+
+    def __process_axis_unit(self, splitstr_arr):
+        ''' Processes the AXIS_UNIT keyword
+        :param splitstr_arr: array of field strings
+        '''
+        for idx in range(0,3):
+            unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
+            if unit_str=='KM':
+                self.xyz_mult[idx] =  1000.0
+            # Warn if not metres or kilometres or unitless etc.
+            elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS']:
+                self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' "+ splitstr_arr[idx+1])
+            else:
+                self.xyz_unit[idx] = unit_str
+
+
+    def __process_header(self, line_gen):
+        ''' Process fields in the GOCAD header
+        :param line_gen: line generator
+        :returns: a boolean, is True iff we are at last line
+        '''
+        while True:
+            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen) 
+            # Are we on the last line?
+            if is_last:
+                self.logger.debug("Process header: last line")
+                return True
+                
+            # Are we out of the header? 
+            if splitstr_arr[0] == "}" or is_last:
+                self.logger.debug("End of header")
+                return False
+
+            # When in the HEADER get the colours
+            name_str, sep, value_str = line_str.partition(':')
+            name_str = name_str.strip()
+            value_str = value_str.strip()
+            self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
+            if name_str=='*SOLID*COLOR' or name_str=='*ATOMS*COLOR':
+                self.style_obj.rgba_tup = self.__parse_colour(value_str)
+                self.logger.debug("self.style_obj.rgba_tup = %s", repr(self.style_obj.rgba_tup))
+            elif name_str[:9]=='*REGIONS*' and name_str[-12:]=='*SOLID*COLOR':
+                region_name = name_str.split('*')[2]
+                self.region_colour_dict[region_name] = self.__parse_colour(value_str)
+                self.logger.debug("region_colour_dict[%s] = %s", region_name, repr(self.region_colour_dict[region_name]))
+            # Get header name
+            elif name_str=='NAME':
+                self.header_name = value_str.replace('/','-')
+                self.logger.debug("self.header_name = %s", self.header_name)
+
+
+    def __process_prop_class_hdr(self, line_gen, splitstr_arr):
+        ''' Process the property class header
+        :param line_gen: line generator
+        :param splitstr_arr: array of field strings from first line of prop class header
+        :returns: a boolean, is True iff we are at last line
+        '''
+        propClassIndex = splitstr_arr[1]
+        # There are two kinds of PROPERTY_CLASS_HEADER
+        # First, properties attached to local points
+        if splitstr_arr[2] == '{':
+            inLocalPropClassHeader = True
+            while True:
+                splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen) 
+                # Are we on the last line?
+                if is_last:
+                    self.logger.debug("Property class header: last line")
+                    return True
+
+                # Leaving header
+                if splitstr_arr[0] == "}":
+                    self.logger.debug("Property class header: end header")
+                    return False
+                else:
+                    # When in the PROPERTY CLASS headers, get the colour table
+                    if propClassIndex in self.local_props:
+                        self.__parse_property_header(self.local_props[propClassIndex], line_str)
+
+        # Second, properties of binary files 
+        elif splitstr_arr[3] == '{':
+            if propClassIndex not in self.prop_dict:
+                self.prop_dict[propClassIndex] = PROPS(splitstr_arr[2])
+            while True:
+                splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen) 
+                # Are we on the last line?
+                if is_last:
+                    self.logger.debug("Property class header: last line")
+                    return True
+
+                # Leaving header
+                if splitstr_arr[0] == "}":
+                    self.logger.debug("Property class header: end header")
+                    return False
+
+                else:
+                    # When in the PROPERTY CLASS headers, get the colour table
+                    self.__parse_property_header(self.prop_dict[propClassIndex], line_str)
+
+        else:
+            self.logger.error("ERROR - Cannot parse property header")
+            sys.exit(1)
+
+        self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
 
 
 
