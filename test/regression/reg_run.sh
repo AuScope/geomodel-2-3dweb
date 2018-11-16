@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 #
 # Basic regression test script. Run from the 'regression' directory
 #
@@ -23,7 +23,7 @@ for i in 'pl' 'ts' 'vs' 'gp'; do
 echo -n "$i File test: "
 
 # Convert GOCAD to COLLADA
-./gocad2collada.py "$CWD/input/${i}Test.$i" -g --output_folder $CWD/output --create -o "$CWD/output/${i}Test.json" input/NorthGawlerConvParam.json  >/dev/null 2>&1
+./gocad2collada.py "$CWD/input/${i}Test.$i" -g --output_folder $CWD/output --create -o "$CWD/output/${i}Test.json" input/NorthGawlerConvParam.json 
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Remove date stamps from file
