@@ -22,7 +22,6 @@ sys.path.append(os.path.join('..','lib'))
 from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
-from makeBoreholes import get_boreholes
 import exports.collada2gltf
 from file_processing import find, create_json_config, read_json_file, update_json_config, reduce_extents, add_info2popup
 
