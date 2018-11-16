@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 pwd
 cd test
-./gocad_vessel_test.py
+./run_test.py

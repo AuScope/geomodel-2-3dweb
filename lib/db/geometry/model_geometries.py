@@ -153,6 +153,13 @@ class MODEL_GEOMETRIES:
         return self.vol_sz != None
 
 
+    def is_single_layer_vo(self):
+        ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer
+            and should be converted into a PNG instead of a GLTF
+        '''
+        return self.is_volume() and self.vol_sz[2]==1
+
+
     def calc_minmax(self, x, y, z):
         ''' Calculates and stores the max and min of all x,y,z coords
 

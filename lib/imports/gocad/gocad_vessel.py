@@ -16,7 +16,20 @@ from db.geometry.types import VRTX, ATOM, TRGL, SEG
 from db.metadata.metadata import METADATA
 
 # Set up debugging
-local_logger = logging.getLogger(__name__)
+local_logger = logging.getLogger("gocad_vessel")
+
+# Create console handler
+local_handler = logging.StreamHandler(sys.stdout)
+
+# Create formatter
+local_formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+
+# Add formatter to ch
+local_handler.setFormatter(local_formatter)
+
+# Add handler to logger
+local_logger.addHandler(local_handler)
+
 
 
 def de_concat(filename_lines):
@@ -53,7 +66,8 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl, non
     :param file_lines: lines extracted from GOCAD group file
     :returns: a list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
     '''
-    local_logger.debug("extract_gocad(%s,%s)", src_dir, filename_str)
+    local_logger.setLevel(debug_lvl)
+    local_logger.debug("extract_from_grp(%s,%s)", src_dir, filename_str)
     global CtFileDict
     main_gsm_list = []
     firstLine = True
@@ -352,13 +366,6 @@ class GOCAD_VESSEL():
                 ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
         return ret_str
 
-
-
-    def is_single_layer_vo(self):
-        ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer
-            and should be converted into a PNG instead of a GLTF
-        '''
-        return self.__is_vo and self.vol_sz[2]==1
 
 
     def __make_vertex_dict(self):

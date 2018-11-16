@@ -10,12 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 
-def find(src_dir, ext_list, find_and_process):
+def find(src_dir, dest_dir, ext_list, find_and_process):
     ''' Searches for 3rd party model files in all the subdirectories
 
     :param src_dir: directory in which to begin the search
     :param ext_list: list of supported file extensions
-    :param find_and_process: calls this when found something, fn(src_dir, ext_list)
+    :param find_and_process: calls this when found something, fn(src_dir, dest_dir, ext_list)
     :returns: a list of model dict
         (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
         and a list of geographical extents ( [ [min_x, max_x, min_y, max_y], ... ] )
@@ -31,7 +31,7 @@ def find(src_dir, ext_list, find_and_process):
             name_str, ext_str = os.path.splitext(file)
             for target_ext_str in ext_list:
                 if ext_str.lstrip('.').upper() == target_ext_str:
-                    p_list, g_list = find_and_process(root, ext_list)
+                    p_list, g_list = find_and_process(root, dest_dir, ext_list)
                     model_dict_list += p_list
                     geoext_list.append(g_list)
                     done = True

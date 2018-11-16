@@ -5,7 +5,7 @@ import logging
 import os
 
 # Add in path to local library files
-sys.path.append(os.path.join('..','lib'))
+sys.path.append(os.path.join('..', '..','lib'))
 
 
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
@@ -78,7 +78,7 @@ def test_group(msg, test_file, assert_str):
     
 # MAIN PART OF PROGRAMME
 if __name__ == "__main__":
-    print("GOCAD_VESSEL Regression Test")
+    print("GOCAD_VESSEL Unit Test")
 
 
     #
