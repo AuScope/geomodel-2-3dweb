@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh 
 #
 # Basic regression test script. Run from the 'regression' directory
 #
@@ -23,7 +23,7 @@ for i in 'pl' 'ts' 'vs' 'gp'; do
 echo -n "$i File test: "
 
 # Convert GOCAD to COLLADA
-./gocad2collada.py "$CWD/input/${i}Test.$i" -g --output_folder $CWD/output --create -o "$CWD/output/${i}Test.json" input/NorthGawlerConvParam.json 
+./gocad2collada.py -g -f $CWD/output "$CWD/input/${i}Test.$i" input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Remove date stamps from file
@@ -54,7 +54,7 @@ done
 echo -n "Convert single layer VOXET to PNG test: "
 
 # Convert GOCAD to PNG 
-./gocad2collada.py "$CWD/input/PNGTest.vo" -g --output_folder $CWD/output --create -o "$CWD/output/PNGTest.json" input/NorthGawlerConvParam.json >/dev/null 2>&1
+./gocad2collada.py -g -f $CWD/output $CWD/input/PNGTest.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -73,6 +73,23 @@ case $? in
     ;;
 esac
 
-# Remove output dir
-\rm -rf $CWD/output
+# Clear output directory
+\rm -f $CWD/output/*
+
+echo -n "Recursion test: "
+
+# Try converting all files at once
+./gocad2collada.py -g -r -f $CWD/output $CWD/input input/NorthGawlerConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
+
+# Check that all files were converted
+for f in PNGTest_0.PNG gpTest.dae plTest.dae tsTest.dae vsTest.dae; do
+[ ! -e $CWD/output/$f ] && echo "FAILED - $f" && exit 1
+done
+echo "PASSED"
+
+## Remove output dir
+#\rm -rf $CWD/output
+
+
 exit 0

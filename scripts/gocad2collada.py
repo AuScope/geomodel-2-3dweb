@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 #
-# I am writing this because the current library (LaGrit) used to read  GOCAD *.ts
-# is buggy (seg faults a lot) and does not read the 'ZPOSITIVE', so some parts of models are displayed
-# upside down.
-#
-# This accepts most types of GOCAD files and support colours and 'ZPOSITIVE' flag etc.
+# This converts GOCAD to COLLADA and GLTF 
+# It accepts many types of GOCAD files (TS, GP, VS, PL, VO) and support colours and 'ZPOSITIVE' flag etc.
 # 
-#  Dependencies: owslib, pyproj, pycollada, pyassimp
 #
 import sys
 import os
@@ -23,7 +19,7 @@ from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
 import exports.collada2gltf
-from file_processing import find, create_json_config, read_json_file, update_json_config, reduce_extents, add_info2popup
+from file_processing import find, create_json_config, read_json_file, reduce_extents, add_info2popup
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -117,7 +113,7 @@ def process(filename_str, dest_dir):
         fp = open(filename_str,'r')
         whole_file_lines = fp.readlines()
     except Exception as e:
-        logger.error("ERROR - Can't open or read - skipping file %s %s", filename_str, e)
+        logger.error("Can't open or read - skipping file %s %s", filename_str, e)
         return False, [], []
     has_result = False
 
@@ -132,7 +128,7 @@ def process(filename_str, dest_dir):
             # Check that conversion worked
             is_ok, gsm_list = gv.process_gocad(src_dir, filename_str, file_lines)
             if not is_ok:
-                logger.warning("WARNING - could not process %s", filename_str) 
+                logger.warning("Could not process %s", filename_str) 
                 continue
 
             # Write out files
@@ -245,12 +241,12 @@ def initialise_params(param_file):
     Params = SimpleNamespace()
     param_dict = read_json_file(param_file)
     if 'ModelProperties' not in param_dict:
-        logger.error("ERROR - Cannot find 'ModelProperties' key in JSON file %s", param_file)
+        logger.error("Cannot find 'ModelProperties' key in JSON file %s", param_file)
         sys.exit(1)
     # Mandatory parameters
     for field_name in ['crs', 'name', 'init_cam_dist']:
         if field_name not in param_dict['ModelProperties']:
-            logger.error('ERROR - field "%s" not in "ModelProperties" in JSON input parameter file %s', field_name, param_file)
+            logger.error('Field "%s" not in "ModelProperties" in JSON input parameter file %s', field_name, param_file)
             sys.exit(1)
         setattr(Params, field_name, param_dict['ModelProperties'][field_name])
     # Optional parameter
@@ -273,12 +269,9 @@ if __name__ == "__main__":
 
     # Parse the arguments
     parser = argparse.ArgumentParser(description='Convert GOCAD files into files used to display a geological model')
-    parser.add_argument('src', help='GOCAD source directory or source file', metavar='GOCAD source dir or file')
+    parser.add_argument('src', help='GOCAD source directory or source file', metavar='GOCAD source dir/file')
     parser.add_argument('param_file', help='Input parameters in JSON format', metavar='JSON input param file')
-    parser.add_argument('--config_in', '-i', action='store', help='Input JSON config file', metavar='input config file')
-    parser.add_argument('--config_out', '-o', action='store', help='Output JSON config file', metavar='output config file')
-    parser.add_argument('--create', '-c', action='store_true', help='Create a JSON config file, must be used with -o option')
-    parser.add_argument('--bores', '-b', action='store_true', help='Add WFS boreholes to model')
+    parser.add_argument('--output_config', '-o', action='store', help='Output JSON config file', default='output_config.json')
     parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
     parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
     parser.add_argument('--nondefault_coord', '-x', action='store_true', help='Tolerate non-default GOCAD coordinate system')
@@ -297,11 +290,11 @@ if __name__ == "__main__":
 
     initialise_params(args.param_file)
 
-    # Initialise output directory
-    dest_dir = args.src
+    # Initialise output directory, default is source directory
+    dest_dir = os.path.dirname(args.src)
     if args.output_folder != None:
         if not os.path.exists(args.output_folder) or not os.path.exists(args.output_folder):
-            logger.error("ERROR - output folder %s does not exist, or is not a directory", args.output_folder)
+            logger.error("Output folder %s does not exist, or is not a directory", args.output_folder)
             sys.exit(1)
         dest_dir = args.output_folder
 
@@ -311,6 +304,7 @@ if __name__ == "__main__":
     else:
         DEBUG_LVL = logging.INFO
 
+    # Will tolerate non default coords
     if args.nondefault_coord:
         NONDEF_COORDS = True
 
@@ -333,7 +327,7 @@ if __name__ == "__main__":
 
         # Recursively search subdirectories
         if args.recursive:
-            model_dict_list, geo_extent = find(gocad_src, GOCAD_VESSEL.SUPPORTED_EXTS, find_and_process, dest_dir)
+            model_dict_list, geo_extent = find(gocad_src, dest_dir, GOCAD_VESSEL.SUPPORTED_EXTS, find_and_process)
 
         # Only search local directory
         else: 
@@ -341,7 +335,7 @@ if __name__ == "__main__":
 
     # Process a single file
     elif os.path.isfile(gocad_src):
-        success, model_dict_list, extent = process(gocad_src, dest_dir)
+        success, model_dict_list, geo_extent = process(gocad_src, dest_dir)
 
         # Convert all files from collada to GLTF v2
         if success and CONVERT_COLLADA:
@@ -353,27 +347,9 @@ if __name__ == "__main__":
             sys.exit(1)
 
     else:
-        logger.error("ERROR - %s does not exist", gocad_src)
+        logger.error("%s does not exist", gocad_src)
         sys.exit(1)
        
-    # Update a config file
-    if args.config_in!=None and args.config_out!=None:
-        json_template = args.config_in
-        json_output = args.config_out
-        if os.path.isfile(json_template):
-            if is_dir and args.bores:
-                update_json_config(model_dict_list, json_template, json_output, gocad_src)
-            else:
-                update_json_config(model_dict_list, json_template, json_output)
-        else:
-            logger.error("ERROR - %s does not exist", json_template)
-            sys.exit(1)
+    # Always create a config file
+    create_json_config(model_dict_list, args.output_config, geo_extent, Params)
 
-    # Create a config file
-    elif args.create and args.config_out!=None:
-        json_output = args.config_out
-        create_json_config(model_dict_list, json_output, geo_extent, Params)
-
-    elif args.config_in!=None or args.config_out!=None or args.create:
-        logger.error("You must specify either input and output files or create flag and output file")
-        sys.exit(1)

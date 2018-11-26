@@ -5,7 +5,19 @@ from json import JSONDecodeError
 import logging
 
 # Set up debugging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("file_processing")
+
+# Create console handler
+local_handler = logging.StreamHandler(sys.stdout)
+
+# Create formatter
+local_formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+
+# Add formatter to ch
+local_handler.setFormatter(local_formatter)
+
+# Add handler to logger
+logger.addHandler(local_handler)
 
 
 
@@ -14,6 +26,7 @@ def find(src_dir, dest_dir, ext_list, find_and_process):
     ''' Searches for 3rd party model files in all the subdirectories
 
     :param src_dir: directory in which to begin the search
+    :param dest_dir: directory to store output
     :param ext_list: list of supported file extensions
     :param find_and_process: calls this when found something, fn(src_dir, dest_dir, ext_list)
     :returns: a list of model dict
@@ -21,7 +34,7 @@ def find(src_dir, dest_dir, ext_list, find_and_process):
         and a list of geographical extents ( [ [min_x, max_x, min_y, max_y], ... ] )
         both can be used to create a config file
     '''
-    logger.debug("find(%s, %s)", src_dir, repr(ext_list))
+    logger.debug("find(%s, %s, %s)", src_dir, dest_dir, repr(ext_list))
     model_dict_list = []
     geoext_list = []
     walk_obj = os.walk(src_dir)
