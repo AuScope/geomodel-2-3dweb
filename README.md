@@ -20,12 +20,12 @@ The aim is to generate 3D web versions of geological models
 
 ### To convert some GOCAD files to COLLADA and/or GLTF
 
-Run 'gocad2collada.py' (in 'scripts' dir). You must give it the directory where the GOCAD files reside, or a GOCAD file and an input file. Sample input files are in the 'scripts/input' directory. 
+Run 'gocad2collada.py' (in 'scripts' dir). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an input file. Sample input files are in the 'scripts/input' directory. 
 
 ```
 usage: gocad2collada.py [-h] [--output_config OUTPUT_CONFIG] [--recursive]
                         [--debug] [--nondefault_coord] [--output_folder OUTPUT_FOLDER] [--no_gltf]
-                        GOCAD source dir/file JSON input param file
+                        GOCAD source dir/file   JSON input param file
 
 Convert GOCAD files into files used to display a geological model
 
