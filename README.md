@@ -23,30 +23,30 @@ The aim is to generate 3D web versions of geological models
 Run 'gocad2collada.py' (in 'scripts' dir). You must give it the directory where the GOCAD files reside, or a GOCAD file and an input file.
 Sample input files are in the 'scripts/input' directory. 
 
-usage: gocad2collada.py [-h] [--output_config OUTPUT_CONFIG] [--recursive]
-                        [--debug] [--nondefault_coord]
-                        [--output_folder OUTPUT_FOLDER] [--no_gltf]
-                        GOCAD source dir/file JSON input param file
+usage: gocad2collada.py [-h] [--output_config OUTPUT_CONFIG] [--recursive]  
+                        [--debug] [--nondefault_coord]  
+                        [--output_folder OUTPUT_FOLDER] [--no_gltf]  
+                        GOCAD source dir/file JSON input param file  
 
 Convert GOCAD files into files used to display a geological model
 
-positional arguments:
-  GOCAD source dir/file
-                        GOCAD source directory or source file
-  JSON input param file
-                        Input parameters in JSON format
+positional arguments:  
+  GOCAD source dir/file  
+                        GOCAD source directory or source file  
+  JSON input param file  
+                        Input parameters in JSON format  
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --output_config OUTPUT_CONFIG, -o OUTPUT_CONFIG
-                        Output JSON config file
-  --recursive, -r       Recursively search directories for files
-  --debug, -d           Print debug statements during execution
-  --nondefault_coord, -x
-                        Tolerate non-default GOCAD coordinate system
-  --output_folder OUTPUT_FOLDER, -f OUTPUT_FOLDER
-                        Output folder for graphics files
-  --no_gltf, -g         Create COLLADA files, but do not convert to GLTF
+optional arguments:  
+  -h, --help            show this help message and exit  
+  --output_config OUTPUT_CONFIG, -o OUTPUT_CONFIG  
+                        Output JSON config file  
+  --recursive, -r       Recursively search directories for files  
+  --debug, -d           Print debug statements during execution  
+  --nondefault_coord, -x  
+                        Tolerate non-default GOCAD coordinate system  
+  --output_folder OUTPUT_FOLDER, -f OUTPUT_FOLDER  
+                        Output folder for graphics files  
+  --no_gltf, -g         Create COLLADA files, but do not convert to GLTF  
 
 
 ### TravisCI Status
