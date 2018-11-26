@@ -18,7 +18,7 @@ The aim is to generate 3D web versions of geological models
 3. Clone this repository
 4. Edit 'lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
 
-### To convert some GOCAD files to GLTF
+### To convert some GOCAD files to COLLADA and/or GLTF
 
 Run 'gocad2collada.py' (in 'scripts' dir). You must give it the directory where the GOCAD files reside, or a GOCAD file and an input file. Sample input files are in the 'scripts/input' directory. 
 
