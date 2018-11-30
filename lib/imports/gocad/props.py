@@ -2,6 +2,9 @@ import numpy
 import os
 import csv
 import sys
+import logging
+
+
 
 class PROPS:
     ''' This class holds generic 3d data and properties
@@ -9,18 +12,38 @@ class PROPS:
         information attached to a set of XYZ points (e.g. from GOCAD 'PATOM', 'PVRTX')
     '''
 
-    def __init__(self, class_name):
+    def __init__(self, class_name, debug_level):
+
+        # Set up logging, use an attribute of class name so it is only called once
+        if not hasattr(PROPS, 'logger'):
+            PROPS.logger = logging.getLogger(__name__)
+
+            # Create console handler
+            handler = logging.StreamHandler(sys.stdout)
+
+            # Create formatter
+            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+
+            # Add formatter to ch
+            handler.setFormatter(formatter)
+
+            # Add handler to logger and set level
+            PROPS.logger.addHandler(handler)
+
+        PROPS.logger.setLevel(debug_level)
+
+        self.logger = PROPS.logger
 
         self.file_name = ""
         ''' Name of binary file associated with GOCAD file
         '''
        
         self.data_sz = 0 
-        ''' Number of bytes in floating point number in binary file
+        ''' Number of bytes in number in binary file, usually 1, 2 or 4
         '''
 
         self.data_type = "f"
-        ''' Type of data in binary file e.g. 'h' - short int, 'f' = float
+        ''' Type of data in binary file e.g. 'h' = short 2-byte int, 'f' = float, 'b' - byte
         '''
 
         self.signed_int = False
@@ -71,43 +94,70 @@ class PROPS:
     def __repr__(self):
         ''' A print friendly representation
         '''
-        return "self = {:}\n".format(hex(id(self))) + \
-               "file_name = {:}\n".format(repr(self.file_name)) + \
-               "data_sz = {:d}\n".format(self.data_sz) + \
-               "data_type = {:}\n".format(repr(self.data_type)) + \
-               "signed_int = {:}\n".format(repr(self.signed_int)) + \
-               "data_3d = {:}\n".format(repr(self.data_3d)) + \
-               "data_xyz = {:}\n".format(repr(self.data_xyz)) + \
-               "data_stats = {:}\n".format(repr(self.data_stats)) + \
-               "colour_map = {:}\n".format(repr(self.colour_map)) + \
-               "colourmap_name = {:}\n".format(self.colourmap_name) + \
-               "class_name = {:}\n".format(self.class_name) + \
-               "no_data_marker = {:}\n".format(repr(self.no_data_marker)) + \
-               "is_index_data = {:}\n".format(repr(self.is_index_data)) + \
-               "rock_label_table = {:}\n".format(repr(self.rock_label_table)) 
+        return "\nPROPS START\n  self = {:}\n".format(hex(id(self))) + \
+               "  file_name = {:}\n".format(repr(self.file_name)) + \
+               "  data_sz = {:d}\n".format(self.data_sz) + \
+               "  data_type = {:}\n".format(repr(self.data_type)) + \
+               "  signed_int = {:}\n".format(repr(self.signed_int)) + \
+               "  data_3d = {:}\n".format(repr(self.data_3d)) + \
+               "  data_xyz = {:}\n".format(repr(self.data_xyz)) + \
+               "  data_stats = {:}\n".format(repr(self.data_stats)) + \
+               "  colour_map = {:}\n".format(repr(self.colour_map)) + \
+               "  colourmap_name = {:}\n".format(self.colourmap_name) + \
+               "  class_name = {:}\n".format(self.class_name) + \
+               "  no_data_marker = {:}\n".format(repr(self.no_data_marker)) + \
+               "  is_index_data = {:}\n".format(repr(self.is_index_data)) + \
+               "  rock_label_table = {:}\n".format(repr(self.rock_label_table)) + \
+               "  str_data_type = {:}\n".format(repr(self.get_str_data_type())) + \
+               "PROPS END\n\n"
+
+
+    def get_str_data_type(self):
+        ''' Returns a string form of the data type of the volume data e.g. "INT_16", "FLOAT_32", "UINT_8"
+        '''
+        if self.data_type == 'f' and self.data_sz == 4:
+            return "FLOAT_32"
+        if self.data_type == 'h' and self.data_sz == 2:
+            if self.signed_int:
+                return "INT_16"
+            else:
+                return "UINT_16"
+        if self.data_type == 'b':
+            if self.signed_int:
+                return "INT_8"
+            else:
+                return "UINT_8"
+        return ""  
 
 
     def make_numpy_dtype(self):
         ''' Returns a string that can be passed to 'numpy' to read a binary file
+            It takes the 'data_type' of 'f', 'b', h'
         '''
-        # Prepare 'numpy' binary float integer signed/unsigned data types, always big-endian
+        # Prepare 'numpy' binary float integer signed/unsigned data types
+        # Using '>' to tell 'numpy' that it is big-endian
+        # Using upper case to tell 'numpy' that it is unsigned integer
+        # 'numpy' recognises 'h' as a 2-byte integer and 'b' as byte
         if self.data_type == 'h' or self.data_type == 'b':
             if not self.signed_int:
                 return numpy.dtype('>'+self.data_type.upper())
             else:
                 return numpy.dtype('>'+self.data_type)
+        # Floating point i.e. data_type = 'f'
         return numpy.dtype('>'+self.data_type+str(self.data_sz))
 
 
     def read_colour_table_csv(self, csv_file):
         ''' Reads a colour table from CSV file for use in VOXET colours
             csv_file - filename of  CSV file to read, without path
-            Returns a dict, key is integer, keys start at 0, value is (R,G,B,A) tuple of floats
+            Sets the 'colour_map' and 'rock_label_table' class attibutes
+            'colour_map' is a dict, key is integer, value is (R,G,B,A) tuple of floats
+            'rock_label_table' is a dict, key is integer, value is string
         '''
         ct = {}
         lt = {}
         if not os.path.isfile(csv_file):
-            self.logger.error("ERROR - cannot find CSV file: %s", csv_file)
+            self.logger.error("Cannot find CSV file: %s", csv_file)
             sys.exit(1)
         try:
             csvfilehandle = open(csv_file, 'r')
@@ -116,20 +166,10 @@ class PROPS:
                 ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]), 1.0)
                 lt[int(row[0])] = row[1]
         except Exception as e:
-            self.logger.error("ERROR - cannot read CSV file %s %s", csv_file, e)
+            self.logger.error("Cannot read CSV file %s %s", csv_file, e)
             sys.exit(1)
-        # Make sure it is zero-based
-        if min(ct.keys()) == 1:
-            ret_ct = {}
-            ret_lt = {}
-            for key in ct:
-                ret_ct[key-1] = ct[key]
-                ret_lt[key-1] = lt[key]
-            self.colour_map = ret_ct
-            self.rock_label_table = ret_lt
-        else:
-            self.colour_map = ct
-            self.rock_label_table = lt
+        self.colour_map = ct
+        self.rock_label_table = lt
 
 
     def assign_to_3d(self, x,y,z, fp):

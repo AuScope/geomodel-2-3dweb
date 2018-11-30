@@ -36,14 +36,14 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     else:
         gv = GOCAD_VESSEL(logging.ERROR, stop_on_exc=True) # logging.DEBUG or logging.ERROR
     is_ok, gsm_list = gv.process_gocad(".", test_file, split_str)
-    #print("gv=", repr(gv))
-    #print("gsm_list=", repr(gsm_list))
+    # print("is_ok = ", is_ok)
+    # print("gsm_list=", repr(gsm_list))
     if not is_ok and not should_fail:
         print(msg, ": FAIL !!")
         sys.exit(1)
     try:
         assert(eval(assert_str))
-    except AssertionError:
+    except (AssertionError, IndexError) as exc:
         print(msg, ": FAIL !!")
         sys.exit(1) 
     print(msg, ": PASS")
@@ -132,17 +132,17 @@ if __name__ == "__main__":
     #
     # Solid colours: 3 floats
     #
-    test_this("Colour floats*3 test", "test010.ts", "gsm_list[0][1].rgba_tup == (0.0,0.5,1.0,1.0)")
+    test_this("Colour floats*3 test", "test010.ts", "gsm_list[0][1].get_rgba_tup() == (0.0,0.5,1.0,1.0)")
 
     #
     # Solid colours: 4 floats
     #
-    test_this("Colour floats*4 test", "test011.ts", "gsm_list[0][1].rgba_tup == (0.486275,0.596078,0.827451,0.9)")
+    test_this("Colour floats*4 test", "test011.ts", "gsm_list[0][1].get_rgba_tup() == (0.486275,0.596078,0.827451,0.9)")
 
     #
     # Solid colours: hex
     #
-    test_this("Colour hex test", "test012.ts", "gsm_list[0][1].rgba_tup == (0.5019607843137255,0.5019607843137255,0.5019607843137255,1.0)")
+    test_this("Colour hex test", "test012.ts", "gsm_list[0][1].get_rgba_tup() == (0.5019607843137255,0.5019607843137255,0.5019607843137255,1.0)")
 
 
     #
@@ -234,19 +234,19 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     test_this("Max & min of property values", "test027.vs", "gv.local_props['HRZR'].data_stats == {'min': -110.087890625, 'max': 23.025390625}")
 
     #
-    # Two sets of property values
+    # Two sets of vertex property values
     #
-    test_this("Two sets of vertex properties", "test028.ts", "len(gsm_list)==2")
+    test_this("Two sets of vertex properties", "test028.ts", "len(gsm_list)==1")
 
     #
     # Names of objects and properties 
     #
-    test_this("Names of objects and properties", "test028.ts", "gsm_list[0][2].name == 'BASE' and gsm_list[0][2].property_name == 'I' and gsm_list[1][2].name == 'BASE' and gsm_list[1][2].property_name == 'J'")
+    test_this("Names of objects and properties", "test028.ts", "gsm_list[0][2].name == 'BASE' and gsm_list[0][2].get_property_name(0) == 'I' and gsm_list[0][2].get_property_name(1) == 'J'")
 
     #
     # Values of properties
     #
-    test_this("Values of properties", "test028.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
+    test_this("Values of properties", "test028.ts", "gsm_list[0][0].get_xyz_data(0)[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[0][0].get_xyz_data(1)[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
 
     #
     # Renumber skipped vertex ids, recognise TRGL keyword
@@ -276,14 +276,14 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     #
     # Handle control nodes
     #
-    test_this("Handle control nodes", "test031.ts", "gsm_list[0][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[1][0].xyz_data[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
+    test_this("Handle control nodes", "test031.ts", "gsm_list[0][0].get_xyz_data(0)[(459395.951171875, 8241423.6875, -475.7239685058594)] == 1057.0 and gsm_list[0][0].get_xyz_data(1)[(459395.951171875, 8241423.6875, -475.7239685058594)] == 927.0")
 
     #
     # ATOMS with and without properties
     #
-    test_this("ATOMS with and without properties", "test032.ts", "gsm_list[0][0].xyz_data[(459876.3125, 8241554.9453125, -485.6229248046875)] == 1050.0 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr")
+    test_this("ATOMS with and without properties", "test032.ts", "gsm_list[0][0].get_xyz_data()[(459876.3125, 8241554.9453125, -485.6229248046875)] == 1050.0 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr")
 
     #
     # Extract GOCAD objects from group file
     #
-    test_group("Extract GOCAD objects from group file", "test033.gp","len(gsm_list)==30 and gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].property_name == 'OBJECTID' and gsm_list[0][0].xyz_data[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
+    test_group("Extract GOCAD objects from group file", "test033.gp","len(gsm_list)==6 and gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].get_property_name() == 'OBJECTID' and gsm_list[0][0].get_xyz_data()[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")

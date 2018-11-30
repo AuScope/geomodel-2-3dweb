@@ -1,0 +1,23 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 0, "south": 0, "east": 0, "north": 0 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:3857",
+        "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/wfs",
+        "BOREHOLE_CRS": "?",
+        "WFS_VERSION": "1.1.0"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:3857",
+        "name": "Sandstone",
+        "init_cam_dist": 500000.0
+    },
+    "VoxetColourTables": [
+        {
+            "filename": "3D_geology_Lithology@@",
+            "colour_table": "3D_geology_lithology_colours.csv"
+        }
+    ]
+}

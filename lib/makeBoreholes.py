@@ -82,23 +82,23 @@ def get_json_input_param(input_file):
     try:
         param_dict = json.load(fp)
     except JSONDecodeError as exc:
-        print("ERROR - cannot read JSON file\n", input_file, "\n", exc)
+        print("Cannot read JSON file\n", input_file, "\n", exc)
         fp.close()
         sys.exit(1)
     fp.close()
     if 'BoreholeData' not in param_dict:
-        print('ERROR - Cannot find "BoreholeData" key in input file', input_file);
+        print('Cannot find "BoreholeData" key in input file', input_file);
         sys.exit(1)
 
     Param = SimpleNamespace()
     for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
         if field_name not in param_dict['BoreholeData']:
-            print("ERROR - Cannot find '"+field_name+"' key in input file", input_file);
+            print("Cannot find '"+field_name+"' key in input file", input_file);
             sys.exit(1)
         setattr(Param, field_name, param_dict['BoreholeData'][field_name])
 
     if 'west' not in Param.BBOX or 'south' not in Param.BBOX or 'east' not in Param.BBOX or 'north' not in Param.BBOX:
-        print("ERROR - Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
+        print("Cannot find 'west', 'south', 'east', 'north' keys in 'BBOX' in input file", input_file)
         sys.exit(1)
     print("Closed: ", input_file)
     return Param

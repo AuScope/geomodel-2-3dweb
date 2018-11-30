@@ -4,9 +4,10 @@ from collections import namedtuple
 from .types import VRTX, ATOM, TRGL, SEG
 
 class MODEL_GEOMETRIES:
-    ''' Class used to store abstract parts of a model
+    ''' Class used to store abstract geometry of parts of a geological model and its data 
         It should be independent as possible of any model's input format
-        All sequence numbers for _arr start at 1
+        Each class only stores data for 1 volume, but for many line segments and triangle faces
+        All sequence numbers for _*_arr start at 1
     '''
 
 
@@ -76,16 +77,26 @@ class MODEL_GEOMETRIES:
         ''' 3d numpy array of volume data
         '''
 
-        self.xyz_data = {}
-        ''' Generic property data associated with XYZ points
-        '''
- 
-        self.max_data = None
-        ''' Maximum value in 'xyz_data' or 'vol_data'
+        self.vol_data_type = "FLOAT_32"
+        ''' Type of data in 'vol_data' e.g. 'FLOAT_32' 'INT_16'
+            NB: Always stored in big-endian fashion
         '''
 
-        self.min_data = None
-        ''' Minimum value in 'xyz_data' or 'vol_data'
+        self._xyz_data = []
+        ''' Generic property data associated with XYZ points
+            This is an array of a dictionary mapping (X,Y,Z) => [data1, data2, data3, ... ]
+        '''
+ 
+        self._max_data = []
+        ''' Array of maximum values in 'xyz_data' or 'vol_data'
+        '''
+
+        self._min_data = []
+        ''' Array of minimum value in 'xyz_data' or 'vol_data'
+        '''
+
+        self._no_data_marker = []
+        ''' Array of values indicating no data exists at a point in space
         '''
 
     def __repr__(self):
@@ -98,7 +109,7 @@ class MODEL_GEOMETRIES:
         return ret_str
 
 
-    # properties
+    # Properties
 
     @property
     def vrtx_arr(self):
@@ -184,4 +195,66 @@ class MODEL_GEOMETRIES:
             format is [min_x, max_x, min_y, max_y]
         '''
         return [self.min_X, self.max_X, self.min_Y, self.max_Y]
+
+
+    def get_vol_side_lengths(self):
+        ''' Returns the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats
+        '''
+        return [self.max_X - self.min_X, self.max_Y - self.min_Y, self.max_Z - self.min_Z]
+
+    
+    def get_max_data(self, idx=0):
+        ''' Retrieves maximum value of data point
+        :param idx: index into property data, omit for volume data
+        :returns: maximum data value
+        '''
+        if len(self._max_data) > idx:
+            return self._max_data[idx] 
+        return None
+
+
+    def get_min_data(self, idx=0):
+        ''' Retrieves minimum value of data point
+        :param idx: index into property data, omit for volume data
+        :returns: minimum data value
+        '''
+        if len(self._min_data) > idx:
+            return self._min_data[idx]
+        return None
+
+
+    def get_no_data_marker(self, idx=0):
+        ''' Retrieve no data marker
+        :param idx: index into property data, omit for volume data
+        :returns: no data marker
+        ''' 
+        if len(self._no_data_marker) > idx:
+            return self._no_data_marker[idx]
+        return None
+
+
+    def add_stats(self, min, max, no_data):
+        ''' Adds minimum, maximum and no data marker
+        '''
+        self._min_data.append(min)
+        self._max_data.append(max)
+        self._no_data_marker.append(no_data)
+
+
+    def add_xyz_data(self, xyz_data):
+        ''' Adds an instance of XYZ data
+        :param xyz_data: dictionary of (X,Y,Z) => data value to be added
+        '''
+        self._xyz_data.append(xyz_data)
+
+
+    def get_xyz_data(self, idx=0):
+        ''' Retrieves data from xyz data dictionary
+        :param idx: index for when there are multiple values for each point in space, omit for volumes
+        :returns: dictionary of (X,Y,Z) => data value
+        '''
+        if len(self._xyz_data) > idx:
+            return self._xyz_data[idx]
+        return {}
+
 

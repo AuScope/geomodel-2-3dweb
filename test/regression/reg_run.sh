@@ -3,11 +3,14 @@
 # Basic regression test script. Run from the 'regression' directory
 #
 # Acknowledgements:
-# 1) Files for tests derived from: http://www.energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models
-# 2) SKUA/GOCAD software from the "Paradigm Academic Software Program" (http://www.pdgm.com/affiliations/academic-software-programs/) was used to produce and view the voxet files
+# 1) Some of the files for tests derived from these models: 
+#    http://www.energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models (North Gawler model)
+#    https://dasc.dmp.wa.gov.au/dasc/ (Sandstone model)
+# 2) SKUA/GOCAD software from the "Paradigm Academic Software Program" (http://www.pdgm.com/affiliations/academic-software-programs/)
+#    was used to produce and view the voxet files
 #
 
-echo "\n\nGOCAD to COLLADA and PNG conversion regresssion test"
+echo "\n\nGOCAD to COLLADA, GZIP and PNG conversion regression test"
 CWD=`pwd`
 
 # Make the output directory
@@ -48,8 +51,13 @@ esac
 
 done
 
+##########################################################################################
+# Convert single layer VOXET to PNG test
+##########################################################################################
+
 # Clear output directory
 \rm -f $CWD/output/*
+
 
 echo -n "Convert single layer VOXET to PNG test: "
 
@@ -58,7 +66,7 @@ echo -n "Convert single layer VOXET to PNG test: "
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that conversion was correct
-cmp "$CWD/output/PNGTest_0.PNG" "$CWD/golden/PNGTest.PNG" >/dev/null 2>&1
+cmp "$CWD/output/PNGTest@@.PNG" "$CWD/golden/PNGTest.PNG" >/dev/null 2>&1
 case $? in
 "0")
     echo "PASSED"
@@ -73,6 +81,40 @@ case $? in
     ;;
 esac
 
+##########################################################################################
+# Voxet with 3 binary files conversion & output config test
+##########################################################################################
+
+# Clear output directory
+\rm -f $CWD/output/*
+
+echo -n "Voxet with 3 binary files conversion & output config test: "
+
+./gocad2collada.py -g -f $CWD/output -o smallConf.json $CWD/input/small_voxet/small.vo $CWD/input/small_voxet/small.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
+
+# Check that conversion was correct
+for f in small_lithology@@.gz small_density@@.gz small_susceptibility@@.gz; do
+
+# Crudely removing the MTIME from gzip header to allow comparison
+od -c "$CWD/golden/$f" | tail -n +2 > $CWD/output/gold.gz
+od -c "$CWD/output/$f" | tail -n +2 > $CWD/output/out.gz
+cmp "$CWD/output/gold.gz" "$CWD/output/out.gz" >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - comparison of $f returned False" && exit 1
+
+done
+
+# Compare the output config file
+cmp "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json" >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - comparison of output config returned False" && exit 1
+
+echo "PASSED"
+
+
+##########################################################################################
+# Recursion test
+##########################################################################################
+
 # Clear output directory
 \rm -f $CWD/output/*
 
@@ -83,13 +125,13 @@ echo -n "Recursion test: "
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that all files were converted
-for f in PNGTest_0.PNG gpTest.dae plTest.dae tsTest.dae vsTest.dae; do
+for f in PNGTest@@.PNG gpTest.dae plTest.dae tsTest.dae vsTest.dae small_lithology@@.gz small_density@@.gz small_susceptibility@@.gz; do
 [ ! -e $CWD/output/$f ] && echo "FAILED - $f" && exit 1
 done
 echo "PASSED"
 
-## Remove output dir
-#\rm -rf $CWD/output
 
+# Remove output dir
+\rm -rf $CWD/output
 
 exit 0

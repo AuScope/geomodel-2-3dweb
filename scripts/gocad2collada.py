@@ -10,6 +10,8 @@ import glob
 import argparse
 import random
 import logging
+import gzip
+import shutil
 from types import SimpleNamespace
 
 # Add in path to local library files
@@ -19,7 +21,7 @@ from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
 import exports.collada2gltf
-from file_processing import find, create_json_config, read_json_file, reduce_extents, add_info2popup
+from file_processing import find, create_json_config, read_json_file, reduce_extents, add_info2popup, add_vol_config, is_only_small
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -36,6 +38,11 @@ GROUP_LIMIT = 8
 
 NONDEF_COORDS = False
 ''' Will tolerate non default coordinates
+'''
+
+VOL_SLICER = True
+''' If 'True', it will create a volume slicer for voxet files
+    else will create cubes, which will only work for smaller volumes
 '''
 
 # Set up debugging 
@@ -117,8 +124,8 @@ def process(filename_str, dest_dir):
         return False, [], []
     has_result = False
 
-    # VS and VO files usually have lots of data points and thus one COLLADA file for each GOCAD file
-    if ext_str in ['VS', 'VO']:
+    # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
+    if ext_str == 'VS':
         file_lines_list = de_concat(whole_file_lines)
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list)>1:
@@ -139,15 +146,33 @@ def process(filename_str, dest_dir):
             for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
-                if ext_str == 'VS':
-                    popup_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
-                    model_dict_list.append(add_info2popup(meta_obj.name, popup_dict, prop_filename))
-
-                elif ext_str == 'VO':
-                    md_list = write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, prop_filename, prop_idx)
-                    model_dict_list += md_list
+                popup_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
+                model_dict_list.append(add_info2popup(meta_obj.name, popup_dict, prop_filename))
                 has_result = True
                 extent_list.append(geom_obj.get_extent())
+
+    # One VO file can produce many other files
+    elif ext_str == 'VO':
+        file_lines_list = de_concat(whole_file_lines)
+        for mask_idx, file_lines in enumerate(file_lines_list):
+            if len(file_lines_list)>1:
+                out_filename = "{0}_{1:d}".format(os.path.join(dest_dir, os.path.basename(file_name)), mask_idx)
+            gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS, ct_file_dict=CtFileDict)
+
+            # Check that conversion worked
+            is_ok, gsm_list = gv.process_gocad(src_dir, filename_str, file_lines)
+            if not is_ok:
+                logger.warning("Could not process %s", filename_str) 
+                continue
+
+            # Loop around when several binary files in one GOCAD VOXET object
+            for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
+                out_filename = os.path.join(dest_dir, os.path.basename(meta_obj.src_filename))
+                md_list = write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_filename, prop_idx)
+                model_dict_list += md_list
+                has_result = True
+                extent_list.append(geom_obj.get_extent())
+
 
     # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
     elif ext_str in ['TS','PL', 'WL']:
@@ -179,7 +204,7 @@ def process(filename_str, dest_dir):
         gsm_list=extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz, DEBUG_LVL, NONDEF_COORDS, CtFileDict)
 
         # If there are too many entries in the GP file, then place everything in one COLLADA file
-        if len(gsm_list) > GROUP_LIMIT:
+        if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
             logger.debug("All group objects in one COLLADA file")
             ck.start_collada()
             popup_dict = {}
@@ -194,11 +219,12 @@ def process(filename_str, dest_dir):
         # Else place each GOCAD object in its own COLLADA file
         else:
             for file_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
-                prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                 if geom_obj.is_volume():
-                    md_list = write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, prop_filename, file_idx)
+                    out_filename = os.path.join(dest_dir, os.path.basename(meta_obj.src_filename))
+                    md_list = write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_filename, file_idx)
                     model_dict_list += md_list
                 else:
+                    prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                     p_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
                     model_dict_list.append(add_info2popup(meta_obj.name, p_dict, prop_filename))
                 extent_list.append(geom_obj.get_extent())
@@ -207,7 +233,7 @@ def process(filename_str, dest_dir):
     fp.close()
     if has_result:
         logger.debug("process() returns True")
-        reduced_extent_list =  reduce_extents(extent_list)
+        reduced_extent_list = reduce_extents(extent_list)
         return True, model_dict_list, reduce_extents(extent_list)
     else:
         logger.debug("process() returns False, no result")
@@ -215,13 +241,32 @@ def process(filename_str, dest_dir):
 
 
 def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_filename, prop_idx):
-    # Produce a GLTF from voxet file
+    ''' Write a single volume to disk
+    :param ck: COLLADA_KIT object, used to output COLLADA files
+    :param pk: PNG_KIT object, used to output PNG files
+    :param geom_obj: MODEL_GEOMETRY object, contains the geometry of the volume
+    :param style_obj: STYLE object, contains the volume's style
+    :param meta_obj: METADATA object, contains the volume's metadata
+    :param src_dir: source directory where there are 3rd party model files
+    :param out_filename: output filename without extension
+    :param prop_idx: property index of volume's properties, integer
+    '''
+    print("write_single_volume(", geom_obj, style_obj, meta_obj, src_dir, out_filename, prop_idx, ")") 
     model_dict_list = []
     if not geom_obj.vol_data is None: 
         if not geom_obj.is_single_layer_vo():
-            popup_list = ck.write_vol_collada(geom_obj, style_obj, meta_obj, out_filename)
-            for popup_dict_key, popup_dict, out_filename in popup_list:
-                model_dict_list.append(add_info2popup(popup_dict_key, popup_dict, out_filename))
+            if VOL_SLICER:
+                in_filename = os.path.join(src_dir, os.path.basename(out_filename))
+                with open(in_filename, 'rb') as fp_in:
+                    with gzip.open(out_filename + '.gz', 'wb') as fp_out:
+                        shutil.copyfileobj(fp_in, fp_out)
+                        model_dict_list.append(add_vol_config(geom_obj, style_obj, meta_obj))
+
+            else:
+                # Produce GLTFs from voxet file
+                popup_list = ck.write_vol_collada(geom_obj, style_obj, meta_obj, out_filename)
+                for popup_dict_key, popup_dict, out_filename in popup_list:
+                    model_dict_list.append(add_info2popup(popup_dict_key, popup_dict, out_filename))
 
         # Produce a PNG file from voxet file
         else:
@@ -231,7 +276,7 @@ def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_file
 
 
 def initialise_params(param_file):
-    ''' Initialise the global 'Params' object from input parameter file
+    ''' Reads the input parameter file and initialises the global 'Params' object
 
     :param param_file: file name of input parameter file
     '''
@@ -351,5 +396,5 @@ if __name__ == "__main__":
         sys.exit(1)
        
     # Always create a config file
-    create_json_config(model_dict_list, args.output_config, geo_extent, Params)
+    create_json_config(model_dict_list, args.output_config, dest_dir, geo_extent, Params)
 

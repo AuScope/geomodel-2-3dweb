@@ -82,9 +82,9 @@ class COLLADA_KIT:
         ''' Adds a vessel object to the pycollada mesh object
             NB: Does not accept GOCAD vertex or volume files as they usually have (too) many node objects
 
-        :param geom_obj: model geometry object
-        :param style_obj: style object containing colour info
-        :param meta_obj: metadata object
+        :param geom_obj: MODEL_GEOMETRY object
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object
         :returns: a popup info dict or exits if you try to add a GOCAD VS (vertex) or VO (volume) file
             popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
         '''
@@ -100,9 +100,7 @@ class COLLADA_KIT:
 
         # Triangles
         if geom_obj.is_trgl():
-            if len(style_obj.rgba_tup)!=4:
-                style_obj.rgba_tup = (1,0,0,1.0)
-            effect = Collada.material.Effect("effect-{0:05d}".format(self.obj_cnt), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=style_obj.rgba_tup, specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
+            effect = Collada.material.Effect("effect-{0:05d}".format(self.obj_cnt), [], self.SHADING, emission=self.EMISSION, ambient=self.AMBIENT, diffuse=style_obj.get_rgba_tup(), specular=self.SPECULAR, shininess=self.SHININESS, double_sided=True)
             mat = Collada.material.Material("material-{0:05d}".format(self.obj_cnt), "mymaterial-{0:05d}".format(self.obj_cnt), effect)
             self.mesh_obj.effects.append(effect)
             self.mesh_obj.materials.append(mat)
@@ -146,19 +144,19 @@ class COLLADA_KIT:
         # Points
         elif geom_obj.is_point():
             geometry_name = meta_obj.name
-            prop_dict = geom_obj.xyz_data
+            prop_dict = geom_obj.get_xyz_data()
  
             POINT_SIZE = 1000
             colour_num = 0
             # If there are many colours, make MAX_COLORS materials
             if not style_obj.has_single_colour():
                 self.make_false_colour_materials(self.mesh_obj, self.MAX_COLOURS)
-                max_v = geom_obj.max_data
-                min_v = geom_obj.min_data
+                max_v = geom_obj.get_max_data()
+                min_v = geom_obj.get_min_data()
 
             # If there is only one colour
             else:
-                self.make_colour_material(self.mesh_obj, style_obj.rgba_tup, colour_num)
+                self.make_colour_material(self.mesh_obj, style_obj.get_rgba_tup(), colour_num)
                 min_v = 0.0
                 max_v = 0.0
 
@@ -169,7 +167,7 @@ class COLLADA_KIT:
                     colour_num = calculate_false_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
                 geom_label = self.co.make_pyramid(self.mesh_obj, geometry_name, self.geomnode_list, v, self.obj_cnt, POINT_SIZE, colour_num)
 
-                popup_dict[geom_label] = { 'name': meta_obj.property_name, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
+                popup_dict[geom_label] = { 'name': meta_obj.get_property_name(), 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
 
         self.obj_cnt += 1
         return popup_dict
@@ -195,9 +193,9 @@ class COLLADA_KIT:
     def write_collada(self, geom_obj, style_obj, meta_obj, out_filename):
         ''' Write out a COLLADA file
 
-        :param geom_obj: model geometry object that geometry and text
-        :param style_obj: style object containing colour info
-        :param meta_obj: metadata object, used for labelling 
+        :param geom_obj: MODEL_GEOMETRY object that geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling 
         :param out_filename: path & filename of COLLADA file to output, without extension
         :returns: a dictionary of popup info objects
             popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
@@ -220,9 +218,9 @@ class COLLADA_KIT:
     def write_point_collada(self, geom_obj, style_obj, meta_obj, out_filename):
         ''' Write out a COLLADA file from a point geometry file
 
-        :param geom_obj: model geometry object that hold geometry and text
-        :param style_obj: style object containing colour info
-        :param meta_obj: metadata object, used for labelling 
+        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling 
         :param out_filename: path & filename of COLLADA file to output, without extension
         '''
         self.logger.debug("write_point_collada(%s)", out_filename)
@@ -241,37 +239,42 @@ class COLLADA_KIT:
         geomnode_list = []
         colour_num = 0
         # If there are many colours, make MAX_COLORS materials
+        prop_dict = geom_obj.get_xyz_data()
         if not style_obj.has_single_colour():
             self.make_false_colour_materials(mesh, self.MAX_COLOURS)
-            prop_dict = geom_obj.xyz_data
-            max_v = geom_obj.max_data
-            min_v = geom_obj.min_data
+            max_v = geom_obj.get_max_data()
+            min_v = geom_obj.get_min_data()
 
         # If there is only one colour
         else:
-            self.make_colour_material(mesh, style_obj.rgba_tup, colour_num)
-            prop_dict = {}
-            min_v = 0.0
-            max_v = 0.0
+            self.make_colour_material(mesh, style_obj.get_rgba_tup(), colour_num)
 
         # Draw vertices as pyramids
         for point_cnt, v in enumerate(geom_obj.vrtx_arr):
-            # If no data value for this vertex then skip to next one
-            if v.xyz not in prop_dict:
-                continue               
-            # Lookup the colour table
+            # If there's a colour table calculate colour, but if no data at that point then skip this vertex
             if not style_obj.has_single_colour():
+                if v.xyz not in prop_dict:
+                    continue               
                 colour_num = calculate_false_colour_num(prop_dict[v.xyz], max_v, min_v, self.MAX_COLOURS)
+
+            # Create coloured pyramid
             geom_label = self.co.make_pyramid(mesh, geometry_name, geomnode_list, v, point_cnt, POINT_SIZE, colour_num)
 
-            popup_dict[geom_label] = { 'name': meta_obj.property_name, 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
+            # Create popup info
+            popup_dict[geom_label] = { 'name': meta_obj.get_property_name(), 'title': geometry_name.replace('_',' ') }
+            if v.xyz in prop_dict:
+                popup_dict[geom_label]['val'] = prop_dict[v.xyz]
 
+        # Create a node using the geometry list
         node = Collada.scene.Node("node0", children=geomnode_list)
         node_list.append(node)
+
+        # Add nodes to scene, add scene to mesh
         myscene = Collada.scene.Scene("myscene", node_list)
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
+        # Write mesh to file
         dest_path = out_filename+'.dae'
         self.logger.info("write_point_collada() Writing COLLADA file: %s", dest_path)
         mesh.write(dest_path)
@@ -306,7 +309,7 @@ class COLLADA_KIT:
         ''' With many voxets being so large, we have to increase sample size so we don't create too much data, 
             to be improved later on.
 
-        :params geom_obj: model geometry object
+        :params geom_obj: MODEL_GEOMETRY object
         :params limit: the higher this number the more cubes will be used to represent the voxet data
         :returns: step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]
         '''
@@ -324,9 +327,9 @@ class COLLADA_KIT:
     def write_vol_collada(self, geom_obj, style_obj, meta_obj, out_filename):
         ''' Write out a COLLADA file from a vo file
 
-        :param geom_obj: model geometry object that geometry and text
-        :param style_obj: style object containing colour info
-        :param meta_obj: metadata object, used for labelling 
+        :param geom_obj: MODEL_GEOMETRY object that geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling 
         :param out_filename: path & filename of COLLADA file to output, without extension
         '''
         self.logger.debug("write_vol_collada(%s)", out_filename)
@@ -352,7 +355,7 @@ class COLLADA_KIT:
             for z in range(0, geom_obj.vol_sz[2], step):
                 for y in range(0, geom_obj.vol_sz[1], step):
                     for x in range(0, geom_obj.vol_sz[0], step):
-                        if geom_obj.vol_data[x][y][z] != geom_obj.no_data_marker:
+                        if geom_obj.vol_data[x][y][z] != geom_obj.get_no_data_marker():
                             key = int(geom_obj.vol_data[x][y][z])
                             bucket.setdefault(key, []) 
                             bucket[key].append((x,y,z))
@@ -373,8 +376,8 @@ class COLLADA_KIT:
                 self.make_mapped_colour_materials(mesh, style_obj.colour_map)
                 point_cnt = 0
                 node_list = []
-                colour_num = data_val - int(geom_obj.min_data)
-                data_val_label = meta_obj.rock_label_table.get(colour_num, meta_obj.property_name)
+                colour_num = data_val - int(geom_obj.get_min_data())
+                data_val_label = style_obj.get_rock_label_table().get(colour_num, meta_obj.get_property_name())
                 geom_label_stub = geometry_name+"-"+data_val_label
                 for x,y,z in coord_list:
                     # self.logger.debug("%d %d %d data_val = %s num_neighbours = %d", x,y,z, repr(data_val), num_neighbours[data_val][(x,y,z)])
@@ -387,14 +390,14 @@ class COLLADA_KIT:
                         point_cnt += 1
 
                 # Use a key with a regular expression to save writing thousands of properties to config file
-                popup_dict["^"+geom_label_stub] = { 'title': meta_obj.name, 'property name': meta_obj.property_name, 'property value': data_val_label }
+                popup_dict["^"+geom_label_stub] = { 'title': meta_obj.name, 'property name': meta_obj.get_property_name(), 'property value': data_val_label }
                 
                 myscene = Collada.scene.Scene("myscene", node_list)
                 mesh.scenes.append(myscene)
                 mesh.scene = myscene
 
                 # If there are unique labels, then use these, else use the filename
-                if data_val_label != meta_obj.property_name:
+                if data_val_label != meta_obj.get_property_name():
                     popup_dict_key = data_val_label
                 else:
                     popup_dict_key = out_filename+'_'+str(file_cnt)
@@ -422,16 +425,16 @@ class COLLADA_KIT:
             for z in range(0, geom_obj.vol_sz[2], step):
                 for y in range(0, geom_obj.vol_sz[1], step):
                     for x in range(0, geom_obj.vol_sz[0], step):
-                        if geom_obj.vol_data[x][y][z] != geom_obj.no_data_marker and \
+                        if geom_obj.vol_data[x][y][z] != geom_obj.get_no_data_marker() and \
                                  (z == 0 or y == 0 or x == 0 or z == geom_obj.vol_sz[2]-1 or y == geom_obj.vol_sz[1]-1 or x == geom_obj.vol_sz[0]-1):
-                            colour_num = calculate_false_colour_num(geom_obj.vol_data[x][y][z], geom_obj.max_data, geom_obj.min_data, self.MAX_COLOURS)
+                            colour_num = calculate_false_colour_num(geom_obj.vol_data[x][y][z], geom_obj.get_max_data(), geom_obj.get_min_data(), self.MAX_COLOURS)
                             geomnode_list = []
                             geom_label = self.co.make_cube(mesh, colour_num, x,y,z, geom_obj, pt_size, geometry_name, 1, point_cnt, geomnode_list)
                             node = Collada.scene.Node("node{0:010d}".format(point_cnt), children=geomnode_list)
-                            popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.property_name, 'value': "{:.3f}".format(geom_obj.vol_data[x][y][z]) }
+                            popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.get_property_name(), 'value': "{:.3f}".format(geom_obj.vol_data[x][y][z]) }
                             node_list.append(node)
                             point_cnt += 1
-                        elif geom_obj.vol_data[x][y][z] == geom_obj.no_data_marker:
+                        elif geom_obj.vol_data[x][y][z] == geom_obj.get_no_data_marker():
                             self.logger.debug("%d %d %d no data", x,y,z)
 
             myscene = Collada.scene.Scene("myscene", node_list)
@@ -441,7 +444,7 @@ class COLLADA_KIT:
             dest_path = out_filename+'.dae'
             self.logger.info("write_vol_collada() Writing COLLADA file: %s", dest_path)
             mesh.write(dest_path)
-            popup_list.append((meta_obj.property_name, popup_dict, out_filename))
+            popup_list.append((meta_obj.get_property_name(), popup_dict, out_filename))
                 
         return popup_list
 

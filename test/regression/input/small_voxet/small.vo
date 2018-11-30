@@ -1,0 +1,110 @@
+GOCAD Voxet 1 
+HEADER {
+name: small
+*painted*variable: VPmg_density
+painted: on
+sections: 3 1 1 3 2 1 3 3 1 3 
+ascii: off
+}
+GOCAD_ORIGINAL_COORDINATE_SYSTEM
+NAME Default
+PROJECTION Unknown
+DATUM Unknown
+AXIS_NAME X Y Z
+AXIS_UNIT m m m
+ZPOSITIVE Elevation
+END_ORIGINAL_COORDINATE_SYSTEM
+CLASSIFICATION "3D Survey" Seismic "3D Survey"
+AXIS_O 696000 6863000 -40000 
+AXIS_U 51000 0 0 
+AXIS_V 0 87000 0 
+AXIS_W 0 0 51000 
+AXIS_MIN 0 0 0 
+AXIS_MAX 0.0882352963 0.0919540226 0.0882352963 
+AXIS_N 10 17 10 
+AXIS_NAME axis-1 axis-2 axis-3
+AXIS_UNIT "none" "none" "none" 
+AXIS_TYPE even even even
+
+
+
+
+PROPERTY 1 Lithology
+PROPERTY_CLASS 1 lithologies
+INTERPOLATION_METHOD  Block
+PROPERTY_KIND 1 lithologies
+PROPERTY_CLASS_HEADER 1 lithologies {
+colormap: lithologies
+*colormap*size: 21
+*colormap*nbcolors: 21
+low_clip: 1
+high_clip: 21
+*colormap*nodata: true
+name: lithologies
+*colormap*nodata*transparency: 1
+}
+PROPERTY_SUBCLASS 1 ROCK 0  
+PROP_ORIGINAL_UNIT 1 none
+PROP_UNIT 1 none
+PROP_NO_DATA_VALUE 1 -9999
+PROP_SAMPLE_STATS 1 1700 1 0 1 1
+PROP_STORAGE_TYPE 1 Short
+PROP_ESIZE 1 2
+PROP_SIGNED 1 1
+PROP_ETYPE 1  IEEE
+PROP_FORMAT 1 RAW
+PROP_OFFSET 1 0
+PROP_FILE 1 small_lithology@@
+
+PROPERTY 2 VPmg_density
+PROPERTY_CLASS 2 vpmg_workflow_gravity_imported_den_prop
+PROPERTY_KIND 2 vpmg_workflow_gravity_imported_den_prop
+PROPERTY_CLASS_HEADER 2 vpmg_workflow_gravity_imported_den_prop {
+colormap: Geophysics
+*colormap*nodata: true
+pclip: 99
+low_clip: -0.241651
+high_clip: 0.19
+name: vpmg_workflow_gravity_imported_den_prop
+*colormap*nodata*transparency: 1
+unit: Euc
+kind: vpmg_workflow_gravity_imported_den_prop
+
+}
+PROPERTY_SUBCLASS 2 QUANTITY Float
+PROP_ORIGINAL_UNIT 2 Euc
+PROP_UNIT 2 Euc
+PROP_NO_DATA_VALUE 2 -99999
+PROP_SAMPLE_STATS 2 1700 0.1095 1.04553e-016 0.1095 0.1095
+PROP_ESIZE 2 4
+PROP_ETYPE 2  IEEE
+PROP_FORMAT 2 RAW
+PROP_OFFSET 2 0
+PROP_FILE 2 small_density@@
+
+PROPERTY 3 VPmg_susceptibility
+PROPERTY_CLASS 3 vpmg_workflow_magnetics_imported_sus_prop
+PROPERTY_KIND 3 vpmg_workflow_magnetics_imported_sus_prop
+PROPERTY_CLASS_HEADER 3 vpmg_workflow_magnetics_imported_sus_prop {
+colormap: Geophysics
+*colormap*nodata: true
+pclip: 99
+low_clip: 0
+high_clip: 0.04245541
+name: vpmg_workflow_magnetics_imported_sus_prop
+*colormap*nodata*transparency: 1
+unit: Euc
+kind: vpmg_workflow_magnetics_imported_sus_prop
+
+}
+PROPERTY_SUBCLASS 3 QUANTITY Float
+PROP_ORIGINAL_UNIT 3 Euc
+PROP_UNIT 3 Euc
+PROP_NO_DATA_VALUE 3 -99999
+PROP_SAMPLE_STATS 3 1700 0 0 0 0
+PROP_ESIZE 3 4
+PROP_ETYPE 3  IEEE
+PROP_FORMAT 3 RAW
+PROP_OFFSET 3 0
+PROP_FILE 3 small_susceptibility@@
+END

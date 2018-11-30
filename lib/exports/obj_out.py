@@ -38,7 +38,7 @@ class OBJ_OUT():
         ''' Writes out voxel data to Wavefront OBJ and MTL files
 
         :param out_fp: open file handle of OBJ file
-        :param geom_obj: model geometry object
+        :param geom_obj: MODEL_GEOMETRY object
         :param fileName: filename of OBJ file without the 'OBJ' extension
         :param src_file_str: filename of gocad file
         :param step_sz: when stepping through the voxel block this is the step size
@@ -134,7 +134,7 @@ class OBJ_OUT():
     def write_OBJ(self, geom_obj, fileName, src_file_str):
         ''' Writes out an OBJ file
 
-        :param geom_obj: model geometry object
+        :param geom_obj: MODEL_GEOMETRY object
         :param fileName: filename of OBJ file, without extension
         :param src_file_str: filename of gocad file
 
@@ -155,7 +155,7 @@ class OBJ_OUT():
         # This dictionary returns the insertion order of the vertex in the vrtx_arr given its sequence number
         vert_dict = geom_obj.make_vertex_dict()
         if geom_obj.is_trgl():
-            if len(style_obj.rgba_tup)==4:
+            if len(style_obj.get_rgba_tup())==4:
                 out_fp.write("mtllib "+fileName+".MTL\n")
         if geom_obj.is_trgl() or geom_obj.is_line() or geom_obj.is_point():
             for v in geom_obj.vrtx_arr:
@@ -181,12 +181,13 @@ class OBJ_OUT():
         out_fp.close()
 
         # Create an MTL file for the colour
-        if len(style_obj.rgba_tup)==4 and not ct_done:
+        rgba_tup = style_obj.get_rgba_tup()
+        if len(rgba_tup)==4 and not ct_done:
             out_fp = open(fileName+".MTL", 'w')
             out_fp.write("# Wavefront MTL file converted from  '{0}'\n\n".format(src_file_str))
             out_fp.write("newmtl colouring\n")
-            out_fp.write("Ka {0:.3f} {1:.3f} {2:.3f}\n".format(style_obj.rgba_tup[0], style_obj.rgba_tup[1], style_obj.rgba_tup[2]))
-            out_fp.write("Kd {0:.3f} {1:.3f} {2:.3f}\n".format(style_obj.rgba_tup[0], style_obj.rgba_tup[1], style_obj.rgba_tup[2]))
+            out_fp.write("Ka {0:.3f} {1:.3f} {2:.3f}\n".format(rgba_tup[0], rgba_tup[1], rgba_tup[2]))
+            out_fp.write("Kd {0:.3f} {1:.3f} {2:.3f}\n".format(rgba_tup[0], rgba_tup[1], rgba_tup[2]))
             out_fp.write("Ks 0.000 0.000 0.000\n")
             out_fp.write("d 1.0\n")
             out_fp.close()

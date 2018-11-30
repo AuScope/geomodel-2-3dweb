@@ -56,23 +56,24 @@ def find(src_dir, dest_dir, ext_list, find_and_process):
     return model_dict_list, reduced_geoext_list
 
 
-def create_json_config(model_dict_list, output_filename, geo_extent, params):
+def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, params):
     ''' Creates a JSON file of GLTF objects to display in 3D
 
     :param model_dict_list: list of model dicts to write to JSON file
     :param output_filename: name of file containing created config file
+    :param dest_dir: destination directory for output file
     :param geo_extent: list of coords defining boundaries of model [min_x, max_x, min_y, max_y]
     :param params: model input parameters, SimpleNamespace() object, keys are: 'name' 'crs' 'init_cam_dist'
                                                                     and optional 'proj4_defn'
     '''
     logger.debug("create_json_config(%s, %s)",  output_filename, repr(geo_extent))
     try:
-        fp = open(output_filename, "w")
+        fp = open(os.path.join(dest_dir, os.path.basename(output_filename)), "w")
     except Exception as e:
-        logger.error("ERROR - cannot open file %s %s", output_filename, e)
+        logger.error("Cannot open file %s %s", output_filename, e)
         return
-    # Sort by display name before saving to file
-    sorted_model_dict_list = sorted(model_dict_list, key=lambda x: x['display_name'])
+    # Sort by display name before saving to file, sort by display name, then model URL
+    sorted_model_dict_list = sorted(model_dict_list, key=lambda x: (x['display_name'], x['model_url']))
     config_dict = { "properties": { "crs": params.crs, "extent": geo_extent,
                                     "name": params.name,
                                     "init_cam_dist": params.init_cam_dist
@@ -86,6 +87,7 @@ def create_json_config(model_dict_list, output_filename, geo_extent, params):
     json.dump(config_dict, fp, indent=4, sort_keys=True)
     fp.close()
 
+
 def read_json_file(file_name):
     ''' Reads a JSON file and returns the contents
 
@@ -94,13 +96,13 @@ def read_json_file(file_name):
     try:
         fp = open(file_name, "r")
     except Exception as e:
-        logger.error("ERROR - Cannot open JSON file %s %s", file_name, e)
+        logger.error("Cannot open JSON file %s %s", file_name, e)
         sys.exit(1)
     try:
         json_dict = json.load(fp)
     except JSONDecodeError as e:
         json_dict = {}
-        logger.error("ERROR - cannot read JSON file %s %s", file_name, e)
+        logger.error("Cannot read JSON file %s %s", file_name, e)
         sys.exit(1)
     fp.close()
     return json_dict
@@ -118,7 +120,7 @@ def update_json_config(model_dict_list, template_filename, output_filename, bore
     try:
         fp = open(output_filename, "w")
     except Exception as e:
-        logger.error("ERROR - cannot open file %s %s", output_filename, e)
+        logger.error("Cannot open file %s %s", output_filename, e)
         return
     config_dict = read_json_file(template_filename)
     if config_dict=={}:
@@ -187,5 +189,35 @@ def add_info2popup(label_str, popup_dict, fileName, file_ext='.gltf', position=[
     j_dict['include'] = True
     j_dict['displayed'] = True
     return j_dict
+
+
+def add_vol_config(geom_obj, style_obj, meta_obj):
+    ''' Create a dictionary containing volume configuration data 
+    :param geom_obj: MODEL_GEOMETRIES object
+    :param style_obj: STYLE object
+    :param meta_obj: METADATA object
+    :returns: a dict of volume config data
+    '''
+    j_dict = { 'model_url': os.path.basename(meta_obj.src_filename)+'.gz', 'type': '3DVolume', 'include': True, 'displayed': False, 'display_name': meta_obj.name }
+    j_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz, 'origin': geom_obj.vol_origin, 'size': geom_obj.get_vol_side_lengths() }
+    if len(style_obj.get_colour_table()) > 0:
+        j_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
+    if len(style_obj.get_label_table()) > 0:
+        j_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
+    return j_dict
+    
+     
+def is_only_small(gsm_list):
+    ''' Returns True if this list of geometries contains only lines and points
+    :param gsm_list: list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
+    :returns True if we think this is a small model that can fit in one collada file
+    '''
+    small = True
+    for geom_obj, style_obj, meta_obj in gsm_list:
+        if not geom_obj.is_point() and not geom_obj.is_line():
+            small = False
+            break
+    return small
+
 
 

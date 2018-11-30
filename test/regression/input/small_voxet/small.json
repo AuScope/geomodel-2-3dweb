@@ -1,0 +1,23 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 0, "south": 0, "east": 0, "north": 0 },
+        "EXTERNAL_LINK": { "label": "URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:3857",
+        "WFS_URL": "http://wfs",
+        "BOREHOLE_CRS": "?",
+        "WFS_VERSION": "1.1.0"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:3857",
+        "name": "Small",
+        "init_cam_dist": 500000.0
+    },
+    "VoxetColourTables": [
+        {
+            "filename": "small_lithology@@",
+            "colour_table": "small_lithology_colours.csv"
+        }
+    ]
+}
