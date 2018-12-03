@@ -270,8 +270,8 @@ def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_file
 
         # Produce a PNG file from voxet file
         else:
-            popup_dict = pk.write_single_voxel_png(geom_obj, style_obj, meta_obj, out_filename, prop_idx)
-            model_dict_list.append(add_info2popup("{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, "{1}_{0}".format(prop_idx+1, out_filename), file_ext='.PNG', position=geom_obj.vol_origin))
+            popup_dict = pk.write_single_voxel_png(geom_obj, style_obj, meta_obj, out_filename)
+            model_dict_list.append(add_info2popup("{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, out_filename, file_ext='.PNG', position=geom_obj.vol_origin))
     return model_dict_list
 
 

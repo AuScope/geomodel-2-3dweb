@@ -199,7 +199,7 @@ def add_vol_config(geom_obj, style_obj, meta_obj):
     :returns: a dict of volume config data
     '''
     j_dict = { 'model_url': os.path.basename(meta_obj.src_filename)+'.gz', 'type': '3DVolume', 'include': True, 'displayed': False, 'display_name': meta_obj.name }
-    j_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz, 'origin': geom_obj.vol_origin, 'size': geom_obj.get_vol_side_lengths() }
+    j_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz, 'origin': geom_obj.vol_origin, 'size': geom_obj.get_vol_side_lengths(), 'maxVal': geom_obj.get_max_data(), 'minVal': geom_obj.get_min_data()  }
     if len(style_obj.get_colour_table()) > 0:
         j_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
     if len(style_obj.get_label_table()) > 0:

@@ -3,6 +3,7 @@ import sys
 import logging
 import array
 import PIL
+from db.style.false_colour import make_false_colour_tup
 
 class PNG_KIT:
     ''' Class used to output PBG files
@@ -33,16 +34,15 @@ class PNG_KIT:
         self.logger = PNG_KIT.logger
 
 
-    def write_single_voxel_png(self, geom_obj, style_obj, meta_obj, file_name, idx):
+    def write_single_voxel_png(self, geom_obj, style_obj, meta_obj, file_name):
         ''' Writes out a PNG file of the top layer of the voxel data
 
         :param geom_obj: MODEL_GEOMETRY object that holds voxel data
         :param style_obj: SYTLE object, contains colour map
         :param meta_obj: FILENAME object, contains object information
         :param file_name: filename of PNG file, without extension
-        :param idx: property index
         '''
-        self.logger.debug("write_single_voxel_png(%s, %d)",file_name, idx)
+        self.logger.debug("write_single_voxel_png(%s)",file_name)
         colour_arr = array.array("B")
         z = geom_obj.vol_sz[2]-1
         pixel_cnt = 0
@@ -69,7 +69,7 @@ class PNG_KIT:
             for x in range(0, geom_obj.vol_sz[0]):
                 for y in range(0, geom_obj.vol_sz[1]):
                     try:
-                        (r,g,b,a) = make_false_colour_tup(geom_obj.vol_data[x][y][z], geom_obj.get_min_data(), geom_obj.get_min_data())
+                        (r,g,b,a) = make_false_colour_tup(geom_obj.vol_data[x][y][z], geom_obj.get_min_data(), geom_obj.get_max_data())
                     except ValueError:
                         (r,g,b,a) = (0.0, 0.0, 0.0, 0.0)
                     pixel_colour = [int(r*255.0), int(g*255.0), int(b*255.0)]
@@ -84,6 +84,6 @@ class PNG_KIT:
             label_str = property_name
         else:
             label_str = meta_obj.name
-        popup_dict = { os.path.basename("{0}_{1:d}".format(file_name, idx)): { 'title': label_str, 'name': label_str } }
+        popup_dict = { os.path.basename(file_name): { 'title': label_str, 'name': label_str } }
         return popup_dict
 
