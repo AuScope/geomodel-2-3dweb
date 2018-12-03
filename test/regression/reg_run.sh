@@ -10,6 +10,34 @@
 #    was used to produce and view the voxet files
 #
 
+
+# Function to compare two files, print result and clear output dir. Exits if bad.
+compare_and_print() {
+    cmp $1 $2 >/dev/null 2>&1
+    case $? in
+    "0")
+        echo "PASSED"
+        ;;
+    "1")
+        echo "FAILED"
+        exit 1
+        ;;
+    *)
+        echo "FAILED - file could not be compared"
+        exit 1
+        ;;
+    esac
+
+    # Clear output directory
+    \rm -f $CWD/output/*
+
+}
+
+
+##########################################################################################
+# Main part starts here
+##########################################################################################
+
 echo "\n\nGOCAD to COLLADA, GZIP and PNG conversion regression test"
 CWD=`pwd`
 
@@ -17,11 +45,13 @@ CWD=`pwd`
 [ ! -e output ] && mkdir output 
 cd ../../scripts
 
+
+##########################################################################################
+# Convert various file types
+##########################################################################################
+
 # Loop around processing different GOCAD objects
 for i in 'pl' 'ts' 'vs' 'gp'; do
-
-# Clear output directory
-\rm -f $CWD/output/*
 
 echo -n "$i File test: "
 
@@ -34,59 +64,38 @@ egrep -v '(<created>|<modified>)' "$CWD/output/${i}Test.dae" > "$CWD/output/${i}
 [ $? -ne 0 ] && echo "FAILED" && exit 1
 
 # Check that conversion was correct
-cmp "$CWD/output/${i}Test2.dae" "$CWD/golden/${i}Test.dae" >/dev/null 2>&1
-case $? in
-"0")
-    echo "PASSED"
-    ;;
-"1")
-    echo "FAILED"
-    exit 1
-    ;;
-*)
-    echo "FAILED - file could not be compared"
-    exit 1
-    ;;
-esac
+compare_and_print "$CWD/output/${i}Test2.dae" "$CWD/golden/${i}Test.dae"
 
 done
 
+
 ##########################################################################################
-# Convert single layer VOXET to PNG test
+# Convert single layer VOXET to PNG test, with and without colour table
 ##########################################################################################
 
-# Clear output directory
-\rm -f $CWD/output/*
+echo -n "Convert single layer VOXET to PNG test, with colour table: "
 
-
-echo -n "Convert single layer VOXET to PNG test: "
-
-# Convert GOCAD to PNG 
+# Convert GOCAD to PNG with colour table
 ./gocad2collada.py -g -f $CWD/output $CWD/input/PNGTest.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
-[ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
+[ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
-cmp "$CWD/output/PNGTest@@.PNG" "$CWD/golden/PNGTest.PNG" >/dev/null 2>&1
-case $? in
-"0")
-    echo "PASSED"
-    ;;
-"1")
-    echo "FAILED"
-    exit 1
-    ;;
-*)
-    echo "FAILED - file could not be compared"
-    exit 1
-    ;;
-esac
+compare_and_print "$CWD/output/PNGTest@@.PNG" "$CWD/golden/PNGTest.PNG"
+
+
+echo -n "Convert single layer VOXET to PNG test, without colour table: "
+
+# Convert GOCAD to PNG without colour table
+./gocad2collada.py -g -f $CWD/output $CWD/input/PNGTestNoCT.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
+
+# Check that conversion was correct
+compare_and_print "$CWD/output/PNGTestNoCT@@.PNG" "$CWD/golden/PNGTestNoCT.PNG"
+
 
 ##########################################################################################
 # Voxet with 3 binary files conversion & output config test
 ##########################################################################################
-
-# Clear output directory
-\rm -f $CWD/output/*
 
 echo -n "Voxet with 3 binary files conversion & output config test: "
 
@@ -105,18 +114,12 @@ cmp "$CWD/output/gold.gz" "$CWD/output/out.gz" >/dev/null 2>&1
 done
 
 # Compare the output config file
-cmp "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json" >/dev/null 2>&1
-[ $? -ne 0 ] && echo "FAILED - comparison of output config returned False" && exit 1
-
-echo "PASSED"
+compare_and_print "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json"
 
 
 ##########################################################################################
 # Recursion test
 ##########################################################################################
-
-# Clear output directory
-\rm -f $CWD/output/*
 
 echo -n "Recursion test: "
 
@@ -128,6 +131,7 @@ echo -n "Recursion test: "
 for f in PNGTest@@.PNG gpTest.dae plTest.dae tsTest.dae vsTest.dae small_lithology@@.gz small_density@@.gz small_susceptibility@@.gz; do
 [ ! -e $CWD/output/$f ] && echo "FAILED - $f" && exit 1
 done
+
 echo "PASSED"
 
 
