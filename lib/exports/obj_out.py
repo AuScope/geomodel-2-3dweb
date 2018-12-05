@@ -65,11 +65,11 @@ class OBJ_OUT():
                     colour_num = int(255.0*(geom_obj.voxel_data[x][y][z] - geom_obj.voxel_data_stats['min'])/(geom_obj.voxel_data_stats['max'] - geom_obj.voxel_data_stats['min']))
 
                     # NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1
-                    u_offset = geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*geom_obj.vol_axis_u[0]
-                    v_offset = geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*geom_obj.vol_axis_v[1]
-                    w_offset = geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*geom_obj.vol_axis_w[2]
+                    u_offset = geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*abs(geom_obj.vol_axis_u[0])
+                    v_offset = geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*abs(geom_obj.vol_axis_v[1])
+                    w_offset = geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*abs(geom_obj.vol_axis_w[2])
                     v = (u_offset, v_offset, w_offset)
-                    pt_size = (step_sz*geom_obj.vol_axis_u[0]/geom_obj.vol_sz[0]/2, step_sz*geom_obj.vol_axis_v[1]/geom_obj.vol_sz[1]/2, step_sz*geom_obj.vol_axis_w[2]/geom_obj.vol_sz[2]/2)
+                    pt_size = (step_sz*abs(geom_obj.vol_axis_u[0])/geom_obj.vol_sz[0]/2, step_sz*abs(geom_obj.vol_axis_v[1])/geom_obj.vol_sz[1]/2, step_sz*abs(geom_obj.vol_axis_w[2])/geom_obj.vol_sz[2]/2)
                     vert_list = [ (v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]),
                                   (v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]),
                                   (v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]),

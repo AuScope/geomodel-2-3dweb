@@ -76,9 +76,9 @@ def cube_gen(x,y,z, geom_obj, pt_size):
     :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats;
         indices - integer index pointers to which vertices are joined as triangles
     '''    
-    v = (geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*geom_obj.vol_axis_u[0],
-         geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*geom_obj.vol_axis_v[1],
-         geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*geom_obj.vol_axis_w[2])
+    v = (geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*abs(geom_obj.vol_axis_u[0]),
+         geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*abs(geom_obj.vol_axis_v[1]),
+         geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*abs(geom_obj.vol_axis_w[2]))
     vert_floats = [v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
                 + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
                 + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \

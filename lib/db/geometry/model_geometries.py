@@ -3,6 +3,8 @@ from collections import namedtuple
 
 from .types import VRTX, ATOM, TRGL, SEG
 
+import numpy as np
+
 class MODEL_GEOMETRIES:
     ''' Class used to store abstract geometry of parts of a geological model and its data 
         It should be independent as possible of any model's input format
@@ -201,6 +203,21 @@ class MODEL_GEOMETRIES:
         ''' Returns the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats
         '''
         return [self.max_X - self.min_X, self.max_Y - self.min_Y, self.max_Z - self.min_Z]
+
+
+    def __unit_vector(self, vector):
+        ''' Returns the unit vector of the vector.
+        '''
+        return vector / np.linalg.norm(vector)
+
+
+    def get_rotation(self):
+        u_vec = self.__unit_vector(self.vol_axis_u)
+        v_vec = self.__unit_vector(self.vol_axis_v)
+        w_vec = self.__unit_vector(self.vol_axis_w)
+        ret = [tuple(u_vec), tuple(v_vec), tuple(w_vec) ]
+        print('get_rotation()=', ret)
+        return ret
 
     
     def get_max_data(self, idx=0):

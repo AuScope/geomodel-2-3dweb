@@ -317,9 +317,9 @@ class COLLADA_KIT:
         n_elems3 = geom_obj.vol_sz[0] * geom_obj.vol_sz[1] * geom_obj.vol_sz[2]
         while n_elems3/(step*step*step) > limit: 
             step += 1
-        pt_size = [(geom_obj.vol_axis_u[0]*step)/(geom_obj.vol_sz[0]*2), 
-                   (geom_obj.vol_axis_v[1]*step)/(geom_obj.vol_sz[1]*2),
-                   (geom_obj.vol_axis_w[2]*step)/(geom_obj.vol_sz[2]*2)]
+        pt_size = [(abs(geom_obj.vol_axis_u[0])*step)/(geom_obj.vol_sz[0]*2), 
+                   (abs(geom_obj.vol_axis_v[1])*step)/(geom_obj.vol_sz[1]*2),
+                   (abs(geom_obj.vol_axis_w[2])*step)/(geom_obj.vol_sz[2]*2)]
         return step, pt_size
 
 
