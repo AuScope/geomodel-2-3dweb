@@ -8,6 +8,9 @@ import glob
 COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 ''' Path where 'COLLADA2GLTF-bin' is located '''
 
+REMOVE_COLLADA = True
+''' Removes COLLADA file after conversion '''
+
 
 def convert_dir(src_dir, file_mask="*.dae"):
     ''' Converts a directory of files from COLLADA to GLTF
@@ -45,4 +48,7 @@ def convert_one_file(daefile_str):
     cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i '"+daefile_str+"' -o '"+fileName+".gltf'")
     print(cmd_str)
     os.system(cmd_str)
+    if REMOVE_COLLADA:
+        print("Deleting ", daefile_str)
+        os.remove(daefile_str)
 
