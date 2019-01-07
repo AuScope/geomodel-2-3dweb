@@ -4,15 +4,16 @@
         "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
                            "URL": ""
                          },
-        "MODEL_CRS": "EPSG:3857",
+        "MODEL_CRS": "EPSG:28354",
         "WFS_URL": "http://geology.information.qld.gov.au/geoserver/wfs",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
      },
      "ModelProperties": {
-        "crs": "EPSG:3857",
+        "crs": "EPSG:28354",
         "init_cam_dist": 2000000.0,
-        "name": "North Queensland"
+        "name": "North Queensland",
+        "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
       }
 }

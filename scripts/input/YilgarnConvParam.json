@@ -1,18 +1,19 @@
 {
     "BoreholeData": {
-        "BBOX": { "west": 0, "south": 0, "east": 0, "north": 0 },
+        "BBOX": { "west": 113.606468, "south": -32.4859203, "east": 119.283877, "north": -25.271620 },
         "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
                            "URL": ""
                          },
-        "MODEL_CRS": "EPSG:3857",
+        "MODEL_CRS": "EPSG:28350",
         "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/wfs",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"
      },
      "ModelProperties": {
-        "crs": "EPSG:3857",
+        "crs": "EPSG:28350",
         "init_cam_dist": 1000000.0,
-        "name": "Yilgarn"
+        "name": "Yilgarn",
+        "proj4_defn": "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
       }
 }

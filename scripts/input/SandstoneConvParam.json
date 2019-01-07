@@ -4,7 +4,7 @@
         "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
                            "URL": ""
                          },
-        "MODEL_CRS": "EPSG:3857",
+        "MODEL_CRS": "EPSG:28350",
         "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/wfs",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",

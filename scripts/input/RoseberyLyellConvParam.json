@@ -4,7 +4,7 @@
         "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
                            "URL": ""
                          },
-        "MODEL_CRS": "EPSG:3857",
+        "MODEL_CRS": "EPSG:28355",
         "WFS_URL": "http://www.mrt.tas.gov.au:80/web-services/wfs",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
