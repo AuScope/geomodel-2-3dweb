@@ -1,13 +1,14 @@
 {
     "BoreholeData": {
-        "BBOX": { "west": 0, "south": 0, "east": 0, "north": 0 },
+        "BBOX": { "west": 139.5, "south": -22, "east": 147, "north": -17 },
         "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
                            "URL": ""
                          },
         "MODEL_CRS": "EPSG:3857",
         "WFS_URL": "http://geology.information.qld.gov.au/geoserver/wfs",
-        "BOREHOLE_CRS": "?",
-        "WFS_VERSION": "1.1.0"
+        "BOREHOLE_CRS": "EPSG:4283",
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
      },
      "ModelProperties": {
         "crs": "EPSG:3857",

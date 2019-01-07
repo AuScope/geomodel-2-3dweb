@@ -7,7 +7,8 @@
         "MODEL_CRS": "EPSG:20354",
         "WFS_URL": "http://geology.information.qld.gov.au/geoserver/wfs",
         "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
-        "WFS_VERSION": "1.1.0"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
      },
      "ModelProperties": {
         "crs": "EPSG:20354",
