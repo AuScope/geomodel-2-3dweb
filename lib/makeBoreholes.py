@@ -375,6 +375,7 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
     borehole_list = get_boreholes_list(wfs, MAX_BOREHOLES, Param)
     HEIGHT_RES = 10.0
     print("borehole_list = ", borehole_list)
+    blob_obj = None
     # Parse response for all boreholes, make COLLADA files
     for borehole_dict in borehole_list:
         #print(borehole_dict)
