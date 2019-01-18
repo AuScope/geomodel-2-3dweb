@@ -15,6 +15,8 @@ from collections import OrderedDict
 from types import SimpleNamespace
 import itertools
 import logging
+from requests.exceptions import HTTPError
+from urllib.error import URLError 
 
 
 
@@ -149,8 +151,13 @@ def get_borehole_data(url, log_id, height_resol):
     params = {'logid' : log_id, 'outputformat': 'json', 'startdepth': 0.0, 'enddepth': 10000.0, 'interval': height_resol }
     enc_params = urllib.parse.urlencode(params).encode('ascii')
     req = urllib.request.Request(url, enc_params)
-    with urllib.request.urlopen(req, timeout=60) as response:
-        json_data = response.read()
+    json_data = b''
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:
+            json_data = response.read()
+    except URLError as e:
+        print('URLError:', e)
+        return OrderedDict()
     #print('json_data = ', json_data)
     meas_list = []
     depth_dict = OrderedDict()
@@ -189,8 +196,13 @@ def get_borehole_logids(url, nvcl_id):
     params = {'holeidentifier' : nvcl_id }
     enc_params = urllib.parse.urlencode(params).encode('ascii')
     req = urllib.request.Request(url, enc_params)
-    with urllib.request.urlopen(req, timeout=60) as response:
-        response_str = response.read()
+    response_str = b''
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:
+            response_str = response.read()
+    except URLError as e:
+        print('URLError:', e)
+        return []
     root = ET.fromstring(response_str)
     logid_list = []
     for child in root.findall('./*/Logs/Log'):
@@ -217,8 +229,12 @@ def get_boreholes_list(wfs, max_boreholes, Param):
     # filter_2 = BBox([Param.BBOX['west'], Param.BBOX['south'], Param.BBOX['east'], Param.BBOX['north']], crs=Param.BOREHOLE_CRS)
     # filter_3 = And([filter_, filter_2])
     filterxml = etree.tostring(filter_.toXML()).decode("utf-8")
-    response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
-    response_str = bytes(response.read(), 'ascii')
+    response_str = ''
+    try:
+        response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
+        response_str = bytes(response.read(), 'ascii')
+    except HTTPError as e:
+        return []
     borehole_list = []
     print('get_boreholes_list() resp=', response_str)
     borehole_cnt=0
@@ -325,6 +341,7 @@ def get_blob_boreholes(borehole_dict, Param):
     ''' Retrieves borehole data and writes 3D model files to a blob
 
     :param borehole_dict: 
+    :param Param: input parameters
     :returns: GLTF blob object
     '''
     print("get_blob_boreholes(", borehole_dict, ")")
@@ -334,7 +351,6 @@ def get_blob_boreholes(borehole_dict, Param):
         x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
         log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
-        print('got log_ids = ', log_ids)
         url = Param.NVCL_URL + '/getDownsampledData.html'
         bh_data_dict = [] 
         for log_id, log_type, log_name in log_ids:
