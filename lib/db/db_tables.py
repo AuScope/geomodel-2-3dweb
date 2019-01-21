@@ -169,7 +169,7 @@ class QueryDB():
             self.ses.rollback()
 
     def query(self, label, model_name):
-        result = self.ses.query(Query).filter_by(label=label).first()
+        result = self.ses.query(Query).filter_by(label=label).filter_by(model_name=model_name).first()
         if result == None:
             filter = label.rpartition('_')[0]
             result = self.ses.query(Query).filter_by(label=filter).first()
