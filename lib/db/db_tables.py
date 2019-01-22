@@ -118,7 +118,8 @@ class QueryDB():
         self.eng = None
         self.ses = None
 
-    def open_db(self, create=False, db_name='sqlite:///query_data.db'):
+    def open_db(self, create=False, db_name='query_data.db'):
+        db_name = 'sqlite:///' + db_name
         self.eng = create_engine(db_name)
         Base.metadata.bind = self.eng
         if create:
