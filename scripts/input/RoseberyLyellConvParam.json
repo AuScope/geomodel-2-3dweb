@@ -13,6 +13,7 @@
     "ModelProperties": {
         "crs": "EPSG:28355",
         "name": "Rosebery Lyell",
+        "modelUrlPath": "rosebery",
         "init_cam_dist": 170000.0,
         "proj4_defn": "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },

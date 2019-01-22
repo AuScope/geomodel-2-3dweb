@@ -1,0 +1,11 @@
+../scripts/input/NorthGawlerConvParam.json
+../scripts/input/McArthurBasinConvParam.json
+../scripts/input/SandstoneConvParam.json
+../scripts/input/TasConvParam.json
+../scripts/input/NorthQueenslandConvParam.json
+../scripts/input/WestTamworthConvParam.json
+../scripts/input/OtwayConvParam.json
+../scripts/input/WindimurraConvParam.json
+../scripts/input/QuambyConvParam.json
+../scripts/input/YilgarnConvParam.json
+../scripts/input/RoseberyLyellConvParam.json
