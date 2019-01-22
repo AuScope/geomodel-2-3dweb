@@ -316,12 +316,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert GOCAD files into files used to display a geological model')
     parser.add_argument('src', help='GOCAD source directory or source file', metavar='GOCAD source dir/file')
     parser.add_argument('param_file', help='Input parameters in JSON format', metavar='JSON input param file')
-    parser.add_argument('--output_config', '-o', action='store', help='Output JSON config file', default='output_config.json')
-    parser.add_argument('--recursive', '-r', action='store_true', help='Recursively search directories for files')
-    parser.add_argument('--debug', '-d', action='store_true', help='Print debug statements during execution')
-    parser.add_argument('--nondefault_coord', '-x', action='store_true', help='Tolerate non-default GOCAD coordinate system')
-    parser.add_argument('--output_folder', '-f', action='store', help='Output folder for graphics files')
-    parser.add_argument('--no_gltf', '-g', action='store_true', help='Create COLLADA files, but do not convert to GLTF')
+    parser.add_argument('-o', '--output_config', action='store', help='Output JSON config file', default='output_config.json')
+    parser.add_argument('-r', '--recursive', action='store_true', help='Recursively search directories for files')
+    parser.add_argument('-d', '--debug', action='store_true', help='Print debug statements during execution')
+    parser.add_argument('-x', '--nondefault_coord', action='store_true', help='Tolerate non-default GOCAD coordinate system')
+    parser.add_argument('-f', '--output_folder', action='store', help='Output folder for graphics files')
+    parser.add_argument('-g', '--no_gltf', action='store_true', help='Create COLLADA files, but do not convert to GLTF')
     args = parser.parse_args()
 
     # If just want to create COLLADA files without converting them to GLTF
