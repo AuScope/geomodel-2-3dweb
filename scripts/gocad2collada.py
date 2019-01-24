@@ -338,8 +338,8 @@ if __name__ == "__main__":
     # Initialise output directory, default is source directory
     dest_dir = os.path.dirname(args.src)
     if args.output_folder != None:
-        if not os.path.exists(args.output_folder) or not os.path.exists(args.output_folder):
-            logger.error("Output folder %s does not exist, or is not a directory", args.output_folder)
+        if not os.path.isdir(args.output_folder):
+            logger.error("Output folder %s is not a directory", repr(args.output_folder))
             sys.exit(1)
         dest_dir = args.output_folder
 
