@@ -18,45 +18,41 @@ The aim is to generate 3D web versions of geological models
 3. Clone this repository
 4. Edit 'lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
 
-### To convert some GOCAD files to COLLADA and/or GLTF
+### To convert some GOCAD *.ts *.vs *.pl files to COLLADA and/or GLTF
 
-Run 'gocad2collada.py' (in 'scripts' dir). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an input file. Sample input files are in the 'scripts/input' directory. 
+Run 'gocad2collada.py' (in 'scripts' dir). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an input file. Sample input files are in the 'scripts/input' directory. e.g.
+```
+./gocad2collada.py gocad.ts config.json
+```
 
 ```
-usage: gocad2collada.py [-h] [--output_config OUTPUT_CONFIG] [--recursive]
-                        [--debug] [--nondefault_coord] [--output_folder OUTPUT_FOLDER] [--no_gltf]
-                        GOCAD source dir/file   JSON input param file
+usage: gocad2collada.py [-h] [-o OUTPUT_CONFIG] [-r] [-d] [-x]
+                        [-f OUTPUT_FOLDER] [-g]
+                        GOCAD source dir/file JSON input param file
 
 Convert GOCAD files into files used to display a geological model
 
 positional arguments:
-
-   GOCAD source dir/file
-                        GOCAD source directory or source file  
-   JSON input param file
-                        Input parameters in JSON format  
+  GOCAD source dir/file
+                        GOCAD source directory or source file
+  JSON input param file
+                        Input parameters in JSON format
 
 optional arguments:
-
-   -h, --help            show this help message and exit
-  
-   --output_config OUTPUT_CONFIG, -o OUTPUT_CONFIG
-                         Output JSON config file
-                        
-   --recursive, -r       Recursively search directories for files
-  
-   --debug, -d           Print debug statements during execution
-  
-   --nondefault_coord, -x
-                         Tolerate non-default GOCAD coordinate system  
-                        
-   --output_folder OUTPUT_FOLDER, -f OUTPUT_FOLDER
-                         Output folder for graphics files  
-                        
-   --no_gltf, -g         Create COLLADA files, but do not convert to GLTF  
+  -h, --help            show this help message and exit
+  -o OUTPUT_CONFIG, --output_config OUTPUT_CONFIG
+                        Output JSON config file
+  -r, --recursive       Recursively search directories for files
+  -d, --debug           Print debug statements during execution
+  -x, --nondefault_coord
+                        Tolerate non-default GOCAD coordinate system
+  -f OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
+                        Output folder for graphics files
+  -g, --no_gltf         Create COLLADA files, but do not convert to GLTF
  ```
-  
 
+  
+### To convert GOCAD models for use in websites, use the 'batch_proc.py' script
 
 ### TravisCI Status
 
