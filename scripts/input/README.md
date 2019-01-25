@@ -51,12 +51,12 @@ The "BoreholeData" section is used to create borehole GLTF objects. It has a num
 
 The "ModelProperties" section contains the following:
 
-    "crs"- this is the coordinate reference system of x,y,z coordinates that 
-are contained in all the GOCAD files
-    "name" - name of model for display purposes
-    "proj4_defn" - if the CRS is not common, a 'proj4' definition may sometimes be necessary (http://proj4js.org/)
-    "init_cam_dist" - this is the initial camera distance to the model, this is
-used for website
+    "crs"- this is the coordinate reference system of x,y,z coordinates that are contained in all the GOCAD files
+    "name" - name of model for display purposes (used by the geomodels website)
+    "proj4_defn" - if the CRS is not common, a 'proj4' definition may be necessary (http://proj4js.org/)
+    "init_cam_dist" - this is the initial camera distance to the model (used by the geomodelportal website)
 
 
-The "CoordOffsets" section is a coordinate offset that is added to all model parts from a particular file. For example, using the input parameter file above, if a GOCAD VSet object in "Hellyer.vs" is at (1000.0, 1000.0, 2500.0), its model part in the website would be placed at  (1000.0, 1000.0, 500.0)
+The "CoordOffsets" section is a coordinate offset that is added to all model parts from a particular file. For example, using the input parameter file above, if a GOCAD VSet object in "Hellyer.vs" is at (1000.0, 1000.0, 2500.0), its model part in the website would be placed at (1000.0, 1000.0, 500.0)
+
+
