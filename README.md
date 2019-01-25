@@ -20,7 +20,7 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 
 ### To convert some GOCAD *.ts *.vs *.pl files to GLTF or COLLADA
 
-Run [gocad2collada.py](scripts/gocad2collada.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
+Run [gocad2collada.py](scripts/gocad2collada.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
 
 e.g.
 ```
