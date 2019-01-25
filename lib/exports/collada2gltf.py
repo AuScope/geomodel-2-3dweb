@@ -4,6 +4,7 @@
 #
 import os
 import glob
+import subprocess
 
 COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 ''' Path where 'COLLADA2GLTF-bin' is located '''
@@ -45,10 +46,17 @@ def convert_one_file(daefile_str):
     :param daefile_str: filename to be converted
     '''
     fileName, fileExt = os.path.splitext(daefile_str)
-    cmd_str = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin -i '"+daefile_str+"' -o '"+fileName+".gltf'")
-    print(cmd_str)
-    os.system(cmd_str)
-    if REMOVE_COLLADA:
-        print("Deleting ", daefile_str)
+    # COLLADA2GLTF does not like single filename without path as -o parameter
+    fileName = os.path.abspath(fileName)
+    cmdList = [os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin"), "-i", daefile_str, "-o", fileName+".gltf"]
+    try:
+        cmdProc = subprocess.run(cmdList)
+    except OSError as e:
+        print("Cannot execute COLLADA2GLTF: ", e)
+    else:
+        if cmdProc.returncode != 0:
+            print("Conversion from COLLADA to GLTF failed: return code=", str(cmdProc.returncode))
+        elif REMOVE_COLLADA:
+            print("Deleting ", daefile_str)
         os.remove(daefile_str)
 
