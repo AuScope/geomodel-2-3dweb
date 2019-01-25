@@ -1,6 +1,6 @@
 # geomodel-2-3dweb
 
-The aim is to generate 3D web versions of geological models
+Generates 3D web versions of geological models primarily for geomodelportal website (https://github.com/AuScope/geomodelportal)
 
 **NOTE:** This is still being developed. It is far from complete.
 
@@ -18,43 +18,38 @@ The aim is to generate 3D web versions of geological models
 3. Clone this repository
 4. Edit 'lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
 
-### To convert some GOCAD *.ts *.vs *.pl files to GLTF
+### To convert some GOCAD *.ts *.vs *.pl files to GLTF or COLLADA
 
-Run 'gocad2collada.py' (in 'scripts' dir). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an input file. Sample input files are in the 'scripts/input' directory. This [README](scripts/input/README.md) explains their format.
+Run 'gocad2collada.py' (in 'scripts' dir). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus an conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
 
 e.g.
 ```
 ./gocad2collada.py gocad.ts config.json
-```
 
 ```
-usage: gocad2collada.py [-h] [-o OUTPUT_CONFIG] [-r] [-d] [-x]
-                        [-f OUTPUT_FOLDER] [-g]
-                        GOCAD source dir/file JSON input param file
 
-Convert GOCAD files into files used to display a geological model
+where _config.json_ looks like this:
 
-positional arguments:
-  GOCAD source dir/file
-                        GOCAD source directory or source file
-  JSON input param file
-                        Input parameters in JSON format
+```
+{
+    "ModelProperties": {
+        "crs": "EPSG:28352",
+        "name": "Any Name",
+        "modelUrlPath": "path",
+        "init_cam_dist": 0.0,
+        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    }
+}
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -o OUTPUT_CONFIG, --output_config OUTPUT_CONFIG
-                        Output JSON config file
-  -r, --recursive       Recursively search directories for files
-  -d, --debug           Print debug statements during execution
-  -x, --nondefault_coord
-                        Tolerate non-default GOCAD coordinate system
-  -f OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
-                        Output folder for graphics files
-  -g, --no_gltf         Create COLLADA files, but do not convert to GLTF
- ```
+```
+
+Use the '-g' flag to generate COLLADA files
 
   
-### To convert GOCAD models for use in websites, use the 'batch_proc.py' script
+### To convert GOCAD models for use in geomodelportal website
+
+The 'batch_proc.py' script (in the 'scripts' directory) is a simple batch script used to convert the GOCAD models for the website.
+
 
 ### TravisCI Status
 
