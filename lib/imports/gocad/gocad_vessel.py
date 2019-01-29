@@ -13,7 +13,7 @@ from db.geometry.model_geometries import MODEL_GEOMETRIES
 from imports.gocad.props import PROPS
 from db.style.style import STYLE
 from db.geometry.types import VRTX, ATOM, TRGL, SEG
-from db.metadata.metadata import METADATA
+from db.metadata.metadata import METADATA, MapFeat
 
 # Set up debugging
 local_logger = logging.getLogger("gocad_vessel")
@@ -573,6 +573,22 @@ class GOCAD_VESSEL():
                     is_ok_b, b_int = self.__parse_int(splitstr_arr[2])
                     if is_ok_a and is_ok_b:
                         self.__seg_arr.append(SEG((a_int, b_int)))
+
+                # Grab metadata - see 'metadata.py' for more info
+                elif splitstr_arr[0] in ("STRATIGRAPHIC_POSITION","GEOLOGICAL_FEATURE"):
+                    self.meta_obj.geofeat_name = splitstr_arr[1]
+                    if splitstr_arr[0] == 'STRATIGRAPHIC_POSITION':
+                        is_ok, self.meta_obj.geoevent_numeric_age_range = self.__parse_int(splitstr_arr[2], 0)
+                        self.meta_obj.mapped_feat = MapFeat.GEOLOGICAL_UNIT
+
+                elif splitstr_arr[0] == "GEOLOGICAL_TYPE":
+                    if splitstr_arr[1] == "FAULT":
+                        self.meta_obj.mapped_feat = MapFeat.SHEAR_DISP_STRUCT
+                    elif  splitstr_arr[1] == "INTRUSIVE":
+                        self.meta_obj.mapped_feat = MapFeat.GEOLOGICAL_UNIT
+                    elif splitstr_arr[1] in ("BOUNDARY","UNCONFORMITY","INTRAFORMATIONAL"):
+                        self.meta_obj.mapped_feat = MapFeat.CONTACT
+
 
                 # What kind of property is this? Is it a measurement, or a reference to a rock colour table?
                 elif splitstr_arr[0] == "PROPERTY_SUBCLASS":

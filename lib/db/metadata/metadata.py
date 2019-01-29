@@ -1,3 +1,11 @@
+from enum import Enum
+
+class MapFeat(Enum):
+    UNKNOWN = 1
+    SHEAR_DISP_STRUCT = 2
+    GEOLOGICAL_UNIT = 3
+    CONTACT = 4
+
 class METADATA():
     def __init__(self):
         self.name = ''
@@ -13,17 +21,44 @@ class METADATA():
         '''
 
         self.rock_label_table = {}
-        ''' Table specifying names of rocks , key is an integer, value is the label
+        ''' Table specifying names of rocks, key is an integer, value is the label
         '''
 
         self.src_filename = ''
         ''' Volume data source file
         '''
 
+        self.geofeat_name = ''
+        ''' Copied from GOCAD "STRATIGRAPHIC_POSITION" (1st val) or from GOCAD "GEOLOGICAL_FEATURE"
+            to GeoSciML v4 GeologicFeature::GeologicUnit gml:name or
+            GeologicFeature::GeologicStructure::ShearDisplacementStructure gml:name or
+            GeologicFeature::GeologicStructure::Contact gml:name
+        '''
 
+        self.geoevent_numeric_age_range = 0
+        ''' Copied from GOCAD "STRATIGRAPHIC_POSITION" (2nd val) to GeoSciML v4 GeologicEvent
+            gsmlb:numericAgeRange
+    
+        '''
+
+        self.mapped_feat = MapFeat.UNKNOWN
+        ''' Copied from GOCAD "GEOLOGICAL_TYPE" which can have values: top, intraformational, 
+           fault, unconformity, intrusive, topography, boundary, and ghost
+           'fault' maps to "GeologicFeature::GeologicStructure::ShearDisplacementStructure"
+           'intrusive' - many kinds of igneous formations, maps to 'GeologicFeature::GeologicUnit'
+           'unconformity' - (gaps in the geologic record within a stratigraphic unit) and
+             'intraformational' and 'boundary' map to 'GeologicFeature::GeologicStructure::Contact'
+           'top', 'topography' maybe map to 'MappedFeature' fields
+        '''
 
     def __repr__(self):
-        return("METADATA(): name={0} property_name={1} is_index_data={2}".format(self.name, self._property_name, str(self.is_index_data)))
+        ''' A basic print friendly representation
+        '''
+        ret_str = 'METADATA():'
+        for field in dir(self):
+            if '__' != field[-2:] and not callable(getattr(self,field)):
+                ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
+        return ret_str
 
     def add_property_name(self, name):
         ''' Adds a property name

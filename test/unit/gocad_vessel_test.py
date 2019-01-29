@@ -12,6 +12,8 @@ from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
 
 from db.geometry.types import ATOM
 
+from db.metadata.metadata import MapFeat
+
 INPUT_DIR = 'input'
 
 
@@ -287,3 +289,13 @@ gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
     # Extract GOCAD objects from group file
     #
     test_group("Extract GOCAD objects from group file", "test033.gp","len(gsm_list)==6 and gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].get_property_name() == 'OBJECTID' and gsm_list[0][0].get_xyz_data()[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
+
+    #
+    # Extraction of metadata 
+    #
+    test_this("Extraction of GeoSciML MappedFeatures - part 1", "test034.ts", "gsm_list[0][2].geofeat_name == 'F123' and gsm_list[0][2].mapped_feat == MapFeat.SHEAR_DISP_STRUCT")
+
+    test_this("Extraction of GeoSciML MappedFeatures - part 2", "test035.ts", "gsm_list[0][2].geofeat_name == 'MESOZOIC' and gsm_list[0][2].geoevent_numeric_age_range == 200 and gsm_list[0][2].mapped_feat == MapFeat.GEOLOGICAL_UNIT")
+
+    test_this("Extraction of GeoSciML MappedFeatures - part 3", "test036.ts", "gsm_list[0][2].geofeat_name == 'VOI' and gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
+
