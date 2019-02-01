@@ -92,6 +92,7 @@ class COLLADA_OUT():
         mesh.geometries.append(geom)
         matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num), mesh.materials[colour_num], inputs=[])]
         geomnode_list.append(Collada.scene.GeometryNode(geom, matnode_list))
+        return geom_label
 
 
     def make_line(self, mesh, geometry_name, geomnode_list, seg_arr, vrtx_arr, obj_cnt, line_width):
