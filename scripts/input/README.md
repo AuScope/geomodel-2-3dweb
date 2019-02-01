@@ -18,16 +18,16 @@ Here is an example conversion parameter file
         "WFS_URL": "http://blah.united.gov.au:80/geoserver/wfs",
         "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
         "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "http://auscope.ssw.gov.au/NVCLDataServices/"
-     },
-     "ModelProperties": {
+        "NVCL_URL": "http://blah.ssw.gov.au/NVCLDataServices/"
+    },
+    "ModelProperties": {
         "crs": "EPSG:20356",
         "init_cam_dist": 900000.0,
-        "name": "West Tamworth Belt",
+        "name": "Tamworth",
         "modelUrlPath": "tamworth",
         "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-      },
-      "CoordOffsets": [
+    },
+    "CoordOffsets": [
          {
              "filename": "Avebury.vs",
              "offset": [0.0, 0.0, -2250.0]
@@ -36,13 +36,39 @@ Here is an example conversion parameter file
              "filename": "Hellyer.vs",
              "offset": [0.0, 0.0, -2000.0]
          }
-      ],
-      "VoxetColourTables": [
+    ],
+    "VoxetColourTables": [
         {
                 "filename": "3D_geology_Lithology@@",
                 "colour_table": "3D_geology_lithology_colours.csv"
         }
-      ]
+    ],
+    "GroupStructure": {
+        "Surface Geology": [
+            {
+                "FileNameKey": "SurfaceGeology_BLAH.PNG",
+                "Insert": {
+                    "display_name": "Surface Geology",
+                    "3dobject_label": "SurfaceGeology_BLAH_0",
+                    "reference_url": "http://www.minerals.com/geoscience/geology/info"
+                }
+            }
+        ],
+        "Muskrat Creek Faults": [
+            {
+                "FileNameKey": "Faults_Muskrat_Creek_0.gltf",
+                "Insert": {
+                    "display_name": "Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Muskrat_Creek_1.gltf",
+                "Insert": {
+                    "display_name": "Fault 2"
+                }
+            }
+        ],
+    }
 }
 ```
 
@@ -84,3 +110,15 @@ When displaying volume data, an optional colour table can be specified so that a
 * "colour_table" - name of colour table file. Its format is CSV: _index_, _rock_label_, _red_, _green_, _blue_ where _index_ is the data value, and _red_, _green_, _blue_ are floats e.g.
 
 ```1,"RockySupersuite",0.968627,0.505882,0.705882```
+
+### 5. GroupStructure
+
+The optional "GroupStructure" section is used to define what labels are seen in the website's sidebar, and to insert additional parameters into the model's configuration file
+
+The "GroupStructure" contains labels for the groups in the sidebar (i.e. "Surface Geology" and "Muskrat Creek Faults" are group names in the example above). Within each group
+there is an array of structures:
+
+* "FileNameKey" - name of the GLTF or PNG file for the model part
+* "Insert" - a structure to be inserted into the model configuration file for that model part
+
+Thus the "Insert" can be used to change the labels of the parts and make the website open a window when the model is clicked on, as in the "Surface Geology" example above

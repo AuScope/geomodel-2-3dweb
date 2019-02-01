@@ -9,12 +9,34 @@
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"
-     },
-     "ModelProperties": {
+    },
+    "ModelProperties": {
         "crs": "EPSG:28350",
         "init_cam_dist": 1000000.0,
         "name": "Yilgarn NWS",
         "modelUrlPath": "yilgarn",
         "proj4_defn": "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-      }
+    },
+    "GroupStructure": {
+        "Surfaces and structures": [
+            {
+                "FileNameKey": "nws_greenstone_0.gltf",
+                "Insert": {
+                    "display_name": "Greenstone 0"
+                }
+            },
+            {
+                "FileNameKey": "nws_greenstone_1.gltf",
+                "Insert": {
+                    "display_name": "Greenstone 1"
+                }
+            },
+            {
+                "FileNameKey": "nws_structures.gltf",
+                "Insert": {
+                    "display_name": "Faults"
+                }
+            }
+        ]
+    }
 }

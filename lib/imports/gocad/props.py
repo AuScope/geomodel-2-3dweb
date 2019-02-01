@@ -3,6 +3,7 @@ import os
 import csv
 import sys
 import logging
+from collections import defaultdict
 
 
 
@@ -54,7 +55,7 @@ class PROPS:
         ''' Property data collected from binary file, value is float, stored as a 3d numpy array.
         '''
 
-        self.data_xyz = {}
+        self.data_xyz = defaultdict(list)
         ''' Property data attached to XYZ points (index is XYZ coordinate)
         '''
 
@@ -197,7 +198,6 @@ class PROPS:
             xyz - (X,Y,Z) tuple array indexes (floats)
             val - value to be assigned 
         '''
-        self.data_xyz.setdefault((x,y,z), [])
         self.data_xyz[xyz].append(val)
         
 

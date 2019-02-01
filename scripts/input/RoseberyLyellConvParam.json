@@ -60,5 +60,1307 @@
             "filename": "Rosebery_Lyell_geophysics_lithologies@@",
             "colour_table": "RL_Reclassification.csv"
         }
-    ]
+    ],
+    "GroupStructure": {
+        "Digital Elevation Model": [
+            {
+                "FileNameKey": "RL_DEM100m.gltf",
+                "Insert": {
+                    "display_name": "RL DEM100m"
+                }
+            }
+        ],
+        "Faults": [
+            {
+                "FileNameKey": "F_000_Federal_Bassett_fault.gltf",
+                "Insert": {
+                    "display_name": "Federal Bassett fault"
+                }
+            },
+            {
+                "FileNameKey": "F_001_Rosebery_Fault.gltf",
+                "Insert": {
+                    "display_name": "Rosebery Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_001_Rosebery_Fault_inferred.gltf",
+                "Insert": {
+                    "display_name": "Rosebery Fault inferred"
+                }
+            },
+            {
+                "FileNameKey": "F_002_Mt_Black_Fault.gltf",
+                "Insert": {
+                    "display_name": "Mt Black Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_003_Moxons_Fault.gltf",
+                "Insert": {
+                    "display_name": "Moxons Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_004_Marionoak_Fault.gltf",
+                "Insert": {
+                    "display_name": "Marionoak Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_005_Henty_Fault_1.gltf",
+                "Insert": {
+                    "display_name": "Henty Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "F_005_Henty_Fault_2.gltf",
+                "Insert": {
+                    "display_name": "Henty Fault 2"
+                }
+            },
+            {
+                "FileNameKey": "F_005_Henty_Fault_3.gltf",
+                "Insert": {
+                    "display_name": "Henty Fault 3"
+                }
+            },
+            {
+                "FileNameKey": "F_006_South_Henty_Fault.gltf",
+                "Insert": {
+                    "display_name": "South Henty Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_007_Mt_Strahan_Fault.gltf",
+                "Insert": {
+                    "display_name": "Mt Strahan Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_008.gltf",
+                "Insert": {
+                    "display_name": "Fault 008"
+                }
+            },
+            {
+                "FileNameKey": "F_009.gltf",
+                "Insert": {
+                    "display_name": "Fault 009"
+                }
+            },
+            {
+                "FileNameKey": "F_010_Mt_Cripps_Fault.gltf",
+                "Insert": {
+                    "display_name": "Mt Cripps Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_011.gltf",
+                "Insert": {
+                    "display_name": "Fault 011"
+                }
+            },
+            {
+                "FileNameKey": "F_012_Mt_Charter_Fault.gltf",
+                "Insert": {
+                    "display_name": "Mt Charter Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_013.gltf",
+                "Insert": {
+                    "display_name": "Fault 013"
+                }
+            },
+            {
+                "FileNameKey": "F_014.gltf",
+                "Insert": {
+                    "display_name": "Fault 014"
+                }
+            },
+            {
+                "FileNameKey": "F_015_Anthony_River_Fault.gltf",
+                "Insert": {
+                    "display_name": "Anthony River Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_016.gltf",
+                "Insert": {
+                    "display_name": "Fault 016"
+                }
+            },
+            {
+                "FileNameKey": "F_017.gltf",
+                "Insert": {
+                    "display_name": "Fault 017"
+                }
+            },
+            {
+                "FileNameKey": "F_018_Ewart_Fault.gltf",
+                "Insert": {
+                    "display_name": "Ewart Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_019.gltf",
+                "Insert": {
+                    "display_name": "Fault 019"
+                }
+            },
+            {
+                "FileNameKey": "F_020.gltf",
+                "Insert": {
+                    "display_name": "Fault 020"
+                }
+            },
+            {
+                "FileNameKey": "F_021_Engineer_Fault.gltf",
+                "Insert": {
+                    "display_name": "Engineer Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_01.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 01"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_02.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 02"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_03.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 03"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_04.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 04"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_05.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 05"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_06.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 06"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_07.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 07"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_08.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 08"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_09.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 09"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_10.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 10"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_11.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault 11"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_01.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 01"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_02.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 02"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_03.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 03"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_04.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 04"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_05.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 05"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_06.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 06"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_07.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 07"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_08.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 08"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_09.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 09"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_10.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 10"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_11.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 11"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_12.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 12"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_13.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 13"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_14.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 14"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_15.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 15"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_16.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 16"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_17.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 17"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_18.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 18"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_19.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 19"
+                }
+            },
+            {
+                "FileNameKey": "F_022_ultramafic_fault_inferred_20.gltf",
+                "Insert": {
+                    "display_name": "Ultramafic fault inferred 20"
+                }
+            },
+            {
+                "FileNameKey": "F_023_Firewood_Siding_Fault_02.gltf",
+                "Insert": {
+                    "display_name": "Firewood Siding Fault 02"
+                }
+            },
+            {
+                "FileNameKey": "F_023_Firewood_Siding_Fault_03.gltf",
+                "Insert": {
+                    "display_name": "Firewood Siding Fault 03"
+                }
+            },
+            {
+                "FileNameKey": "F_023_Firewood_Siding_Fault_04.gltf",
+                "Insert": {
+                    "display_name": "Firewood Siding Fault 04"
+                }
+            },
+            {
+                "FileNameKey": "F_023_Firewood_Siding_Fault_05.gltf",
+                "Insert": {
+                    "display_name": "Firewood Siding Fault 05"
+                }
+            },
+            {
+                "FileNameKey": "F_023_Firewood_Siding_fault_01.gltf",
+                "Insert": {
+                    "display_name": "Firewood Siding fault 01"
+                }
+            },
+            {
+                "FileNameKey": "F_024.gltf",
+                "Insert": {
+                    "display_name": "Fault 024"
+                }
+            },
+            {
+                "FileNameKey": "F_025.gltf",
+                "Insert": {
+                    "display_name": "Fault 025"
+                }
+            },
+            {
+                "FileNameKey": "F_026.gltf",
+                "Insert": {
+                    "display_name": "Fault 026"
+                }
+            },
+            {
+                "FileNameKey": "F_027_Glen_Lyell_Fault.gltf",
+                "Insert": {
+                    "display_name": "Glen Lyell Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_028_Great_Northern_Fault.gltf",
+                "Insert": {
+                    "display_name": "Great Northern Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_029.gltf",
+                "Insert": {
+                    "display_name": "Fault 029"
+                }
+            },
+            {
+                "FileNameKey": "F_030_Great_Lyell_Fault.gltf",
+                "Insert": {
+                    "display_name": "Great Lyell Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_031_King_River_Fault_splay.gltf",
+                "Insert": {
+                    "display_name": "King River Fault splay"
+                }
+            },
+            {
+                "FileNameKey": "F_032_King_River_Fault.gltf",
+                "Insert": {
+                    "display_name": "King River Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_033.gltf",
+                "Insert": {
+                    "display_name": "Fault 033"
+                }
+            },
+            {
+                "FileNameKey": "F_034.gltf",
+                "Insert": {
+                    "display_name": "Fault 034"
+                }
+            },
+            {
+                "FileNameKey": "F_035.gltf",
+                "Insert": {
+                    "display_name": "Fault 035"
+                }
+            },
+            {
+                "FileNameKey": "F_036.gltf",
+                "Insert": {
+                    "display_name": "Fault 036"
+                }
+            },
+            {
+                "FileNameKey": "F_037_North_Lyell_Fault.gltf",
+                "Insert": {
+                    "display_name": "North Lyell Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_038_East_Jukes_Fault.gltf",
+                "Insert": {
+                    "display_name": "East Jukes Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_039_West_Jukes_Fault.gltf",
+                "Insert": {
+                    "display_name": "West Jukes Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_040_North_Lyell_Fault.gltf",
+                "Insert": {
+                    "display_name": "North Lyell Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_041.gltf",
+                "Insert": {
+                    "display_name": "Fault 041"
+                }
+            },
+            {
+                "FileNameKey": "F_042_Teepookana.gltf",
+                "Insert": {
+                    "display_name": "Teepookana"
+                }
+            },
+            {
+                "FileNameKey": "F_043_Little_Henty_Fault.gltf",
+                "Insert": {
+                    "display_name": "Little Henty Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_044.gltf",
+                "Insert": {
+                    "display_name": "Fault 044"
+                }
+            },
+            {
+                "FileNameKey": "F_045.gltf",
+                "Insert": {
+                    "display_name": "Fault 045"
+                }
+            },
+            {
+                "FileNameKey": "F_046.gltf",
+                "Insert": {
+                    "display_name": "Fault 046"
+                }
+            },
+            {
+                "FileNameKey": "F_047.gltf",
+                "Insert": {
+                    "display_name": "Fault 047"
+                }
+            },
+            {
+                "FileNameKey": "F_048_Comstock_Fault.gltf",
+                "Insert": {
+                    "display_name": "Comstock Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_049_Tenth_Legion_Thrust.gltf",
+                "Insert": {
+                    "display_name": "Tenth Legion Thrust"
+                }
+            },
+            {
+                "FileNameKey": "F_050.gltf",
+                "Insert": {
+                    "display_name": "Fault 050"
+                }
+            },
+            {
+                "FileNameKey": "F_051.gltf",
+                "Insert": {
+                    "display_name": "Fault 051"
+                }
+            },
+            {
+                "FileNameKey": "F_052.gltf",
+                "Insert": {
+                    "display_name": "Fault 052"
+                }
+            },
+            {
+                "FileNameKey": "F_053.gltf",
+                "Insert": {
+                    "display_name": "Fault 053"
+                }
+            },
+            {
+                "FileNameKey": "F_054.gltf",
+                "Insert": {
+                    "display_name": "Fault 054"
+                }
+            },
+            {
+                "FileNameKey": "F_055.gltf",
+                "Insert": {
+                    "display_name": "Fault 055"
+                }
+            },
+            {
+                "FileNameKey": "F_056.gltf",
+                "Insert": {
+                    "display_name": "Fault 056"
+                }
+            },
+            {
+                "FileNameKey": "F_057.gltf",
+                "Insert": {
+                    "display_name": "Fault 057"
+                }
+            },
+            {
+                "FileNameKey": "F_058.gltf",
+                "Insert": {
+                    "display_name": "Fault 058"
+                }
+            },
+            {
+                "FileNameKey": "F_059.gltf",
+                "Insert": {
+                    "display_name": "Fault 059"
+                }
+            },
+            {
+                "FileNameKey": "F_060.gltf",
+                "Insert": {
+                    "display_name": "Fault 060"
+                }
+            },
+            {
+                "FileNameKey": "F_061.gltf",
+                "Insert": {
+                    "display_name": "Fault 061"
+                }
+            },
+            {
+                "FileNameKey": "F_062.gltf",
+                "Insert": {
+                    "display_name": "Fault 062"
+                }
+            },
+            {
+                "FileNameKey": "F_064.gltf",
+                "Insert": {
+                    "display_name": "Fault 064"
+                }
+            },
+            {
+                "FileNameKey": "F_065.gltf",
+                "Insert": {
+                    "display_name": "Fault 065"
+                }
+            },
+            {
+                "FileNameKey": "F_066.gltf",
+                "Insert": {
+                    "display_name": "Fault 066"
+                }
+            },
+            {
+                "FileNameKey": "F_067.gltf",
+                "Insert": {
+                    "display_name": "Fault 067"
+                }
+            },
+            {
+                "FileNameKey": "F_068.gltf",
+                "Insert": {
+                    "display_name": "Fault 068"
+                }
+            },
+            {
+                "FileNameKey": "F_069.gltf",
+                "Insert": {
+                    "display_name": "Fault 069"
+                }
+            },
+            {
+                "FileNameKey": "F_070.gltf",
+                "Insert": {
+                    "display_name": "Fault 070"
+                }
+            },
+            {
+                "FileNameKey": "F_071.gltf",
+                "Insert": {
+                    "display_name": "Fault 071"
+                }
+            },
+            {
+                "FileNameKey": "F_072.gltf",
+                "Insert": {
+                    "display_name": "Fault 072"
+                }
+            },
+            {
+                "FileNameKey": "F_073.gltf",
+                "Insert": {
+                    "display_name": "Fault 073"
+                }
+            },
+            {
+                "FileNameKey": "F_074.gltf",
+                "Insert": {
+                    "display_name": "Fault 074"
+                }
+            },
+            {
+                "FileNameKey": "F_075.gltf",
+                "Insert": {
+                    "display_name": "Fault 075"
+                }
+            },
+            {
+                "FileNameKey": "F_076.gltf",
+                "Insert": {
+                    "display_name": "Fault 076"
+                }
+            },
+            {
+                "FileNameKey": "F_077.gltf",
+                "Insert": {
+                    "display_name": "Fault 077"
+                }
+            },
+            {
+                "FileNameKey": "F_078.gltf",
+                "Insert": {
+                    "display_name": "Fault 078"
+                }
+            },
+            {
+                "FileNameKey": "F_079.gltf",
+                "Insert": {
+                    "display_name": "Fault 079"
+                }
+            },
+            {
+                "FileNameKey": "F_080.gltf",
+                "Insert": {
+                    "display_name": "Fault 080"
+                }
+            },
+            {
+                "FileNameKey": "F_081.gltf",
+                "Insert": {
+                    "display_name": "Fault 081"
+                }
+            },
+            {
+                "FileNameKey": "F_082.gltf",
+                "Insert": {
+                    "display_name": "Fault 082"
+                }
+            },
+            {
+                "FileNameKey": "F_083_Brickfield_Fault.gltf",
+                "Insert": {
+                    "display_name": "Brickfield Fault"
+                }
+            },
+            {
+                "FileNameKey": "F_084.gltf",
+                "Insert": {
+                    "display_name": "Fault 084"
+                }
+            },
+            {
+                "FileNameKey": "F_085.gltf",
+                "Insert": {
+                    "display_name": "Fault 085"
+                }
+            },
+            {
+                "FileNameKey": "F_086.gltf",
+                "Insert": {
+                    "display_name": "Fault 086"
+                }
+            },
+            {
+                "FileNameKey": "F_087.gltf",
+                "Insert": {
+                    "display_name": "Fault 087"
+                }
+            },
+            {
+                "FileNameKey": "F_088.gltf",
+                "Insert": {
+                    "display_name": "Fault 088"
+                }
+            },
+            {
+                "FileNameKey": "F_089.gltf",
+                "Insert": {
+                    "display_name": "Fault 089"
+                }
+            },
+            {
+                "FileNameKey": "F_090.gltf",
+                "Insert": {
+                    "display_name": "Fault 090"
+                }
+            },
+            {
+                "FileNameKey": "F_091.gltf",
+                "Insert": {
+                    "display_name": "Fault 091"
+                }
+            },
+            {
+                "FileNameKey": "F_092.gltf",
+                "Insert": {
+                    "display_name": "Fault 092"
+                }
+            },
+            {
+                "FileNameKey": "F_093.gltf",
+                "Insert": {
+                    "display_name": "Fault 093"
+                }
+            },
+            {
+                "FileNameKey": "F_094.gltf",
+                "Insert": {
+                    "display_name": "Fault 094"
+                }
+            },
+            {
+                "FileNameKey": "F_095.gltf",
+                "Insert": {
+                    "display_name": "Fault 095"
+                }
+            },
+            {
+                "FileNameKey": "F_096.gltf",
+                "Insert": {
+                    "display_name": "Fault 096"
+                }
+            },
+            {
+                "FileNameKey": "F_097.gltf",
+                "Insert": {
+                    "display_name": "Fault 097"
+                }
+            },
+            {
+                "FileNameKey": "F_098.gltf",
+                "Insert": {
+                    "display_name": "Fault 098"
+                }
+            },
+            {
+                "FileNameKey": "F_099.gltf",
+                "Insert": {
+                    "display_name": "Fault 099"
+                }
+            },
+            {
+                "FileNameKey": "F_100.gltf",
+                "Insert": {
+                    "display_name": "Fault 100"
+                }
+            },
+            {
+                "FileNameKey": "F_101.gltf",
+                "Insert": {
+                    "display_name": "Fault 101"
+                }
+            },
+            {
+                "FileNameKey": "F_102.gltf",
+                "Insert": {
+                    "display_name": "Fault 102"
+                }
+            },
+            {
+                "FileNameKey": "F_103.gltf",
+                "Insert": {
+                    "display_name": "Fault 103"
+                }
+            },
+            {
+                "FileNameKey": "F_104.gltf",
+                "Insert": {
+                    "display_name": "Fault 104"
+                }
+            },
+            {
+                "FileNameKey": "F_105.gltf",
+                "Insert": {
+                    "display_name": "Fault 105"
+                }
+            },
+            {
+                "FileNameKey": "F_106.gltf",
+                "Insert": {
+                    "display_name": "Fault 106"
+                }
+            },
+            {
+                "FileNameKey": "F_107.gltf",
+                "Insert": {
+                    "display_name": "Fault 107"
+                }
+            },
+            {
+                "FileNameKey": "F_108.gltf",
+                "Insert": {
+                    "display_name": "Fault 108"
+                }
+            },
+            {
+                "FileNameKey": "F_109.gltf",
+                "Insert": {
+                    "display_name": "Fault 109"
+                }
+            },
+            {
+                "FileNameKey": "F_110.gltf",
+                "Insert": {
+                    "display_name": "Fault 110"
+                }
+            }
+        ],
+        "Geography": [
+            {
+                "FileNameKey": "Avebury.gltf",
+                "Insert": {
+                    "display_name": "Avebury"
+                }
+            },
+            {
+                "FileNameKey": "Hellyer.gltf",
+                "Insert": {
+                    "display_name": "Hellyer"
+                }
+            },
+            {
+                "FileNameKey": "Henty.gltf",
+                "Insert": {
+                    "display_name": "Henty"
+                }
+            },
+            {
+                "FileNameKey": "Mt_Lindsay.gltf",
+                "Insert": {
+                    "display_name": "Mt Lindsay"
+                }
+            },
+            {
+                "FileNameKey": "Queenstown.gltf",
+                "Insert": {
+                    "display_name": "Queenstown"
+                }
+            },
+            {
+                "FileNameKey": "Renison.gltf",
+                "Insert": {
+                    "display_name": "Renison"
+                }
+            },
+            {
+                "FileNameKey": "Rosebery.gltf",
+                "Insert": {
+                    "display_name": "Rosebery"
+                }
+            },
+            {
+                "FileNameKey": "Strahan.gltf",
+                "Insert": {
+                    "display_name": "Strahan"
+                }
+            },
+            {
+                "FileNameKey": "Zeehan.gltf",
+                "Insert": {
+                    "display_name": "Zeehan"
+                }
+            }
+        ],
+        "Geophysics 3D Slice Views": [
+            {
+                "FileNameKey": "Rosebery_Lyell_geophysics_Vpmg_workflow_den_prop@@.gz",
+                "Insert": {
+                    "display_name": "Vpmg Density"
+                }
+            },
+            {
+                "FileNameKey": "Rosebery_Lyell_geophysics_Vpmg_workflow_sus_prop@@.gz",
+                "Insert": {
+                    "display_name": "Vpmg Susceptibility"
+                }
+            },
+            {
+                "FileNameKey": "Rosebery_Lyell_geophysics_lithologies@@.gz",
+                "Insert": {
+                    "display_name": "Lithology"
+                }
+            }
+        ],
+        "Grav model grids density": [
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_B_Forward@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 1"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_C_Residual_homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 2"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_A_Observed@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 3"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_D_Heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 4"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_C_Homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 5"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_D_Residual_Heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL GRAV MODEL GRIDS DENSITY 6"
+                }
+            }
+        ],
+        "Grid points": [
+            {
+                "FileNameKey": "352000mE_5320000mN.gltf",
+                "Insert": {
+                    "display_name": "352000mE 5320000mN"
+                }
+            },
+            {
+                "FileNameKey": "352000mE_5335000mN.gltf",
+                "Insert": {
+                    "display_name": "352000mE 5335000mN"
+                }
+            },
+            {
+                "FileNameKey": "352000mE_5355000mN.gltf",
+                "Insert": {
+                    "display_name": "352000mE 5355000mN"
+                }
+            },
+            {
+                "FileNameKey": "352000mE_5375000mN.gltf",
+                "Insert": {
+                    "display_name": "352000mE 5375000mN"
+                }
+            },
+            {
+                "FileNameKey": "352000mE_5395000mN.gltf",
+                "Insert": {
+                    "display_name": "352000mE 5395000mN"
+                }
+            },
+            {
+                "FileNameKey": "372000mE_5320000mN.gltf",
+                "Insert": {
+                    "display_name": "372000mE 5320000mN"
+                }
+            },
+            {
+                "FileNameKey": "372000mE_5335000mN.gltf",
+                "Insert": {
+                    "display_name": "372000mE 5335000mN"
+                }
+            },
+            {
+                "FileNameKey": "372000mE_5355000mN.gltf",
+                "Insert": {
+                    "display_name": "372000mE 5355000mN"
+                }
+            },
+            {
+                "FileNameKey": "372000mE_5375000mN.gltf",
+                "Insert": {
+                    "display_name": "372000mE 5375000mN"
+                }
+            },
+            {
+                "FileNameKey": "372000mE_5395000mN.gltf",
+                "Insert": {
+                    "display_name": "372000mE 5395000mN"
+                }
+            },
+            {
+                "FileNameKey": "397000mE_5320000mN.gltf",
+                "Insert": {
+                    "display_name": "397000mE 5320000mN"
+                }
+            },
+            {
+                "FileNameKey": "397000mE_5335000mN.gltf",
+                "Insert": {
+                    "display_name": "397000mE 5335000mN"
+                }
+            },
+            {
+                "FileNameKey": "397000mE_5355000mN.gltf",
+                "Insert": {
+                    "display_name": "397000mE 5355000mN"
+                }
+            },
+            {
+                "FileNameKey": "397000mE_5375000mN.gltf",
+                "Insert": {
+                    "display_name": "397000mE 5375000mN"
+                }
+            },
+            {
+                "FileNameKey": "397000mE_5395000mN.gltf",
+                "Insert": {
+                    "display_name": "397000mE 5395000mN"
+                }
+            }
+        ],
+        "Mag model grids susc": [
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_B_Forward@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 1"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_C_Residual_Homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 2"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_A_Observed@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 3"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_D_heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 4"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_C_Homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 5"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_E_Residual_heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "RL MAG MODEL GRIDS SUSC 6"
+                }
+            }
+        ],
+        "Stratigraphic Surfaces": [
+            {
+                "FileNameKey": "02_water.gltf",
+                "Insert": {
+                    "display_name": "Water"
+                }
+            },
+            {
+                "FileNameKey": "03_Cenozoic_basalt.gltf",
+                "Insert": {
+                    "display_name": "Cenozoic basalt"
+                }
+            },
+            {
+                "FileNameKey": "04_Cenozoic_sediment.gltf",
+                "Insert": {
+                    "display_name": "Cenozoic sediment"
+                }
+            },
+            {
+                "FileNameKey": "05_Tasmanian_Dolerite.gltf",
+                "Insert": {
+                    "display_name": "Tasmanian Dolerite"
+                }
+            },
+            {
+                "FileNameKey": "06_Devonian_granite.gltf",
+                "Insert": {
+                    "display_name": "Devonian granite"
+                }
+            },
+            {
+                "FileNameKey": "06_Devonian_granite_base.gltf",
+                "Insert": {
+                    "display_name": "Devonian granite base"
+                }
+            },
+            {
+                "FileNameKey": "07_Parmeener_Supergroup.gltf",
+                "Insert": {
+                    "display_name": "Parmeener Supergroup"
+                }
+            },
+            {
+                "FileNameKey": "08_Eldon_Group.gltf",
+                "Insert": {
+                    "display_name": "Eldon Group"
+                }
+            },
+            {
+                "FileNameKey": "09_Gordon_Group.gltf",
+                "Insert": {
+                    "display_name": "Gordon Group"
+                }
+            },
+            {
+                "FileNameKey": "09_Moina_Sandstone.gltf",
+                "Insert": {
+                    "display_name": "Moina Sandstone"
+                }
+            },
+            {
+                "FileNameKey": "10_Owen_Group.gltf",
+                "Insert": {
+                    "display_name": "Owen Group"
+                }
+            },
+            {
+                "FileNameKey": "11_Tyndall_Group.gltf",
+                "Insert": {
+                    "display_name": "Tyndall Group"
+                }
+            },
+            {
+                "FileNameKey": "12_Que_Hellyer_Volcanics.gltf",
+                "Insert": {
+                    "display_name": "Que Hellyer Volcanics"
+                }
+            },
+            {
+                "FileNameKey": "12_Western_Volcano_Sedimentary_sequence.gltf",
+                "Insert": {
+                    "display_name": "Western Volcano Sedimentary seq"
+                }
+            },
+            {
+                "FileNameKey": "14_andesite.gltf",
+                "Insert": {
+                    "display_name": "Andesite"
+                }
+            },
+            {
+                "FileNameKey": "17_Cambrian_granite_magnetic.gltf",
+                "Insert": {
+                    "display_name": "Cambrian granite magnetic"
+                }
+            },
+            {
+                "FileNameKey": "18_Cambrian_granite_non_magnetic.gltf",
+                "Insert": {
+                    "display_name": "Cambrian granite non magnetic"
+                }
+            },
+            {
+                "FileNameKey": "19_quartz_feldspar_porphyry.gltf",
+                "Insert": {
+                    "display_name": "Quartz Feldspar Porphyry"
+                }
+            },
+            {
+                "FileNameKey": "20_Central_Volcanic_Complex.gltf",
+                "Insert": {
+                    "display_name": "Central Volcanic Complex"
+                }
+            },
+            {
+                "FileNameKey": "21_Bonds_Range_Porphyry.gltf",
+                "Insert": {
+                    "display_name": "Bonds Range Porphyry"
+                }
+            },
+            {
+                "FileNameKey": "22_Farrell_Slate.gltf",
+                "Insert": {
+                    "display_name": "Farrell Slate"
+                }
+            },
+            {
+                "FileNameKey": "23_Eastern_Quartz_Phyric_Sequence.gltf",
+                "Insert": {
+                    "display_name": "Eastern Quartz Phyric Sequence"
+                }
+            },
+            {
+                "FileNameKey": "24_Sticht_Range_Formation.gltf",
+                "Insert": {
+                    "display_name": "Sticht Range Formation"
+                }
+            },
+            {
+                "FileNameKey": "25_Luina_Group.gltf",
+                "Insert": {
+                    "display_name": "Luina Group"
+                }
+            },
+            {
+                "FileNameKey": "27_Crimson_Creek_Formation.gltf",
+                "Insert": {
+                    "display_name": "Crimson Creek Formation"
+                }
+            },
+            {
+                "FileNameKey": "28_Success_Creek_Group.gltf",
+                "Insert": {
+                    "display_name": "Success Creek Group"
+                }
+            },
+            {
+                "FileNameKey": "30_Rocky_Cape_Group.gltf",
+                "Insert": {
+                    "display_name": "Rocky Cape Group"
+                }
+            }
+        ]
+    }
 }

@@ -3,6 +3,7 @@ import json
 import sys
 from json import JSONDecodeError
 import logging
+from collections import defaultdict
 
 # Set up debugging
 logger = logging.getLogger("file_processing")
@@ -19,7 +20,7 @@ local_handler.setFormatter(local_formatter)
 # Add handler to logger
 logger.addHandler(local_handler)
 
-
+#logger.setLevel(logging.DEBUG)
 
 
 def find(src_dir, dest_dir, ext_list, find_and_process):
@@ -66,7 +67,7 @@ def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, p
     :param params: model input parameters, SimpleNamespace() object, keys are: 'name' 'crs' 'init_cam_dist'
                                                                     and optional 'proj4_defn'
     '''
-    logger.debug("create_json_config(%s, %s)",  output_filename, repr(geo_extent))
+    logger.debug("create_json_config(%s, %s, %s)", repr(model_dict_list), output_filename, repr(geo_extent))
     try:
         fp = open(os.path.join(dest_dir, os.path.basename(output_filename)), "w")
     except Exception as e:
@@ -79,9 +80,21 @@ def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, p
                                     "init_cam_dist": params.init_cam_dist
                                   },
                     "type": "GeologicalModel",
-                    "version": 1.0,
-                    "groups": {"Group Name": sorted_model_dict_list }
+                    "version": 1.0
                    }
+    # Are there any sidebar group labels that we can use?
+    # If not, then put them in "Not Grouped"
+    if hasattr(params, 'grp_struct_dict'):
+        config_dict['groups'] = defaultdict(list)
+        for model in sorted_model_dict_list:
+            model_file = model['model_url']
+            if model_file in params.grp_struct_dict:
+                group_name = params.grp_struct_dict[model_file][0]
+                config_dict["groups"][group_name].append(model)
+            else:
+                config_dict["groups"]["Not Grouped"].append(model)
+
+    # Is there a proj4 definition?
     if hasattr(params, 'proj4_defn'):
         config_dict["properties"]["proj4_defn"] = params.proj4_defn
     json.dump(config_dict, fp, indent=4, sort_keys=True)
@@ -166,12 +179,15 @@ def reduce_extents(extent_list):
     return out_extent
 
 
-def add_info2popup(label_str, popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
+def add_info2popup(gs_dict, label_str, popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
     ''' Adds more information to popup dictionary
 
-    :param label_str: string to use as a display name for this part of the model
+    :param gs_dict: group structure dictionary (group struct dict format:
+        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
+    :param label_str: string to use as a display name for this part of the
+        model, if none available in group struct dict
     :param popup_dict: information to display in popup window
-            ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
+        ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
     :param fileName:  file and path without extension of source file
     :returns: a dict of model info, which includes the popup dict
     '''
@@ -184,8 +200,18 @@ def add_info2popup(label_str, popup_dict, fileName, file_ext='.gltf', position=[
         j_dict['position'] = position;
     else:
         j_dict['type'] = 'GLTFObject'
-    j_dict['model_url'] = np_filename + file_ext
-    j_dict['display_name'] = label_str.replace('_',' ')
+    model_url = np_filename + file_ext
+    j_dict['model_url'] = model_url
+
+    # Include inserts from group struct dict
+    if model_url in gs_dict and len(gs_dict[model_url]) > 1:
+        for ins_k, ins_v in gs_dict[model_url][1].items():
+            j_dict[ins_k] = ins_v
+                 
+    # If display name not in group structure dict, use label string
+    if 'display_name' not in j_dict:
+        j_dict['display_name'] = label_str.replace('_',' ')
+
     j_dict['include'] = True
     j_dict['displayed'] = True
     return j_dict

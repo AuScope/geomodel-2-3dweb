@@ -16,5 +16,291 @@
         "modelUrlPath": "ngawler",
         "init_cam_dist": 500000.0,
         "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    },
+    "GroupStructure": {
+        "Ammaroodinna Faults": [
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_0.gltf",
+                "Insert": {
+                    "display_name": "Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_1.gltf",
+                "Insert": {
+                    "display_name": "Fault 2"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_2.gltf",
+                "Insert": {
+                    "display_name": "Fault 3"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_3.gltf",
+                "Insert": {
+                    "display_name": "Fault 4"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_4.gltf",
+                "Insert": {
+                    "display_name": "Fault 5"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_5.gltf",
+                "Insert": {
+                    "display_name": "Fault 6"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_6.gltf",
+                "Insert": {
+                    "display_name": "Fault 7"
+                }
+            },
+            {
+                "FileNameKey": "Faults_Ammaroodinna_Yoolperlunna_7.gltf",
+                "Insert": {
+                    "display_name": "Fault 8"
+                }
+            }
+        ],
+        "Drapes": [
+            {
+                "FileNameKey": "CP_Surface_Fixed.gltf",
+                "Insert": {
+                    "display_name": "Base of Carboniferous"
+                }
+            },
+            {
+                "FileNameKey": "2_Basement_Fixed.gltf",
+                "Insert": {
+                    "display_name": "Depth to basement"
+                }
+            },
+            {
+                "FileNameKey": "GravDrape.gltf",
+                "Insert": {
+                    "display_name": "Gravity Drape"
+                }
+            },
+            {
+                "FileNameKey": "MagDrape.gltf",
+                "Insert": {
+                    "display_name": "Magnetic Drape"
+                }
+            },
+            {
+                "FileNameKey": "MarlaOutline.gltf",
+                "Insert": {
+                    "display_name": "Marla Outline"
+                }
+            },
+            {
+                "FileNameKey": "SRTM_surf.gltf",
+                "Insert": {
+                    "display_name": "SRTM surface topology"
+                }
+            },
+            {
+                "FileNameKey": "VOL_0.gltf",
+                "Insert": {
+                    "display_name": "VOI Marla"
+                }
+            }
+        ],
+        "Gravity": [
+            {
+                "FileNameKey": "BougGrav_BougGrav_prop@@.PNG",
+                "Insert": {
+                    "display_name": "Bouguer Gravity",
+                    "3dobject_label": "BougGrav_BougGrav_prop@@_0",
+                    "reference_url": "https://sarigbasis.pir.sa.gov.au/WebtopEw/ws/samref/sarig1/image/DDD/GDP00026.pdf#page=5"
+                }
+            }
+        ],
+        "Magnetism": [
+            {
+                "FileNameKey": "TMI_RTP_TMI_RTP_prop@@.PNG",
+                "Insert": {
+                    "display_name": "Total Magnetic Intensity - RTP",
+                    "3dobject_label": "TMI_RTP_TMI_RTP_prop@@_0",
+                    "reference_url": "https://sarigbasis.pir.sa.gov.au/WebtopEw/ws/samref/sarig1/image/DDD/GDP00026.pdf#page=5"
+                }
+            }
+        ],
+        "Middle Bore Ridge Faults": [
+            {
+                "FileNameKey": "Faults_MiddleBoreRidge_0.gltf",
+                "Insert": {
+                    "display_name": "Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "Faults_MiddleBoreRidge_1.gltf",
+                "Insert": {
+                    "display_name": "Fault 2"
+                }
+            }
+        ],
+        "Musgrave Block Faults": [
+            {
+                "FileNameKey": "Faults_MusgraveBlock_0.gltf",
+                "Insert": {
+                    "display_name": "Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "Faults_MusgraveBlock_1.gltf",
+                "Insert": {
+                    "display_name": "Fault 2"
+                }
+            }
+        ],
+        "Surface Geology": [
+            {
+                "FileNameKey": "2MsurfaceGeologyZ52_PMsurfaceGeologyZ52_prop@@.PNG",
+                "Insert": {
+                    "display_name": "2M Surface Geology",
+                    "3dobject_label": "2MsurfaceGeologyZ52_PMsurfaceGeologyZ52_prop@@_0",
+                    "reference_url": "http://www.minerals.statedevelopment.sa.gov.au/geoscience/geology/gawler_craton"
+                }
+            }
+        ],
+        "UBC Basement Input": [
+            {
+                "FileNameKey": "UBC_Basement.gltf",
+                "Insert": {
+                    "display_name": "UBC Basement Input"
+                }
+            }
+        ],
+        "UBC Density Isosurfaces": [
+            {
+                "FileNameKey": "UBC_Density_neg_pt04.gltf",
+                "Insert": {
+                    "display_name": "-0.04g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_neg_pt08.gltf",
+                "Insert": {
+                    "display_name": "-0.08g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_neg_pt3.gltf",
+                "Insert": {
+                    "display_name": "-0.30g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_oZero.gltf",
+                "Insert": {
+                    "display_name": "0.00g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_pos_pt01.gltf",
+                "Insert": {
+                    "display_name": "0.01g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_pos_pt04.gltf",
+                "Insert": {
+                    "display_name": "0.04g/cc"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Density_pos_pt08.gltf",
+                "Insert": {
+                    "display_name": "0.08g/cc"
+                }
+            }
+        ],
+        "UBC Gravity Observations": [
+            {
+                "FileNameKey": "UBC_GravObs.gltf",
+                "Insert": {
+                    "display_name": "UBC Gravity Observations"
+                }
+            }
+        ],
+        "UBC Magnetic Observations": [
+            {
+                "FileNameKey": "UBC_MagObs.gltf",
+                "Insert": {
+                    "display_name": "UBC Magnetic Observations"
+                }
+            }
+        ],
+        "UBC Susceptibility Isosurfaces": [
+            {
+                "FileNameKey": "UBC_Susc_0_0001.gltf",
+                "Insert": {
+                    "display_name": "0.0001 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0010.gltf",
+                "Insert": {
+                    "display_name": "0.001 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0100.gltf",
+                "Insert": {
+                    "display_name": "0.01 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0200.gltf",
+                "Insert": {
+                    "display_name": "0.02 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0300.gltf",
+                "Insert": {
+                    "display_name": "0.03 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0400.gltf",
+                "Insert": {
+                    "display_name": "0.04 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0500.gltf",
+                "Insert": {
+                    "display_name": "0.05 SI"
+                }
+            },
+            {
+                "FileNameKey": "UBC_Susc_0_0600.gltf",
+                "Insert": {
+                    "display_name": "0.06 SI"
+                }
+            }
+        ],
+        "Wintinna Trough Faults": [
+            {
+                "FileNameKey": "Faults_WintinnaTrough_0.gltf",
+                "Insert": {
+                    "display_name": "Fault 1"
+                }
+            },
+            {
+                "FileNameKey": "Faults_WintinnaTrough_1.gltf",
+                "Insert": {
+                    "display_name": "Fault 2"
+                }
+            }
+        ]
     }
 }

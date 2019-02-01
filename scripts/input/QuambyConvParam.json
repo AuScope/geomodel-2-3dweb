@@ -9,12 +9,172 @@
         "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
-     },
-     "ModelProperties": {
+    },
+    "ModelProperties": {
         "crs": "EPSG:28354",
         "init_cam_dist": 500000.0,
         "name": "Quamby",
         "modelUrlPath": "quamby",
         "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-      }
+    },
+    "GroupStructure": {
+        "Quamby": [
+            {
+                "FileNameKey": "00_Faults.gltf",
+                "Insert": {
+                    "display_name": "Faults"
+                }
+            },
+            {
+                "FileNameKey": "02G_Malakoff_Granite.gltf",
+                "Insert": {
+                    "display_name": "Malakoff Granite"
+                }
+            },
+            {
+                "FileNameKey": "03G_Williams_Granite.gltf",
+                "Insert": {
+                    "display_name": "Williams Granite"
+                }
+            },
+            {
+                "FileNameKey": "04G_Williams_Granite_LM.gltf",
+                "Insert": {
+                    "display_name": "Williams Granite LM"
+                }
+            },
+            {
+                "FileNameKey": "05G_Williams_Granite_HM.gltf",
+                "Insert": {
+                    "display_name": "Williams Granite HM"
+                }
+            },
+            {
+                "FileNameKey": "06G_Tommy_Creek_MicroGranite.gltf",
+                "Insert": {
+                    "display_name": "Tommy Creek MicroGranite"
+                }
+            },
+            {
+                "FileNameKey": "07G_Godkin_Granite.gltf",
+                "Insert": {
+                    "display_name": "Godkin Granite"
+                }
+            },
+            {
+                "FileNameKey": "08G_Levian_Granite.gltf",
+                "Insert": {
+                    "display_name": "Levian Granite"
+                }
+            },
+            {
+                "FileNameKey": "09G_Dipvale_Granite.gltf",
+                "Insert": {
+                    "display_name": "Dipvale Granite"
+                }
+            },
+            {
+                "FileNameKey": "10_Millungera_Basin.gltf",
+                "Insert": {
+                    "display_name": "Millungera Basin"
+                }
+            },
+            {
+                "FileNameKey": "11_Quamby_Conglomerate.gltf",
+                "Insert": {
+                    "display_name": "Quamby Conglomerate"
+                }
+            },
+            {
+                "FileNameKey": "12_Milo_Beds.gltf",
+                "Insert": {
+                    "display_name": "Milo Beds"
+                }
+            },
+            {
+                "FileNameKey": "13_TooleCreekVolc.gltf",
+                "Insert": {
+                    "display_name": "TooleCreekVolc"
+                }
+            },
+            {
+                "FileNameKey": "14_StavleyThrust.gltf",
+                "Insert": {
+                    "display_name": "StavleyThrust"
+                }
+            },
+            {
+                "FileNameKey": "15_Kuridala.gltf",
+                "Insert": {
+                    "display_name": "Kuridala"
+                }
+            },
+            {
+                "FileNameKey": "16_SolidersCap.gltf",
+                "Insert": {
+                    "display_name": "SolidersCap"
+                }
+            },
+            {
+                "FileNameKey": "17_Mount_Albert_Group_Upper.gltf",
+                "Insert": {
+                    "display_name": "Mount Albert Group Upper"
+                }
+            },
+            {
+                "FileNameKey": "18_Mount_Albert_Group_Lower.gltf",
+                "Insert": {
+                    "display_name": "Mount Albert Group Lower"
+                }
+            },
+            {
+                "FileNameKey": "19_Staveley.gltf",
+                "Insert": {
+                    "display_name": "Staveley"
+                }
+            },
+            {
+                "FileNameKey": "20_Mount_Fort_Constantine.gltf",
+                "Insert": {
+                    "display_name": "Mount Fort Constantine"
+                }
+            },
+            {
+                "FileNameKey": "21_Corrella.gltf",
+                "Insert": {
+                    "display_name": "Corrella"
+                }
+            },
+            {
+                "FileNameKey": "22_Mitakoodi.gltf",
+                "Insert": {
+                    "display_name": "Mitakoodi"
+                }
+            },
+            {
+                "FileNameKey": "23_Bulonga.gltf",
+                "Insert": {
+                    "display_name": "Bulonga"
+                }
+            },
+            {
+                "FileNameKey": "24_Boomarra_Meta.gltf",
+                "Insert": {
+                    "display_name": "Boomarra Meta"
+                }
+            },
+            {
+                "FileNameKey": "25_Argylla.gltf",
+                "Insert": {
+                    "display_name": "Argylla"
+                }
+            },
+            {
+                "FileNameKey": "26_Leichardt_Volcanics.gltf",
+                "Insert": {
+                    "display_name": "Leichardt Volcanics"
+                }
+            }
+        ]
+    }
 }

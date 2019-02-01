@@ -5,6 +5,7 @@ import sys
 import os
 import array
 import logging
+from collections import defaultdict
 
 from exports.collada_out import COLLADA_OUT
 from exports.obj_out import OBJ_OUT
@@ -351,13 +352,12 @@ class COLLADA_KIT:
             self.logger.debug("step = %d", step)
 
             # Take the index data found in the voxel file and group it together       
-            bucket = {}
+            bucket = defaultdict(list)
             for z in range(0, geom_obj.vol_sz[2], step):
                 for y in range(0, geom_obj.vol_sz[1], step):
                     for x in range(0, geom_obj.vol_sz[0], step):
                         if geom_obj.vol_data[x][y][z] != geom_obj.get_no_data_marker():
                             key = int(geom_obj.vol_data[x][y][z])
-                            bucket.setdefault(key, []) 
                             bucket[key].append((x,y,z))
 
             self.logger.debug("Computed buckets")

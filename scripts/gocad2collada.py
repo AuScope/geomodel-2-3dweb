@@ -57,9 +57,6 @@ CoordOffset = {}
 # Colour table files: key is GOCAD filename, value is CSV colour table filename (without path)
 CtFileDict = {}
 
-
-
-
 def find_and_process(src_dir, dest_dir, ext_list):
     ''' Searches for files in local directory and processes them
 
@@ -147,7 +144,7 @@ def process(filename_str, dest_dir):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
                 popup_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
-                model_dict_list.append(add_info2popup(meta_obj.name, popup_dict, prop_filename))
+                model_dict_list.append(add_info2popup(Params.grp_struct_dict, meta_obj.name, popup_dict, prop_filename))
                 has_result = True
                 extent_list.append(geom_obj.get_extent())
 
@@ -195,7 +192,7 @@ def process(filename_str, dest_dir):
                     has_result = True
 
         if has_result:
-            model_dict_list.append(add_info2popup(os.path.basename(file_name), popup_dict, file_name))
+            model_dict_list.append(add_info2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
             ck.end_collada(out_filename)
         
 
@@ -213,7 +210,7 @@ def process(filename_str, dest_dir):
                 extent_list.append(geom_obj.get_extent())
                 has_result = True
             if has_result:
-                model_dict_list.append(add_info2popup(os.path.basename(file_name), popup_dict, file_name))
+                model_dict_list.append(add_info2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
                 ck.end_collada(out_filename)
  
         # Else place each GOCAD object in its own COLLADA file
@@ -226,7 +223,7 @@ def process(filename_str, dest_dir):
                 else:
                     prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                     p_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
-                    model_dict_list.append(add_info2popup(meta_obj.name, p_dict, prop_filename))
+                    model_dict_list.append(add_info2popup(Params.grp_struct_dict, meta_obj.name, p_dict, prop_filename))
                 extent_list.append(geom_obj.get_extent())
                 has_result = True
 
@@ -251,7 +248,7 @@ def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_file
     :param out_filename: output filename without extension
     :param prop_idx: property index of volume's properties, integer
     '''
-    print("write_single_volume(", geom_obj, style_obj, meta_obj, src_dir, out_filename, prop_idx, ")") 
+    logger.debug("write_single_volume(geom_obj=%s, style_obj=%s, meta_obj=%s, src_dir=%s, out_filename=%s, prop_idx=%d)", repr(geom_obj), repr(style_obj), repr(meta_obj), src_dir, out_filename, prop_idx)
     model_dict_list = []
     if not geom_obj.vol_data is None: 
         if not geom_obj.is_single_layer_vo():
@@ -266,12 +263,12 @@ def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_file
                 # Produce GLTFs from voxet file
                 popup_list = ck.write_vol_collada(geom_obj, style_obj, meta_obj, out_filename)
                 for popup_dict_key, popup_dict, out_filename in popup_list:
-                    model_dict_list.append(add_info2popup(popup_dict_key, popup_dict, out_filename))
+                    model_dict_list.append(add_info2popup(Params.grp_struct_dict, popup_dict_key, popup_dict, out_filename))
 
         # Produce a PNG file from voxet file
         else:
             popup_dict = pk.write_single_voxel_png(geom_obj, style_obj, meta_obj, out_filename)
-            model_dict_list.append(add_info2popup("{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, out_filename, file_ext='.PNG', position=geom_obj.vol_origin))
+            model_dict_list.append(add_info2popup(Params.grp_struct_dict, "{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, out_filename, file_ext='.PNG', position=geom_obj.vol_origin))
     return model_dict_list
 
 
@@ -307,7 +304,13 @@ def initialise_params(param_file):
             colour_table = ctObj['colour_table']
             filename = ctObj['filename']
             CtFileDict[filename] = colour_table
-        
+
+    # Optional labels for sidebars
+    setattr(Params, 'grp_struct_dict', {})
+    if 'GroupStructure' in param_dict:
+        for groupName, commandList in param_dict['GroupStructure'].items():
+            for command in commandList:
+                Params.grp_struct_dict[command["FileNameKey"]] = (groupName, command["Insert"])
 
 # MAIN PART OF PROGRAMME
 if __name__ == "__main__":

@@ -9,12 +9,70 @@
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
-     },
-     "ModelProperties": {
+    },
+    "ModelProperties": {
         "crs": "EPSG:28354",
         "init_cam_dist": 2000000.0,
         "name": "North Queensland",
         "modelUrlPath": "nqueensland",
         "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-      }
+    },
+    "GroupStructure": {
+        "Surfaces": [
+            {
+                "FileNameKey": "abingdon_surf.gltf",
+                "Insert": {
+                    "display_name": "Abingdon surface"
+                }
+            },
+            {
+                "FileNameKey": "agwamin_surf.gltf",
+                "Insert": {
+                    "display_name": "Agwamin surface"
+                }
+            },
+            {
+                "FileNameKey": "drummond_surf.gltf",
+                "Insert": {
+                    "display_name": "Drummond surface"
+                }
+            },
+            {
+                "FileNameKey": "etheridge_2_surf.gltf",
+                "Insert": {
+                    "display_name": "Etheridge 2 surface"
+                }
+            },
+            {
+                "FileNameKey": "etheridge_surf.gltf",
+                "Insert": {
+                    "display_name": "Etheridge surface"
+                }
+            },
+            {
+                "FileNameKey": "moho_base_surf.gltf",
+                "Insert": {
+                    "display_name": "Moho base surface"
+                }
+            },
+            {
+                "FileNameKey": "numil_surf.gltf",
+                "Insert": {
+                    "display_name": "Numil surface"
+                }
+            },
+            {
+                "FileNameKey": "pilgrim_surf.gltf",
+                "Insert": {
+                    "display_name": "Pilgrim surface"
+                }
+            },
+            {
+                "FileNameKey": "suture_surf.gltf",
+                "Insert": {
+                    "display_name": "Suture surface"
+                }
+            }
+        ]
+    }
 }

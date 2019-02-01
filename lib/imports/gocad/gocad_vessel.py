@@ -578,7 +578,7 @@ class GOCAD_VESSEL():
                 elif splitstr_arr[0] in ("STRATIGRAPHIC_POSITION","GEOLOGICAL_FEATURE"):
                     self.meta_obj.geofeat_name = splitstr_arr[1]
                     if splitstr_arr[0] == 'STRATIGRAPHIC_POSITION':
-                        is_ok, self.meta_obj.geoevent_numeric_age_range = self.__parse_int(splitstr_arr[2], 0)
+                        is_ok, self.meta_obj.geoevent_numeric_age_range = self.__parse_int(splitstr_arr[-1:][0], 0)
                         self.meta_obj.mapped_feat = MapFeat.GEOLOGICAL_UNIT
 
                 elif splitstr_arr[0] == "GEOLOGICAL_TYPE":
