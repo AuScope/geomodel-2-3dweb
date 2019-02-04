@@ -1,8 +1,8 @@
 {
     "groups": {
-        "Not Grouped": [
+        "3D Slice Views": [
             {
-                "display_name": "SMALL",
+                "display_name": "Density",
                 "displayed": false,
                 "include": true,
                 "model_url": "small_density@@.gz",
@@ -46,7 +46,7 @@
                 }
             },
             {
-                "display_name": "SMALL",
+                "display_name": "Lithology",
                 "displayed": false,
                 "include": true,
                 "model_url": "small_lithology@@.gz",
@@ -239,7 +239,9 @@
                         4050.00010017
                     ]
                 }
-            },
+            }
+        ],
+        "Not Grouped": [
             {
                 "display_name": "SMALL",
                 "displayed": false,

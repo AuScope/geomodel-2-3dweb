@@ -21,7 +21,7 @@ from exports.png_kit import PNG_KIT
 from exports.collada_kit import COLLADA_KIT
 from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
 import exports.collada2gltf
-from file_processing import find, create_json_config, read_json_file, reduce_extents, add_info2popup, add_vol_config, is_only_small
+from file_processing import find, create_json_config, read_json_file, reduce_extents, add_config2popup, add_vol_config, is_only_small
 
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
@@ -144,7 +144,7 @@ def process(filename_str, dest_dir):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
                 popup_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
-                model_dict_list.append(add_info2popup(Params.grp_struct_dict, meta_obj.name, popup_dict, prop_filename))
+                model_dict_list.append(add_config2popup(Params.grp_struct_dict, meta_obj.name, popup_dict, prop_filename))
                 has_result = True
                 extent_list.append(geom_obj.get_extent())
 
@@ -192,7 +192,7 @@ def process(filename_str, dest_dir):
                     has_result = True
 
         if has_result:
-            model_dict_list.append(add_info2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
+            model_dict_list.append(add_config2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
             ck.end_collada(out_filename)
         
 
@@ -210,7 +210,7 @@ def process(filename_str, dest_dir):
                 extent_list.append(geom_obj.get_extent())
                 has_result = True
             if has_result:
-                model_dict_list.append(add_info2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
+                model_dict_list.append(add_config2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
                 ck.end_collada(out_filename)
  
         # Else place each GOCAD object in its own COLLADA file
@@ -223,7 +223,7 @@ def process(filename_str, dest_dir):
                 else:
                     prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                     p_dict = ck.write_collada(geom_obj, style_obj, meta_obj, prop_filename)
-                    model_dict_list.append(add_info2popup(Params.grp_struct_dict, meta_obj.name, p_dict, prop_filename))
+                    model_dict_list.append(add_config2popup(Params.grp_struct_dict, meta_obj.name, p_dict, prop_filename))
                 extent_list.append(geom_obj.get_extent())
                 has_result = True
 
@@ -257,18 +257,18 @@ def write_single_volume(ck, pk, geom_obj, style_obj, meta_obj, src_dir, out_file
                 with open(in_filename, 'rb') as fp_in:
                     with gzip.open(out_filename + '.gz', 'wb') as fp_out:
                         shutil.copyfileobj(fp_in, fp_out)
-                        model_dict_list.append(add_vol_config(geom_obj, style_obj, meta_obj))
+                        model_dict_list.append(add_vol_config(Params.grp_struct_dict, geom_obj, style_obj, meta_obj))
 
             else:
                 # Produce GLTFs from voxet file
                 popup_list = ck.write_vol_collada(geom_obj, style_obj, meta_obj, out_filename)
                 for popup_dict_key, popup_dict, out_filename in popup_list:
-                    model_dict_list.append(add_info2popup(Params.grp_struct_dict, popup_dict_key, popup_dict, out_filename))
+                    model_dict_list.append(add_config2popup(Params.grp_struct_dict, popup_dict_key, popup_dict, out_filename))
 
         # Produce a PNG file from voxet file
         else:
             popup_dict = pk.write_single_voxel_png(geom_obj, style_obj, meta_obj, out_filename)
-            model_dict_list.append(add_info2popup(Params.grp_struct_dict, "{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, out_filename, file_ext='.PNG', position=geom_obj.vol_origin))
+            model_dict_list.append(add_config2popup(Params.grp_struct_dict, "{0}_{1}".format(meta_obj.name, prop_idx+1), popup_dict, out_filename, file_ext='.PNG', position=geom_obj.vol_origin))
     return model_dict_list
 
 

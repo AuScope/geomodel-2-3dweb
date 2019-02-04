@@ -179,8 +179,8 @@ def reduce_extents(extent_list):
     return out_extent
 
 
-def add_info2popup(gs_dict, label_str, popup_dict, fileName, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
-    ''' Adds more information to popup dictionary
+def add_config2popup(gs_dict, label_str, popup_dict, file_name, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
+    ''' Adds more config information to popup dictionary
 
     :param gs_dict: group structure dictionary (group struct dict format:
         { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
@@ -188,52 +188,70 @@ def add_info2popup(gs_dict, label_str, popup_dict, fileName, file_ext='.gltf', p
         model, if none available in group struct dict
     :param popup_dict: information to display in popup window
         ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
-    :param fileName:  file and path without extension of source file
-    :returns: a dict of model info, which includes the popup dict
+    :param file_name:  file and path (without extension) of model part source file
+    :param file_ext: optional file extension of 'file_name', defaults to '.gltf'
+    :param position: optional [x,y,z] position of model part
+    :returns: a dict of model configuration info, which includes the popup dict
     '''
-    logger.debug("add_info2popup(%s, %s, %s)", label_str, fileName, file_ext)
-    np_filename = os.path.basename(fileName)
-    j_dict = {}
-    j_dict['popups'] = popup_dict
+    logger.debug("add_config2popup(%s, %s, %s)", label_str, file_name, file_ext)
+    np_filename = os.path.basename(file_name)
+    modelconf_dict = {}
+    modelconf_dict['popups'] = popup_dict
     if file_ext.upper()==".PNG":
-        j_dict['type'] = 'ImagePlane'
-        j_dict['position'] = position;
+        modelconf_dict['type'] = 'ImagePlane'
+        modelconf_dict['position'] = position;
     else:
-        j_dict['type'] = 'GLTFObject'
+        modelconf_dict['type'] = 'GLTFObject'
     model_url = np_filename + file_ext
-    j_dict['model_url'] = model_url
+    modelconf_dict['model_url'] = model_url
 
+    add_inserts(gs_dict, model_url, modelconf_dict, label_str.replace('_', ' '))
+
+    modelconf_dict['include'] = True
+    modelconf_dict['displayed'] = True
+    return modelconf_dict
+
+
+def add_inserts(gs_dict, model_part_key, modelconf_dict, alt_name):
+    ''' Sets the 'display_name' and other inserts from the group structure dictionary
+
+    :param gs_dict: group structure dictionary (group struct dict format:
+        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
+    :param model_part_key: model part key in 'gs_dict'
+    :param modelconf_dict: dictionary of model information
+    :param alt_name: alternative 'display_name' when not supplied in 'gs_dict'
+    '''
     # Include inserts from group struct dict
-    if model_url in gs_dict and len(gs_dict[model_url]) > 1:
-        for ins_k, ins_v in gs_dict[model_url][1].items():
-            j_dict[ins_k] = ins_v
+    if model_part_key in gs_dict and len(gs_dict[model_part_key]) > 1:
+        for ins_k, ins_v in gs_dict[model_part_key][1].items():
+            modelconf_dict[ins_k] = ins_v
                  
-    # If display name not in group structure dict, use label string
-    if 'display_name' not in j_dict:
-        j_dict['display_name'] = label_str.replace('_',' ')
-
-    j_dict['include'] = True
-    j_dict['displayed'] = True
-    return j_dict
+    # If display name not in group structure dict, use alt name string
+    if 'display_name' not in modelconf_dict:
+        modelconf_dict['display_name'] = alt_name
 
 
-def add_vol_config(geom_obj, style_obj, meta_obj):
+def add_vol_config(gs_dict, geom_obj, style_obj, meta_obj):
     ''' Create a dictionary containing volume configuration data 
+    :param gs_dict: group structure dictionary (group struct dict format:
+        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
     :param geom_obj: MODEL_GEOMETRIES object
     :param style_obj: STYLE object
     :param meta_obj: METADATA object
     :returns: a dict of volume config data
     '''
-    j_dict = { 'model_url': os.path.basename(meta_obj.src_filename)+'.gz', 'type': '3DVolume', 'include': True, 'displayed': False, 'display_name': meta_obj.name }
-    j_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz,
+    model_url = os.path.basename(meta_obj.src_filename)+'.gz'
+    modelconf_dict = { 'model_url': model_url, 'type': '3DVolume', 'include': True, 'displayed': False }
+    add_inserts(gs_dict, model_url, modelconf_dict, meta_obj.name)
+    modelconf_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz,
                               'origin': geom_obj.vol_origin, 'size': geom_obj.get_vol_side_lengths(),
                               'maxVal': geom_obj.get_max_data(), 'minVal': geom_obj.get_min_data(),
                               'rotation': geom_obj.get_rotation()  }
     if len(style_obj.get_colour_table()) > 0:
-        j_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
+        modelconf_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
     if len(style_obj.get_label_table()) > 0:
-        j_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
-    return j_dict
+        modelconf_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
+    return modelconf_dict
     
      
 def is_only_small(gsm_list):

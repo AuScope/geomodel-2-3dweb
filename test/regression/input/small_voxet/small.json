@@ -19,5 +19,22 @@
             "filename": "small_lithology@@",
             "colour_table": "small_lithology_colours.csv"
         }
-    ]
+    ],
+    "GroupStructure": {
+        "3D Slice Views": [
+            {
+                "FileNameKey": "small_density@@.gz",
+                "Insert": {
+                    "display_name": "Density"
+                }
+            },
+            {
+                "FileNameKey": "small_lithology@@.gz",
+                "Insert": {
+                    "display_name": "Lithology"
+                }
+            }
+        ]
+
+    }
 }
