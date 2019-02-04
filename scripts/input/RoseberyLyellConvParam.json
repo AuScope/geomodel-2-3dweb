@@ -1238,43 +1238,113 @@
             {
                 "FileNameKey": "07_Parmeener_Supergroup.gltf",
                 "Insert": {
-                    "display_name": "Parmeener Supergroup"
+                    "display_name": "Parmeener Supergroup",
+                    "popups": {
+                        "07_PARMEENER_SUPERGROUP": {
+                            "name": "07_PARMEENER_SUPERGROUP",
+                            "title": "07_PARMEENER_SUPERGROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=14900",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "08_Eldon_Group.gltf",
                 "Insert": {
-                    "display_name": "Eldon Group"
+                    "display_name": "Eldon Group",
+                    "popups": {
+                        "08_ELDON_GROUP": {
+                            "name": "08_ELDON_GROUP",
+                            "title": "08_ELDON_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=27768",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "09_Gordon_Group.gltf",
                 "Insert": {
-                    "display_name": "Gordon Group"
+                    "display_name": "Gordon Group",
+                    "popups": {
+                        "09_GORDON_GROUP": {
+                            "name": "09_GORDON_GROUP",
+                            "title": "09_GORDON_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=7586",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "09_Moina_Sandstone.gltf",
                 "Insert": {
-                    "display_name": "Moina Sandstone"
+                    "display_name": "Moina Sandstone",
+                    "popups": {
+                        "09_MOINA_SANDSTONE": {
+                            "name": "09_MOINA_SANDSTONE",
+                            "title": "09_MOINA_SANDSTONE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=27837",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    } 
                 }
             },
             {
                 "FileNameKey": "10_Owen_Group.gltf",
                 "Insert": {
-                    "display_name": "Owen Group"
+                    "display_name": "Owen Group",
+                    "popups": {
+                        "10_OWEN_GROUP": {
+                            "name": "10_OWEN_GROUP",
+                            "title": "10_OWEN_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=34165",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "11_Tyndall_Group.gltf",
                 "Insert": {
-                    "display_name": "Tyndall Group"
+                    "display_name": "Tyndall Group",
+                    "popups": {
+                        "11_TYNDALL_GROUP": {
+                            "name": "11_TYNDALL_GROUP",
+                            "title": "11_TYNDALL_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=18756",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "12_Que_Hellyer_Volcanics.gltf",
                 "Insert": {
-                    "display_name": "Que Hellyer Volcanics"
+                    "display_name": "Que Hellyer Volcanics",
+                    "popups": {
+                        "12_QUE_HELLYER_VOLCANICS": {
+                            "name": "12_QUE_HELLYER_VOLCANICS",
+                            "title": "12_QUE_HELLYER_VOLCANICS",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=30401",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
@@ -1304,25 +1374,65 @@
             {
                 "FileNameKey": "19_quartz_feldspar_porphyry.gltf",
                 "Insert": {
-                    "display_name": "Quartz Feldspar Porphyry"
+                    "display_name": "Quartz Feldspar Porphyry",
+                    "popups": {
+                        "19_QUARTZ_FELDSPAR_PORPHYRY": {
+                            "name": "19_QUARTZ_FELDSPAR_PORPHYRY",
+                            "title": "19_QUARTZ_FELDSPAR_PORPHYRY",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=37499",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "20_Central_Volcanic_Complex.gltf",
                 "Insert": {
-                    "display_name": "Central Volcanic Complex"
+                    "display_name": "Central Volcanic Complex",
+                    "popups": {
+                        "20_CENTRAL_VOLCANIC_COMPLEX": {
+                            "name": "20_CENTRAL_VOLCANIC_COMPLEX",
+                            "title": "20_CENTRAL_VOLCANIC_COMPLEX",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=3868",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "21_Bonds_Range_Porphyry.gltf",
                 "Insert": {
-                    "display_name": "Bonds Range Porphyry"
+                    "display_name": "Bonds Range Porphyry",
+                    "popups": {
+                        "21_BONDS_RANGE_PORPHYRY": {
+                            "name": "21_BONDS_RANGE_PORPHYRY",
+                            "title": "21_BONDS_RANGE_PORPHYRY",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=30389",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "22_Farrell_Slate.gltf",
                 "Insert": {
-                    "display_name": "Farrell Slate"
+                    "display_name": "Farrell Slate",
+                    "popups": {
+                        "22_FARRELL_SLATE": {
+                            "name": "22_FARRELL_SLATE",
+                            "title": "22_FARRELL_SLATE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=6545",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
@@ -1334,31 +1444,81 @@
             {
                 "FileNameKey": "24_Sticht_Range_Formation.gltf",
                 "Insert": {
-                    "display_name": "Sticht Range Formation"
+                    "display_name": "Sticht Range Formation",
+                    "popups": {
+                        "24_STICHT_RANGE_FORMATION": {
+                            "name": "24_STICHT_RANGE_FORMATION",
+                            "title": "24_STICHT_RANGE_FORMATION",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=26910",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "25_Luina_Group.gltf",
                 "Insert": {
-                    "display_name": "Luina Group"
+                    "display_name": "Luina Group",
+                    "popups": {
+                        "25_LUINA_GROUP": {
+                            "name": "25_LUINA_GROUP",
+                            "title": "25_LUINA_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=75980",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "27_Crimson_Creek_Formation.gltf",
                 "Insert": {
-                    "display_name": "Crimson Creek Formation"
+                    "display_name": "Crimson Creek Formation",
+                    "popups": {
+                        "27_CRIMSON_CREEK_FORMATION": {
+                            "name": "27_CRIMSON_CREEK_FORMATION",
+                            "title": "27_CRIMSON_CREEK_FORMATION",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=4898",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                         }
+                    }
                 }
             },
             {
                 "FileNameKey": "28_Success_Creek_Group.gltf",
                 "Insert": {
-                    "display_name": "Success Creek Group"
+                    "display_name": "Success Creek Group",
+                    "popups": {
+                        "28_SUCCESS_CREEK_GROUP": {
+                            "name": "28_SUCCESS_CREEK_GROUP",
+                            "title": "28_SUCCESS_CREEK_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=17488",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "30_Rocky_Cape_Group.gltf",
                 "Insert": {
-                    "display_name": "Rocky Cape Group"
+                    "display_name": "Rocky Cape Group",
+                    "popups": {
+                        "30_ROCKY_CAPE_GROUP": {
+                            "name": "30_ROCKY_CAPE_GROUP",
+                            "title": "30_ROCKY_CAPE_GROUP",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=27555",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             }
         ]

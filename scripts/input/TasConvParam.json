@@ -34,7 +34,74 @@
             {
                 "FileNameKey": "tas_structures.gltf",
                 "Insert": {
-                    "display_name": "Structures"
+                    "display_name": "Structures",
+                    "popups": {
+                       "TAS_STRUCTURES-BERNAFAI": {
+                            "name": "BERNAFAI",
+                            "title": "BERNAFAI",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=1513",
+                                "label": "Australian Stratigraphic Units Database"
+                            } ]
+                        },
+                        "TAS_STRUCTURES-EASTERN_TYENNAN_MARGIN": {
+                            "name": "EASTERN_TYENNAN_MARGIN",
+                            "title": "EASTERN_TYENNAN_MARGIN",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=37490",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                       "TAS_STRUCTURES-GOG_RANGE": {
+                            "name": "GOG_RANGE",
+                            "title": "GOG_RANGE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=27421",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                        "TAS_STRUCTURES-MARIONOAK": {
+                            "name": "MARIONOAK",
+                            "title": "MARIONOAK",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=79574",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                       "TAS_STRUCTURES-PEDDER_RIVER": {
+                            "name": "PEDDER_RIVER",
+                            "title": "PEDDER_RIVER",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=40960",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                        "TAS_STRUCTURES-PIEMAN": {
+                            "name": "PIEMAN",
+                            "title": "PIEMAN",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=31623",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                       "TAS_STRUCTURES-ROSEBERY": {
+                            "name": "ROSEBERY",
+                            "title": "ROSEBERY",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=79506",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        },
+                        "TAS_STRUCTURES-TYENNAN_MARGIN": {
+                            "name": "TYENNAN_MARGIN",
+                            "title": "TYENNAN_MARGIN",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=37490",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
+
                 }
             }
         ]

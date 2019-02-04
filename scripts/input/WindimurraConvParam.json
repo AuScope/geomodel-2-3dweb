@@ -28,7 +28,17 @@
             {
                 "FileNameKey": "V01_BaldRockSupersuite.gltf",
                 "Insert": {
-                    "display_name": "Bald Rock Supersuite"
+                    "display_name": "Bald Rock Supersuite",
+                    "popups": {
+                        "V01_BALDROCKSUPERSUITE": {
+                            "name": "V01_BALDROCKSUPERSUITE",
+                            "title": "V01_BALDROCKSUPERSUITE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=74836",
+                                "label": "Australian Stratigraphic Units Database"
+                                } ]
+                        }
+                    }
                 }
             },
             {
@@ -76,7 +86,17 @@
             {
                 "FileNameKey": "V09_YarraquinSeismicProvince.gltf",
                 "Insert": {
-                    "display_name": "Yarraquin Seismic Province"
+                    "display_name": "Yarraquin Seismic Province",
+                    "popups": {
+                        "V09_YARRAQUINSEISMICPROVINCE": {
+                            "name": "V09_YARRAQUINSEISMICPROVINCE",
+                            "title": "V09_YARRAQUINSEISMICPROVINCE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=80136",
+                                "label": "Australian Stratigraphic Units Database"
+                            } ]
+                        }
+                    }
                 }
             },
             {
@@ -138,7 +158,17 @@
             {
                 "FileNameKey": "S01_BaldRockSupersuite.gltf",
                 "Insert": {
-                    "display_name": "Bald Rock Supersuite"
+                    "display_name": "Bald Rock Supersuite",
+                    "popups": {
+                        "S01_BALDROCKSUPERSUITE": {
+                            "name": "S01_BALDROCKSUPERSUITE",
+                            "title": "S01_BALDROCKSUPERSUITE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=74836",
+                                "label": "Australian Stratigraphic Units Database"
+                            } ]
+                         }
+                    }
                 }
             },
             {
@@ -186,7 +216,17 @@
             {
                 "FileNameKey": "S09_YarraquinSeismicProvince.gltf",
                 "Insert": {
-                    "display_name": "Yarraquin Seismic Province"
+                    "display_name": "Yarraquin Seismic Province",
+                    "popups": {
+                        "S09_YARRAQUINSEISMICPROVINCE": {
+                            "name": "S09_YARRAQUINSEISMICPROVINCE",
+                            "title": "S09_YARRAQUINSEISMICPROVINCE",
+                            "href": [ {
+                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=80136",
+                                "label": "Australian Stratigraphic Units Database"
+                            } ]
+                        }
+                    }
                 }
             }
         ]

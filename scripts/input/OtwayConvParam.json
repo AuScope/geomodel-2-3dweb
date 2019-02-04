@@ -52,25 +52,65 @@
             {
                 "FileNameKey": "FINAL_OTWAY_EXTRA_STRAT_13-07-11_1.gltf",
                 "Insert": {
-                    "display_name": "CRAYFISH"
+                    "display_name": "CRAYFISH",
+                    "popups": {
+                        "FINAL_OTWAY_EXTRA_STRAT_13-07-11-STRAT_TOP-CRAYFISH_GSV": {
+                            "name": "STRAT_TOP-CRAYFISH_GSV",
+                            "title": "STRAT_TOP-CRAYFISH_GSV",
+                            "href": [ {
+                                       "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=4874",
+                                       "label": "Australian Stratigraphic Units Database"
+                                    }  ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "FINAL_OTWAY_EXTRA_STRAT_13-07-11_2.gltf",
                 "Insert": {
-                    "display_name": "EUMERALLA"
+                    "display_name": "EUMERALLA",
+                    "popups": {
+                        "FINAL_OTWAY_EXTRA_STRAT_13-07-11-STRAT_TOP-EUMERALLA_GSV": {
+                            "name": "STRAT_TOP-EUMERALLA_GSV",
+                            "title": "STRAT_TOP-EUMERALLA_GSV",
+                            "href" : [ {
+                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=6363",
+                                        "label": "Australian Stratigraphic Units Database"
+                                      } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "FINAL_OTWAY_EXTRA_STRAT_13-07-11_3.gltf",
                 "Insert": {
-                    "display_name": "PRETTY HILL EAST"
+                    "display_name": "PRETTY HILL EAST",
+                    "popups": {
+                        "FINAL_OTWAY_EXTRA_STRAT_13-07-11-STRAT_TOP-PRETTY-HILL-EAST_FROGTECH_FINAL": {
+                            "name": "STRAT_TOP-PRETTY-HILL-EAST_FROGTECH_FINAL",
+                            "title": "STRAT_TOP-PRETTY-HILL-EAST_FROGTECH_FINAL",
+                            "href" : [ {
+                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=15555",
+                                        "label": "Australian Stratigraphic Units Database"
+                                      } ]
+                        }
+                    }
                 }
             },
             {
                 "FileNameKey": "FINAL_OTWAY_EXTRA_STRAT_13-07-11_4.gltf",
                 "Insert": {
-                    "display_name": "PRETTY HILL WEST"
+                    "display_name": "PRETTY HILL WEST",
+                    "popups": {
+                        "FINAL_OTWAY_EXTRA_STRAT_13-07-11-STRAT_TOP-PRETTY-HILL-WEST_FROGTECH_FINAL": {
+                            "name": "STRAT_TOP-PRETTY-HILL-WEST_FROGTECH_FINAL",
+                            "title": "STRAT_TOP-PRETTY-HILL-WEST_FROGTECH_FINAL",
+                            "href" : [ {
+                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=15555",
+                                        "label": "Australian Stratigraphic Units Database"
+                                      } ]
+                        }
+                    }
                 }
             }
         ]
