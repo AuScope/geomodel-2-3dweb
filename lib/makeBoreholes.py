@@ -39,6 +39,21 @@ DEBUG_LVL = logging.CRITICAL
 
 # Set up debugging
 logger = logging.getLogger(__name__)
+logger.setLevel(DEBUG_LVL)
+
+if not logger.hasHandlers():
+
+    # Create logging console handler
+    handler = logging.StreamHandler(sys.stdout)
+
+    # Create logging formatter
+    formatter = logging.Formatter('%(name)s -- %(levelname)s - %(message)s')
+
+    # Add formatter to ch
+    handler.setFormatter(formatter)
+
+    # Add handler to logger and set level
+    logger.addHandler(handler)
 
 # We are exporting using ASSIMP_KIT, could also use COLLADA_KIT
 EXPORT_KIT = ASSIMP_KIT(DEBUG_LVL)
@@ -369,6 +384,8 @@ def get_blob_boreholes(borehole_dict, Param):
             blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
             logger.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
+        else:
+            logger.debug("No borehole data")
                 
     return None
 
@@ -493,17 +510,6 @@ if __name__ == "__main__":
     else:
         DEBUG_LVL = logging.INFO
 
-    # Create logging console handler
-    handler = logging.StreamHandler(sys.stdout)
-
-    # Create logging formatter
-    formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
-
-    # Add formatter to ch
-    handler.setFormatter(formatter)
-
-    # Add handler to logger and set level
-    logger.addHandler(handler)
     logger.setLevel(DEBUG_LVL)
 
 

@@ -55,7 +55,7 @@ class ASSIMP_KIT:
         :param file_ext: optional extension of file, defaults to '.gltf'
         :param export_type: optional export type for assimp API, defaults to 'gltf2'
         '''
-        self.logger.debug(" write_borehole(%s, %s, %s, %s, colour_info_dict = %s)", bv, repr(dest_dir), repr(file_name), repr(borehole_name), repr(colour_info_dict), ")")
+        self.logger.debug(" write_borehole(%s, %s, %s, %s, colour_info_dict = %s)", repr(bv), repr(dest_dir), repr(file_name), repr(borehole_name), repr(colour_info_dict))
 
         sc = structs.Scene()
         sc.mMetadata = None
