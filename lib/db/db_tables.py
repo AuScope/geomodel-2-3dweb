@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.schema import ForeignKey, UniqueConstraint, PrimaryKeyConstraint
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, DatabaseError
 
 Base = declarative_base()
 
@@ -119,85 +119,121 @@ class QueryDB():
         self.ses = None
 
     def open_db(self, create=False, db_name='query_data.db'):
-        db_name = 'sqlite:///' + db_name
-        self.eng = create_engine(db_name)
-        Base.metadata.bind = self.eng
-        if create:
-            Base.metadata.drop_all()        
-            Base.metadata.create_all()        
-        Session = sessionmaker(bind=self.eng)
-        self.ses = Session()
+        try:
+            db_name = 'sqlite:///' + db_name
+            self.eng = create_engine(db_name)
+            Base.metadata.bind = self.eng
+            if create:
+                Base.metadata.drop_all()        
+                Base.metadata.create_all()        
+            Session = sessionmaker(bind=self.eng)
+            self.ses = Session()
+        except DatabaseError as e:
+            return False, str(e)
+        return True, None
+            
         
 
     def add_segment(self, json_str):
-        s = self.ses.query(Segment_Info).filter_by(json=json_str).first()
-        if s == None:
-            s = Segment_Info(json=json_str)
-            self.ses.add(s)
-            self.ses.commit()
-        return s
+        try:
+            s = self.ses.query(Segment_Info).filter_by(json=json_str).first()
+            if s == None:
+                s = Segment_Info(json=json_str)
+                self.ses.add(s)
+                self.ses.commit()
+        except DatabaseError as e:
+            return False, str(e)
+        return True, s
         
     def add_part(self, json_str):
-        p = self.ses.query(Part_Info).filter_by(json=json_str).first()
-        if p == None:
-            p = Part_Info(json=json_str)
-            self.ses.add(p)
-            self.ses.commit()
-        return p
+        try:
+            p = self.ses.query(Part_Info).filter_by(json=json_str).first()
+            if p == None:
+                p = Part_Info(json=json_str)
+                self.ses.add(p)
+                self.ses.commit()
+        except DatabaseError as e:
+            return False, str(e)
+        return True, p
 
     def add_model(self, json_str):
-        m = self.ses.query(Model_Info).filter_by(json=json_str).first()
-        if m == None:
-            m = Model_Info(json=json_str)
-            self.ses.add(m)
-            self.ses.commit()
-        return m
+        try:
+            m = self.ses.query(Model_Info).filter_by(json=json_str).first()
+            if m == None:
+                m = Model_Info(json=json_str)
+                self.ses.add(m)
+                self.ses.commit()
+        except DatabaseError as e:
+            return False, str(e)   
+        return True, m
 
     def add_user(self, json_str):
-        u = self.ses.query(User_Info).filter_by(json=json_str).first()
-        if u == None:
-            u = User_Info(json=json_str)
-            self.ses.add(u)
-            self.ses.commit()
-        return u
+        try:
+            u = self.ses.query(User_Info).filter_by(json=json_str).first()
+            if u == None:
+                u = User_Info(json=json_str)
+                self.ses.add(u)
+                self.ses.commit()
+        except DatabaseError as e:
+            return False, str(e)       
+        return True, u
 
     def add_query(self, label, model_name, segment, part, model, user):
-        q = Query(label=label, model_name=model_name, segment_info=segment, part_info=part, model_info=model, user_info=user)
-        self.ses.merge(q)
         try:
+            q = Query(label=label, model_name=model_name, segment_info=segment, part_info=part, model_info=model, user_info=user)
+            self.ses.merge(q)
             self.ses.commit()
-        except IntegrityError:
-            self.ses.rollback()
+        except DatabaseError as e:
+            return False, str(e)
+        return True, None
 
     def query(self, label, model_name):
-        result = self.ses.query(Query).filter_by(label=label).filter_by(model_name=model_name).first()
+        try:
+            result = self.ses.query(Query).filter_by(label=label).filter_by(model_name=model_name).first()
+        except DatabaseError as e:
+            return False, str(e)
         if result == None:
             filter = label.rpartition('_')[0]
-            result = self.ses.query(Query).filter_by(label=filter).first()
-            # result = self.ses.query(Query).filter(Query.label.like(filter)).first()
-            if result == None:
-                return (None, None, None, None, None, None)
-        return (result.label, result.model_name, getattr(result.segment_info, 'json', None), getattr(result.part_info, 'json', None), getattr(result.model_info, 'json', None), getattr(result.user_info, 'json', None))
+            try:
+                result = self.ses.query(Query).filter_by(label=filter).first()
+            except DatabaseError as e:
+                return False, str(e)
+        if result == None:
+            return True, (None, None, None, None, None, None)
+        return True, (result.label, result.model_name, getattr(result.segment_info, 'json', None), getattr(result.part_info, 'json', None), getattr(result.model_info, 'json', None), getattr(result.user_info, 'json', None))
         
 
 
 if __name__ == "__main__":
     # Basic unit testing
     qd = QueryDB()
-    qd.open_db(create=True, db_name='sqlite:///:memory:')
-    s=qd.add_segment('seg')
-    s2=qd.add_segment('seg')
+    ok, msg = qd.open_db(create=True, db_name=':memory:')
+    if not ok:
+        print(msg)
+    assert(ok)
+    ok, s = qd.add_segment('seg')
+    assert(ok)
+    ok, s2 = qd.add_segment('seg')
+    assert(ok)
 
     # Test for no duplicates
-    assert(qd.ses.query(Segment_Info).count()==1)
+    q = qd.ses.query(Segment_Info)
+    assert(q.count()==1)
 
-    s3=qd.add_segment('seg3')
-    p=qd.add_part('part')
-    m=qd.add_model('model')
-    u=qd.add_user('user')
-    qd.add_query('label', 'model_name', s, p, m, u)
-    qd.add_query('label2', 'model_name2', s3, p, m, u)
-    qd.add_query('label_3_i', 'model_name3', s3, p, None, None)
+    ok, s3 = qd.add_segment('seg3')
+    assert(ok)
+    ok, p = qd.add_part('part')
+    assert(ok)
+    ok, m = qd.add_model('model')
+    assert(ok)
+    ok, u = qd.add_user('user')
+    assert(ok)
+    ok, msg = qd.add_query('label', 'model_name', s, p, m, u)
+    assert(ok)
+    ok, msg = qd.add_query('label2', 'model_name2', s3, p, m, u)
+    assert(ok)
+    ok, msg = qd.add_query('label_3_i', 'model_name3', s3, p, None, None)
+    assert(ok)
 
     # Have added three 'Query' objs? two 'Segment_Info' objs ? etc.
     assert(qd.ses.query(Query).count()==3)
@@ -207,20 +243,20 @@ if __name__ == "__main__":
     assert(qd.ses.query(User_Info).count()==1)
 
     # Look for a 'Query' with all info tables
-    q1=qd.query('label2', 'model_name2')
-    assert(q1 != None and q1[0] == 'label2' and q1[1] == 'model_name2' and q1[2] == 'seg3')
+    ok, q1 = qd.query('label2', 'model_name2')
+    assert(ok and q1 != None and q1[0] == 'label2' and q1[1] == 'model_name2' and q1[2] == 'seg3')
 
     # Look for 'Query' containing Nones
-    q2 = qd.query('label_3_i', 'model_name3')
-    assert(q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
+    ok, q2 = qd.query('label_3_i', 'model_name3')
+    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
 
     # Look for 'Query' with trailling number in label
-    q2 = qd.query('label_3_i_44', 'model_name3')
-    assert(q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
+    ok, q2 = qd.query('label_3_i_44', 'model_name3')
+    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
 
     # Non existing 'Query'
-    assert(qd.query('label1_6', 'model_name5') == (None, None, None, None, None, None))
-    assert(qd.query('_label6', 'model_name5') == (None, None, None, None, None, None))
+    assert(qd.query('label1_6', 'model_name5') == (True, (None, None, None, None, None, None)))
+    assert(qd.query('_label6', 'model_name5') == (True, (None, None, None, None, None, None)))
 
     print("PASSED TESTS")
 
