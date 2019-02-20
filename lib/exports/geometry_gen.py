@@ -14,7 +14,7 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
         color_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label } ;
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
-    BH_WIDTH= 675 # Width of stick
+    BH_WIDTH = 10 # Width of stick
     max_depth = max(colour_info_dict.keys())
     min_depth = max(colour_info_dict.keys())
 
