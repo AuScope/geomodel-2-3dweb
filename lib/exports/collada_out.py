@@ -140,9 +140,9 @@ class COLLADA_OUT():
         :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
         :param ht_reso: height resolution
         '''
-        for vert_list, indices, colour_idx, depth, colour_info in colour_borehole_gen(pos, colour_info_dict, ht_resol):
+        for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(pos, "borehole-{0}".format(borehole_label), colour_info_dict, ht_resol):
             vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list), ('X', 'Y', 'Z'))
-            geom = Collada.geometry.Geometry(mesh, "geometry_{0}".format(int(depth)), "{0}_{1}".format(borehole_label, int(depth)), [vert_src])
+            geom = Collada.geometry.Geometry(mesh, "geometry_{0}".format(int(depth)), mesh_name, [vert_src])
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
 

@@ -27,7 +27,7 @@ from owslib.wfs import WebFeatureService
 from owslib.fes import *
 from owslib.util import ServiceException
 
-from exports.bh_utils import make_borehole_label, make_borehole_filename
+from exports.bh_utils import make_borehole_filename, make_borehole_label
 from exports.assimp_kit import ASSIMP_KIT
 from exports.geometry_gen import colour_borehole_gen
 from db.db_tables import QueryDB
@@ -385,7 +385,7 @@ def get_blob_boreholes(borehole_dict, Param):
 
         # If there's data, then create the borehole
         if len(bh_data_dict) > 0:
-            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'].replace(' ','_'), bh_data_dict, HEIGHT_RES, '', file_name)
+            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
             logger.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
         else:
@@ -447,7 +447,6 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
             # If there's NVCL data, then create the borehole
             if len(bh_data_dict) > 0:
                 first_depth = -1
-                bh_clean = borehole_dict['name'].replace(' ','_')
                 for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES):
                     if first_depth < 0:
                         first_depth = int(depth)
@@ -457,21 +456,21 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
                     if not is_ok:
                         logger.warning("Cannot add segment to db: %s", s)
                         continue
-                    # NB: This is the format that the label takes when a part of the GLTF file is clicked on.
-                    is_ok, r = qdb.add_query("{0}_{1}_{2}".format(bh_clean, first_depth, colour_idx), Param.modelUrlPath, s, p, None, None)
+                    # Using 'make_borehole_label()' ensures that name is the same in both db and GLTF file
+                    is_ok, r = qdb.add_query("{0}_{1}".format(make_borehole_label(borehole_dict['name'], first_depth), colour_idx), Param.modelUrlPath, s, p, None, None)
                     if not is_ok:
                         logger.warning("Cannot add query to db: %s", r)
                         continue
                     logger.debug("ADD_QUERY(%s, %s)", mesh_name, Param.modelUrlPath)
 
                 if output_mode == 'GLTF':
-                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, bh_clean, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     
                 elif dest_dir != '':
                     import exports.collada2gltf
                     from exports.collada_kit import COLLADA_KIT
                     export_kit = COLLADA_KIT(DEBUG_LVL)
-                    export_kit.write_borehole(base_xyz, bh_clean, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     blob_obj = None
                 else:
                     logger.warning("COLLADA_KIT cannot write blobs")

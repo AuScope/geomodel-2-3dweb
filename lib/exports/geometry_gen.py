@@ -1,4 +1,5 @@
 import math
+from exports.bh_utils import make_borehole_label
 
 def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     ''' A generator which is used to make a borehole marker stick with triangular cross section
@@ -42,7 +43,7 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
                    0, 1, 3,
                    1, 5, 3]
 
-        mesh_name = bytes(borehole_name+"_"+str(int(depth)), encoding='utf=8')
+        mesh_name = make_borehole_label(borehole_name, depth)
 
         yield vert_list, indices, colour_idx, depth, colour_info, mesh_name
 

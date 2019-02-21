@@ -8,7 +8,6 @@ from pyassimp import *
 from exports.geometry_gen import colour_borehole_gen
 
 import exports.print_assimp as pa
-from exports.bh_utils import make_borehole_label
 
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
