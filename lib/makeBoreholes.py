@@ -33,7 +33,7 @@ from exports.geometry_gen import colour_borehole_gen
 from db.db_tables import QueryDB
 
 
-DEBUG_LVL = logging.CRITICAL
+DEBUG_LVL = logging.ERROR
 ''' Initialise debug level to minimal debugging
 '''
 
@@ -88,8 +88,8 @@ GSMLP_IDS = [ 'identifier', 'name', 'description', 'purpose', 'status', 'drillin
 # Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
 
-# Timeout for querying WFS services (seconds)
-WFS_TIMEOUT = 6000
+# Timeout for querying WFS and NVCL services (seconds)
+TIMEOUT = 6000
 
 
 
@@ -161,12 +161,13 @@ def bgr2rgba(bgr):
     return ((bgr & 255)/255.0, ((bgr & 65280) >> 8)/255.0, (bgr >> 16)/255.0, 1.0)
 
 
-def get_borehole_data(url, log_id, height_resol):
+def get_borehole_data(url, log_id, height_resol, class_name):
     ''' Retrieves borehole mineral data for a borehole
 
     :param url: URL of the NVCL Data Service 
     :param log_id: borehole log identifier, string e.g. 'ce2df1aa-d3e7-4c37-97d5-5115fc3c33d'
     :param height_resol: height resolution, float
+    :param class_name: name of mineral class
     :returns: a dict: key - depth, float; value - { 'colour': RGB colour string, 'classText': mineral name }
     '''
     logger.debug(" get_borehole_data(%s, %s)", url, log_id)
@@ -176,7 +177,7 @@ def get_borehole_data(url, log_id, height_resol):
     req = urllib.request.Request(url, enc_params)
     json_data = b''
     try:
-        with urllib.request.urlopen(req, timeout=60) as response:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
             json_data = response.read()
     except URLError as e:
         logger.error('URLError: %s', e)
@@ -194,18 +195,20 @@ def get_borehole_data(url, log_id, height_resol):
         sorted_meas_list = sorted(meas_list, key=lambda x: x['roundedDepth'])
         for depth, group in itertools.groupby(sorted_meas_list, lambda x: x['roundedDepth']):
             # Filter out invalid values
-            filtered_group = itertools.filterfalse(lambda x: x['classText'] == 'INVALID', group)
+            filtered_group = itertools.filterfalse(lambda x: x['classText'].upper() == 'INVALID', group)
             # Make a dict keyed on depth, value is element with largest count
             try:
                 max_elem = max(filtered_group, key = lambda x: x['classCount'])
             except ValueError:
                 # Sometimes 'filtered_group' is empty
+                logger.warning("No valid values at depth %s", str(depth))
                 continue
             col = bgr2rgba(max_elem['colour'])
-            depth_dict[depth] = { **max_elem, 'colour': col}
+            depth_dict[depth] = { 'className': class_name, **max_elem, 'colour': col}
             del depth_dict[depth]['roundedDepth']
             del depth_dict[depth]['classCount']
             
+    
     return depth_dict 
 
 
@@ -221,7 +224,7 @@ def get_borehole_logids(url, nvcl_id):
     req = urllib.request.Request(url, enc_params)
     response_str = b''
     try:
-        with urllib.request.urlopen(req, timeout=60) as response:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
             response_str = response.read()
     except URLError as e:
         logger.error('URLError: %s', e)
@@ -256,7 +259,7 @@ def get_boreholes_list(wfs, max_boreholes, Param):
     try:
         response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
         response_str = bytes(response.read(), 'ascii')
-    except HTTPError as e:
+    except (HTTPError, ReadTimeout) as e:
         return []
     borehole_list = []
     logger.debug('get_boreholes_list() resp= %s', response_str)
@@ -278,7 +281,8 @@ def get_boreholes_list(wfs, max_boreholes, Param):
                 else:
                     borehole_dict['x'] = float(xy[0]) # lon
                     borehole_dict['y'] = float(xy[1]) # lat
-            except:
+            except Exception as e:
+                logger.warning("Cannot parse collar coordinates %s", str(e))
                 continue
         
             borehole_dict['href'] = child.findtext('./gsmlp:identifier', default="", namespaces=NS)
@@ -375,13 +379,13 @@ def get_blob_boreholes(borehole_dict, Param):
             # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
             # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
             if log_type == '1' and log_name == 'Grp1 uTSAS':
-                bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
+                bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES, 'Grp1 uTSAS')
                 logger.debug('got bh_data_dict= %s', str(bh_data_dict))
                 break
 
         # If there's data, then create the borehole
         if len(bh_data_dict) > 0:
-            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
+            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'].replace(' ','_'), bh_data_dict, HEIGHT_RES, '', file_name)
             logger.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
         else:
@@ -395,9 +399,13 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
         If 'dest_dir' is supplied, then files are written
         If output_mode != 'GLTF' then 'dest_dir' must not be ''
 
+    :param wfs: OWSLib WebFeatureService object
+    :param qdb: opened query database 'QueryDB' object
     :param Param: input parameters
     :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob, else outputs COLLADA (.dae) to file
-    :param dest_dir: optional directory where 3D model files are written :returns: config object and optional GLTF blob object '''
+    :param dest_dir: optional directory where 3D model files are written 
+    :returns: config object and optional GLTF blob object
+    '''
     logger.debug("get_boreholes(%s, %s, %s)", str(Param), output_mode, dest_dir)
 
     # Get all NVCL scanned boreholes within BBOX
@@ -413,7 +421,10 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
 
         # Get borehole information dictionary, and add to query db
         bh_info_dict = get_bh_info_dict(borehole_dict, Param)
-        p = qdb.add_part(json.dumps(bh_info_dict))
+        is_ok, p = qdb.add_part(json.dumps(bh_info_dict))
+        if not is_ok:
+            logger.warning("Cannot add part to db: %s", p)
+            continue
 
         if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
             file_name = make_borehole_filename(borehole_dict['name'])
@@ -431,28 +442,36 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
                 # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
                 # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
                 if log_type == '1' and log_name == 'Grp1 uTSAS':
-                    bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES)
+                    bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES, 'Grp1 uTSAS')
                     break
             # If there's NVCL data, then create the borehole
             if len(bh_data_dict) > 0:
                 first_depth = -1
+                bh_clean = borehole_dict['name'].replace(' ','_')
                 for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES):
                     if first_depth < 0:
                         first_depth = int(depth)
                     popup_info = colour_info.copy()
                     del popup_info['colour']
-                    s = qdb.add_segment(json.dumps(popup_info))
-                    # This is the format that the label takes when a part of the GLTF file is clicked on. NB: Implementation dependent.
-                    qdb.add_query("{0}_{1}_{2}".format(borehole_dict['name'], first_depth, colour_idx), Param.modelUrlPath, s, p, None, None)
+                    is_ok, s = qdb.add_segment(json.dumps(popup_info))
+                    if not is_ok:
+                        logger.warning("Cannot add segment to db: %s", s)
+                        continue
+                    # NB: This is the format that the label takes when a part of the GLTF file is clicked on.
+                    is_ok, r = qdb.add_query("{0}_{1}_{2}".format(bh_clean, first_depth, colour_idx), Param.modelUrlPath, s, p, None, None)
+                    if not is_ok:
+                        logger.warning("Cannot add query to db: %s", r)
+                        continue
                     logger.debug("ADD_QUERY(%s, %s)", mesh_name, Param.modelUrlPath)
+
                 if output_mode == 'GLTF':
-                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, bh_clean, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     
                 elif dest_dir != '':
                     import exports.collada2gltf
                     from exports.collada_kit import COLLADA_KIT
                     export_kit = COLLADA_KIT(DEBUG_LVL)
-                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    export_kit.write_borehole(base_xyz, bh_clean, bh_data_dict, HEIGHT_RES, dest_dir, file_name)
                     blob_obj = None
                 else:
                     logger.warning("COLLADA_KIT cannot write blobs")
@@ -471,25 +490,35 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
 
 
 def process_single(dest_dir, input_file, db_name, create_db=True):
+    ''' Process a single model's boreholes
+
+    :param dest_dir: directory to output database and files
+    :param input_file: conversion parameter file
+    :param db_name: name of database
+    :param create_db: optional (default True) create new database or append to existing one
+    
+    '''
     logger.info("Processing %s", input_file)
     out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
     logger.info("Writing to: %s", out_filename)
     with open(out_filename, 'w') as fp:
         Param = get_json_input_param(input_file)
         try:
-            wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, xml=None, timeout=WFS_TIMEOUT)
+            wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, xml=None, timeout=TIMEOUT)
         except ServiceException as e:
             logger.error("WFS error, cannot process %s : %s", input_file, str(e))
             return
         except ReadTimeout as e:
             logger.error("Timeout error, cannot process %s : %s", input_file, str(e))
             return
+        except HTTPError as e:
+            logger.error("HTTP error code returned, cannot process %s : %s", input_file, str(e))
+            return
             
         qdb = QueryDB()
-        try:
-            qdb.open_db(create=create_db, db_name=db_name)
-        except Exception as e:
-            logger.error("Cannot open/create database: %s", e)
+        is_ok, err_str = qdb.open_db(create=create_db, db_name=db_name)
+        if not is_ok:
+            logger.error("Cannot open/create database: %s", err_str)
             sys.exit(1)
         borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=args.dest_dir)
         json.dump(borehole_loadconfig, fp, indent=4, sort_keys=True)
@@ -512,7 +541,6 @@ if __name__ == "__main__":
 
     logger.setLevel(DEBUG_LVL)
 
-
     # Check and create output directory, if necessary
     if not os.path.isdir(args.dest_dir):
         logger.warning("Output directory %s does not exist", args.dest_dir)
@@ -528,7 +556,7 @@ if __name__ == "__main__":
         if not os.path.isfile(args.input):
             logger.error("Input file does not exist: %s", args.input)
             sys.exit(1) 
-        process_single(args.dest_dir, args.input, args.database)
+        process_single(args.dest_dir, args.input, os.path.join(args.dest_dir, args.database))
 
     # Check batch file
     elif getattr(args, 'batch', None) != None:
@@ -540,7 +568,7 @@ if __name__ == "__main__":
             for line in fp:
                 # Skip lines starting with '#'
                 if line[0]!='#':
-                    process_single(args.dest_dir, line.rstrip('\n'), args.database, create_db)
+                    process_single(args.dest_dir, line.rstrip('\n'), os.path.join(args.dest_dir, args.database), create_db)
                     create_db = False
     else:
         print("No input specified")

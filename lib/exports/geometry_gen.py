@@ -11,7 +11,7 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
         indices - list of integers, index pointers to which vertices are joined as triangles;
         colour_idx - integer index pointing to material object array;
         depth - depth of borehole segment, float;
-        color_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label } ;
+        colour_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label, 'className' : label } ;
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
     BH_WIDTH = 10 # Width of stick
