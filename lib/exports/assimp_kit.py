@@ -67,7 +67,17 @@ class ASSIMP_KIT:
         mesh_arr_pp = ctypes.cast(mesh_p_arr, POINTER(POINTER(structs.Mesh))) 
         sc.mMeshes = mesh_arr_pp
         sc.mNumMeshes = bh_size
-        self.make_nodes(sc, b'root_node', b'child_node', bh_size)
+        gen = colour_borehole_gen(bv, borehole_name, colour_info_dict, height_reso)
+        *first, mesh_name = next(gen)
+        one_only = False
+        try:
+            next(gen)
+        except StopIteration:
+            one_only = True
+        
+        # Put the mesh name in the mesh's parents, because GLTFLoader
+        # copies this into the mesh name
+        self.make_nodes(sc, b'root_node', mesh_name+b'_0', bh_size)
 
         # Set up materials
         mat_p_arr = (POINTER(structs.Material) * bh_size)()
@@ -76,6 +86,10 @@ class ASSIMP_KIT:
         sc.mNumMaterials = bh_size
 
         for vert_list, indices, colour_idx, depth, colour_info, mesh_name in colour_borehole_gen(bv, borehole_name, colour_info_dict, height_reso):
+            # If there is only one mesh, then GLTFLoader does not append a '_0' to the name, so we must do so, to be 
+            # consistent with the database
+            if one_only:
+               mesh_name += b'_0'
             mesh_obj = self.make_a_mesh(mesh_name, indices, colour_idx)
             mesh_p_arr[colour_idx] = ctypes.pointer(mesh_obj)
             self.add_vertices_to_mesh(mesh_obj, vert_list)

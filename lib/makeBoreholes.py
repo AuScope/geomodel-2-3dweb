@@ -259,7 +259,8 @@ def get_boreholes_list(wfs, max_boreholes, Param):
     try:
         response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
         response_str = bytes(response.read(), 'ascii')
-    except (HTTPError, ReadTimeout) as e:
+    except (HTTPError, ServiceException, ReadTimeout) as e:
+        logger.error("WFS GetFeature failed, filter=%s: %s", filterxml, str(e))
         return []
     borehole_list = []
     logger.debug('get_boreholes_list() resp= %s', response_str)
@@ -457,7 +458,7 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
                         logger.warning("Cannot add segment to db: %s", s)
                         continue
                     # Using 'make_borehole_label()' ensures that name is the same in both db and GLTF file
-                    is_ok, r = qdb.add_query("{0}_{1}".format(make_borehole_label(borehole_dict['name'], first_depth), colour_idx), Param.modelUrlPath, s, p, None, None)
+                    is_ok, r = qdb.add_query("{0}_{1}".format(make_borehole_label(borehole_dict['name'], first_depth).decode('utf-8'), colour_idx), Param.modelUrlPath, s, p, None, None)
                     if not is_ok:
                         logger.warning("Cannot add query to db: %s", r)
                         continue
