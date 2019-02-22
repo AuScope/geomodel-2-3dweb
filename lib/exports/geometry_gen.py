@@ -16,15 +16,13 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
     BH_WIDTH = 10 # Width of stick
-    max_depth = max(colour_info_dict.keys())
-    min_depth = max(colour_info_dict.keys())
 
     # Convert bv to an equilateral triangle of floats
     angl_rad = math.radians(30.0)
     cos_flt = math.cos(angl_rad)
     sin_flt = math.sin(angl_rad)
     for colour_idx, (depth, colour_info) in enumerate(colour_info_dict.items()):
-        height = pos[2]+max_depth+ht_resol-depth
+        height = pos[2]+ht_resol-depth
         ptA_high = [pos[0], pos[1]+BH_WIDTH*cos_flt, height]
         ptB_high = [pos[0]+BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
         ptC_high = [pos[0]-BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
