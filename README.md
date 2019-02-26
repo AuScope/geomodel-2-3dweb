@@ -18,6 +18,8 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 3. Clone this repository
 4. Edit 'lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
 
+NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
+
 ### To convert some GOCAD *.ts *.vs *.pl files to GLTF or COLLADA
 
 Run [gocad2collada.py](scripts/gocad2collada.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
