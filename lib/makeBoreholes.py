@@ -180,7 +180,7 @@ def get_borehole_data(url, log_id, height_resol, class_name):
         with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
             json_data = response.read()
     except URLError as e:
-        logger.error('URLError: %s', e)
+        logger.warning('URLError: %s', e)
         return OrderedDict()
     logger.debug('json_data = %s', json_data)
     meas_list = []
@@ -227,7 +227,7 @@ def get_borehole_logids(url, nvcl_id):
         with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
             response_str = response.read()
     except URLError as e:
-        logger.error('URLError: %s', e)
+        logger.warning('URLError: %s', e)
         return []
     root = ET.fromstring(response_str)
     logid_list = []
@@ -260,7 +260,7 @@ def get_boreholes_list(wfs, max_boreholes, Param):
         response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
         response_str = bytes(response.read(), 'ascii')
     except (HTTPError, ServiceException, ReadTimeout) as e:
-        logger.error("WFS GetFeature failed, filter=%s: %s", filterxml, str(e))
+        logger.warning("WFS GetFeature failed, filter=%s: %s", filterxml, str(e))
         return []
     borehole_list = []
     logger.debug('get_boreholes_list() resp= %s', response_str)
@@ -379,8 +379,8 @@ def get_blob_boreholes(borehole_dict, Param):
             # Min1,2,3 = 1st, 2nd, 3rd most common mineral
             # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
             # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-            if log_type == '1' and log_name == 'Grp1 uTSAS':
-                bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES, 'Grp1 uTSAS')
+            if log_type == '1' and log_name in ['Grp1 uTSAS', 'Grp1 uTSAV', 'Grp1 uTSAT']:
+                bh_data_dict = get_borehole_data(url, log_id, HEIGHT_RES, log_name)
                 logger.debug('got bh_data_dict= %s', str(bh_data_dict))
                 break
 
@@ -390,7 +390,7 @@ def get_blob_boreholes(borehole_dict, Param):
             logger.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
         else:
-            logger.debug("No borehole data")
+            logger.debug("No borehole data len=%d", len(log_ids))
                 
     return None
 
@@ -506,13 +506,13 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
         try:
             wfs = WebFeatureService(Param.WFS_URL, version=Param.WFS_VERSION, xml=None, timeout=TIMEOUT)
         except ServiceException as e:
-            logger.error("WFS error, cannot process %s : %s", input_file, str(e))
+            logger.warning("WFS error, cannot process %s : %s", input_file, str(e))
             return
         except ReadTimeout as e:
-            logger.error("Timeout error, cannot process %s : %s", input_file, str(e))
+            logger.warning("Timeout error, cannot process %s : %s", input_file, str(e))
             return
         except HTTPError as e:
-            logger.error("HTTP error code returned, cannot process %s : %s", input_file, str(e))
+            logger.warning("HTTP error code returned, cannot process %s : %s", input_file, str(e))
             return
             
         qdb = QueryDB()
