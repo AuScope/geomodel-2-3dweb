@@ -5,7 +5,7 @@ import sys
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.schema import ForeignKey, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.exc import IntegrityError, DatabaseError
 
@@ -114,25 +114,24 @@ class KeyValuePairs(Base):
 class QueryDB():
     ''' A simple database class to manage the creation, writing and reading of the query database
     '''
-    def __init__(self):
-        self.eng = None
-        self.ses = None
-
-    def open_db(self, create=False, db_name='query_data.db'):
+    def __init__(self, create=False, db_name='query_data.db'):
+        self.error = ''
         try:
             db_name = 'sqlite:///' + db_name
-            self.eng = create_engine(db_name)
-            Base.metadata.bind = self.eng
+            eng = create_engine(db_name, echo=False)
+            Base.metadata.bind = eng
             if create:
                 Base.metadata.drop_all()        
                 Base.metadata.create_all()        
-            Session = sessionmaker(bind=self.eng)
-            self.ses = Session()
+            # 'scoped_session()' makes a thread-safe cache of session objects
+            # TODO: Make scope_session() more global
+            self.Session = scoped_session(sessionmaker(eng))
+            self.ses = self.Session()
         except DatabaseError as e:
-            return False, str(e)
-        return True, None
+            self.error = str(e)
             
-        
+    def get_error(self):
+        return self.error
 
     def add_segment(self, json_str):
         try:
@@ -195,22 +194,28 @@ class QueryDB():
         if result == None:
             filter = label.rpartition('_')[0]
             try:
-                result = self.ses.query(Query).filter_by(label=filter).first()
+                result = self.ses.query(Query).filter_by(model_name=model_name).filter_by(label=filter).first()
             except DatabaseError as e:
                 return False, str(e)
         if result == None:
             return True, (None, None, None, None, None, None)
         return True, (result.label, result.model_name, getattr(result.segment_info, 'json', None), getattr(result.part_info, 'json', None), getattr(result.model_info, 'json', None), getattr(result.user_info, 'json', None))
         
+    def __del__(self):
+        try:
+            self.Session.remove() 
+        except DatabaseError as e:
+            pass
+
 
 
 if __name__ == "__main__":
     # Basic unit testing
-    qd = QueryDB()
-    ok, msg = qd.open_db(create=True, db_name=':memory:')
-    if not ok:
+    qd = QueryDB(create=True, db_name=':memory:')
+    msg = qd.get_error()
+    if msg != '':
         print(msg)
-    assert(ok)
+    assert(msg=='')
     ok, s = qd.add_segment('seg')
     assert(ok)
     ok, s2 = qd.add_segment('seg')
