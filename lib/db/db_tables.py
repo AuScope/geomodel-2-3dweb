@@ -210,12 +210,13 @@ class QueryDB():
 
 
 if __name__ == "__main__":
+    print("Testing query db")
     # Basic unit testing
     qd = QueryDB(create=True, db_name=':memory:')
     msg = qd.get_error()
     if msg != '':
         print(msg)
-    assert(msg=='')
+    assert(msg!='')
     ok, s = qd.add_segment('seg')
     assert(ok)
     ok, s2 = qd.add_segment('seg')
@@ -263,6 +264,6 @@ if __name__ == "__main__":
     assert(qd.query('label1_6', 'model_name5') == (True, (None, None, None, None, None, None)))
     assert(qd.query('_label6', 'model_name5') == (True, (None, None, None, None, None, None)))
 
-    print("PASSED TESTS")
+    print("PASSED QUERY DB TESTS")
 
     

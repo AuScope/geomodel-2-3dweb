@@ -69062,7 +69062,7 @@
   </library_materials>
   <library_visual_scenes>
     <visual_scene id="myscene">
-      <node id="node0" name="node0">
+      <node id="PYRAMIDS-0000002763" name="PYRAMIDS-0000002763">
         <instance_geometry url="#geometry0000000000">
           <bind_material>
             <technique_common>

@@ -394,7 +394,7 @@
   </library_materials>
   <library_visual_scenes>
     <visual_scene id="myscene">
-      <node id="node0" name="node0">
+      <node id="GPTEST-BENDIGO-0000000005" name="GPTEST-BENDIGO-0000000005">
         <instance_geometry url="#geometry0000000000">
           <bind_material>
             <technique_common>
