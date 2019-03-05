@@ -176,6 +176,7 @@ def process(filename_str, dest_dir):
         file_lines_list = de_concat(whole_file_lines)
         ck.start_collada()
         popup_dict = {}
+        node_label = ''
         for file_lines in file_lines_list:
             gv = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz, nondefault_coords=NONDEF_COORDS)
             is_ok, gsm_list = gv.process_gocad(src_dir, filename_str, file_lines)
@@ -187,13 +188,14 @@ def process(filename_str, dest_dir):
                 # Check that conversion worked and write out files
                 if ext_str == 'TS' and len(geom_obj.vrtx_arr) > 0 and len(geom_obj.trgl_arr) > 0 \
                            or (ext_str in ['PL','WL']) and len(geom_obj.vrtx_arr) > 0 and len(geom_obj.seg_arr) > 0:
-                    popup_dict.update(ck.add_geom_to_collada(geom_obj, style_obj, meta_obj))
+                    p_dict, node_label = ck.add_geom_to_collada(geom_obj, style_obj, meta_obj)
+                    popup_dict.update(p_dict)
                     extent_list.append(geom_obj.get_extent())
                     has_result = True
 
         if has_result:
             model_dict_list.append(add_config2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
-            ck.end_collada(out_filename)
+            ck.end_collada(out_filename, node_label)
         
 
     # Process group files, depending on the number of GOCAD objects inside
@@ -205,13 +207,15 @@ def process(filename_str, dest_dir):
             logger.debug("All group objects in one COLLADA file")
             ck.start_collada()
             popup_dict = {}
+            node_label = ''
             for geom_obj, style_obj, meta_obj in gsm_list:
-                popup_dict.update(ck.add_geom_to_collada(geom_obj, style_obj, meta_obj))
+                p_dict, node_label = ck.add_geom_to_collada(geom_obj, style_obj, meta_obj)
+                popup_dict.update(p_dict)
                 extent_list.append(geom_obj.get_extent())
                 has_result = True
             if has_result:
                 model_dict_list.append(add_config2popup(Params.grp_struct_dict, os.path.basename(file_name), popup_dict, file_name))
-                ck.end_collada(out_filename)
+                ck.end_collada(out_filename, node_label)
  
         # Else place each GOCAD object in its own COLLADA file
         else:

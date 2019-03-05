@@ -88,6 +88,7 @@ class COLLADA_KIT:
         :param meta_obj: METADATA object
         :returns: a popup info dict or exits if you try to add a GOCAD VS (vertex) or VO (volume) file
             popup info dict format: { object_name: { 'attr_name': attr_val, ... } }
+            and a node label string
         '''
         self.logger.debug("add_geom_to_collada()")
 
@@ -98,6 +99,7 @@ class COLLADA_KIT:
 
         geometry_name = meta_obj.name
         popup_dict = {}
+        node_label = ''
 
         # Triangles
         if geom_obj.is_trgl():
@@ -128,6 +130,7 @@ class COLLADA_KIT:
             self.geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
             popup_dict[geometry_name] = { 'title': meta_obj.name, 'name': meta_obj.name }
+            node_label = geometry_name
 
         # Lines
         elif geom_obj.is_line():
@@ -141,6 +144,7 @@ class COLLADA_KIT:
             geom_label_list = self.co.make_line(self.mesh_obj, geometry_name, self.geomnode_list, geom_obj.seg_arr, geom_obj.vrtx_arr, self.obj_cnt, self.LINE_WIDTH)
             for geom_label in geom_label_list:
                 popup_dict[geom_label] = { 'title': meta_obj.name, 'name': meta_obj.name }
+                node_label = geom_label
 
         # Points
         elif geom_obj.is_point():
@@ -169,20 +173,23 @@ class COLLADA_KIT:
                 geom_label = self.co.make_pyramid(self.mesh_obj, geometry_name, self.geomnode_list, v, self.obj_cnt, POINT_SIZE, colour_num)
 
                 popup_dict[geom_label] = { 'name': meta_obj.get_property_name(), 'val': prop_dict[v.xyz], 'title': geometry_name.replace('_',' ') }
+                node_label = geom_label
+            
 
         self.obj_cnt += 1
-        return popup_dict
+        return popup_dict, node_label
 
 
 
-    def end_collada(self, out_filename):
+    def end_collada(self, out_filename, node_label):
         ''' Close out a COLLADA, writing the mesh object to file
 
         :param out_filename: path & filename of COLLADA file to output, without extension
+        :param node_label: label for the COLLADA "Node" object (used by the website to recognise model parts)
         '''
-        self.logger.debug("end_collada(%s)", out_filename)
+        self.logger.debug("end_collada(%s, %s)", out_filename, node_label)
 
-        node = Collada.scene.Node("node0", children=self.geomnode_list)
+        node = Collada.scene.Node(node_label, children=self.geomnode_list)
         myscene = Collada.scene.Scene("myscene", [node])
         self.mesh_obj.scenes.append(myscene)
         self.mesh_obj.scene = myscene
@@ -211,8 +218,8 @@ class COLLADA_KIT:
             sys.exit(1)
         else:
             self.start_collada()
-            p_dict = self.add_geom_to_collada(geom_obj, style_obj, meta_obj)
-            self.end_collada(out_filename)
+            p_dict, node_label = self.add_geom_to_collada(geom_obj, style_obj, meta_obj)
+            self.end_collada(out_filename, node_label)
         return p_dict
 
 
@@ -267,7 +274,7 @@ class COLLADA_KIT:
                 popup_dict[geom_label]['val'] = prop_dict[v.xyz]
 
         # Create a node using the geometry list
-        node = Collada.scene.Node("node0", children=geomnode_list)
+        node = Collada.scene.Node(geom_label, children=geomnode_list)
         node_list.append(node)
 
         # Add nodes to scene, add scene to mesh
@@ -472,7 +479,7 @@ class COLLADA_KIT:
         geomnode_list = []
         borehole_label = make_borehole_label(borehole_name)
         self.co.make_colour_borehole_marker(mesh, bv, borehole_label, geomnode_list, colour_info_dict, height_reso)
-        node = Collada.scene.Node("node0", children=geomnode_list)
+        node = Collada.scene.Node(borehole_label, children=geomnode_list)
         node_list.append(node)
 
         myscene = Collada.scene.Scene("myscene", node_list)
