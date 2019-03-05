@@ -216,7 +216,7 @@ if __name__ == "__main__":
     msg = qd.get_error()
     if msg != '':
         print(msg)
-    assert(msg!='')
+    assert(msg=='')
     ok, s = qd.add_segment('seg')
     assert(ok)
     ok, s2 = qd.add_segment('seg')
