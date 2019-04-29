@@ -56,7 +56,7 @@ Use the '-g' flag to generate COLLADA files
 
 ### Building a borehole database
 
-[makeBoreholes.py](lib/makeBoreholes.py) is a script to create a database of NVCL borehole objects to display within the model. 
+[makeBoreholes.py](lib/makeBoreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](lib/README.md) for more information.
 
 
 ### TravisCI Status
