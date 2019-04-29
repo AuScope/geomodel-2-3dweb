@@ -182,6 +182,9 @@ def get_borehole_data(url, log_id, height_resol, class_name):
     except URLError as e:
         logger.warning('URLError: %s', e)
         return OrderedDict()
+    except ConnectionResetError as e:
+        logger.warning('ConnectionResetError: %s', e)
+        return OrderedDict()
     logger.debug('json_data = %s', json_data)
     meas_list = []
     depth_dict = OrderedDict()
@@ -228,6 +231,9 @@ def get_borehole_logids(url, nvcl_id):
             response_str = response.read()
     except URLError as e:
         logger.warning('URLError: %s', e)
+        return []
+    except ConnectionResetError as e:
+        logger.warning('ConnectionResetError: %s', e)
         return []
     root = ET.fromstring(response_str)
     logid_list = []
@@ -515,9 +521,9 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
             logger.warning("HTTP error code returned, cannot process %s : %s", input_file, str(e))
             return
             
-        qdb = QueryDB()
-        is_ok, err_str = qdb.open_db(create=create_db, db_name=db_name)
-        if not is_ok:
+        qdb = QueryDB(create=create_db, db_name=db_name)
+        err_str = qdb.get_error()
+        if err_str != '':
             logger.error("Cannot open/create database: %s", err_str)
             sys.exit(1)
         borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=args.dest_dir)
