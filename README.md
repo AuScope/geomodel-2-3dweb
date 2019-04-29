@@ -51,12 +51,12 @@ Use the '-g' flag to generate COLLADA files
   
 ### Converting GOCAD models for use in geomodelportal website
 
-[batch_proc.py](scripts/batch_proc.py) script is a simple batch script used to convert the GOCAD models for the website.
+[batch_proc.py](scripts/batch_proc.py) is a simple batch script used to convert the GOCAD models for the website.
 
 
 ### Building a borehole database
 
-[makeBorehole.py](lib/makeBoreholes.py) script to create a database of NVCL borehole objects to display within the model. 
+[makeBoreholes.py](lib/makeBoreholes.py) is a script to create a database of NVCL borehole objects to display within the model. 
 
 
 ### TravisCI Status

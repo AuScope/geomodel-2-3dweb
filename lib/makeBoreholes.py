@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
-# This code creates a set of COLLADA (.dae) or GLTF files which represent BoreHoles in a 3D model
+# This code creates a set of COLLADA (.dae) or GLTF files and a sqlite database
+# which can be used to embed NVCL boreholes in a geological model
 #
 import collada as Collada
 import numpy
