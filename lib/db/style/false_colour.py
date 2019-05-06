@@ -1,4 +1,6 @@
-
+'''
+ A collection of Python functions for creating false colour representations of objects
+'''
 import sys 
 
 def calculate_false_colour_num(val_flt, max_flt, min_flt, max_colours_flt):

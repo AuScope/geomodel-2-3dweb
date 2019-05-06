@@ -1,3 +1,6 @@
+'''
+ A collection of Python generator functions used to create geometries, including: borehole sticks, lines, cubes and pyramids
+'''
 import math
 from exports.bh_utils import make_borehole_label
 
@@ -8,7 +11,7 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     :param borehole_name: borehole's name
     :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
     :param ht_reso: height resolution, float
-    :returns vert_list - list of floats, (x,y,z) vertices;
+    :returns vert_list: list of floats, (x,y,z) vertices;
         indices - list of integers, index pointers to which vertices are joined as triangles;
         colour_idx - integer index pointing to material object array;
         depth - depth of borehole segment, float;

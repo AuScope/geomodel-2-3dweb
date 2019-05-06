@@ -1,7 +1,7 @@
-# Convert files from collada to GLTF v2
-# by calling 'COLLADA2GLTF-bin' which is assumed to be available locally
-# See https://github.com/KhronosGroup/COLLADA2GLTF/ for more information
-#
+''' Converts files from collada to GLTF v2
+   by calling 'COLLADA2GLTF-bin' which is assumed to be available locally
+   See https://github.com/KhronosGroup/COLLADA2GLTF/ for more information
+'''
 import os
 import glob
 import subprocess

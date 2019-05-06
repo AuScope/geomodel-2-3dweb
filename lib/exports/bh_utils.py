@@ -1,3 +1,6 @@
+'''
+ A collection of Python functions used to create clean, consistent borehole labels and filenames
+'''
 
 def make_borehole_label(borehole_name, depth):
      ''' Makes a consistent and space-free label for borehole sections

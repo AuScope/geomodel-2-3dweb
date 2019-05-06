@@ -1,3 +1,7 @@
+'''
+Contains named tuples of basic types, independent of any geological model file format
+'''
+
 from collections import namedtuple
 
 VRTX = namedtuple('VRTX', 'n xyz')

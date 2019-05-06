@@ -6,7 +6,7 @@ import PIL
 from db.style.false_colour import make_false_colour_tup
 
 class PNG_KIT:
-    ''' Class used to output PBG files
+    ''' Class used to output PNG files, given geometry, style and metadata data structures
     '''
 
     def __init__(self, debug_level):

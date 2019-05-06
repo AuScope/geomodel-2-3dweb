@@ -12,7 +12,7 @@ import exports.print_assimp as pa
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class ASSIMP_KIT:
-    ''' Class used to output export geometries to assimp lib
+    ''' Class used to export geometries to assimp lib
     '''
 
     def __init__(self, debug_level):

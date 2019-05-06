@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
-
+'''
+  Functions used to print out "assimp" (https://github.com/assimp/assimp) data structures, used for debugging purposes
+'''
 from pyassimp import *
 import ctypes
 

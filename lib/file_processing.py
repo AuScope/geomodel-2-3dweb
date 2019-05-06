@@ -1,3 +1,6 @@
+'''
+  A very general collection of functions used for finding files, JSON file creation, JSON file reading, updating dictionaries, detecting small geometric objects etc.
+'''
 import os
 import json
 import sys
@@ -215,8 +218,8 @@ def add_config2popup(gs_dict, label_str, popup_dict, file_name, file_ext='.gltf'
 def add_inserts(gs_dict, model_part_key, modelconf_dict, alt_name):
     ''' Sets the 'display_name' and other inserts from the group structure dictionary
 
-    :param gs_dict: group structure dictionary (group struct dict format:
-        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
+    :param gs_dict: group structure dictionary (group struct dict format: \
+    { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))
     :param model_part_key: model part key in 'gs_dict'
     :param modelconf_dict: dictionary of model information
     :param alt_name: alternative 'display_name' when not supplied in 'gs_dict'
@@ -233,8 +236,9 @@ def add_inserts(gs_dict, model_part_key, modelconf_dict, alt_name):
 
 def add_vol_config(gs_dict, geom_obj, style_obj, meta_obj):
     ''' Create a dictionary containing volume configuration data 
-    :param gs_dict: group structure dictionary (group struct dict format:
-        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
+
+    :param gs_dict: group structure dictionary (group struct dict format: \
+    { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))
     :param geom_obj: MODEL_GEOMETRIES object
     :param style_obj: STYLE object
     :param meta_obj: METADATA object
@@ -257,7 +261,7 @@ def add_vol_config(gs_dict, geom_obj, style_obj, meta_obj):
 def is_only_small(gsm_list):
     ''' Returns True if this list of geometries contains only lines and points
     :param gsm_list: list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
-    :returns True if we think this is a small model that can fit in one collada file
+    :returns: True if we think this is a small model that can fit in one collada file
     '''
     small = True
     for geom_obj, style_obj, meta_obj in gsm_list:

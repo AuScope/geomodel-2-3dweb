@@ -7,6 +7,8 @@ class MapFeat(Enum):
     CONTACT = 4
 
 class METADATA():
+    ''' Storage for metadata attributes extracted from GOCAD that can be assigned directly to GeoSciML 
+    '''
     def __init__(self):
         self.name = ''
         ''' Taken from GOCAD object name ??
@@ -38,7 +40,6 @@ class METADATA():
         self.geoevent_numeric_age_range = 0
         ''' Copied from GOCAD "STRATIGRAPHIC_POSITION" (2nd val) to GeoSciML v4 GeologicEvent
             gsmlb:numericAgeRange
-    
         '''
 
         self.mapped_feat = MapFeat.UNKNOWN
@@ -47,7 +48,7 @@ class METADATA():
            'fault' maps to "GeologicFeature::GeologicStructure::ShearDisplacementStructure"
            'intrusive' - many kinds of igneous formations, maps to 'GeologicFeature::GeologicUnit'
            'unconformity' - (gaps in the geologic record within a stratigraphic unit) and
-             'intraformational' and 'boundary' map to 'GeologicFeature::GeologicStructure::Contact'
+           'intraformational' and 'boundary' map to 'GeologicFeature::GeologicStructure::Contact'
            'top', 'topography' maybe map to 'MappedFeature' fields
         '''
 

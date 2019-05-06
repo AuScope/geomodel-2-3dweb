@@ -1,3 +1,5 @@
+''' This contains the GOCAD_VESSEL class, which is the main class used for parsing GOCAD object files. It also contains other functions for parsing GOCAD group files.
+'''
 import numpy
 import sys
 import os
@@ -391,9 +393,10 @@ class GOCAD_VESSEL():
     def line_gen(self, filename_str, file_lines):
         ''' This is a Python generator function that processes lines of the GOCAD object file
             and returns each line in various forms, from quite unprocessed to fully processed
+
         :param filename_str: filename of gocad file
         :param file_lines: array of strings of lines from gocad file
-        :returns array of field strings in upper case with double quotes removed from strings,
+        :returns: array of field strings in upper case with double quotes removed from strings,
                  array of field string in original case without double quotes removed,
                  line of GOCAD file in upper case,
                  boolean, True iff it is the last line of the file

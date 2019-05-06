@@ -13,7 +13,9 @@ Base = declarative_base()
 
 
 class Query(Base):
-    ''' Basic idea is to have a "query" table that points to the various parts of the model.
+    ''' **Query table**
+
+        Basic idea is to have a "query" table that points to the various parts of the model.
         A website query will provide the name of the model and a label from within the model.
         This can be used as an index to a row of the table.
  
@@ -50,7 +52,9 @@ class Query(Base):
 
 
 class Segment_Info(Base):
-    ''' Any information derived from a segment within a 3d model part,
+    ''' **Segment_Info table**
+
+        Any information derived from a segment within a 3d model part,
         e.g. a single triangle on a fault surface made of lots of triangles
     '''
     __tablename__ = "segment_info"
@@ -64,7 +68,9 @@ class Segment_Info(Base):
 
 
 class Part_Info(Base):
-    ''' Any information derived from a model part
+    ''' **Part_Info table**
+
+        Any information derived from a model part
         e.g. fault surface, borehole
     '''
     __tablename__ = "part_info"
@@ -77,7 +83,9 @@ class Part_Info(Base):
 
 
 class Model_Info(Base):
-    ''' Any information that comes from the model as a whole, 
+    ''' **Model_Info table**
+
+        Any information that comes from the model as a whole, 
         e.g. CRS of the model
     '''
     __tablename__ = "model_info"
@@ -90,7 +98,9 @@ class Model_Info(Base):
 
 
 class User_Info(Base):
-    ''' Any user notes that must be kept separate from the model data update process
+    ''' **User_Info table**
+
+        Any user notes that must be kept separate from the model data update process
         e.g. links to external databases
     '''
     __tablename__ = "user_info"
@@ -103,6 +113,10 @@ class User_Info(Base):
     
     
 class KeyValuePairs(Base):
+    ''' **KeyValuePairs table**
+
+        Stores key value pairs
+    '''
     __tablename__ = "keyvaluepairs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

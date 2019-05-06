@@ -14,7 +14,7 @@ from exports.bh_utils import make_borehole_label
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class COLLADA_KIT:
-    ''' Class used to output as COLLADA files
+    ''' Class used to output COLLADA files, given geometry, style and metadata data structures
     '''
 
     EMISSION = (0,0,0,1)
