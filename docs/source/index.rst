@@ -1,10 +1,10 @@
-.. geomodel-2-3dweb documentation master file, created by
-   sphinx-quickstart on Tue Sep 11 09:14:30 2018.
+.. AuScope 3D Geological Models documentation master file, created by
+   sphinx-quickstart on Mon May  6 11:33:27 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to geomodel-2-3dweb's documentation!
-============================================
+Welcome to AuScope 3D Geological Models's documentation!
+========================================================
 
 Contents:
 

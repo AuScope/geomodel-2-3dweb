@@ -91,9 +91,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/geomodel-2-3dweb.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/AuScope3DGeologicalModels.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/geomodel-2-3dweb.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/AuScope3DGeologicalModels.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -110,8 +110,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/geomodel-2-3dweb"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/geomodel-2-3dweb"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/AuScope3DGeologicalModels"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/AuScope3DGeologicalModels"
 	@echo "# devhelp"
 
 .PHONY: epub

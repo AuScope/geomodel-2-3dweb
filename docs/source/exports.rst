@@ -4,6 +4,14 @@ exports package
 Submodules
 ----------
 
+exports.assimp_kit module
+-------------------------
+
+.. automodule:: exports.assimp_kit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 exports.bh_utils module
 -----------------------
 
@@ -40,14 +48,6 @@ exports.geometry_gen module
 ---------------------------
 
 .. automodule:: exports.geometry_gen
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-exports.gltf_kit module
------------------------
-
-.. automodule:: exports.gltf_kit
     :members:
     :undoc-members:
     :show-inheritance:

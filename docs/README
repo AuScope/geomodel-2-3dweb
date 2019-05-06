@@ -1,8 +1,8 @@
-I use the 'sphinx' documentation generation to generate documentation for this project (http://www.sphinx-doc.org/en/master/index.html)
+I use the 'sphinx' (v1.4.9) documentation generation to generate documentation for this project (http://www.sphinx-doc.org/en/master/index.html)
 
 To generate .rst files for each of the .py source files:
 
-sphinx-apidoc -f -o source ../lib/
+sphinx-apidoc -f -o source ../lib/ ../scripts
 
 
 To generate html documentation:

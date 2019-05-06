@@ -10,6 +10,18 @@ Subpackages
     db.metadata
     db.style
 
+Submodules
+----------
+
+db.db_tables module
+-------------------
+
+.. automodule:: db.db_tables
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Module contents
 ---------------
 
