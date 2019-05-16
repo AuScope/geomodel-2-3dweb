@@ -18,7 +18,6 @@ from urllib.error import URLError
 import urllib
 import urllib.parse
 import urllib.request
-import urllib.parse
 import argparse
 
 from owslib.wfs import WebFeatureService
@@ -104,10 +103,10 @@ def get_json_input_param(input_file):
             logger.error("Cannot read JSON file %s: %s", input_file, str(exc))
             sys.exit(1)
     if 'BoreholeData' not in param_dict:
-        logger.error('Cannot find "BoreholeData" key in input file %s', input_file);
+        logger.error('Cannot find "BoreholeData" key in input file %s', input_file)
         sys.exit(1)
     if 'ModelProperties' not in param_dict:
-        logger.error('Cannot find "ModelProperties" key in input file %s', input_file);
+        logger.error('Cannot find "ModelProperties" key in input file %s', input_file)
         sys.exit(1)
 
     Param = SimpleNamespace()

@@ -172,7 +172,7 @@ class OBJ_OUT():
                 out_fp.write("l {0:d} {1:d}\n".format(vert_dict[s.ab[0]], vert_dict[s.ab[1]]))
 
         elif geom_obj.is_point():
-            out_fp.write("p");
+            out_fp.write("p")
             for p in range(len(geom_obj.vrtx_arr)):
                 out_fp.write(" {0:d}".format(p+1))
             out_fp.write("\n")

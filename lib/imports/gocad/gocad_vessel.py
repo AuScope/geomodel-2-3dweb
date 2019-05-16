@@ -1,6 +1,5 @@
 ''' This contains the GOCAD_VESSEL class, which is the main class used for parsing GOCAD object files. It also contains other functions for parsing GOCAD group files.
 '''
-import numpy
 import sys
 import os
 from collections import OrderedDict
@@ -1000,7 +999,7 @@ class GOCAD_VESSEL():
                     sys.exit(1)
 
                 # Initialise data array to zeros
-                prop_obj.data_3d = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
+                prop_obj.data_3d = np.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
 
                 # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
                 dt = prop_obj.make_numpy_dtype()
@@ -1009,7 +1008,7 @@ class GOCAD_VESSEL():
                 self.logger.info("Reading binary file: %s", prop_obj.file_name)
                 elem_offset = prop_obj.offset//prop_obj.data_sz
                 self.logger.debug("elem_offset = %s", repr(elem_offset))
-                f_arr = numpy.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels+elem_offset)
+                f_arr = np.fromfile(prop_obj.file_name, dtype=dt, count=num_voxels+elem_offset)
                 fl_idx = elem_offset 
                 mult = [(self.__axis_max[0]-self.__axis_min[0])/self.vol_sz[0],
                         (self.__axis_max[1]-self.__axis_min[1])/self.vol_sz[1],
@@ -1069,14 +1068,14 @@ class GOCAD_VESSEL():
                 sys.exit(1)
 
             # Initialise data array to zeros
-            flag_data = numpy.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
+            flag_data = np.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
 
             # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
-            dt =  numpy.dtype(('B',(self.flags_bit_size)))
+            dt =  np.dtype(('B',(self.flags_bit_size)))
 
             # Read entire file, assumes file small enough to store in memory
             self.logger.info("Reading binary flags file: %s", self.flags_file)
-            f_arr = numpy.fromfile(self.flags_file, dtype=dt)
+            f_arr = np.fromfile(self.flags_file, dtype=dt)
             f_idx = self.flags_offset//self.flags_bit_size
             self.flags_prop = PROPS(self.flags_file, self.logger.getEffectiveLevel())
             # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())

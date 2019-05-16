@@ -169,7 +169,7 @@ def add_config2popup(gs_dict, label_str, popup_dict, file_name, file_ext='.gltf'
     modelconf_dict['popups'] = popup_dict
     if file_ext.upper()==".PNG":
         modelconf_dict['type'] = 'ImagePlane'
-        modelconf_dict['position'] = position;
+        modelconf_dict['position'] = position
     else:
         modelconf_dict['type'] = 'GLTFObject'
     model_url = np_filename + file_ext
