@@ -124,39 +124,6 @@ def read_json_file(file_name):
     return json_dict
 
 
-def update_json_config(model_dict_list, template_filename, output_filename, borehole_outdir=""):
-    ''' Updates a JSON file of GLTF objects to display in 3D
-
-    :param model_dict_list: list of model dicts to write to JSON file
-    :param template_filename: name of file which will be used as input for the update
-    :param output_filename: name of updated config file
-    :param borehole_outdir: optional name of diectory in which to save borehole GLTF files
-    '''
-    logger.debug("update_json_config(%s, %s, %s)", template_filename, output_filename, borehole_outdir)
-    try:
-        fp = open(output_filename, "w")
-    except Exception as e:
-        logger.error("Cannot open file %s %s", output_filename, e)
-        return
-    config_dict = read_json_file(template_filename)
-    if config_dict=={}:
-        config_dict['groups'] = {}
-    groups_obj = config_dict['groups']
-    for group_name, part_list in groups_obj.items():
-        for part in part_list:
-            for model_dict in model_dict_list:
-                if part['model_url'] == model_dict['model_url']:
-                    part['popups'] = model_dict['popups']
-                    for label, p_dict in part['popups'].items():
-                        p_dict['title'] = group_name + '-' + part['display_name']
-                    break
-    if borehole_outdir != "":
-        from makeBoreholes import get_boreholes
-        config_dict['groups']['Boreholes'], flag = get_boreholes(borehole_outdir)
-    json.dump(config_dict, fp, indent=4, sort_keys=True)
-    fp.close()
-
-
 def reduce_extents(extent_list):
     ''' Reduces a list of extents to just one extent
 

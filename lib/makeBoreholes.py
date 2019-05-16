@@ -3,11 +3,8 @@
 # This code creates a set of COLLADA (.dae) or GLTF files and a sqlite database
 # which can be used to embed NVCL boreholes in a geological model
 #
-import collada as Collada
-import numpy
 import sys
 import os
-import glob
 from pyproj import Proj, transform
 import xml.etree.ElementTree as ET
 import json
@@ -18,7 +15,7 @@ import itertools
 import logging
 from requests.exceptions import HTTPError, ReadTimeout
 from urllib.error import URLError 
-import http.client, urllib
+import urllib
 import urllib.parse
 import urllib.request
 import urllib.parse

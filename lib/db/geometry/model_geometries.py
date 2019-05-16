@@ -1,8 +1,4 @@
 import sys
-from collections import namedtuple
-
-from .types import VRTX, ATOM, TRGL, SEG
-
 import numpy as np
 
 class MODEL_GEOMETRIES:
@@ -71,7 +67,7 @@ class MODEL_GEOMETRIES:
         ''' Full length W-axis volume vector
         '''
 
-        self.vol_sz = None
+        self.vol_sz = []
         ''' 3 dimensional size of voxel volume
         '''
 
@@ -88,7 +84,7 @@ class MODEL_GEOMETRIES:
         ''' Generic property data associated with XYZ points
             This is an array of a dictionary mapping (X,Y,Z) => [data1, data2, data3, ... ]
         '''
- 
+
         self._max_data = []
         ''' Array of maximum values in 'xyz_data' or 'vol_data'
         '''
@@ -163,7 +159,7 @@ class MODEL_GEOMETRIES:
         ''' Returns True iff this contains volume data
           
         '''
-        return self.vol_sz != None
+        return len(self.vol_sz) > 2
 
 
     def is_single_layer_vo(self):
@@ -215,7 +211,7 @@ class MODEL_GEOMETRIES:
         u_vec = self.__unit_vector(self.vol_axis_u)
         v_vec = self.__unit_vector(self.vol_axis_v)
         w_vec = self.__unit_vector(self.vol_axis_w)
-        ret = [tuple(u_vec), tuple(v_vec), tuple(w_vec) ]
+        ret = [tuple(u_vec), tuple(v_vec), tuple(w_vec)]
         print('get_rotation()=', ret)
         return ret
 

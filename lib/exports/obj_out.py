@@ -34,7 +34,7 @@ class OBJ_OUT():
         self.MAX_COLOURS = 256.0
 
 
-    def write_voxel_obj(self, geom_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes):
+    def write_voxel_obj(self, geom_obj, out_fp, fileName, src_file_str, step_sz, use_full_cubes=False):
         ''' Writes out voxel data to Wavefront OBJ and MTL files
 
         :param out_fp: open file handle of OBJ file
@@ -42,7 +42,7 @@ class OBJ_OUT():
         :param fileName: filename of OBJ file without the 'OBJ' extension
         :param src_file_str: filename of gocad file
         :param step_sz: when stepping through the voxel block this is the step size
-        :param use_full_cubes: will write out full cubes to file if true, else will remove non-visible faces
+        :param use_full_cubes: (optional, default to false) will write out full cubes to file if true, else will remove non-visible faces
         '''
         self.logger.debug("write_voxel_obj(%s,%s)",  fileName, src_file_str)
         mtl_fp = open(fileName+".MTL", 'w')
@@ -114,7 +114,7 @@ class OBJ_OUT():
                     # Only write if there are indices to write
                     if len(indice_list)>0:
                         for vert in vert_list:
-                            out_fp.write("v {0:f} {1:f} {2:f}\n".format(vert[0],vert[1],ert[2]))
+                            out_fp.write("v {0:f} {1:f} {2:f}\n".format(vert[0],vert[1],vert[2]))
                         out_fp.write("g main-{0:010d}\n".format(vert_idx))
                         out_fp.write("usemtl colouring-{0:03d}\n".format(colour_num))
                         for ind in indice_list:
@@ -131,9 +131,10 @@ class OBJ_OUT():
         return ct_done
 
 
-    def write_OBJ(self, geom_obj, fileName, src_file_str):
+    def write_OBJ(self, geom_obj, style_obj, fileName, src_file_str):
         ''' Writes out an OBJ file
 
+        :param style_obj: STYLE object
         :param geom_obj: MODEL_GEOMETRY object
         :param fileName: filename of OBJ file, without extension
         :param src_file_str: filename of gocad file

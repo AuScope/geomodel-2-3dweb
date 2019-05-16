@@ -1,14 +1,11 @@
 import collada as Collada
 import numpy
-import PIL
 import sys
-import os
-import array
 import logging
 from collections import defaultdict
 
 from exports.collada_out import COLLADA_OUT
-from exports.obj_out import OBJ_OUT
+# from exports.obj_out import OBJ_OUT
 from exports.bh_utils import make_borehole_label
 
 from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
@@ -477,7 +474,7 @@ class COLLADA_KIT:
             mesh.materials.append(mat)
 
         geomnode_list = []
-        borehole_label = make_borehole_label(borehole_name)
+        borehole_label = make_borehole_label(borehole_name, 0)
         self.co.make_colour_borehole_marker(mesh, bv, borehole_label, geomnode_list, colour_info_dict, height_reso)
         node = Collada.scene.Node(borehole_label, children=geomnode_list)
         node_list.append(node)

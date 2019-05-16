@@ -3,8 +3,6 @@
 import numpy
 import sys
 import os
-import struct
-from collections import namedtuple
 from collections import OrderedDict
 import logging
 import traceback
@@ -553,7 +551,7 @@ class GOCAD_VESSEL():
                     else:
                         # Add vertex
                         if self.invert_zaxis:
-                            z_flt = -z_flt
+                            z_flt = -1.0 * z_flt
                         self.__vrtx_arr.append(VRTX(seq_no, (x_flt, y_flt, z_flt)))
    
                         # Vertices with attached properties
@@ -1380,6 +1378,7 @@ class GOCAD_VESSEL():
         :param splitstr_arr: array of field strings from first line of prop class header
         :returns: a boolean, is True iff we are at last line
         '''
+        self.logger.debug("START property class header")
         propClassIndex = splitstr_arr[1]
         # There are two kinds of PROPERTY_CLASS_HEADER
         # First, properties attached to local points
@@ -1425,7 +1424,7 @@ class GOCAD_VESSEL():
             self.logger.error("Cannot parse property header")
             sys.exit(1)
 
-        self.logger.debug("inPropClassHeader = %s", repr(inPropClassHeader))
+        self.logger.debug("END property class header")
 
 
 

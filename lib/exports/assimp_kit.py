@@ -7,9 +7,8 @@ from pyassimp import *
 
 from exports.geometry_gen import colour_borehole_gen
 
-import exports.print_assimp as pa
+# import exports.print_assimp as pa
 
-from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class ASSIMP_KIT:
     ''' Class used to export geometries to assimp lib
@@ -40,7 +39,7 @@ class ASSIMP_KIT:
         self.logger = ASSIMP_KIT.logger
 
 
-    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name='', file_ext='.gltf', export_type="gltf2", ):
+    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name=''):
         ''' Write out a file or blob of a borehole stick
             if 'dest_dir' and 'file_name' are supplied then writes a file and returns True/False
             else returns a pointer to a 'structs.ExportDataBlob' object
@@ -51,10 +50,13 @@ class ASSIMP_KIT:
         :param height_reso: height resolution for colour info dict
         :param dest_dir: optional destination directory, where file is written
         :param file_name: optional filename of file, without extension
-        :param file_ext: optional extension of file, defaults to '.gltf'
-        :param export_type: optional export type for assimp API, defaults to 'gltf2'
         '''
         self.logger.debug(" write_borehole(%s, %s, %s, %s, colour_info_dict = %s)", repr(bv), repr(dest_dir), repr(file_name), repr(borehole_name), repr(colour_info_dict))
+
+        # Extension of file
+        file_ext='.gltf'
+        # Export type for assimp API
+        export_type='gltf2'
 
         sc = structs.Scene()
         sc.mMetadata = None

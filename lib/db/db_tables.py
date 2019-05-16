@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import sys
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
-from sqlalchemy.schema import ForeignKey, UniqueConstraint, PrimaryKeyConstraint
-from sqlalchemy.exc import IntegrityError, DatabaseError
+from sqlalchemy.schema import ForeignKey, PrimaryKeyConstraint
+from sqlalchemy.exc import DatabaseError
 
 Base = declarative_base()
 
@@ -150,7 +148,7 @@ class QueryDB():
     def add_segment(self, json_str):
         try:
             s = self.ses.query(Segment_Info).filter_by(json=json_str).first()
-            if s == None:
+            if s is None:
                 s = Segment_Info(json=json_str)
                 self.ses.add(s)
                 self.ses.commit()
@@ -161,7 +159,7 @@ class QueryDB():
     def add_part(self, json_str):
         try:
             p = self.ses.query(Part_Info).filter_by(json=json_str).first()
-            if p == None:
+            if p is None:
                 p = Part_Info(json=json_str)
                 self.ses.add(p)
                 self.ses.commit()
@@ -172,7 +170,7 @@ class QueryDB():
     def add_model(self, json_str):
         try:
             m = self.ses.query(Model_Info).filter_by(json=json_str).first()
-            if m == None:
+            if m is None:
                 m = Model_Info(json=json_str)
                 self.ses.add(m)
                 self.ses.commit()
@@ -183,7 +181,7 @@ class QueryDB():
     def add_user(self, json_str):
         try:
             u = self.ses.query(User_Info).filter_by(json=json_str).first()
-            if u == None:
+            if u is None:
                 u = User_Info(json=json_str)
                 self.ses.add(u)
                 self.ses.commit()
@@ -205,13 +203,13 @@ class QueryDB():
             result = self.ses.query(Query).filter_by(label=label).filter_by(model_name=model_name).first()
         except DatabaseError as e:
             return False, str(e)
-        if result == None:
+        if result is None:
             filter = label.rpartition('_')[0]
             try:
                 result = self.ses.query(Query).filter_by(model_name=model_name).filter_by(label=filter).first()
             except DatabaseError as e:
                 return False, str(e)
-        if result == None:
+        if result is None:
             return True, (None, None, None, None, None, None)
         return True, (result.label, result.model_name, getattr(result.segment_info, 'json', None), getattr(result.part_info, 'json', None), getattr(result.model_info, 'json', None), getattr(result.user_info, 'json', None))
         
@@ -264,15 +262,15 @@ if __name__ == "__main__":
 
     # Look for a 'Query' with all info tables
     ok, q1 = qd.query('label2', 'model_name2')
-    assert(ok and q1 != None and q1[0] == 'label2' and q1[1] == 'model_name2' and q1[2] == 'seg3')
+    assert(ok and q1 is not None and q1[0] == 'label2' and q1[1] == 'model_name2' and q1[2] == 'seg3')
 
     # Look for 'Query' containing Nones
     ok, q2 = qd.query('label_3_i', 'model_name3')
-    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
+    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] is None)
 
     # Look for 'Query' with trailling number in label
     ok, q2 = qd.query('label_3_i_44', 'model_name3')
-    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] == None)
+    assert(ok and q2[0] == 'label_3_i' and q2[1] == 'model_name3' and q2[5] is None)
 
     # Non existing 'Query'
     assert(qd.query('label1_6', 'model_name5') == (True, (None, None, None, None, None, None)))
