@@ -958,55 +958,64 @@
             {
                 "FileNameKey": "Avebury.gltf",
                 "Insert": {
-                    "display_name": "Avebury"
+                    "display_name": "Avebury",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Hellyer.gltf",
                 "Insert": {
-                    "display_name": "Hellyer"
+                    "display_name": "Hellyer",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Henty.gltf",
                 "Insert": {
-                    "display_name": "Henty"
+                    "display_name": "Henty",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Mt_Lindsay.gltf",
                 "Insert": {
-                    "display_name": "Mt Lindsay"
+                    "display_name": "Mt Lindsay",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Queenstown.gltf",
                 "Insert": {
-                    "display_name": "Queenstown"
+                    "display_name": "Queenstown",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Renison.gltf",
                 "Insert": {
-                    "display_name": "Renison"
+                    "display_name": "Renison",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Rosebery.gltf",
                 "Insert": {
-                    "display_name": "Rosebery"
+                    "display_name": "Rosebery",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Strahan.gltf",
                 "Insert": {
-                    "display_name": "Strahan"
+                    "display_name": "Strahan",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "Zeehan.gltf",
                 "Insert": {
-                    "display_name": "Zeehan"
+                    "display_name": "Zeehan",
+                    "is_labelled": true
                 }
             }
         ],
@@ -1072,91 +1081,106 @@
             {
                 "FileNameKey": "352000mE_5320000mN.gltf",
                 "Insert": {
-                    "display_name": "352000mE 5320000mN"
+                    "display_name": "352000mE 5320000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "352000mE_5335000mN.gltf",
                 "Insert": {
-                    "display_name": "352000mE 5335000mN"
+                    "display_name": "352000mE 5335000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "352000mE_5355000mN.gltf",
                 "Insert": {
-                    "display_name": "352000mE 5355000mN"
+                    "display_name": "352000mE 5355000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "352000mE_5375000mN.gltf",
                 "Insert": {
-                    "display_name": "352000mE 5375000mN"
+                    "display_name": "352000mE 5375000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "352000mE_5395000mN.gltf",
                 "Insert": {
-                    "display_name": "352000mE 5395000mN"
+                    "display_name": "352000mE 5395000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "372000mE_5320000mN.gltf",
                 "Insert": {
-                    "display_name": "372000mE 5320000mN"
+                    "display_name": "372000mE 5320000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "372000mE_5335000mN.gltf",
                 "Insert": {
-                    "display_name": "372000mE 5335000mN"
+                    "display_name": "372000mE 5335000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "372000mE_5355000mN.gltf",
                 "Insert": {
-                    "display_name": "372000mE 5355000mN"
+                    "display_name": "372000mE 5355000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "372000mE_5375000mN.gltf",
                 "Insert": {
-                    "display_name": "372000mE 5375000mN"
+                    "display_name": "372000mE 5375000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "372000mE_5395000mN.gltf",
                 "Insert": {
-                    "display_name": "372000mE 5395000mN"
+                    "display_name": "372000mE 5395000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "397000mE_5320000mN.gltf",
                 "Insert": {
-                    "display_name": "397000mE 5320000mN"
+                    "display_name": "397000mE 5320000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "397000mE_5335000mN.gltf",
                 "Insert": {
-                    "display_name": "397000mE 5335000mN"
+                    "display_name": "397000mE 5335000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "397000mE_5355000mN.gltf",
                 "Insert": {
-                    "display_name": "397000mE 5355000mN"
+                    "display_name": "397000mE 5355000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "397000mE_5375000mN.gltf",
                 "Insert": {
-                    "display_name": "397000mE 5375000mN"
+                    "display_name": "397000mE 5375000mN",
+                    "is_labelled": true
                 }
             },
             {
                 "FileNameKey": "397000mE_5395000mN.gltf",
                 "Insert": {
-                    "display_name": "397000mE 5395000mN"
+                    "display_name": "397000mE 5395000mN",
+                    "is_labelled": true
                 }
             }
         ],
@@ -1350,7 +1374,7 @@
             {
                 "FileNameKey": "12_Western_Volcano_Sedimentary_sequence.gltf",
                 "Insert": {
-                    "display_name": "Western Volcano Sedimentary seq"
+                    "display_name": "Western Volcano Sedimentary"
                 }
             },
             {
@@ -1438,7 +1462,7 @@
             {
                 "FileNameKey": "23_Eastern_Quartz_Phyric_Sequence.gltf",
                 "Insert": {
-                    "display_name": "Eastern Quartz Phyric Sequence"
+                    "display_name": "Eastern Quartz Phyric Seq"
                 }
             },
             {
