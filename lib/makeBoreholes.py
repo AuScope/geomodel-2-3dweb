@@ -372,7 +372,6 @@ def get_blob_boreholes(borehole_dict, Param):
     logger.debug("get_blob_boreholes(%s)", str(borehole_dict))
     HEIGHT_RES = 10.0
     if 'name' in borehole_dict and 'x' in borehole_dict and 'y' in borehole_dict and 'z' in borehole_dict:
-        file_name = make_borehole_filename(borehole_dict['name'])
         x_m, y_m = convert_coords(Param.BOREHOLE_CRS, Param.MODEL_CRS, [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
         log_ids = get_borehole_logids(Param.NVCL_URL + '/getDatasetCollection.html', borehole_dict['nvcl_id'])
@@ -390,7 +389,7 @@ def get_blob_boreholes(borehole_dict, Param):
 
         # If there's data, then create the borehole
         if len(bh_data_dict) > 0:
-            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '', file_name)
+            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, '')
             logger.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
         else:
@@ -469,13 +468,13 @@ def get_boreholes(wfs, qdb, Param, output_mode='GLTF', dest_dir=''):
                     logger.debug("ADD_QUERY(%s, %s)", mesh_name, Param.modelUrlPath)
 
                 if output_mode == 'GLTF':
-                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, os.path.join(dest_dir, file_name))
                     
                 elif dest_dir != '':
                     import exports.collada2gltf
                     from exports.collada_kit import COLLADA_KIT
                     export_kit = COLLADA_KIT(DEBUG_LVL)
-                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, dest_dir, file_name)
+                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict, HEIGHT_RES, os.path.join(dest_dir, file_name))
                     blob_obj = None
                 else:
                     logger.warning("COLLADA_KIT cannot write blobs")

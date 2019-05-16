@@ -39,19 +39,19 @@ class ASSIMP_KIT:
         self.logger = ASSIMP_KIT.logger
 
 
-    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, dest_dir='', file_name=''):
+    def write_borehole(self, bv, borehole_name, colour_info_dict, height_reso, out_filename=''):
         ''' Write out a file or blob of a borehole stick
-            if 'dest_dir' and 'file_name' are supplied then writes a file and returns True/False
+            if 'out_filename' is supplied then writes a file and returns True/False
             else returns a pointer to a 'structs.ExportDataBlob' object
 
         :param bv: base vertex, position of the object within the model [x,y,z]
         :param borehole_name: name of borehole
         :param colour_info_dict: dict of colour info; key - depth, float, val - { 'colour' : (R,B,G,A), 'classText' : mineral name }, where R,G,B,A are floats
         :param height_reso: height resolution for colour info dict
-        :param dest_dir: optional destination directory, where file is written
-        :param file_name: optional filename of file, without extension
+        :param out_filename: optional destination directory+file (without extension), where file is written
         '''
-        self.logger.debug(" write_borehole(%s, %s, %s, %s, colour_info_dict = %s)", repr(bv), repr(dest_dir), repr(file_name), repr(borehole_name), repr(colour_info_dict))
+        self.logger.debug(" write_borehole(%s, %s, %s, colour_info_dict = %s)",
+             repr(bv), repr(out_filename), repr(borehole_name), repr(colour_info_dict))
 
         # Extension of file
         file_ext='.gltf'
@@ -100,12 +100,16 @@ class ASSIMP_KIT:
 
         #pa.print_scene(sc)
         #sys.stdout.flush()
-        if dest_dir!='' and file_name !='':
-            self.logger.info("Writing GLTF: %s", file_name+file_ext)
-            export(sc, os.path.join(dest_dir, file_name+file_ext), export_type)
+
+        # Create a file
+        if out_filename !='':
+            self.logger.info("Writing GLTF: %s", out_filename+file_ext)
+            export(sc, out_filename+file_ext, export_type)
             self.logger.info(" DONE.")
             sys.stdout.flush()
             return True
+
+        # Return a blob
         else:
             exp_blob = export_blob(sc, export_type, processing = None)
             #pa.print_blob(exp_blob)
