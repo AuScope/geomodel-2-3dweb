@@ -358,22 +358,18 @@ class Gocad2Collada:
         for part_list in param_dict['GroupStructure'].values():
             display_name_set = set()
             filename_set = set()
-            print("part_list=", part_list)
             for part in part_list:
-                print("part = ", part)
                 if part["FileNameKey"] in filename_set:
                     self.logger.error("Cannot process JSON file %s: duplicate FileNameKey %s",
                                       param_file, part["FileNameKey"])
                     sys.exit(1)
                 filename_set.add(part["FileNameKey"])
-                print("filename_set =", filename_set)
                 if "display_name" in part["Insert"] and \
                                      part["Insert"]["display_name"] in display_name_set:
                     self.logger.error("Cannot process JSON file %s: duplicate display_name %s",
                                       param_file, part["Insert"]["display_name"])
                     sys.exit(1)
                 display_name_set.add(part["Insert"]["display_name"])
-                print("display_name_set = ", display_name_set)
 
 
     def initialise_params(self, param_file):
