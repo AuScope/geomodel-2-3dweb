@@ -3,7 +3,7 @@ import sys
 import logging
 import array
 import PIL
-from db.style.false_colour import make_false_colour_tup
+from lib.db.style.false_colour import make_false_colour_tup
 
 class PNG_KIT:
     ''' Class used to output PNG files, given geometry, style and metadata data structures

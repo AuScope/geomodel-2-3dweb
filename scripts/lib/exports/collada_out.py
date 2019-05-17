@@ -2,7 +2,7 @@ import collada as Collada
 import numpy
 import logging
 import sys
-from exports.geometry_gen import colour_borehole_gen, line_gen, pyramid_gen, cube_gen
+from lib.exports.geometry_gen import colour_borehole_gen, line_gen, pyramid_gen, cube_gen
 
 class COLLADA_OUT():
     ''' Class to output specific geometries as pycollada objects

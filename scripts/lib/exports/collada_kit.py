@@ -4,11 +4,11 @@ import sys
 import logging
 from collections import defaultdict
 
-from exports.collada_out import COLLADA_OUT
-# from exports.obj_out import OBJ_OUT
-from exports.bh_utils import make_borehole_label
+from lib.exports.collada_out import COLLADA_OUT
+# from lib.exports.obj_out import OBJ_OUT
+from lib.exports.bh_utils import make_borehole_label
 
-from db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
+from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class COLLADA_KIT:
     ''' Class used to output COLLADA files, given geometry, style and metadata data structures

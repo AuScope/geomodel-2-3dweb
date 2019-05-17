@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 #
 # Basic regression test script. Run from the 'regression' directory
 #

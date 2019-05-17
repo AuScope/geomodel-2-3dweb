@@ -5,9 +5,9 @@ import ctypes
 from ctypes import POINTER
 from pyassimp import *
 
-from exports.geometry_gen import colour_borehole_gen
+from lib.exports.geometry_gen import colour_borehole_gen
 
-# import exports.print_assimp as pa
+# import lib.exports.print_assimp as pa
 
 
 class ASSIMP_KIT:

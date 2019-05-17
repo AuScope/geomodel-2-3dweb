@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from db.style.false_colour import make_false_colour_tup
+from lib.db.style.false_colour import make_false_colour_tup
 
 class OBJ_OUT():
     ''' Class to output geometries to Wavefront OBJ format

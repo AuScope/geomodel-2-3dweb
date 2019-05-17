@@ -2,7 +2,7 @@
  A collection of Python generator functions used to create geometries, including: borehole sticks, lines, cubes and pyramids
 '''
 import math
-from exports.bh_utils import make_borehole_label
+from lib.exports.bh_utils import make_borehole_label
 
 def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     ''' A generator which is used to make a borehole marker stick with triangular cross section

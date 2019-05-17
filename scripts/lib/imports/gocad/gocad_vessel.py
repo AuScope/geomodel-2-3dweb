@@ -8,11 +8,11 @@ import traceback
 import numpy as np
 import copy
 
-from db.geometry.model_geometries import MODEL_GEOMETRIES
-from imports.gocad.props import PROPS
-from db.style.style import STYLE
-from db.geometry.types import VRTX, ATOM, TRGL, SEG
-from db.metadata.metadata import METADATA, MapFeat
+from lib.db.geometry.model_geometries import MODEL_GEOMETRIES
+from lib.imports.gocad.props import PROPS
+from lib.db.style.style import STYLE
+from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
+from lib.db.metadata.metadata import METADATA, MapFeat
 
 # Set up debugging
 local_logger = logging.getLogger("gocad_vessel")

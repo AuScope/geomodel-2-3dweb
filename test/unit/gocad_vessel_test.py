@@ -5,14 +5,14 @@ import logging
 import os
 
 # Add in path to local library files
-sys.path.append(os.path.join('..', '..','lib'))
+sys.path.append(os.path.join('..', '..', 'scripts'))
 
 
-from imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
+from lib.imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp
 
-from db.geometry.types import ATOM
+from lib.db.geometry.types import ATOM
 
-from db.metadata.metadata import MapFeat
+from lib.db.metadata.metadata import MapFeat
 
 INPUT_DIR = 'input'
 
