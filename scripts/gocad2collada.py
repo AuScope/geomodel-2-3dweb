@@ -195,9 +195,9 @@ class Gocad2Collada:
                 # Loop around when several binary files in one GOCAD VOXET object
                 for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                     out_filename = os.path.join(dest_dir, os.path.basename(meta_obj.src_filename))
-                    md_list = self.write_single_volume(coll_kit_obj, png_kit_obj, geom_obj,
-                                                       style_obj, meta_obj, src_dir,
-                                                       out_filename, prop_idx)
+                    md_list = self.write_single_volume((coll_kit_obj, png_kit_obj),
+                                                       (geom_obj, style_obj, meta_obj),
+                                                       src_dir, out_filename, prop_idx)
                     model_dict_list += md_list
                     has_result = True
                     extent_list.append(geom_obj.get_extent())
@@ -264,9 +264,9 @@ class Gocad2Collada:
                     if geom_obj.is_volume():
                         out_filename = os.path.join(dest_dir,
                                                     os.path.basename(meta_obj.src_filename))
-                        md_list = self.write_single_volume(coll_kit_obj, png_kit_obj, geom_obj,
-                                                           style_obj, meta_obj, src_dir,
-                                                           out_filename, file_idx)
+                        md_list = self.write_single_volume((coll_kit_obj, png_kit_obj),
+                                                           (geom_obj, style_obj, meta_obj),
+                                                           src_dir, out_filename, file_idx)
                         model_dict_list += md_list
                     else:
                         prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
@@ -287,8 +287,7 @@ class Gocad2Collada:
         return False, [], []
 
 
-    def write_single_volume(self, coll_kit_obj, png_kit_obj, geom_obj, style_obj,
-                            meta_obj, src_dir, out_filename, prop_idx):
+    def write_single_volume(self, kit_obj, gsm_obj, src_dir, out_filename, prop_idx):
         ''' Write a single volume to disk
         :param coll_kit_obj: COLLADA_KIT object, used to output COLLADA files
         :param png_kit_obj: PNG_KIT object, used to output PNG files
@@ -299,10 +298,13 @@ class Gocad2Collada:
         :param out_filename: output filename without extension
         :param prop_idx: property index of volume's properties, integer
         '''
+        coll_kit_obj, png_kit_obj = kit_obj
+        geom_obj, style_obj, meta_obj = gsm_obj
         self.logger.debug("write_single_volume(geom_obj=%s, style_obj=%s, meta_obj=%s)",
                           repr(geom_obj), repr(style_obj), repr(meta_obj))
         self.logger.debug("src_dir=%s, out_filename=%s, prop_idx=%d)", src_dir, out_filename,
                           prop_idx)
+
         model_dict_list = []
         if not geom_obj.vol_data is None:
             if not geom_obj.is_single_layer_vo():

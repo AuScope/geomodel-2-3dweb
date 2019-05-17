@@ -30,11 +30,11 @@ MODELS = [
 
     # WA - Windimurra
     ("windimurra", "Windimurra", "input/WindimurraConvParam.json",
-      "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD"),
+     "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD"),
 
     # WA - Sandstone
     ("sandstone", "Sandstone", "input/SandstoneConvParam.json",
-    "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
+     "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
 
     # SA - North Gawler
     ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026"),
@@ -50,11 +50,11 @@ MODELS = [
 
     # NT - McArthur Basin
     ("mcarthur", "McArthurBasin", "input/McArthurBasinConvParam.json",
-        "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL"),
+     "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL"),
 
     # GA - North Qld
     ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json",
-        "GA/North-Queensland"),
+     "GA/North-Queensland"),
 
     # GA - Tasmania
     ("tas", "Tas", "input/TasConvParam.json", "GA/Tas"),
