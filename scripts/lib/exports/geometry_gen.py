@@ -1,5 +1,6 @@
 '''
- A collection of Python generator functions used to create geometries, including: borehole sticks, lines, cubes and pyramids
+A collection of Python generator functions used to create geometries,
+including: borehole sticks, lines, cubes and pyramids
 '''
 import math
 from lib.exports.bh_utils import make_borehole_label
@@ -9,16 +10,18 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
 
     :param pos: x,y,z position of collar of borehole, tuple of 3 floats
     :param borehole_name: borehole's name
-    :param colour_info_dict: dict of: key = height, float; value = { 'colour': (R,G,B,A), 'classText': label }
+    :param colour_info_dict: dict of: key = height, float;
+                                      value = { 'colour': (R,G,B,A), 'classText': label }
     :param ht_reso: height resolution, float
     :returns vert_list: list of floats, (x,y,z) vertices;
         indices - list of integers, index pointers to which vertices are joined as triangles;
         colour_idx - integer index pointing to material object array;
         depth - depth of borehole segment, float;
-        colour_info - colour information dict: { 'colour': (R,G,B,A), 'classText': label, 'className' : label } ;
+        colour_info - colour information dict: { 'colour': (R,G,B,A),
+                                                 'classText': label, 'className' : label } ;
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
-    BH_WIDTH = 10 # Width of stick
+    bh_width = 10 # Width of stick
 
     # Convert bv to an equilateral triangle of floats
     angl_rad = math.radians(30.0)
@@ -26,14 +29,14 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     sin_flt = math.sin(angl_rad)
     for colour_idx, (depth, colour_info) in enumerate(colour_info_dict.items()):
         height = pos[2]+ht_resol-depth
-        ptA_high = [pos[0], pos[1]+BH_WIDTH*cos_flt, height]
-        ptB_high = [pos[0]+BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
-        ptC_high = [pos[0]-BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height]
-        ptA_low = [pos[0], pos[1]+BH_WIDTH*cos_flt, height-ht_resol]
-        ptB_low = [pos[0]+BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height-ht_resol]
-        ptC_low = [pos[0]-BH_WIDTH*cos_flt, pos[1]-BH_WIDTH*sin_flt, height-ht_resol]
+        pt_a_high = [pos[0], pos[1]+bh_width*cos_flt, height]
+        pt_b_high = [pos[0]+bh_width*cos_flt, pos[1]-bh_width*sin_flt, height]
+        pt_c_high = [pos[0]-bh_width*cos_flt, pos[1]-bh_width*sin_flt, height]
+        pt_a_low = [pos[0], pos[1]+bh_width*cos_flt, height-ht_resol]
+        pt_b_low = [pos[0]+bh_width*cos_flt, pos[1]-bh_width*sin_flt, height-ht_resol]
+        pt_c_low = [pos[0]-bh_width*cos_flt, pos[1]-bh_width*sin_flt, height-ht_resol]
 
-        vert_list = ptA_high + ptB_high + ptC_high + ptA_low + ptC_low + ptB_low
+        vert_list = pt_a_high + pt_b_high + pt_c_high + pt_a_low + pt_c_low + pt_b_low
 
         indices = [0, 2, 1,
                    3, 5, 4,
@@ -55,21 +58,22 @@ def line_gen(seg_arr, vrtx_arr, line_width):
     :param seg_arr: line segment array, an array of SEG objects
     :param vrtx_arr: vertex array, an array of VRTX objects
     :param line_width: line width, float
-    :returns point_cnt, vert_floats, indices: point_cnt - count of iterations; 
+    :returns point_cnt, vert_floats, indices: point_cnt - count of iterations;
         vert_floats - list of (x,y,z) vertices, floats;
         indices - integer index pointers to which vertices are joined as triangles
-    '''    
+    '''
     # Draw lines as a series of triangles
-    for point_cnt, l in enumerate(seg_arr):
-        v0 = vrtx_arr[l.ab[0]-1]
-        v1 = vrtx_arr[l.ab[1]-1]
-        vert_floats = list(v0.xyz) + [v0.xyz[0], v0.xyz[1], v0.xyz[2]+line_width] + list(v1.xyz) + [v1.xyz[0], v1.xyz[1], v1.xyz[2]+line_width]
+    for point_cnt, line in enumerate(seg_arr):
+        v_0 = vrtx_arr[line.ab[0]-1]
+        v_1 = vrtx_arr[line.ab[1]-1]
+        vert_floats = list(v_0.xyz) + [v_0.xyz[0], v_0.xyz[1], v_0.xyz[2]+line_width] + \
+                      list(v_1.xyz) + [v_1.xyz[0], v_1.xyz[1], v_1.xyz[2]+line_width]
         indices = [0, 2, 3, 3, 1, 0]
 
         yield point_cnt, vert_floats, indices
 
 
-def cube_gen(x,y,z, geom_obj, pt_size):
+def cube_gen(x_val, y_val, z_val, geom_obj, pt_size):
     ''' A single iteration generator which is used to create a cube
 
     :param x,y,z: x,y,z index coordinates of cube, integers
@@ -77,21 +81,21 @@ def cube_gen(x,y,z, geom_obj, pt_size):
     :param pt_size: size of cube, three float tuple
     :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats;
         indices - integer index pointers to which vertices are joined as triangles
-    '''    
-    v = (geom_obj.vol_origin[0]+ float(x)/geom_obj.vol_sz[0]*abs(geom_obj.vol_axis_u[0]),
-         geom_obj.vol_origin[1]+ float(y)/geom_obj.vol_sz[1]*abs(geom_obj.vol_axis_v[1]),
-         geom_obj.vol_origin[2]+ float(z)/geom_obj.vol_sz[2]*abs(geom_obj.vol_axis_w[2]))
-    vert_floats = [v[0]-pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
-                + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
-                + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]+pt_size[2]] \
-                + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]+pt_size[2]] \
-                + [v[0]-pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
-                + [v[0]-pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]] \
-                + [v[0]+pt_size[0], v[1]-pt_size[1], v[2]-pt_size[2]] \
-                + [v[0]+pt_size[0], v[1]+pt_size[1], v[2]-pt_size[2]]
+    '''
+    uvw = (geom_obj.vol_origin[0]+ float(x_val)/geom_obj.vol_sz[0]*abs(geom_obj.vol_axis_u[0]),
+           geom_obj.vol_origin[1]+ float(y_val)/geom_obj.vol_sz[1]*abs(geom_obj.vol_axis_v[1]),
+           geom_obj.vol_origin[2]+ float(z_val)/geom_obj.vol_sz[2]*abs(geom_obj.vol_axis_w[2]))
+    vert_floats = [uvw[0]-pt_size[0], uvw[1]-pt_size[1], uvw[2]+pt_size[2]] \
+                + [uvw[0]-pt_size[0], uvw[1]+pt_size[1], uvw[2]+pt_size[2]] \
+                + [uvw[0]+pt_size[0], uvw[1]-pt_size[1], uvw[2]+pt_size[2]] \
+                + [uvw[0]+pt_size[0], uvw[1]+pt_size[1], uvw[2]+pt_size[2]] \
+                + [uvw[0]-pt_size[0], uvw[1]-pt_size[1], uvw[2]-pt_size[2]] \
+                + [uvw[0]-pt_size[0], uvw[1]+pt_size[1], uvw[2]-pt_size[2]] \
+                + [uvw[0]+pt_size[0], uvw[1]-pt_size[1], uvw[2]-pt_size[2]] \
+                + [uvw[0]+pt_size[0], uvw[1]+pt_size[1], uvw[2]-pt_size[2]]
 
-    indices = [ 1,3,7, 1,7,5, 0,4,6, 0,6,2, 2,6,7, 2,7,3,
-               4,5,6, 5,7,6, 0,2,3, 0,3,1, 0,1,5, 0,5,4 ]
+    indices = [1, 3, 7, 1, 7, 5, 0, 4, 6, 0, 6, 2, 2, 6, 7, 2, 7, 3,
+               4, 5, 6, 5, 7, 6, 0, 2, 3, 0, 3, 1, 0, 1, 5, 0, 5, 4]
 
     yield vert_floats, indices
 
@@ -104,14 +108,13 @@ def pyramid_gen(vrtx, point_sz):
     :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats;
         indices - integer index pointers to which vertices are joined as triangles
     '''
-    
+
     # Vertices of the pyramid
     vert_floats = [vrtx.xyz[0], vrtx.xyz[1], vrtx.xyz[2]+point_sz*2] + \
                   [vrtx.xyz[0]+point_sz, vrtx.xyz[1]+point_sz, vrtx.xyz[2]] + \
                   [vrtx.xyz[0]+point_sz, vrtx.xyz[1]-point_sz, vrtx.xyz[2]] + \
                   [vrtx.xyz[0]-point_sz, vrtx.xyz[1]-point_sz, vrtx.xyz[2]] + \
                   [vrtx.xyz[0]-point_sz, vrtx.xyz[1]+point_sz, vrtx.xyz[2]]
-    indices = [0, 2, 1,  0, 1, 4,  0, 4, 3,  0, 3, 2,  4, 1, 2,  2, 3, 4]
+    indices = [0, 2, 1, 0, 1, 4, 0, 4, 3, 0, 3, 2, 4, 1, 2, 2, 3, 4]
 
     yield vert_floats, indices
-

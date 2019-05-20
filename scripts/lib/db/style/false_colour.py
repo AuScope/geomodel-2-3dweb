@@ -1,7 +1,7 @@
 '''
  A collection of Python functions for creating false colour representations of objects
 '''
-import sys 
+import sys
 
 def calculate_false_colour_num(val_flt, max_flt, min_flt, max_colours_flt):
     ''' Calculates a colour number via interpolation
@@ -12,8 +12,9 @@ def calculate_false_colour_num(val_flt, max_flt, min_flt, max_colours_flt):
     :param max_colours_flt: maximum number of colours
     :returns: integer colour number
     '''
-    # Floating point arithmetic fails of the numbers are at limits
-    if max_flt == abs(sys.float_info.max) or min_flt == abs(sys.float_info.max) or val_flt == abs(sys.float_info.max):
+    # Floating point arithmetic fails if the numbers are at limits
+    if max_flt == abs(sys.float_info.max) or min_flt == abs(sys.float_info.max) \
+                                          or val_flt == abs(sys.float_info.max):
         return 0
     # Ensure denominator is not too large
     if (max_flt - min_flt) > 0.0000001:
@@ -45,29 +46,28 @@ def make_false_colour_tup(i_flt, imin_flt, imax_flt):
     '''
     if i_flt < imin_flt or i_flt > imax_flt:
         return (0.0, 0.0, 0.0, 0.0)
-    SAT = 0.8
+    saturation = 0.8
     hue_flt = (imax_flt - i_flt)/ (imax_flt - imin_flt)
-    vmin_flt = SAT * (1 - SAT)
-    pix = [0.0,0.0,0.0,1.0]
+    vmin_flt = saturation * (1 - saturation)
+    pix = [0.0, 0.0, 0.0, 1.0]
 
     if hue_flt < 0.25:
-        pix[0] = SAT
-        pix[1] = interpolate(hue_flt, 0.0, 0.25, vmin_flt, SAT)
+        pix[0] = saturation
+        pix[1] = interpolate(hue_flt, 0.0, 0.25, vmin_flt, saturation)
         pix[2] = vmin_flt
 
     elif hue_flt < 0.5:
-        pix[0] = interpolate(hue_flt, 0.25, 0.5, SAT, vmin_flt)
-        pix[1] = SAT
+        pix[0] = interpolate(hue_flt, 0.25, 0.5, saturation, vmin_flt)
+        pix[1] = saturation
         pix[2] = vmin_flt
 
     elif hue_flt < 0.75:
         pix[0] = vmin_flt
-        pix[1] = SAT
-        pix[2] = interpolate(hue_flt, 0.5, 0.75, vmin_flt, SAT)
+        pix[1] = saturation
+        pix[2] = interpolate(hue_flt, 0.5, 0.75, vmin_flt, saturation)
 
     else:
         pix[0] = vmin_flt
-        pix[1] = interpolate(hue_flt, 0.75, 1.0, SAT, vmin_flt)
-        pix[2] = SAT
+        pix[1] = interpolate(hue_flt, 0.75, 1.0, saturation, vmin_flt)
+        pix[2] = saturation
     return tuple(pix)
-

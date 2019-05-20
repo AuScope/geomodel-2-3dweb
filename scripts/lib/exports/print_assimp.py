@@ -1,13 +1,18 @@
 '''
-  Functions used to print out "assimp" (https://github.com/assimp/assimp) data structures, used for debugging purposes
+Functions used to print out "assimp" (https://github.com/assimp/assimp) data structures,
+used for debugging purposes
 '''
-from pyassimp import *
 import ctypes
-
+# from pyassimp import *
 
 def print_scene(scene):
+    ''' Prints out the entire scene contained in the assimp data structure
+        :param scene: assimp scene object
+    '''
     print("\nSCENE START:", repr(scene))
-    field_list = [ 'mNumAnimations', 'mAnimations', 'mNumCameras', 'mCameras', 'mFlags',  'mNumLights', 'mLights', 'mNumMaterials', 'mMaterials',  'mNumMeshes', 'mMeshes', 'mNumTextures', 'mTextures', 'mRootNode']
+    field_list = ['mNumAnimations', 'mAnimations', 'mNumCameras', 'mCameras', 'mFlags',
+                  'mNumLights', 'mLights', 'mNumMaterials', 'mMaterials', 'mNumMeshes',
+                  'mMeshes', 'mNumTextures', 'mTextures', 'mRootNode']
     for field in field_list:
         if getattr(scene, field, False):
             print(field, ':', getattr(scene, field))
@@ -25,8 +30,13 @@ def print_scene(scene):
 
 
 def print_mesh(mesh):
+    ''' Prints out an assimp mesh object
+        :param mesh: assimp mesh object
+    '''
     print("\nMESH START :", repr(mesh))
-    field_list = ['mBitangents', 'mBones', 'mColors', 'mFaces', 'mMaterialIndex', 'mName', 'mNormals', 'mNumAnimMeshes', 'mNumBones', 'mNumFaces', 'mNumUVComponents', 'mNumVertices', 'mPrimitiveTypes', 'mTangents', 'mTextureCoords', 'mVertices']
+    field_list = ['mBitangents', 'mBones', 'mColors', 'mFaces', 'mMaterialIndex', 'mName',
+                  'mNormals', 'mNumAnimMeshes', 'mNumBones', 'mNumFaces', 'mNumUVComponents',
+                  'mNumVertices', 'mPrimitiveTypes', 'mTangents', 'mTextureCoords', 'mVertices']
     for field in field_list:
         if getattr(mesh, field, False):
             print(field, ':', getattr(mesh, field))
@@ -51,6 +61,9 @@ def print_mesh(mesh):
 
 
 def print_faces(face):
+    ''' Prints out an assimp face object
+        :param face: assimp face object
+    '''
     print("\nFACE START:")
     for i_idx in range(face.mNumIndices):
         print(i_idx, ':  ', face.mIndices[i_idx])
@@ -58,18 +71,27 @@ def print_faces(face):
 
 
 def print_vertices(vert):
+    ''' Prints out the XYZ coords of a vertex object
+    '''
     print("x:", vert.x, "y:", vert.y, "z:", vert.z)
 
 
-def print_colours(col):
+def print_colours(col_list):
+    ''' Prints out the RGBA colours in a colour list
+        :param col_list: list of eight colours
+    '''
     print("\nCOLOURS START")
     for idx in range(8):
-        if col[idx]:
-            print(col[idx].contents.r, col[idx].contents.g, col[idx].contents.b, col[idx].contents.a)
+        if col_list[idx]:
+            print(col_list[idx].contents.r, col_list[idx].contents.g, col_list[idx].contents.b,
+                  col_list[idx].contents.a)
     print("COLOURS END\n")
 
 
 def print_texture(texture):
+    ''' Prints out an assimp texture object
+        :param texture: texture object
+    '''
     print("\nTEXTURES START")
     for idx in range(8):
         if texture[idx]:
@@ -78,15 +100,22 @@ def print_texture(texture):
 
 
 def print_uvcomponents(comp):
+    ''' Prints out a list of eight assimp UV component objects
+        :param comp: UV component object
+    '''
     print("\nNUM UV COMPONENTS")
     for idx in range(8):
         print(idx, ':  ', comp[idx])
     print("END NUM UV COMPONENTS")
 
- 
+
 def print_node(node):
+    ''' Prints out an assimp node object
+        :param node: assimp node object
+    '''
     print("\nNODE START:", repr(node))
-    field_list = ['mChildren', 'mMeshes', 'mName', 'mNumChildren', 'mNumMeshes', 'mParent', 'mTransformation']
+    field_list = ['mChildren', 'mMeshes', 'mName', 'mNumChildren',
+                  'mNumMeshes', 'mParent', 'mTransformation']
     for field in field_list:
         if getattr(node, field, False):
             print(field, ':', getattr(node, field))
@@ -107,6 +136,9 @@ def print_node(node):
 
 
 def print_materials(mat):
+    ''' Prints out an assimp materials object
+        :param mat: assimp materials object
+    '''
     print('\nMATERIALS START:', repr(mat))
     field_list = ['mNumAllocated', 'mNumProperties', 'mProperties']
     for field in field_list:
@@ -119,43 +151,53 @@ def print_materials(mat):
 
 
 def print_properties(prop):
+    ''' Prints out assimp properties
+        :param prop: assimp properties object
+    '''
     print('\nPROPERTIES START:', repr(prop))
     field_list = ['mDataLength', 'mIndex', 'mKey', 'mSemantic', 'mType']
     for field in field_list:
         if field == 'mKey':
             print('mKey: ', prop.mKey.data)
-        elif getattr(prop, field, False) != False:
+        elif getattr(prop, field, False):
             print(field, ':', getattr(prop, field))
     # Float
     if prop.mType == 1:
         arr_len = int(prop.mDataLength/4)
-        fp = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_float * arr_len))
+        flt_ptr = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_float * arr_len))
         print("Values: ", end='')
         for idx in range(arr_len):
-            print(fp.contents[idx], ' ', end='')
+            print(flt_ptr.contents[idx], ' ', end='')
         print()
     # String
     elif prop.mType == 3:
-        class STRING_TYP(ctypes.Structure):
-            _fields_ = [ ("len", ctypes.c_int), ("value", ctypes.c_char * prop.mDataLength) ]
-        sp = ctypes.cast(prop.mData, ctypes.POINTER(STRING_TYP))
-        print("Values", sp.contents.len, sp.contents.value)
+        # pylint: disable=C0111, R0903
+        class StringTyp(ctypes.Structure):
+            _fields_ = [("len", ctypes.c_int), ("value", ctypes.c_char * prop.mDataLength)]
+        str_ptr = ctypes.cast(prop.mData, ctypes.POINTER(StringTyp))
+        print("Values", str_ptr.contents.len, str_ptr.contents.value)
     elif prop.mType == 5:
-        bp = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_char * prop.mDataLength)) 
+        bstr_ptr = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_char * prop.mDataLength))
         print("Values: ", end='')
         for idx in range(prop.mDataLength):
-            print(bp.contents[idx], ' ', end='')
+            print(bstr_ptr.contents[idx], ' ', end='')
         print()
     print('PROPERTIES END\n')
 
 
 def print_matrix4x4(matrix):
+    ''' Prints out a 4x4 matrix
+        :param matrix: matrix object with attributes a1,a2,a3,a4, b1,b2 ...
+    '''
     print('    ', matrix.a1, matrix.a2, matrix.a3, matrix.a4)
     print('    ', matrix.b1, matrix.b2, matrix.b3, matrix.b4)
     print('    ', matrix.c1, matrix.c2, matrix.c3, matrix.c4)
     print('    ', matrix.d1, matrix.d2, matrix.d3, matrix.d4)
 
 def print_blob(blob):
+    ''' Prints a binary blob object
+        :param blob: binary blob object
+    '''
     cntr = 0
     while cntr < 10000:
         print("blob =", blob)
@@ -163,8 +205,8 @@ def print_blob(blob):
         print("blob.contents.size =", blob.contents.size)
         bcd = ctypes.cast(blob.contents.data, ctypes.POINTER(blob.contents.size * ctypes.c_char))
         bcd_bytes = b''
-        for b in bcd.contents:
-            bcd_bytes += b
+        for byt in bcd.contents:
+            bcd_bytes += byt
         print("blob.contents.data = ", bcd_bytes)
         print("blob.contents.name =", blob.contents.name.data)
         print("blob.contents.next =", blob.contents.next)
@@ -173,5 +215,3 @@ def print_blob(blob):
         blob = blob.contents.next
         cntr += 1
     print()
-
-

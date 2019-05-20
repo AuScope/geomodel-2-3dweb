@@ -1,10 +1,10 @@
 ## Creating a borehole database 
 
-To create a borehole database, run [makeBoreholes.py](makeBoreholes.py)
+To create a borehole database, run [make_boreholes.py](make_boreholes.py)
 
 e.g. from Linux bash shell:
 
-_./makeBoreholes.py -b batch.txt -d query_data.db output_dir_
+_./make_boreholes.py -b batch.txt -d query_data.db output_dir_
 
 where: 
 

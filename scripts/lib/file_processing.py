@@ -1,29 +1,30 @@
 '''
-  A very general collection of functions used for finding files, JSON file creation, JSON file reading, updating dictionaries, detecting small geometric objects etc.
+A very general collection of functions used for finding files, JSON file creation,
+JSON file reading, updating dictionaries, detecting small geometric objects etc.
 '''
 import os
-import json
 import sys
-from json import JSONDecodeError
 import logging
 from collections import defaultdict
+import json
+from json import JSONDecodeError
 
 # Set up debugging
-logger = logging.getLogger("file_processing")
+LOGGER = logging.getLogger("file_processing")
 
 # Create console handler
-local_handler = logging.StreamHandler(sys.stdout)
+LOCAL_HANDLER = logging.StreamHandler(sys.stdout)
 
 # Create formatter
-local_formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+LOCAL_FORMATTER = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
 
 # Add formatter to ch
-local_handler.setFormatter(local_formatter)
+LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
 
-# Add handler to logger
-logger.addHandler(local_handler)
+# Add handler to LOGGER
+LOGGER.addHandler(LOCAL_HANDLER)
 
-#logger.setLevel(logging.DEBUG)
+#LOGGER.setLevel(logging.DEBUG)
 
 
 def find(src_dir, dest_dir, ext_list, find_and_process):
@@ -34,11 +35,11 @@ def find(src_dir, dest_dir, ext_list, find_and_process):
     :param ext_list: list of supported file extensions
     :param find_and_process: calls this when found something, fn(src_dir, dest_dir, ext_list)
     :returns: a list of model dict
-        (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
+     (model dict list format: [ { model_attr: { object_name: { 'attr_name': attr_val, ... } } } ] )
         and a list of geographical extents ( [ [min_x, max_x, min_y, max_y], ... ] )
         both can be used to create a config file
     '''
-    logger.debug("find(%s, %s, %s)", src_dir, dest_dir, repr(ext_list))
+    LOGGER.debug("find(%s, %s, %s)", src_dir, dest_dir, repr(ext_list))
     model_dict_list = []
     geoext_list = []
     walk_obj = os.walk(src_dir)
@@ -67,24 +68,22 @@ def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, p
     :param output_filename: name of file containing created config file
     :param dest_dir: destination directory for output file
     :param geo_extent: list of coords defining boundaries of model [min_x, max_x, min_y, max_y]
-    :param params: model input parameters, SimpleNamespace() object, keys are: 'name' 'crs' 'init_cam_dist'
-                                                                    and optional 'proj4_defn'
+    :param params: model input parameters, SimpleNamespace() object,
+                      keys are: 'name' 'crs' 'init_cam_dist' and optional 'proj4_defn'
     '''
-    logger.debug("create_json_config(%s, %s, %s)", repr(model_dict_list), output_filename, repr(geo_extent))
-    try:
-        fp = open(os.path.join(dest_dir, os.path.basename(output_filename)), "w")
-    except Exception as e:
-        logger.error("Cannot open file %s %s", output_filename, e)
-        return
+    LOGGER.debug("create_json_config(%s, %s, %s)", repr(model_dict_list), output_filename,
+                 repr(geo_extent))
+
     # Sort by display name before saving to file, sort by display name, then model URL
-    sorted_model_dict_list = sorted(model_dict_list, key=lambda x: (x['display_name'], x['model_url']))
-    config_dict = { "properties": { "crs": params.crs, "extent": geo_extent,
-                                    "name": params.name,
-                                    "init_cam_dist": params.init_cam_dist
-                                  },
-                    "type": "GeologicalModel",
-                    "version": 1.0
-                   }
+    sorted_model_dict_list = sorted(model_dict_list,
+                                    key=lambda x: (x['display_name'], x['model_url']))
+    config_dict = {"properties": {"crs": params.crs, "extent": geo_extent,
+                                  "name": params.name,
+                                  "init_cam_dist": params.init_cam_dist
+                                 },
+                   "type": "GeologicalModel",
+                   "version": 1.0
+                  }
     # Are there any sidebar group labels that we can use?
     # If not, then put them in "Not Grouped"
     if hasattr(params, 'grp_struct_dict'):
@@ -100,8 +99,12 @@ def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, p
     # Is there a proj4 definition?
     if hasattr(params, 'proj4_defn'):
         config_dict["properties"]["proj4_defn"] = params.proj4_defn
-    json.dump(config_dict, fp, indent=4, sort_keys=True)
-    fp.close()
+    try:
+        with open(os.path.join(dest_dir, os.path.basename(output_filename)), "w") as file_p:
+            json.dump(config_dict, file_p, indent=4, sort_keys=True)
+    except OSError as os_exc:
+        LOGGER.error("Cannot open file %s %s", output_filename, os_exc)
+        return
 
 
 def read_json_file(file_name):
@@ -110,17 +113,15 @@ def read_json_file(file_name):
     :param file_name: file name of JSON file
     '''
     try:
-        fp = open(file_name, "r")
-    except Exception as e:
-        logger.error("Cannot open JSON file %s %s", file_name, e)
+        with open(file_name, "r") as file_p:
+            json_dict = json.load(file_p)
+    except OSError as oe_exc:
+        LOGGER.error("Cannot open JSON file %s %s", file_name, oe_exc)
         sys.exit(1)
-    try:
-        json_dict = json.load(fp)
-    except JSONDecodeError as e:
+    except JSONDecodeError as jd_exc:
         json_dict = {}
-        logger.error("Cannot read JSON file %s %s", file_name, e)
+        LOGGER.error("Cannot read JSON file %s %s", file_name, jd_exc)
         sys.exit(1)
-    fp.close()
     return json_dict
 
 
@@ -129,9 +130,9 @@ def reduce_extents(extent_list):
 
     :param extent_list: list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
     '''
-    logger.debug("reduce_extents()")
+    LOGGER.debug("reduce_extents()")
     # If only a single extent and not in a list, then return
-    if len(extent_list)==0 or type(extent_list[0]) is float:
+    if not extent_list or isinstance(extent_list[0], float):
         return extent_list
 
     out_extent = [sys.float_info.max, -sys.float_info.max, sys.float_info.max, -sys.float_info.max]
@@ -163,11 +164,11 @@ def add_config2popup(gs_dict, label_str, popup_dict, file_name, file_ext='.gltf'
     :param position: optional [x,y,z] position of model part
     :returns: a dict of model configuration info, which includes the popup dict
     '''
-    logger.debug("add_config2popup(%s, %s, %s)", label_str, file_name, file_ext)
+    LOGGER.debug("add_config2popup(%s, %s, %s)", label_str, file_name, file_ext)
     np_filename = os.path.basename(file_name)
     modelconf_dict = {}
     modelconf_dict['popups'] = popup_dict
-    if file_ext.upper()==".PNG":
+    if file_ext.upper() == ".PNG":
         modelconf_dict['type'] = 'ImagePlane'
         modelconf_dict['position'] = position
     else:
@@ -195,39 +196,43 @@ def add_inserts(gs_dict, model_part_key, modelconf_dict, alt_name):
     if model_part_key in gs_dict and len(gs_dict[model_part_key]) > 1:
         for ins_k, ins_v in gs_dict[model_part_key][1].items():
             modelconf_dict[ins_k] = ins_v
-                 
+
     # If display name not in group structure dict, use alt name string
     if 'display_name' not in modelconf_dict:
         modelconf_dict['display_name'] = alt_name
 
 
 def add_vol_config(gs_dict, geom_obj, style_obj, meta_obj):
-    ''' Create a dictionary containing volume configuration data 
+    ''' Create a dictionary containing volume configuration data
 
     :param gs_dict: group structure dictionary (group struct dict format: \
     { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))
-    :param geom_obj: MODEL_GEOMETRIES object
+    :param geom_obj: ModelGeometries object
     :param style_obj: STYLE object
     :param meta_obj: METADATA object
     :returns: a dict of volume config data
     '''
     model_url = os.path.basename(meta_obj.src_filename)+'.gz'
-    modelconf_dict = { 'model_url': model_url, 'type': '3DVolume', 'include': True, 'displayed': False }
+    modelconf_dict = {'model_url': model_url, 'type': '3DVolume',
+                      'include': True, 'displayed': False}
     add_inserts(gs_dict, model_url, modelconf_dict, meta_obj.name)
-    modelconf_dict['volumeData'] = { 'dataType': geom_obj.vol_data_type, 'dataDims': geom_obj.vol_sz,
-                              'origin': geom_obj.vol_origin, 'size': geom_obj.get_vol_side_lengths(),
-                              'maxVal': geom_obj.get_max_data(), 'minVal': geom_obj.get_min_data(),
-                              'rotation': geom_obj.get_rotation()  }
-    if len(style_obj.get_colour_table()) > 0:
+    modelconf_dict['volumeData'] = {'dataType': geom_obj.vol_data_type,
+                                    'dataDims': geom_obj.vol_sz,
+                                    'origin': geom_obj.vol_origin,
+                                    'size': geom_obj.get_vol_side_lengths(),
+                                    'maxVal': geom_obj.get_max_data(),
+                                    'minVal': geom_obj.get_min_data(),
+                                    'rotation': geom_obj.get_rotation()}
+    if style_obj.get_colour_table():
         modelconf_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
-    if len(style_obj.get_label_table()) > 0:
+    if style_obj.get_label_table():
         modelconf_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
     return modelconf_dict
-    
-     
+
+
 def is_only_small(gsm_list):
     ''' Returns True if this list of geometries contains only lines and points
-    :param gsm_list: list of (MODEL_GEOMETRIES, STYLE, METADATA) objects
+    :param gsm_list: list of (ModelGeometries, STYLE, METADATA) objects
     :returns: True if we think this is a small model that can fit in one collada file
     '''
     small = True
@@ -236,6 +241,3 @@ def is_only_small(gsm_list):
             small = False
             break
     return small
-
-
-

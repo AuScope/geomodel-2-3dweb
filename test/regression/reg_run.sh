@@ -3,7 +3,7 @@
 # Basic regression test script. Run from the 'regression' directory
 #
 # Acknowledgements:
-# 1) Some of the files for tests derived from these models: 
+# 1) Some of the files for tests derived from these models:
 #    http://www.energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models (North Gawler model)
 #    https://dasc.dmp.wa.gov.au/dasc/ (Sandstone model)
 # 2) SKUA/GOCAD software from the "Paradigm Academic Software Program" (http://www.pdgm.com/affiliations/academic-software-programs/)
@@ -42,7 +42,7 @@ echo "\n\nGOCAD to COLLADA, GZIP and PNG conversion regression test"
 CWD=`pwd`
 
 # Make the output directory
-[ ! -e output ] && mkdir output 
+[ ! -e output ] && mkdir output
 cd ../../scripts
 
 
@@ -60,7 +60,7 @@ echo -n "$i File test: "
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Remove date stamps from file
-egrep -v '(<created>|<modified>)' "$CWD/output/${i}Test.dae" > "$CWD/output/${i}Test2.dae" 
+egrep -v '(<created>|<modified>)' "$CWD/output/${i}Test.dae" > "$CWD/output/${i}Test2.dae"
 [ $? -ne 0 ] && echo "FAILED" && exit 1
 
 # Check that conversion was correct

@@ -18,7 +18,7 @@ from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
 from lib.db.metadata.metadata import METADATA, MapFeat
 
 # Set up debugging
-LOCAL_LOGGER = logging.getLogger("gocad_vessel")
+LOCAL_LOGGER = logging.getLogger("gocad_importer")
 
 # Create console handler
 LOCAL_HANDLER = logging.StreamHandler(sys.stdout)

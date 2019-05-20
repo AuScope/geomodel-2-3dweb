@@ -3,12 +3,12 @@
 '''
 
 def make_borehole_label(borehole_name, depth):
-     ''' Makes a consistent and space-free label for borehole sections
-     :param borehole_name: name of borehole
-     :param depth: depth of section
-     :returns: byte string label
-     '''
-     return bytes(clean(borehole_name)+"_"+str(int(depth)), encoding='utf=8')
+    ''' Makes a consistent and space-free label for borehole sections
+    :param borehole_name: name of borehole
+    :param depth: depth of section
+    :returns: byte string label
+    '''
+    return bytes(clean(borehole_name)+"_"+str(int(depth)), encoding='utf=8')
 
 
 def make_borehole_filename(borehole_name):
@@ -24,6 +24,4 @@ def clean(borehole_name):
 
     :param borehole_name: borehole identifier or name
     '''
-    return borehole_name.replace(' ','_').replace('/','_').replace(':','_')
-
-
+    return borehole_name.replace(' ', '_').replace('/', '_').replace(':', '_')

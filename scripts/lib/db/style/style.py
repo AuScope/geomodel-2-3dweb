@@ -1,4 +1,6 @@
-
+"""
+Contains the STYLE class
+"""
 class STYLE:
     ''' Container class for style (colour, shading etc.) of objects
     '''
@@ -15,7 +17,7 @@ class STYLE:
 
         self.__colour_table = []
         ''' colour table dictionary, integer keys, (R,G,B,A) 4-float tuple values
-        ''' 
+        '''
 
         self.__label_table = []
         ''' label table dict, keys are integers, values are strings
@@ -25,7 +27,9 @@ class STYLE:
     def __repr__(self):
         ''' Pretty print version of this class
         '''
-        return("STYLE(): rgba_tup={0} colour_table={1} label_table={2}".format(str(self.__rgba_tup), str(self.__colour_table), str(self.__label_table)))
+        return "STYLE(): rgba_tup={0}".format(str(self.__rgba_tup)) + \
+               " colour_table={0}".format(str(self.__colour_table)) + \
+               " label_table={0}".format(str(self.__label_table))
 
 
     def get_rgba_tup(self, idx=0):
@@ -55,9 +59,9 @@ class STYLE:
 
 
     def get_colour_table(self, idx=0):
-        ''' Get the colour table 
+        ''' Get the colour table
         :returns: dictionary, integer keys, (R,G,B,A) 4-float tuple values
-        ''' 
+        '''
         if len(self.__colour_table) > idx:
             return self.__colour_table[idx]
         return {}
@@ -67,7 +71,7 @@ class STYLE:
         ''' Add a colour table and a label table
         :param colour_table: new colour table value
         :param label_table: new colour table value
-        ''' 
+        '''
         self.__colour_table.append(colour_table)
         self.__is_single_colour.append(False)
         self.__label_table.append(label_table)
@@ -76,8 +80,7 @@ class STYLE:
     def get_label_table(self, idx=0):
         ''' Get the label table
         :returns: dictionary, integer keys, string values
-        ''' 
+        '''
         if len(self.__label_table) > idx:
             return self.__label_table[idx]
         return {}
-

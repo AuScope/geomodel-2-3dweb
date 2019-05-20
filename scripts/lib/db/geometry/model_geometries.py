@@ -1,13 +1,20 @@
+"""
+Contains ModelGeometries class
+"""
 import sys
 import numpy as np
 
-class MODEL_GEOMETRIES:
-    ''' Class used to store abstract geometry of parts of a geological model and its data 
+def unit_vector(vector):
+    ''' :returns: the unit vector of the vector.
+    '''
+    return vector / np.linalg.norm(vector)
+
+class ModelGeometries:
+    ''' Class used to store abstract geometry of parts of a geological model and its data
         It should be independent as possible of any model's input format
         Each class only stores data for 1 volume, but for many line segments and triangle faces
         All sequence numbers for _*_arr start at 1
     '''
-
 
     def __init__(self):
 
@@ -27,27 +34,27 @@ class MODEL_GEOMETRIES:
         ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
-        self.max_X =  -sys.float_info.max
+        self.max_x = -sys.float_info.max
         ''' Maximum X coordinate, used to calculate extent
         '''
 
-        self.min_X =  sys.float_info.max
+        self.min_x = sys.float_info.max
         ''' Minimum X coordinate, used to calculate extent
         '''
 
-        self.max_Y =  -sys.float_info.max
+        self.max_y = -sys.float_info.max
         ''' Maximum Y coordinate, used to calculate extent
         '''
 
-        self.min_Y =  sys.float_info.max
+        self.min_y = sys.float_info.max
         ''' Minimum Y coordinate, used to calculate extent
         '''
 
-        self.max_Z =  -sys.float_info.max
+        self.max_z = -sys.float_info.max
         ''' Maximum Z coordinate, used to calculate extent
         '''
 
-        self.min_Z =  sys.float_info.max
+        self.min_z = sys.float_info.max
         ''' Minimum Z coordinate, used to calculate extent
         '''
 
@@ -113,12 +120,12 @@ class MODEL_GEOMETRIES:
     def vrtx_arr(self):
         ''' Returns array of VRTX objects
         '''
-        return self._vrtx_arr 
+        return self._vrtx_arr
 
 
     @property
     def atom_arr(self):
-        ''' Returns array of ATOM objects 
+        ''' Returns array of ATOM objects
         '''
         return self._atom_arr
 
@@ -152,12 +159,13 @@ class MODEL_GEOMETRIES:
     def is_point(self):
         ''' Returns True iff this contains point data
         '''
-        return (len(self._vrtx_arr) > 0 or len(self._atom_arr) > 0) and len(self._trgl_arr) == 0 and len(self._seg_arr) == 0
+        return (len(self._vrtx_arr) > 0 or len(self._atom_arr) > 0) and len(self._trgl_arr) == 0 \
+               and len(self._seg_arr) == 0
 
 
     def is_volume(self):
         ''' Returns True iff this contains volume data
-          
+
         '''
         return len(self.vol_sz) > 2
 
@@ -166,63 +174,58 @@ class MODEL_GEOMETRIES:
         ''' Returns True if this is extracted from a GOCAD VOXEL that only has a single layer
             and should be converted into a PNG instead of a GLTF
         '''
-        return self.is_volume() and self.vol_sz[2]==1
+        return self.is_volume() and self.vol_sz[2] == 1
 
 
-    def calc_minmax(self, x, y, z):
+    def calc_minmax(self, x_coord, y_coord, z_coord):
         ''' Calculates and stores the max and min of all x,y,z coords
 
-        :param x,y,z: x,y,z coords
+        :param x_coord, y_coord, z_coord: x,y,z coords
         '''
-        if x > self.max_X:
-            self.max_X = x
-        if x < self.min_X:
-            self.min_X = x
-        if y > self.max_Y:
-            self.max_Y = y
-        if y < self.min_Y:
-            self.min_Y = y
-        if z > self.max_Z:
-            self.max_Z = z
-        if z < self.min_Z:
-            self.min_Z = z
+        if x_coord > self.max_x:
+            self.max_x = x_coord
+        if x_coord < self.min_x:
+            self.min_x = x_coord
+        if y_coord > self.max_y:
+            self.max_y = y_coord
+        if y_coord < self.min_y:
+            self.min_y = y_coord
+        if z_coord > self.max_z:
+            self.max_z = z_coord
+        if z_coord < self.min_z:
+            self.min_z = z_coord
 
 
     def get_extent(self):
-        ''' Returns estimate of the geographic extent of the model, using max and min coordinate values
-            format is [min_x, max_x, min_y, max_y]
+        ''' :returns: estimate of the geographic extent of the model, using max and min
+            coordinate values format is [min_x, max_x, min_y, max_y]
         '''
-        return [self.min_X, self.max_X, self.min_Y, self.max_Y]
+        return [self.min_x, self.max_x, self.min_y, self.max_y]
 
 
     def get_vol_side_lengths(self):
-        ''' Returns the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats
+        ''' :returns: the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats
         '''
-        return [self.max_X - self.min_X, self.max_Y - self.min_Y, self.max_Z - self.min_Z]
-
-
-    def __unit_vector(self, vector):
-        ''' Returns the unit vector of the vector.
-        '''
-        return vector / np.linalg.norm(vector)
+        return [self.max_x - self.min_x, self.max_y - self.min_y, self.max_z - self.min_z]
 
 
     def get_rotation(self):
-        u_vec = self.__unit_vector(self.vol_axis_u)
-        v_vec = self.__unit_vector(self.vol_axis_v)
-        w_vec = self.__unit_vector(self.vol_axis_w)
+        ''' :returns: three unit vectors of the volume's XYZ axes
+        '''
+        u_vec = unit_vector(self.vol_axis_u)
+        v_vec = unit_vector(self.vol_axis_v)
+        w_vec = unit_vector(self.vol_axis_w)
         ret = [tuple(u_vec), tuple(v_vec), tuple(w_vec)]
-        print('get_rotation()=', ret)
         return ret
 
-    
+
     def get_max_data(self, idx=0):
         ''' Retrieves maximum value of data point
         :param idx: index into property data, omit for volume data
         :returns: maximum data value
         '''
         if len(self._max_data) > idx:
-            return self._max_data[idx] 
+            return self._max_data[idx]
         return None
 
 
@@ -240,17 +243,20 @@ class MODEL_GEOMETRIES:
         ''' Retrieve no data marker
         :param idx: index into property data, omit for volume data
         :returns: no data marker
-        ''' 
+        '''
         if len(self._no_data_marker) > idx:
             return self._no_data_marker[idx]
         return None
 
 
-    def add_stats(self, min, max, no_data):
+    def add_stats(self, min_val, max_val, no_data):
         ''' Adds minimum, maximum and no data marker
+        :param min_val: minimum value
+        :param max_val: maximum value
+        :param no_data: value used in a dataset when no data is recorded for a location
         '''
-        self._min_data.append(min)
-        self._max_data.append(max)
+        self._min_data.append(min_val)
+        self._max_data.append(max_val)
         self._no_data_marker.append(no_data)
 
 
@@ -263,11 +269,10 @@ class MODEL_GEOMETRIES:
 
     def get_xyz_data(self, idx=0):
         ''' Retrieves data from xyz data dictionary
-        :param idx: index for when there are multiple values for each point in space, omit for volumes
+        :param idx: index for when there are multiple values for each point in space,
+                    omit for volumes
         :returns: dictionary of (X,Y,Z) => data value
         '''
         if len(self._xyz_data) > idx:
             return self._xyz_data[idx]
         return {}
-
-

@@ -34,29 +34,29 @@ def convert_file(daefile_str):
         convert_one_file(daefile_str)
     else:
         src_dir = os.path.dirname(daefile_str)
-        fileName, fileExt = os.path.splitext(daefile_str)
-        wildcard_str = os.path.join(src_dir, fileName+"_*.dae")
+        file_name, file_ext = os.path.splitext(daefile_str)
+        wildcard_str = os.path.join(src_dir, file_name+"_*.dae")
         collfile_list = glob.glob(wildcard_str)
         for collfile_str in collfile_list:
             convert_one_file(collfile_str)
 
-def convert_one_file(daefile_str): 
+def convert_one_file(daefile_str):
     ''' Converts a COLLADA file to GLTF
 
     :param daefile_str: filename to be converted
     '''
-    fileName, fileExt = os.path.splitext(daefile_str)
+    file_name, file_ext = os.path.splitext(daefile_str)
     # COLLADA2GLTF does not like single filename without path as -o parameter
-    fileName = os.path.abspath(fileName)
-    cmdList = [os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin"), "-i", daefile_str, "-o", fileName+".gltf"]
+    file_name = os.path.abspath(file_name)
+    cmd_list = [os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin"),
+                "-i", daefile_str, "-o", file_name+".gltf"]
     try:
-        cmdProc = subprocess.run(cmdList)
-    except OSError as e:
-        print("Cannot execute COLLADA2GLTF: ", e)
+        cmd_proc = subprocess.run(cmd_list)
+    except OSError as os_exc:
+        print("Cannot execute COLLADA2GLTF: ", os_exc)
     else:
-        if cmdProc.returncode != 0:
-            print("Conversion from COLLADA to GLTF failed: return code=", str(cmdProc.returncode))
+        if cmd_proc.returncode != 0:
+            print("Conversion from COLLADA to GLTF failed: return code=", str(cmd_proc.returncode))
         elif REMOVE_COLLADA:
             print("Deleting ", daefile_str)
         os.remove(daefile_str)
-

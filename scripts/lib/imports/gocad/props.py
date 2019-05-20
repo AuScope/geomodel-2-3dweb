@@ -1,9 +1,12 @@
-import numpy
+"""
+Contains the PROPS class
+"""
 import os
 import csv
 import sys
 import logging
 from collections import defaultdict
+import numpy
 
 
 
@@ -38,8 +41,8 @@ class PROPS:
         self.file_name = ""
         ''' Name of binary file associated with GOCAD file
         '''
-       
-        self.data_sz = 0 
+
+        self.data_sz = 0
         ''' Number of bytes in number in binary file, usually 1, 2 or 4
         '''
 
@@ -51,7 +54,7 @@ class PROPS:
         ''' Is True iff binary data is a signed integer else False
         '''
 
-        self.data_3d = numpy.zeros((0,0,0))
+        self.data_3d = numpy.zeros((0, 0, 0))
         ''' Property data collected from binary file, value is float, stored as a 3d numpy array.
         '''
 
@@ -59,12 +62,13 @@ class PROPS:
         ''' Property data attached to XYZ points (index is XYZ coordinate)
         '''
 
-        self.data_stats = { 'min': sys.float_info.max, 'max': -sys.float_info.max }
+        self.data_stats = {'min': sys.float_info.max, 'max': -sys.float_info.max}
         ''' Property data statistics: min & max
         '''
 
         self.colour_map = {}
-        ''' If colour map was specified, then it is stored here, integer key, value is (R,G,B,A) where R, G, B, A are floats
+        ''' If colour map was specified, then it is stored here, integer is the key,
+            value is (R,G,B,A) where R, G, B, A are floats
         '''
 
         self.colourmap_name = ""
@@ -82,16 +86,16 @@ class PROPS:
         self.is_index_data = False
         ''' Uses 'data_3d' to hold index to colour table or rock label table
         '''
-        
+
         self.rock_label_table = {}
         ''' Table specifying names of rocks , key is an integer, value is the label
         '''
-  
+
         self.offset = 0
         ''' Offset within binary file
         '''
 
-    
+
     def __repr__(self):
         ''' A print friendly representation
         '''
@@ -114,21 +118,20 @@ class PROPS:
 
 
     def get_str_data_type(self):
-        ''' Returns a string form of the data type of the volume data e.g. "INT_16", "FLOAT_32", "UINT_8"
+        ''' Returns a string form of the data type of the volume data
+            e.g. "INT_16", "FLOAT_32", "UINT_8"
         '''
         if self.data_type == 'f' and self.data_sz == 4:
             return "FLOAT_32"
         if self.data_type == 'h' and self.data_sz == 2:
             if self.signed_int:
                 return "INT_16"
-            else:
-                return "UINT_16"
+            return "UINT_16"
         if self.data_type == 'b':
             if self.signed_int:
                 return "INT_8"
-            else:
-                return "UINT_8"
-        return ""  
+            return "UINT_8"
+        return ""
 
 
     def make_numpy_dtype(self):
@@ -142,8 +145,9 @@ class PROPS:
         if self.data_type == 'h' or self.data_type == 'b':
             if not self.signed_int:
                 return numpy.dtype('>'+self.data_type.upper())
-            else:
-                return numpy.dtype('>'+self.data_type)
+
+            return numpy.dtype('>'+self.data_type)
+
         # Floating point i.e. data_type = 'f'
         return numpy.dtype('>'+self.data_type+str(self.data_sz))
 
@@ -155,8 +159,8 @@ class PROPS:
             'colour_map' is a dict, key is integer, value is (R,G,B,A) tuple of floats
             'rock_label_table' is a dict, key is integer, value is string
         '''
-        ct = {}
-        lt = {}
+        col_tab = {}
+        lab_tab = {}
         if not os.path.isfile(csv_file):
             self.logger.error("Cannot find CSV file: %s", csv_file)
             sys.exit(1)
@@ -164,23 +168,23 @@ class PROPS:
             csvfilehandle = open(csv_file, 'r')
             spamreader = csv.reader(csvfilehandle)
             for row in spamreader:
-                ct[int(row[0])] = (float(row[2]),float(row[3]),float(row[4]), 1.0)
-                lt[int(row[0])] = row[1]
-        except Exception as e:
-            self.logger.error("Cannot read CSV file %s %s", csv_file, e)
+                col_tab[int(row[0])] = (float(row[2]), float(row[3]), float(row[4]), 1.0)
+                lab_tab[int(row[0])] = row[1]
+        except OSError as os_exc:
+            self.logger.error("Cannot read CSV file %s %s", csv_file, os_exc)
             sys.exit(1)
-        self.colour_map = ct
-        self.rock_label_table = lt
+        self.colour_map = col_tab
+        self.rock_label_table = lab_tab
 
 
-    def assign_to_3d(self, x,y,z, fp):
+    def assign_to_3d(self, x_val, y_val, z_val, fltp):
         ''' Assigns a value to 3d array
             x,y,z - XYZ integer array indexes
-            fp - floating point value to be assigned
-            
+            fltp - floating point value to be assigned
+
         '''
-        self.data_3d[x][y][z] = fp
-        self.__calc_minmax(fp)
+        self.data_3d[x_val][y_val][z_val] = fltp
+        self.__calc_minmax(fltp)
 
 
     def assign_to_xyz(self, xyz, val):
@@ -189,27 +193,25 @@ class PROPS:
             val - value to be assigned (float or tuple)
         '''
         self.data_xyz[xyz] = val
-        if type(val) is float:
+        if isinstance(val, float):
             self.__calc_minmax(val)
 
 
     def append_to_xyz(self, xyz, val):
-        ''' Appends a value to xyz dict 
+        ''' Appends a value to xyz dict
             xyz - (X,Y,Z) tuple array indexes (floats)
-            val - value to be assigned 
+            val - value to be assigned
         '''
         self.data_xyz[xyz].append(val)
-        
 
 
-    def __calc_minmax(self, fp):
-        ''' Calculates minimum & maximum of floating point value and stores result locally in 'data_stats'
+
+    def __calc_minmax(self, fltp):
+        ''' Calculates minimum & maximum of floating point value and stores
+            result locally in 'data_stats'
             fp - floating point value
         '''
-        if (fp > self.data_stats['max']):
-            self.data_stats['max'] = fp
-        if (fp < self.data_stats['min']):
-            self.data_stats['min'] = fp
-
-
-
+        if fltp > self.data_stats['max']:
+            self.data_stats['max'] = fltp
+        if fltp < self.data_stats['min']:
+            self.data_stats['min'] = fltp

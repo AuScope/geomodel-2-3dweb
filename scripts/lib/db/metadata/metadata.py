@@ -1,13 +1,20 @@
+"""
+Contains the METADATA and MapFeat classes
+"""
 from enum import Enum
 
 class MapFeat(Enum):
+    """
+    Collection of values used to denote different kinds of 'MappedFeature' in GeoSciML
+    """
     UNKNOWN = 1
     SHEAR_DISP_STRUCT = 2
     GEOLOGICAL_UNIT = 3
     CONTACT = 4
 
 class METADATA():
-    ''' Storage for metadata attributes extracted from GOCAD that can be assigned directly to GeoSciML 
+    ''' Storage for metadata attributes extracted from GOCAD that can be assigned directly
+        to GeoSciML
     '''
     def __init__(self):
         self.name = ''
@@ -43,7 +50,7 @@ class METADATA():
         '''
 
         self.mapped_feat = MapFeat.UNKNOWN
-        ''' Copied from GOCAD "GEOLOGICAL_TYPE" which can have values: top, intraformational, 
+        ''' Copied from GOCAD "GEOLOGICAL_TYPE" which can have values: top, intraformational,
            fault, unconformity, intrusive, topography, boundary, and ghost
            'fault' maps to "GeologicFeature::GeologicStructure::ShearDisplacementStructure"
            'intrusive' - many kinds of igneous formations, maps to 'GeologicFeature::GeologicUnit'
@@ -57,7 +64,7 @@ class METADATA():
         '''
         ret_str = 'METADATA():'
         for field in dir(self):
-            if '__' != field[-2:] and not callable(getattr(self,field)):
+            if field[-2:] != '__' and not callable(getattr(self, field)):
                 ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
         return ret_str
 
@@ -76,4 +83,3 @@ class METADATA():
         if len(self._property_name) > idx:
             return self._property_name[idx]
         return ''
-

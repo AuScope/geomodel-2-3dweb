@@ -14,9 +14,9 @@ import gzip
 import shutil
 from types import SimpleNamespace
 
-from lib.exports.png_kit import PNG_KIT
-from lib.exports.collada_kit import COLLADA_KIT
-from lib.imports.gocad.gocad_vessel import GOCAD_VESSEL, extract_from_grp, de_concat
+from lib.exports.png_kit import PngKit
+from lib.exports.collada_kit import ColladaKit
+from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp, de_concat
 from lib.file_processing import find, create_json_config, read_json_file, reduce_extents
 from lib.file_processing import add_config2popup, add_vol_config, is_only_small
 import lib.exports.collada2gltf as collada2gltf
@@ -129,8 +129,8 @@ class Gocad2Collada:
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         ext_str = file_ext.lstrip('.').upper()
         src_dir = os.path.dirname(filename_str)
-        coll_kit_obj = COLLADA_KIT(DEBUG_LVL)
-        png_kit_obj = PNG_KIT(DEBUG_LVL)
+        coll_kit_obj = ColladaKit(DEBUG_LVL)
+        png_kit_obj = PngKit(DEBUG_LVL)
         # Open GOCAD file and read all its contents, assume it fits in memory
         try:
             file_d = open(filename_str, 'r')
@@ -148,9 +148,9 @@ class Gocad2Collada:
                     out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
                                                                    os.path.basename(file_name)),
                                                       mask_idx)
-                gocad_obj = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz,
-                                         nondefault_coords=NONDEF_COORDS,
-                                         ct_file_dict=self.ct_file_dict)
+                gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                                          nondefault_coords=NONDEF_COORDS,
+                                          ct_file_dict=self.ct_file_dict)
 
                 # Check that conversion worked
                 is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
@@ -182,9 +182,9 @@ class Gocad2Collada:
                     out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
                                                                    os.path.basename(file_name)),
                                                       mask_idx)
-                gocad_obj = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz,
-                                         nondefault_coords=NONDEF_COORDS,
-                                         ct_file_dict=self.ct_file_dict)
+                gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                                          nondefault_coords=NONDEF_COORDS,
+                                          ct_file_dict=self.ct_file_dict)
 
                 # Check that conversion worked
                 is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
@@ -210,8 +210,8 @@ class Gocad2Collada:
             popup_dict = {}
             node_label = ''
             for file_lines in file_lines_list:
-                gocad_obj = GOCAD_VESSEL(DEBUG_LVL, base_xyz=base_xyz,
-                                         nondefault_coords=NONDEF_COORDS)
+                gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                                          nondefault_coords=NONDEF_COORDS)
                 is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
                 if not is_ok:
                     self.logger.warning("WARNING - could not process %s", filename_str)
@@ -289,11 +289,9 @@ class Gocad2Collada:
 
     def write_single_volume(self, kit_obj, gsm_obj, src_dir, out_filename, prop_idx):
         ''' Write a single volume to disk
-        :param coll_kit_obj: COLLADA_KIT object, used to output COLLADA files
-        :param png_kit_obj: PNG_KIT object, used to output PNG files
-        :param geom_obj: MODEL_GEOMETRY object, contains the geometry of the volume
-        :param style_obj: STYLE object, contains the volume's style
-        :param meta_obj: METADATA object, contains the volume's metadata
+        :param kit_obj: a tuple of (ColladaKit, PngKit) objects, used to output COLLADA & PNG files
+        :param gsm_obj: (MODEL_GEOMETRY, STYLE, METADATA) tuple, contains the geometry of the
+                        volume, the volume's style & metadata
         :param src_dir: source directory where there are 3rd party model files
         :param out_filename: output filename without extension
         :param prop_idx: property index of volume's properties, integer
@@ -472,13 +470,13 @@ if __name__ == "__main__":
         # Recursively search subdirectories
         if ARGS.recursive:
             MODEL_DICT_LIST, GEO_EXTENT = find(GOCAD_SRC, DEST_DIR,
-                                               GOCAD_VESSEL.SUPPORTED_EXTS,
+                                               GocadImporter.SUPPORTED_EXTS,
                                                CONVERTER.find_and_process)
 
         # Only search local directory
         else:
             MODEL_DICT_LIST, GEO_EXTENT = CONVERTER.find_and_process(GOCAD_SRC, DEST_DIR,
-                                                                     GOCAD_VESSEL.SUPPORTED_EXTS)
+                                                                     GocadImporter.SUPPORTED_EXTS)
 
     # Process a single file
     elif os.path.isfile(GOCAD_SRC):
