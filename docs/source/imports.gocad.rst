@@ -4,10 +4,10 @@ imports.gocad package
 Submodules
 ----------
 
-imports.gocad.gocad_vessel module
----------------------------------
+imports.gocad.gocad_importer module
+-----------------------------------
 
-.. automodule:: imports.gocad.gocad_vessel
+.. automodule:: imports.gocad.gocad_importer
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# AuScope 3D Geological Models documentation build configuration file, created by
-# sphinx-quickstart on Mon May  6 11:33:27 2019.
+# AuScope Geomodels documentation build configuration file, created by
+# sphinx-quickstart on Tue May 21 10:34:11 2019.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -19,10 +19,15 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../../lib'))
-sys.path.insert(0, os.path.abspath('../../lib/exports'))
-sys.path.insert(0, os.path.abspath('../../lib/imports'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts', 'lib')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts', 'lib', 'imports')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts', 'lib', 'exports')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts', 'lib', 'db')))
+
+print(sys.path)
+
+
 
 # -- General configuration ------------------------------------------------
 
@@ -35,7 +40,6 @@ sys.path.insert(0, os.path.abspath('../../lib/imports'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -140,7 +144,7 @@ html_theme = 'alabaster'
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'AuScope 3D Geological Models v1.0'
+# html_title = 'AuScope Geomodels v1.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -240,7 +244,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AuScope3DGeologicalModelsdoc'
+htmlhelp_basename = 'AuScopeGeomodelsdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -266,7 +270,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'AuScope3DGeologicalModels.tex', 'AuScope 3D Geological Models Documentation',
+    (master_doc, 'AuScopeGeomodels.tex', 'AuScope Geomodels Documentation',
      'AuScope', 'manual'),
 ]
 
@@ -308,7 +312,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'auscope3dgeologicalmodels', 'AuScope 3D Geological Models Documentation',
+    (master_doc, 'auscopegeomodels', 'AuScope Geomodels Documentation',
      [author], 1)
 ]
 
@@ -323,8 +327,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'AuScope3DGeologicalModels', 'AuScope 3D Geological Models Documentation',
-     author, 'AuScope3DGeologicalModels', 'One line description of project.',
+    (master_doc, 'AuScopeGeomodels', 'AuScope Geomodels Documentation',
+     author, 'AuScopeGeomodels', 'One line description of project.',
      'Miscellaneous'),
 ]
 

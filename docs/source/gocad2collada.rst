@@ -1,7 +1,7 @@
-makeBoreholes module
+gocad2collada module
 ====================
 
-.. automodule:: makeBoreholes
+.. automodule:: gocad2collada
     :members:
     :undoc-members:
     :show-inheritance:

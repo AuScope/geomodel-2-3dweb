@@ -1,8 +1,8 @@
 I use the 'sphinx' (v1.4.9) documentation generation to generate documentation for this project (http://www.sphinx-doc.org/en/master/index.html)
 
-To generate .rst files for each of the .py source files:
+From the 'docs' directory, to generate .rst files for each of the .py source files:
 
-sphinx-apidoc -f -o source ../lib/ ../scripts
+sphinx-apidoc -f -o source ../scripts/lib
 
 
 To generate html documentation:
@@ -12,4 +12,5 @@ make html
 To remove html documentation:
 
 make clean
+
 

@@ -8,4 +8,4 @@ lib
    exports
    file_processing
    imports
-   makeBoreholes
+   make_boreholes
