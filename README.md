@@ -17,7 +17,7 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 + diskcache (http://www.grantjenks.com/docs/diskcache/)
 2. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
 3. Clone this repository
-4. Edit 'lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
+4. Edit 'scripts/lib/exports/collada2gltf.py', change 'COLLADA2GLTF_BIN' to point to the path where 'COLLADA2GLTF-bin' resides
 
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 
