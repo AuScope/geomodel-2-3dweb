@@ -56,13 +56,13 @@ Use the '-g' flag to generate COLLADA files
 
 ### Building a borehole database
 
-[make_boreholes.py](scripts/lib/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](scripts/lib/README.md) for more information.
+[make_boreholes.py](scripts/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](scripts/README.md) for more information.
 
 ### Code Documentation
 
 In the 'docs' directory, documentation can be generated for the Python scripts using [Sphinx](http://www.sphinx-doc.org/en/master/index.html). Please see local [README](docs/README) file for details.
 
-### TravisCI Status
+### TravisCI Test Status
 
-[![Build Status](https://travis-ci.com/AuScope/geomodel-2-3dweb.svg?branch=master)](https://travis-ci.com/AuScope/geomodel-2-3dweb)
+[![Test Status](https://travis-ci.com/AuScope/geomodel-2-3dweb.svg?branch=master)](https://travis-ci.com/AuScope/geomodel-2-3dweb)
 
