@@ -29,10 +29,10 @@ from owslib.wfs import WebFeatureService
 from owslib.fes import PropertyIsLike, etree
 from owslib.util import ServiceException
 
-from exports.bh_utils import make_borehole_filename, make_borehole_label
-from exports.assimp_kit import AssimpKit
-from exports.geometry_gen import colour_borehole_gen
-from db.db_tables import QueryDB
+from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
+from lib.exports.assimp_kit import AssimpKit
+from lib.exports.geometry_gen import colour_borehole_gen
+from lib.db.db_tables import QueryDB
 
 
 DEBUG_LVL = logging.ERROR
