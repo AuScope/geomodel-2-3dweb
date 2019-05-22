@@ -1,7 +1,7 @@
 ## JSON Conversion Parameter File
 
 The conversion process uses a parameter file to convert the GOCAD files and
-create the model input file that enables the geomodelportal website (https://github.com/AuScope/geomodelportal) to display the converted files.
+create the model input file that enables the geomodelportal website (https://github.com/AuScope/geomodelportal) to display the converted files. These are named "XXXXXXXXConvParam.json", where XXXXX is the name of the model.
 
 There are four sections. The only compulsory section is "ModelProperties".
 
