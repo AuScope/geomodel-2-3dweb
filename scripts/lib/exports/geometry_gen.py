@@ -57,9 +57,16 @@ def tri_gen(trgl_arr, vrtx_arr, mesh_name):
     :param trgl_arr triangle array, an array of TRGL objects
     :param vrtx_arr: vertex array, an array of VRTX objects
     '''
-    sorted_vrtx_arr = sorted(vrtx_arr, key=lambda k: k.x)
-    sorted_trgl_arr = sorted(trgl_arr, key=lambda k: k.x)
-    yield sorted_trgl_arr, sorted_vrtx_arr, mesh_name
+    sorted_vrtx_list = sorted(vrtx_arr, key=lambda k: k.n)
+    sorted_trgl_list = sorted(trgl_arr, key=lambda k: k.n)
+    trgl_list = []
+    vrtx_list = []
+    for vrtx_obj in sorted_vrtx_list:
+        vrtx_list += vrtx_obj.xyz
+    for trgl_obj in sorted_trgl_list:
+        trgl_list += trgl_obj.abc
+
+    yield vrtx_list, trgl_list, bytes(mesh_name, 'ascii')
 
 
 def line_gen(seg_arr, vrtx_arr, line_width):

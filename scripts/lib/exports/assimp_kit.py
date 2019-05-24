@@ -77,9 +77,11 @@ class AssimpKit:
             self.scn.mMeshes = mesh_arr_pp
             self.scn.mNumMeshes = 1
 
+
             # Put the mesh name in the mesh's parents, because GLTFLoader
             # copies this into the mesh name
-            self.make_nodes(b'root_node', meta_obj.name+b'_0', 1)
+            self.make_nodes(b'root_node', bytes(meta_obj.name, 'ascii') + b'_0', 1)
+
 
             # Set up materials
             mat_p_arr = (POINTER(structs.Material) * 1)()
@@ -87,12 +89,13 @@ class AssimpKit:
             self.scn.mMaterials = mat_arr_pp
             self.scn.mNumMaterials = 1
 
-            mesh_gen = tri_gen(geom_obj.trgl_arr, geom_obj.vtrx_arr, meta_obj.name)
+            mesh_gen = tri_gen(geom_obj.trgl_arr, geom_obj.vrtx_arr, meta_obj.name)
+
             for vert_list, indices, mesh_name in mesh_gen:
                 mesh_obj = self.make_a_mesh(mesh_name, indices, 0)
                 mesh_p_arr[0] = ctypes.pointer(mesh_obj)
                 self.add_vertices_to_mesh(mesh_obj, vert_list)
-                mat_obj = self.make_material(style_obj.rgba_tup)
+                mat_obj = self.make_material(style_obj.get_rgba_tup())
                 mat_p_arr[0] = ctypes.pointer(mat_obj)
         else:
             self.logger.warning('AssimpKit cannot convert point or line geometries')
