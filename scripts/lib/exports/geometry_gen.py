@@ -51,6 +51,16 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
 
         yield vert_list, indices, colour_idx, depth, colour_info, mesh_name
 
+def tri_gen(trgl_arr, vrtx_arr, mesh_name):
+    ''' A generator which is used to make a triangular mesh
+
+    :param trgl_arr triangle array, an array of TRGL objects
+    :param vrtx_arr: vertex array, an array of VRTX objects
+    '''
+    sorted_vrtx_arr = sorted(vrtx_arr, key=lambda k: k.x)
+    sorted_trgl_arr = sorted(trgl_arr, key=lambda k: k.x)
+    yield sorted_trgl_arr, sorted_vrtx_arr, mesh_name
+
 
 def line_gen(seg_arr, vrtx_arr, line_width):
     ''' A generator which is used to make lines

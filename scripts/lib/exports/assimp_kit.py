@@ -1,19 +1,28 @@
 """
 Contains the AssimpKit class
 """
+
 import sys
 import logging
 import ctypes
 from ctypes import POINTER
 from pyassimp import structs, export, export_blob
 
-from lib.exports.geometry_gen import colour_borehole_gen
+from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
 
 # import lib.exports.print_assimp as pa
 
 
 class AssimpKit:
     ''' Class used to export geometries to assimp lib
+    '''
+
+    FILE_EXT = '.gltf'
+    ''' Extension of file
+    '''
+
+    EXPORT_TYPE = 'gltf2'
+    ''' Export type for assimp API
     '''
 
     def __init__(self, debug_level):
@@ -40,6 +49,79 @@ class AssimpKit:
         AssimpKit.logger.setLevel(debug_level)
         self.logger = AssimpKit.logger
 
+        self.scn = None
+        ''' Assimp scene object
+        '''
+
+
+    def start_scene(self):
+        ''' Initiate scene creation, only one scene can be created at a time
+        '''
+        self.scn = structs.Scene()
+        self.scn.mMetadata = None
+        self.scn.mPrivate = 0
+
+
+    def add_geom(self, geom_obj, style_obj, meta_obj):
+        ''' Add a geometry ot the scene. It only does triangular meshes for the moment.
+        Will be expanded to include other types.
+        :param geom_obj: ModelGeometries object
+        :param style_obj: STYLE object
+        :param meta_obj: METADATA object
+        '''
+        if geom_obj.is_trgl():
+
+            # Set up a mesh
+            mesh_p_arr = (POINTER(structs.Mesh) * 1)()
+            mesh_arr_pp = ctypes.cast(mesh_p_arr, POINTER(POINTER(structs.Mesh)))
+            self.scn.mMeshes = mesh_arr_pp
+            self.scn.mNumMeshes = 1
+
+            # Put the mesh name in the mesh's parents, because GLTFLoader
+            # copies this into the mesh name
+            self.make_nodes(b'root_node', meta_obj.name+b'_0', 1)
+
+            # Set up materials
+            mat_p_arr = (POINTER(structs.Material) * 1)()
+            mat_arr_pp = ctypes.cast(mat_p_arr, POINTER(POINTER(structs.Material)))
+            self.scn.mMaterials = mat_arr_pp
+            self.scn.mNumMaterials = 1
+
+            mesh_gen = tri_gen(geom_obj.trgl_arr, geom_obj.vtrx_arr, meta_obj.name)
+            for vert_list, indices, mesh_name in mesh_gen:
+                mesh_obj = self.make_a_mesh(mesh_name, indices, 0)
+                mesh_p_arr[0] = ctypes.pointer(mesh_obj)
+                self.add_vertices_to_mesh(mesh_obj, vert_list)
+                mat_obj = self.make_material(style_obj.rgba_tup)
+                mat_p_arr[0] = ctypes.pointer(mat_obj)
+        else:
+            self.logger.warning('AssimpKit cannot convert point or line geometries')
+
+
+    def end_scene(self, out_filename):
+        ''' Called after geometries have all been added to scene and a file or blob
+        should be created
+        :param out_filename: filename and path of output file, without file extension
+                             if an empty string, then a blob is returned and a file is not created
+        :returns: True if file was written out, else returns the GLTF as an assimp blob object
+        '''
+
+        #pa.print_scene(self.scn)
+        #sys.stdout.flush()
+
+        # Create a file
+        if out_filename != '':
+            self.logger.info("Writing GLTF: %s", out_filename + self.FILE_EXT)
+            export(self.scn, out_filename + self.FILE_EXT, self.EXPORT_TYPE)
+            self.logger.info(" DONE.")
+            sys.stdout.flush()
+            return True
+
+        # Return a blob
+        exp_blob = export_blob(self.scn, self.EXPORT_TYPE, processing=None)
+        #pa.print_blob(exp_blob)
+        return exp_blob
+
 
     def write_borehole(self, base_vrtx, borehole_name, colour_info_dict, height_reso,
                        out_filename=''):
@@ -59,22 +141,15 @@ class AssimpKit:
                           repr(base_vrtx), repr(out_filename), repr(borehole_name),
                           repr(colour_info_dict))
 
-        # Extension of file
-        file_ext = '.gltf'
-        # Export type for assimp API
-        export_type = 'gltf2'
-
-        scn = structs.Scene()
-        scn.mMetadata = None
-        scn.mPrivate = 0
+        self.start_scene()
 
         bh_size = len(colour_info_dict)
 
         # Set up meshes
         mesh_p_arr = (POINTER(structs.Mesh) * bh_size)()
         mesh_arr_pp = ctypes.cast(mesh_p_arr, POINTER(POINTER(structs.Mesh)))
-        scn.mMeshes = mesh_arr_pp
-        scn.mNumMeshes = bh_size
+        self.scn.mMeshes = mesh_arr_pp
+        self.scn.mNumMeshes = bh_size
         gen = colour_borehole_gen(base_vrtx, borehole_name, colour_info_dict, height_reso)
         # Test to see if there is only one mesh
         # pylint: disable=W0612
@@ -87,13 +162,13 @@ class AssimpKit:
 
         # Put the mesh name in the mesh's parents, because GLTFLoader
         # copies this into the mesh name
-        self.make_nodes(scn, b'root_node', mesh_name+b'_0', bh_size)
+        self.make_nodes(b'root_node', mesh_name+b'_0', bh_size)
 
         # Set up materials
         mat_p_arr = (POINTER(structs.Material) * bh_size)()
         mat_arr_pp = ctypes.cast(mat_p_arr, POINTER(POINTER(structs.Material)))
-        scn.mMaterials = mat_arr_pp
-        scn.mNumMaterials = bh_size
+        self.scn.mMaterials = mat_arr_pp
+        self.scn.mNumMaterials = bh_size
 
         cb_gen = colour_borehole_gen(base_vrtx, borehole_name, colour_info_dict, height_reso)
         for vert_list, indices, colour_idx, depth, colour_info, mesh_name in cb_gen:
@@ -107,21 +182,7 @@ class AssimpKit:
             mat_obj = self.make_material(colour_info['colour'])
             mat_p_arr[colour_idx] = ctypes.pointer(mat_obj)
 
-        #pa.print_scene(sc)
-        #sys.stdout.flush()
-
-        # Create a file
-        if out_filename != '':
-            self.logger.info("Writing GLTF: %s", out_filename+file_ext)
-            export(scn, out_filename+file_ext, export_type)
-            self.logger.info(" DONE.")
-            sys.stdout.flush()
-            return True
-
-        # Return a blob
-        exp_blob = export_blob(scn, export_type, processing=None)
-        #pa.print_blob(exp_blob)
-        return exp_blob
+        return self.end_scene(out_filename)
 
 
     def make_empty_node(self, node_name):
@@ -145,10 +206,9 @@ class AssimpKit:
         return node
 
 
-    def make_nodes(self, scene, root_node_name, child_node_name, num_meshes):
+    def make_nodes(self, root_node_name, child_node_name, num_meshes):
         ''' Make the scene's root node and a child node
 
-        :param s: pyassimp 'Scene' object
         :param root_node_name: bytes object, name of root node
         :param child_node_name: bytes object, name of child of root node
         '''
@@ -170,7 +230,7 @@ class AssimpKit:
         ch_n_p = ctypes.pointer(child_n)
         ch_n_pp = ctypes.pointer(ch_n_p)
         parent_n.mChildren = ch_n_pp
-        scene.mRootNode = ctypes.pointer(parent_n)
+        self.scn.mRootNode = ctypes.pointer(parent_n)
 
 
     def make_a_mesh(self, mesh_name, index_list, material_index):

@@ -27,11 +27,17 @@ from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from diskcache import Cache
 
 from make_boreholes import get_blob_boreholes, get_boreholes_list, get_json_input_param
+from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file
 from lib.db.db_tables import QueryDB
+from lib.exports.assimp_kit import AssimpKit
 
 DEBUG_LVL = logging.ERROR
 ''' Initialise debug level to minimal debugging
+'''
+
+NONDEF_COORDS = False
+''' Will tolerate non default coordinates
 '''
 
 # Set up debugging
@@ -634,6 +640,34 @@ def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, 
     return [response_bytes]
 
 
+def convert(gocad_list):
+    '''
+    ' Call the conversion code to convert a GOCAD string to GLTF
+    ' :param gocad_str GOCAD file
+    '''
+    base_xyz = (0.0, 0.0, 0.0)
+    gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                              nondefault_coords=NONDEF_COORDS)
+    src_dir = 'drag_and_drop'
+    filename_str = 'otway_test.ts'
+    file_lines = gocad_list
+    # First convert GOCAD to GSM
+    is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+    if is_ok:
+        # Then, output GSM as GLTF ...
+        for gsm_obj in gsm_list:
+            geom_obj, style_obj, metadata_obj = gsm_obj
+            assimp_obj = AssimpKit(DEBUG_LVL)
+            assimp_obj.start_scene()
+            assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
+            blob_obj = assimp_obj.end_scene("")
+        gltf_str = repr(blob_obj)
+    else:
+        gltf_str = "ERROR: "+repr(gsm_list)
+
+    return gltf_str
+
+
 '''
 ' INITIALISATION - Executed upon startup only.
 ' Loads all the model parameters and WFS services from cache or creates them
@@ -660,12 +694,35 @@ def application(environ, start_response):
     sys.path.append(os.path.join(doc_root, 'lib'))
     path_bits = environ['PATH_INFO'].split('/')
     LOGGER.debug('path_bits= %s', repr(path_bits))
-    # Expecting a path '/api/<model_name>?service=<service_name>&param1=val1'
-    # or '/<model_name>?service=<service_name>&param1=val1'
-    if len(path_bits) == 3 and path_bits[:2] == ['', 'api'] or \
-       len(path_bits) == 2 and path_bits[0] == '':
-        model_name = path_bits[-1]
-        LOGGER.debug('model_name= %s', model_name)
+    # Exit if path is not correct
+    if len(path_bits) < 2 or path_bits[0] != '':
+        return make_str_response(start_response, ' ')
+
+    # Remove '' from path
+    path_bits.pop(0)
+
+    # If there is 'api' remove it, so to deal with both '/api/<model_name>?service=blah'
+    # and '/<model_name?service=blah'
+    if path_bits[0] == 'api':
+        path_bits.pop(0)
+
+    # Model names are always alphabetic
+    if not path_bits or not path_bits[0].isalpha():
+        return make_str_response(start_response, ' ')
+    model_name = path_bits[0]
+    LOGGER.error('model_name= %s', model_name)
+
+    # Expecting a path '/<model_name>/convert'
+    if len(path_bits) == 2 and path_bits[1] == "convert":
+        resp_lines = environ['wsgi.input'].readlines()
+        resp_list = []
+        for resp_str in resp_lines:
+            resp_list.append(resp_str.decode())
+        gltf_str = convert(resp_list)
+        return make_str_response(start_response, repr(gltf_str))
+
+    # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
+    if len(path_bits) == 1:
         url_params = urllib.parse.parse_qs(environ['QUERY_STRING'])
         # Convert all the URL parameter names to lower case with merging
         url_kvp = {}
@@ -753,12 +810,8 @@ def application(environ, start_response):
 
 
     # This sends back the second part of the GLTF object - the .bin file
-    # Format '/api/<model_name>/$blobfile.bin?id=12345'
-    # or '/<model_name>/$blobfile.bin?id=12345'
-    if ((len(path_bits) == 4 and path_bits[:2] == ['', 'api']) or \
-       (len(path_bits) == 3 and path_bits[0] == '')) and path_bits[-1] == GLTF_REQ_NAME:
-        model_name = path_bits[-2]
-        LOGGER.debug("2: model_name = %s", model_name)
+    # Format '/<model_name>/$blobfile.bin?id=12345'
+    if len(path_bits) == 2 and path_bits[1] == GLTF_REQ_NAME:
 
         # Get the GLTF binary file associated with each GLTF file
         res_id_arr = urllib.parse.parse_qs(environ['QUERY_STRING']).get('id', [])
