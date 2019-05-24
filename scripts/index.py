@@ -78,7 +78,7 @@ WFS_TIMEOUT = 6000
 # Name of our layer
 LAYER_NAME = 'boreholes'
 
-# NAme of the binary file holding GLTF data
+# Name of the binary file holding GLTF data
 GLTF_REQ_NAME = '$blobfile.bin'
 
 # Stores the models' conversion parameters, key: model name
@@ -91,11 +91,12 @@ G_WFS_DICT = {}
 
 def create_borehole_dict_list(model_name, param_dict, wfs_dict):
     '''
-    ' Call upon network services to create dictionary and a list of boreholes for a model
-    ' @param model_name name of model, string
-    ' @param param_dict parameter dictionary
-    ' @wfs_dict dictionary of WFS services
-    ' @returns borehole_dict, response_list
+    Call upon network services to create dictionary and a list of boreholes for a model
+
+    :param model_name: name of model, string
+    :param param_dict: parameter dictionary
+    :param wfs_dict: dictionary of WFS services
+    :returns: borehole_dict, response_list
     '''
     # Concatenate response
     response_list = []
@@ -115,9 +116,12 @@ def create_borehole_dict_list(model_name, param_dict, wfs_dict):
 
 def get_cached_dict_list(model_name, param_dict, wfs_dict):
     '''
-    ' Fetches borehole dictionary and response list from cache or creates them if necessary
-    ' @param model_name name of model, string
-    ' @returns borehole_dict, response_list
+    Fetches borehole dictionary and response list from cache or creates them if necessary
+
+    :param model_name: name of model, string
+    :param param_dict: parameter dictionary
+    :param wfs_dict: dictionary of WFS services
+    :returns: borehole_dict, response_list
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
@@ -136,19 +140,19 @@ def get_cached_dict_list(model_name, param_dict, wfs_dict):
 
 
 
-def cache_blob(model_name, res_id, blob, blob_sz):
+def cache_blob(model_name, blob_id, blob, blob_sz):
     '''
-    ' Cache a GLTF blob and its size
-    ' @param model_name name of model, string
-    ' @param resource id
-    ' @param blob, binary string
-    ' @param size of blob
-    ' @returns True if blob was added to cache, false if it wasn't added
-    '           (usually because it is already in there)
+    Cache a GLTF blob and its size
+    :param model_name: name of model, string
+    :param blob_id: blob id string, must be unique within each model
+    :param blob: binary string
+    :param size of blob
+    :returns: True if blob was added to cache, false if it wasn't added
+               (usually because it is already in there)
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model_name + '|' + res_id
+            blob_key = 'blob|' + model_name + '|' + blob_id
             return cache_obj.add(blob_key, (blob, blob_sz))
 
     except OSError as os_exc:
@@ -157,16 +161,17 @@ def cache_blob(model_name, res_id, blob, blob_sz):
 
 
 
-def get_cached_blob(model_name, res_id):
+def get_cached_blob(model_name, blob_id):
     '''
-    ' Get blob from cache
-    ' @param model_name name of model, string
-    ' @param resource id
-    ' @returns a GLTF blob (binary string) and its size
+    Get blob from cache
+
+    :param model_name: name of model, string
+    :param blob_id: blob id string, must be unique within each model
+    :returns: a GLTF blob (binary string) and its size
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model_name + '|' + res_id
+            blob_key = 'blob|' + model_name + '|' + blob_id
             blob, blob_sz = cache_obj.get(blob_key, (None, 0))
             return blob, blob_sz
 
@@ -178,8 +183,8 @@ def get_cached_blob(model_name, res_id):
 
 class MyWebFeatureService(WebFeatureService_1_1_0):
     '''
-    ' I have to override 'WebFeatureService' because a bug in owslib makes 'pickle' unusable
-    ' I have created a pull request https://github.com/geopython/OWSLib/pull/548 to fix bug
+    I have to override 'WebFeatureService' because a bug in owslib makes 'pickle' unusable
+    I have created a pull request https://github.com/geopython/OWSLib/pull/548 to fix bug
     '''
     # pylint: disable=W0613,R0913
     def __new__(cls, url, version, xml, parse_remote_metadata=False, timeout=30, username=None,
@@ -193,8 +198,9 @@ class MyWebFeatureService(WebFeatureService_1_1_0):
 
 def get_cached_parameters():
     '''
-    ' Creates dictionaries to store model parameters and WFS services
-    ' @returns parameter dict, WFS dict; both keyed on model name string
+    Creates dictionaries to store model parameters and WFS services
+
+    :returns: parameter dict, WFS dict; both keyed on model name string
     '''
     if not os.path.exists(INPUT_DIR):
         LOGGER.error("input dir %s does not exist", INPUT_DIR)
@@ -231,10 +237,11 @@ def get_cached_parameters():
 
 def make_str_response(start_response, message):
     '''
-    ' Create and initialise an HTTP response with a string message
-    ' @param start_response callback function for initialising HTTP response
-    ' @param message  string message
-    ' @returns byte array HTTP response
+    Create and initialise an HTTP response with a string message
+
+    :param start_response :callback function for initialising HTTP response
+    :param message:  string message
+    :returns: byte array HTTP response
     '''
     msg_bytes = bytes(message, 'utf-8')
     response_headers = [('Content-type', 'text/plain'), ('Content-Length', str(len(msg_bytes))),
@@ -246,15 +253,16 @@ def make_str_response(start_response, message):
 
 def make_json_exception_response(start_response, version, code, message, locator='noLocator'):
     '''
-    ' Write out a json error response
-    ' @param start_response callback function for initialising HTTP response
-    ' @param version version string
-    ' @param code error code string, can be 'OperationNotSupported', 'MissingParameterValue',
-    '                                    'OperationProcessingFailed'
-    ' @param message text message explaining error in more detail
-    ' @param locator  optional string indicating what part of input caused the problem.
-    '                 This must be checked for XSS or SQL injection exploits
-    ' @returns byte array HTTP response
+    Write out a json error response
+
+    :param start_response: callback function for initialising HTTP response
+    :param version: version string
+    :param code: error code string, can be 'OperationNotSupported', 'MissingParameterValue',
+                                           'OperationProcessingFailed'
+    :param message: text message explaining error in more detail
+    :param locator:  optional string indicating what part of input caused the problem.
+                     This must be checked for XSS or SQL injection exploits
+    :returns: byte array HTTP response
     '''
     msg_json = {"version": version, "exceptions": [{"code": code, "locator": locator,
                                                     "text": message}]}
@@ -269,11 +277,12 @@ def make_json_exception_response(start_response, version, code, message, locator
 
 def get_val(key, arr_dict, none_val=''):
     '''
-    ' Try to find a value in a dict using a key
-    ' @param key the key to look for
-    ' @param arr_dict dictionary to search in, must have format { 'key' : [val] ... }
-    ' @param none_val optional value used when key is not found, default is ''
-    ' @returns string value from dict or none_val (if not found)
+    Try to find a value in a dict using a key
+
+    :param key: the key to look for
+    :param arr_dict: dictionary to search in, must have format { 'key' : [val] ... }
+    :param none_val: optional value used when key is not found, default is ''
+    :returns: string value from dict or none_val (if not found)
     '''
     return arr_dict.get(key, [none_val])[0]
 
@@ -281,9 +290,10 @@ def get_val(key, arr_dict, none_val=''):
 
 def make_getcap_response(start_response, model_name, param_dict):
     '''
-    ' Create and initialise the 3DPS 'GetCapabilities' response
-    ' @param start_response callback function for initialising HTTP response
-    ' @returns byte array HTTP response
+    Create and initialise the 3DPS 'GetCapabilities' response
+
+    :param start_response: callback function for initialising HTTP response
+    :returns: byte array HTTP response
     '''
     response = """<?xml version="1.0" encoding="UTF-8"?>
 <Capabilities xmlns="http://www.opengis.net/3dps/1.0/core"
@@ -393,10 +403,11 @@ def make_getcap_response(start_response, model_name, param_dict):
 
 def make_getfeatinfobyid_response(start_response, url_kvp, model_name):
     '''
-    ' Create and initialise the 3DPS 'GetFeatureInfoByObjectId' response
-    ' @param start_response callback function for initialising HTTP response
-    ' @param url_kvp key-value pair dictionary of URL parameters, format: 'key':['val1', 'val2' .. ]
-    ' @returns byte array HTTP response in JSON format
+    Create and initialise the 3DPS 'GetFeatureInfoByObjectId' response
+
+    :param start_response: callback function for initialising HTTP response
+    :param url_kvp: key-value pair dictionary of URL parameters, format: 'key':['val1', 'val2' .. ]
+    :returns: byte array HTTP response in JSON format
     '''
     LOGGER.debug('make_getfeatinfobyid_response() url_kvp = %s', repr(url_kvp))
     # Parse id from query string
@@ -474,10 +485,14 @@ def make_getfeatinfobyid_response(start_response, url_kvp, model_name):
 
 def make_getresourcebyid_response(start_response, url_kvp, model_name, param_dict, wfs_dict):
     '''
-    ' Create and initialise the 3DPS 'GetResourceById' response
-    ' @param start_response callback function for initialising HTTP response
-    ' @param url_kvp key-value pair dictionary of URL parameters, format: 'key':['val1', 'val2' ..]
-    ' @returns byte array HTTP response
+    Create and initialise the 3DPS 'GetResourceById' response
+
+    :param start_response: callback function for initialising HTTP response
+    :param url_kvp: key-value pair dictionary of URL parameters, format: 'key':['val1', 'val2' ..]
+    :param model_name: name of model (string)
+    :param param_dict: parameter dictionary
+    :param wfs_dict: dictionary of WFS services
+    :returns: byte array HTTP response
     '''
     # This sends back the first part of the GLTF object - the GLTF file for the
     # resource id specified
@@ -515,68 +530,8 @@ def make_getresourcebyid_response(start_response, url_kvp, model_name, param_dic
         blob = get_blob_boreholes(borehole_dict, param_dict[model_name])
         # Some boreholes do not have the requested metric
         if blob is not None:
-            LOGGER.debug('got blob %s', str(blob))
-            gltf_bytes = b''
-            # There are 2 files in the blob, a GLTF file and a .bin file
-            for idx in range(2):
-                LOGGER.debug('blob.contents.name.data = %s', repr(blob.contents.name.data))
-                LOGGER.debug('blob.contents.size = %s', repr(blob.contents.size))
-                LOGGER.debug('blob.contents.data = %s', repr(blob.contents.data))
-                # Look for the GLTF file
-                if not blob.contents.name.data:
-                    # Convert to byte array
-                    bcd = ctypes.cast(blob.contents.data, ctypes.POINTER(blob.contents.size \
-                                                                         * ctypes.c_char))
-                    bcd_bytes = b''
-                    for bitt in bcd.contents:
-                        bcd_bytes += bitt
-                    bcd_str = bcd_bytes.decode('utf-8', 'ignore')
-                    LOGGER.debug('bcd_str = %s', bcd_str[:80])
-                    try:
-                        # Convert to json
-                        gltf_json = json.loads(bcd_str)
-                        LOGGER.debug('gltf_json = %s', str(gltf_json)[:80])
-                    except JSONDecodeError as jde_exc:
-                        LOGGER.debug('JSONDecodeError loads(): %s', str(jde_exc))
-                    else:
-                        try:
-                            # This modifies the URL of the .bin file associated with the GLTF file
-                            # Inserting model name and resource id as a parameter so we can tell
-                            # the .bin files apart
-                            gltf_json["buffers"][0]["uri"] = model_name + '/' + \
-                                                             gltf_json["buffers"][0]["uri"] + \
-                                                             "?id=" + res_id
-                            # Convert back to bytes and send
-                            gltf_str = json.dumps(gltf_json)
-                            gltf_bytes = bytes(gltf_str, 'utf-8')
-                        except JSONDecodeError as jde_exc:
-                            LOGGER.debug('JSONDecodeError dumps(): %s', str(jde_exc))
-
-                # Binary file (.bin)
-                elif blob.contents.name.data == b'bin':
-                    response_headers = [('Content-type', 'application/octet-stream'),
-                                        ('Content-Length', str(blob.contents.size)),
-                                        ('Connection', 'keep-alive')]
-                    start_response('200 OK', response_headers)
-                    # Convert to byte array
-                    bcd = ctypes.cast(blob.contents.data,
-                                      ctypes.POINTER(blob.contents.size * ctypes.c_char))
-                    bcd_bytes = b''
-                    for bitt in bcd.contents:
-                        bcd_bytes += bitt
-                    cache_blob(model_name, res_id, bcd_bytes, blob.contents.size)
-
-                blob = blob.contents.next
-            if gltf_bytes == b'':
-                LOGGER.debug('GLTF not found in blob')
-            else:
-                response_headers = [('Content-type', 'model/gltf+json;charset=UTF-8'),
-                                    ('Content-Length', str(len(gltf_bytes))),
-                                    ('Connection', 'keep-alive')]
-                start_response('200 OK', response_headers)
-                return [gltf_bytes]
-        else:
-            LOGGER.debug('Empty GLTF blob')
+            return send_blob(start_response, model_name, res_id, blob)
+        LOGGER.debug('Empty GLTF blob')
     else:
         LOGGER.debug('Resource not found in borehole dict')
 
@@ -584,14 +539,85 @@ def make_getresourcebyid_response(start_response, url_kvp, model_name, param_dic
 
 
 
+def send_blob(start_response, model_name, blob_id, blob):
+    ''' Returns a blob in response
+
+    :param start_response: callback function for initialising HTTP response
+    :param model_name: name of model (string)
+    '''
+    LOGGER.debug('got blob %s', str(blob))
+    gltf_bytes = b''
+    # There are 2 files in the blob, a GLTF file and a .bin file
+    for idx in range(2):
+        LOGGER.debug('blob.contents.name.data = %s', repr(blob.contents.name.data))
+        LOGGER.debug('blob.contents.size = %s', repr(blob.contents.size))
+        LOGGER.debug('blob.contents.data = %s', repr(blob.contents.data))
+        # Look for the GLTF file
+        if not blob.contents.name.data:
+            # Convert to byte array
+            bcd = ctypes.cast(blob.contents.data, ctypes.POINTER(blob.contents.size \
+                                                                 * ctypes.c_char))
+            bcd_bytes = b''
+            for bitt in bcd.contents:
+                bcd_bytes += bitt
+            bcd_str = bcd_bytes.decode('utf-8', 'ignore')
+            LOGGER.debug('bcd_str = %s', bcd_str[:80])
+            try:
+                # Convert to json
+                gltf_json = json.loads(bcd_str)
+                LOGGER.debug('gltf_json = %s', str(gltf_json)[:80])
+            except JSONDecodeError as jde_exc:
+                LOGGER.debug('JSONDecodeError loads(): %s', str(jde_exc))
+            else:
+                try:
+                    # This modifies the URL of the .bin file associated with the GLTF file
+                    # Inserting model name and resource id as a parameter so we can tell
+                    # the .bin files apart
+                    gltf_json["buffers"][0]["uri"] = model_name + '/' + \
+                                                     gltf_json["buffers"][0]["uri"] + \
+                                                     "?id=" + blob_id
+                    # Convert back to bytes and send
+                    gltf_str = json.dumps(gltf_json)
+                    gltf_bytes = bytes(gltf_str, 'utf-8')
+                except JSONDecodeError as jde_exc:
+                    LOGGER.debug('JSONDecodeError dumps(): %s', str(jde_exc))
+
+        # Binary file (.bin)
+        elif blob.contents.name.data == b'bin':
+            response_headers = [('Content-type', 'application/octet-stream'),
+                                ('Content-Length', str(blob.contents.size)),
+                                ('Connection', 'keep-alive')]
+            start_response('200 OK', response_headers)
+            # Convert to byte array
+            bcd = ctypes.cast(blob.contents.data,
+                              ctypes.POINTER(blob.contents.size * ctypes.c_char))
+            bcd_bytes = b''
+            for bitt in bcd.contents:
+                bcd_bytes += bitt
+            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size)
+
+        blob = blob.contents.next
+    if gltf_bytes == b'':
+        LOGGER.debug('GLTF not found in blob')
+    else:
+        response_headers = [('Content-type', 'model/gltf+json;charset=UTF-8'),
+                            ('Content-Length', str(len(gltf_bytes))),
+                            ('Connection', 'keep-alive')]
+        start_response('200 OK', response_headers)
+        return [gltf_bytes]
+
+    return make_str_response(start_response, '{}')
+
+
 def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, wfs_dict):
     '''
-    ' Returns a response to a WFS getPropertyValue request
-    ' @param start_response callback function for initialising HTTP response
-    ' @param url_kvp key-value pair dictionary of URL parameters, format: 'key': ['val1','val2' ..]
-    ' @returns byte array HTTP response
-    ' https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue&
-    '     outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
+    Returns a response to a WFS getPropertyValue request, example:
+      https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue&
+        outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
+
+    :param start_response: callback function for initialising HTTP response
+    :param url_kvp key-value pair dictionary of URL parameters, format: 'key': ['val1','val2' ..]
+    :returns: byte array HTTP response
     '''
 
     # Parse outputFormat from query string
@@ -640,10 +666,11 @@ def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, 
     return [response_bytes]
 
 
-def convert(gocad_list):
+def convert(start_response, model_name, gocad_list):
     '''
-    ' Call the conversion code to convert a GOCAD string to GLTF
-    ' :param gocad_str GOCAD file
+    Call the conversion code to convert a GOCAD string to GLTF
+
+    :param gocad_list: GOCAD file lines as a list of strings
     '''
     base_xyz = (0.0, 0.0, 0.0)
     gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
@@ -653,15 +680,21 @@ def convert(gocad_list):
     file_lines = gocad_list
     # First convert GOCAD to GSM
     is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+    # LOGGER.error("gsm_list = ", repr(gsm_list))
     if is_ok:
         # Then, output GSM as GLTF ...
         for gsm_obj in gsm_list:
+            #LOGGER.error("gsm_obj = ", repr(gsm_obj))
             geom_obj, style_obj, metadata_obj = gsm_obj
             assimp_obj = AssimpKit(DEBUG_LVL)
             assimp_obj.start_scene()
             assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
             blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
+        send_blob(start_response, model_name, 'drag_and_drop', blob_obj)
+        #for gsm_obj in gsm_list:
+        #    geom_obj, style_obj, metadata_obj = gsm_obj
+        #    gltf_str = metadata_obj
     else:
         gltf_str = "ERROR: "+repr(gsm_list)
 
@@ -688,7 +721,7 @@ except OSError as os_exc:
 
 def application(environ, start_response):
     '''
-    ' MAIN - This is called whenever an HTTP request arrives
+    MAIN - This is called whenever an HTTP request arrives
     '''
     doc_root = os.path.normcase(environ['DOCUMENT_ROOT'])
     sys.path.append(os.path.join(doc_root, 'lib'))
@@ -718,7 +751,8 @@ def application(environ, start_response):
         resp_list = []
         for resp_str in resp_lines:
             resp_list.append(resp_str.decode())
-        gltf_str = convert(resp_list)
+        LOGGER.error("Calling convert()")
+        gltf_str = convert(start_response, model_name, resp_list)
         return make_str_response(start_response, repr(gltf_str))
 
     # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
