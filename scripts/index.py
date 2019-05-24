@@ -691,7 +691,7 @@ def convert(start_response, model_name, gocad_list):
             assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
             blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
-        send_blob(start_response, model_name, 'drag_and_drop', blob_obj)
+        return send_blob(start_response, model_name, 'drag_and_drop', blob_obj)
         #for gsm_obj in gsm_list:
         #    geom_obj, style_obj, metadata_obj = gsm_obj
         #    gltf_str = metadata_obj
@@ -752,8 +752,7 @@ def application(environ, start_response):
         for resp_str in resp_lines:
             resp_list.append(resp_str.decode())
         LOGGER.error("Calling convert()")
-        gltf_str = convert(start_response, model_name, resp_list)
-        return make_str_response(start_response, repr(gltf_str))
+        return convert(start_response, model_name, resp_list)
 
     # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
     if len(path_bits) == 1:
