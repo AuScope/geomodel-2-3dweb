@@ -64,7 +64,7 @@ def tri_gen(trgl_arr, vrtx_arr, mesh_name):
     for vrtx_obj in sorted_vrtx_list:
         vrtx_list += vrtx_obj.xyz
     for trgl_obj in sorted_trgl_list:
-        trgl_list += trgl_obj.abc
+        trgl_list += [trgl_obj.abc[0] - 1, trgl_obj.abc[1] - 1, trgl_obj.abc[2] - 1]
 
     yield vrtx_list, trgl_list, bytes(mesh_name, 'ascii')
 

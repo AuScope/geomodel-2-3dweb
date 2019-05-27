@@ -153,7 +153,7 @@ def cache_blob(model_name, blob_id, blob, blob_sz):
     try:
         with Cache(CACHE_DIR) as cache_obj:
             blob_key = 'blob|' + model_name + '|' + blob_id
-            return cache_obj.add(blob_key, (blob, blob_sz))
+            return cache_obj.set(blob_key, (blob, blob_sz))
 
     except OSError as os_exc:
         LOGGER.error("Cannot cache blob %s", str(os_exc))
@@ -573,7 +573,8 @@ def send_blob(start_response, model_name, blob_id, blob):
                     # This modifies the URL of the .bin file associated with the GLTF file
                     # Inserting model name and resource id as a parameter so we can tell
                     # the .bin files apart
-                    gltf_json["buffers"][0]["uri"] = model_name + '/' + \
+                    # gltf_json["buffers"][0]["uri"] = model_name + '/' + \
+                    gltf_json["buffers"][0]["uri"] = '/' + \
                                                      gltf_json["buffers"][0]["uri"] + \
                                                      "?id=" + blob_id
                     # Convert back to bytes and send
@@ -584,17 +585,14 @@ def send_blob(start_response, model_name, blob_id, blob):
 
         # Binary file (.bin)
         elif blob.contents.name.data == b'bin':
-            response_headers = [('Content-type', 'application/octet-stream'),
-                                ('Content-Length', str(blob.contents.size)),
-                                ('Connection', 'keep-alive')]
-            start_response('200 OK', response_headers)
             # Convert to byte array
             bcd = ctypes.cast(blob.contents.data,
                               ctypes.POINTER(blob.contents.size * ctypes.c_char))
             bcd_bytes = b''
             for bitt in bcd.contents:
                 bcd_bytes += bitt
-            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size)
+            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size):
+
 
         blob = blob.contents.next
     if gltf_bytes == b'':
@@ -680,11 +678,11 @@ def convert(start_response, model_name, gocad_list):
     file_lines = gocad_list
     # First convert GOCAD to GSM
     is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
-    # LOGGER.error("gsm_list = ", repr(gsm_list))
+    # LOGGER.error("gsm_list = %s", repr(gsm_list))
     if is_ok:
         # Then, output GSM as GLTF ...
         for gsm_obj in gsm_list:
-            #LOGGER.error("gsm_obj = ", repr(gsm_obj))
+            #LOGGER.error("gsm_obj = %s", repr(gsm_obj))
             geom_obj, style_obj, metadata_obj = gsm_obj
             assimp_obj = AssimpKit(DEBUG_LVL)
             assimp_obj.start_scene()
@@ -726,7 +724,7 @@ def application(environ, start_response):
     doc_root = os.path.normcase(environ['DOCUMENT_ROOT'])
     sys.path.append(os.path.join(doc_root, 'lib'))
     path_bits = environ['PATH_INFO'].split('/')
-    LOGGER.debug('path_bits= %s', repr(path_bits))
+    # LOGGER.debug('path_bits= %s', repr(path_bits))
     # Exit if path is not correct
     if len(path_bits) < 2 or path_bits[0] != '':
         return make_str_response(start_response, ' ')
@@ -743,7 +741,8 @@ def application(environ, start_response):
     if not path_bits or not path_bits[0].isalpha():
         return make_str_response(start_response, ' ')
     model_name = path_bits[0]
-    LOGGER.error('model_name= %s', model_name)
+    #LOGGER.error('model_name= %s', model_name)
+    #LOGGER.error('new path_bits= %s', repr(path_bits))
 
     # Expecting a path '/<model_name>/convert'
     if len(path_bits) == 2 and path_bits[1] == "convert":
@@ -751,7 +750,6 @@ def application(environ, start_response):
         resp_list = []
         for resp_str in resp_lines:
             resp_list.append(resp_str.decode())
-        LOGGER.error("Calling convert()")
         return convert(start_response, model_name, resp_list)
 
     # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
@@ -845,6 +843,7 @@ def application(environ, start_response):
     # This sends back the second part of the GLTF object - the .bin file
     # Format '/<model_name>/$blobfile.bin?id=12345'
     if len(path_bits) == 2 and path_bits[1] == GLTF_REQ_NAME:
+
 
         # Get the GLTF binary file associated with each GLTF file
         res_id_arr = urllib.parse.parse_qs(environ['QUERY_STRING']).get('id', [])
