@@ -157,7 +157,7 @@ def cache_blob(model_name, blob_id, blob, blob_sz):
 
     except OSError as os_exc:
         LOGGER.error("Cannot cache blob %s", str(os_exc))
-        return (None, 0)
+        return False
 
 
 
@@ -573,10 +573,9 @@ def send_blob(start_response, model_name, blob_id, blob):
                     # This modifies the URL of the .bin file associated with the GLTF file
                     # Inserting model name and resource id as a parameter so we can tell
                     # the .bin files apart
-                    # gltf_json["buffers"][0]["uri"] = model_name + '/' + \
-                    gltf_json["buffers"][0]["uri"] = '/' + \
-                                                     gltf_json["buffers"][0]["uri"] + \
-                                                     "?id=" + blob_id
+                    gltf_json["buffers"][0]["uri"] = model_name + '/' + \
+                        gltf_json["buffers"][0]["uri"] + "?id=" + blob_id
+
                     # Convert back to bytes and send
                     gltf_str = json.dumps(gltf_json)
                     gltf_bytes = bytes(gltf_str, 'utf-8')
@@ -591,7 +590,7 @@ def send_blob(start_response, model_name, blob_id, blob):
             bcd_bytes = b''
             for bitt in bcd.contents:
                 bcd_bytes += bitt
-            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size):
+            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size)
 
 
         blob = blob.contents.next
@@ -679,23 +678,21 @@ def convert(start_response, model_name, gocad_list):
     # First convert GOCAD to GSM
     is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
     # LOGGER.error("gsm_list = %s", repr(gsm_list))
-    if is_ok:
+    if is_ok and gsm_list:
         # Then, output GSM as GLTF ...
-        for gsm_obj in gsm_list:
-            #LOGGER.error("gsm_obj = %s", repr(gsm_obj))
-            geom_obj, style_obj, metadata_obj = gsm_obj
-            assimp_obj = AssimpKit(DEBUG_LVL)
-            assimp_obj.start_scene()
-            assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
-            blob_obj = assimp_obj.end_scene("")
+        gsm_obj = gsm_list[0]
+        #LOGGER.error("gsm_obj = %s", repr(gsm_obj))
+        geom_obj, style_obj, metadata_obj = gsm_obj
+        assimp_obj = AssimpKit(DEBUG_LVL)
+        assimp_obj.start_scene()
+        assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
+        blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
         return send_blob(start_response, model_name, 'drag_and_drop', blob_obj)
         #for gsm_obj in gsm_list:
         #    geom_obj, style_obj, metadata_obj = gsm_obj
         #    gltf_str = metadata_obj
-    else:
-        gltf_str = "ERROR: "+repr(gsm_list)
-
+    gltf_str = "ERROR: "+repr(gsm_list)
     return gltf_str
 
 
@@ -724,7 +721,7 @@ def application(environ, start_response):
     doc_root = os.path.normcase(environ['DOCUMENT_ROOT'])
     sys.path.append(os.path.join(doc_root, 'lib'))
     path_bits = environ['PATH_INFO'].split('/')
-    # LOGGER.debug('path_bits= %s', repr(path_bits))
+
     # Exit if path is not correct
     if len(path_bits) < 2 or path_bits[0] != '':
         return make_str_response(start_response, ' ')
@@ -741,16 +738,6 @@ def application(environ, start_response):
     if not path_bits or not path_bits[0].isalpha():
         return make_str_response(start_response, ' ')
     model_name = path_bits[0]
-    #LOGGER.error('model_name= %s', model_name)
-    #LOGGER.error('new path_bits= %s', repr(path_bits))
-
-    # Expecting a path '/<model_name>/convert'
-    if len(path_bits) == 2 and path_bits[1] == "convert":
-        resp_lines = environ['wsgi.input'].readlines()
-        resp_list = []
-        for resp_str in resp_lines:
-            resp_list.append(resp_str.decode())
-        return convert(start_response, model_name, resp_list)
 
     # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
     if len(path_bits) == 1:
@@ -831,6 +818,14 @@ def application(environ, start_response):
                                                   G_PARAM_DICT, G_WFS_DICT)
             return make_json_exception_response(start_response, get_val('version', url_kvp),
                                                 'OperationNotSupported', 'Unknown request name')
+
+        # Expecting a path '/<model_name>?service=CONVERT'
+        if service_name.lower() == 'convert':
+            resp_lines = environ['wsgi.input'].readlines()
+            resp_list = []
+            for resp_str in resp_lines:
+                resp_list.append(resp_str.decode())
+            return convert(start_response, model_name, resp_list)
 
         if service_name != '':
             return make_json_exception_response(start_response, get_val('version', url_kvp),
