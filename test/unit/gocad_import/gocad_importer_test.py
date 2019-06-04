@@ -7,7 +7,7 @@ import logging
 import os
 
 # Add in path to local library files
-sys.path.append(os.path.join('..', '..', 'scripts'))
+sys.path.append(os.path.join('..', '..', '..', 'scripts'))
 
 
 from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
