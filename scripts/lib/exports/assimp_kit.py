@@ -5,8 +5,8 @@ Contains the AssimpKit class
 import sys
 import logging
 import ctypes
-from ctypes import POINTER
-from pyassimp import structs, export, export_blob
+from ctypes import POINTER, pointer, c_byte
+from pyassimp import structs, export, export_blob, material
 
 from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
 
@@ -95,7 +95,8 @@ class AssimpKit:
                 mesh_obj = self.make_a_mesh(mesh_name, indices, 0)
                 mesh_p_arr[0] = ctypes.pointer(mesh_obj)
                 self.add_vertices_to_mesh(mesh_obj, vert_list)
-                mat_obj = self.make_material(style_obj.get_rgba_tup())
+                # Make a double-sided material of a certain colour
+                mat_obj = self.make_material(style_obj.get_rgba_tup(), True)
                 mat_p_arr[0] = ctypes.pointer(mat_obj)
         else:
             self.logger.warning('AssimpKit cannot convert point or line geometries')
@@ -289,7 +290,7 @@ class AssimpKit:
         :param r,g,b,a: floating point values of RGBA colours
         '''
         mat_prop = structs.MaterialProperty()
-        mat_prop.mSemantic = 0
+        mat_prop.mSemantic = material.aiTextureType_NONE
         mat_prop.mIndex = 0
         mat_prop.mType = 1
         mat_prop.mDataLength = 16
@@ -300,9 +301,27 @@ class AssimpKit:
         return mat_prop
 
 
-    def make_material(self, diffuse_colour):
+    def make_two_sided(self):
+        ''' Makes a two-sided 'MaterialProperty' object
+        :param two_sided: boolean value of two sided property
+        :returns: A 'MaterialProperty' object with two-sided set to 1
+        '''
+        key = b'$mat.twosided'
+        mat_prop = structs.MaterialProperty()
+        mat_prop.mSemantic = material.aiTextureType_NONE
+        mat_prop.mIndex = 0
+        mat_prop.mType = 5 # 5 = buffer
+        mat_prop.mDataLength = 1 # booleans are 1 byte long
+        ts_p = pointer(c_byte(1))
+        mat_prop.mData = ctypes.cast(ts_p, POINTER(ctypes.c_char))
+        mat_prop.mKey = structs.String(len(key), key)
+        return mat_prop
+
+
+    def make_material(self, diffuse_colour, two_sided=False):
         ''' Makes a material object with a certain diffuse colour
-        :param diffuse_colour: tuple of floating point values (R,G,B,A)
+        :param diffuse_colour: A tuple of floating point values (R,G,B,A)
+        :param two_sided: Boolean, optional, default False, make a double-sided material
         :returns pyassimp 'Material' object
         '''
         mat = structs.Material()
@@ -310,8 +329,18 @@ class AssimpKit:
         mat.mNumAllocated = 1
         col_p = self.make_colour(b'$clr.diffuse', *diffuse_colour)
         col_pp = ctypes.pointer(col_p)
-        col_ppp = ctypes.pointer(col_pp)
-        mat.mProperties = col_ppp
+        # Make a two-sided property
+        if two_sided:
+            mat.mNumProperties += 1
+            mat.mNumAllocated += 1
+            two_s_p = self.make_two_sided()
+            two_s_pp = ctypes.pointer(two_s_p)
+            mat_prop_ppp = (POINTER(structs.MaterialProperty) * 2)()
+            mat_prop_ppp[1] = col_pp
+            mat_prop_ppp[0] = two_s_pp
+        else:
+            mat_prop_ppp = ctypes.pointer(col_pp)
+        mat.mProperties = mat_prop_ppp
         return mat
 
 #  END OF AssimpKit CLASS
