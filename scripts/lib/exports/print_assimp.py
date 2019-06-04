@@ -14,7 +14,7 @@ def print_scene(scene):
                   'mNumLights', 'mLights', 'mNumMaterials', 'mMaterials', 'mNumMeshes',
                   'mMeshes', 'mNumTextures', 'mTextures', 'mRootNode']
     for field in field_list:
-        if getattr(scene, field, False):
+        if getattr(scene, field, False) is not False:
             print(field, ':', getattr(scene, field))
             if field == 'mRootNode':
                 print_node(scene.mRootNode.contents)
@@ -38,7 +38,7 @@ def print_mesh(mesh):
                   'mNormals', 'mNumAnimMeshes', 'mNumBones', 'mNumFaces', 'mNumUVComponents',
                   'mNumVertices', 'mPrimitiveTypes', 'mTangents', 'mTextureCoords', 'mVertices']
     for field in field_list:
-        if getattr(mesh, field, False):
+        if getattr(mesh, field, False) is not False:
             print(field, ':', getattr(mesh, field))
             if field == 'mFaces':
                 for f_idx in range(mesh.mNumFaces):
@@ -117,7 +117,7 @@ def print_node(node):
     field_list = ['mChildren', 'mMeshes', 'mName', 'mNumChildren',
                   'mNumMeshes', 'mParent', 'mTransformation']
     for field in field_list:
-        if getattr(node, field, False):
+        if getattr(node, field, False) is not False:
             print(field, ':', getattr(node, field))
             if field == 'mMeshes':
                 for m_idx in range(node.mNumMeshes):
@@ -142,7 +142,7 @@ def print_materials(mat):
     print('\nMATERIALS START:', repr(mat))
     field_list = ['mNumAllocated', 'mNumProperties', 'mProperties']
     for field in field_list:
-        if getattr(mat, field, False):
+        if getattr(mat, field, False) is not False:
             print(field, ':', getattr(mat, field))
             if field == 'mProperties':
                 for m_idx in range(mat.mNumProperties):
@@ -159,7 +159,7 @@ def print_properties(prop):
     for field in field_list:
         if field == 'mKey':
             print('mKey: ', prop.mKey.data)
-        elif getattr(prop, field, False):
+        elif getattr(prop, field, False) is not False:
             print(field, ':', getattr(prop, field))
     # Float
     if prop.mType == 1:
@@ -169,6 +169,16 @@ def print_properties(prop):
         for idx in range(arr_len):
             print(flt_ptr.contents[idx], ' ', end='')
         print()
+
+    # Double
+    elif prop.mType == 2:
+        arr_len = int(prop.mDataLength/8)
+        dbl_ptr = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_double * arr_len))
+        print("Values: ", end='')
+        for idx in range(arr_len):
+            print(dbl_ptr.contents[idx], ' ', end='')
+        print()
+
     # String
     elif prop.mType == 3:
         # pylint: disable=C0111, R0903
@@ -176,12 +186,27 @@ def print_properties(prop):
             _fields_ = [("len", ctypes.c_int), ("value", ctypes.c_char * prop.mDataLength)]
         str_ptr = ctypes.cast(prop.mData, ctypes.POINTER(StringTyp))
         print("Values", str_ptr.contents.len, str_ptr.contents.value)
+
+    # 32-bit integer
+    elif prop.mType == 4:
+        arr_len = int(prop.mDataLength/4)
+        int_ptr = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_uint * arr_len))
+        print("Values: ", end='')
+        for idx in range(arr_len):
+            print(int_ptr.contents[idx], ' ', end='')
+        print()
+
+    # Binary buffer
     elif prop.mType == 5:
         bstr_ptr = ctypes.cast(prop.mData, ctypes.POINTER(ctypes.c_char * prop.mDataLength))
         print("Values: ", end='')
         for idx in range(prop.mDataLength):
             print(bstr_ptr.contents[idx], ' ', end='')
         print()
+
+    # Unknown
+    else:
+        print("WARNING: Unknown property type")
     print('PROPERTIES END\n')
 
 
