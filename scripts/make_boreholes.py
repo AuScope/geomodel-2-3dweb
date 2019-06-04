@@ -622,5 +622,5 @@ if __name__ == "__main__":
                                    os.path.join(ARGS.dest_dir, ARGS.database), CREATE_DB)
                     CREATE_DB = False
     else:
-        print("No input specified")
+        print("No input file or batch file specified")
         PARSER.print_help()
