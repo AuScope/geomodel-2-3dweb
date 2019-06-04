@@ -9,6 +9,8 @@ from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.schema import ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.exc import DatabaseError
 
+QUERY_DB_FILE = 'query_data.db'
+
 Base = declarative_base()
 
 # pylint: disable=R0903

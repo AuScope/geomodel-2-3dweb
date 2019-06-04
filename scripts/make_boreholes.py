@@ -32,7 +32,7 @@ from owslib.util import ServiceException
 from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
 from lib.exports.assimp_kit import AssimpKit
 from lib.exports.geometry_gen import colour_borehole_gen
-from lib.db.db_tables import QueryDB
+from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 
 
 DEBUG_LVL = logging.ERROR
@@ -88,11 +88,13 @@ GSMLP_IDS = ['identifier', 'name', 'description', 'purpose', 'status', 'drilling
              'metadata_uri', 'genericSymbolizer']
 
 
-# Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
+''' Maximum number of boreholes processed
+'''
 
-# Timeout for querying WFS and NVCL services (seconds)
 TIMEOUT = 6000
+''' Timeout for querying WFS and NVCL services (seconds)
+'''
 
 
 
@@ -579,7 +581,7 @@ if __name__ == "__main__":
                         help='filename of a text file containing paths of many input files,' \
                              ' one input file per line')
     PARSER.add_argument('-d', '--database', help='filename of output database file',
-                        default='query.db')
+                        default=QUERY_DB_FILE)
     PARSER.add_argument('--debug', help='turn on debug statements', action='store_true')
     ARGS = PARSER.parse_args()
 
@@ -622,5 +624,5 @@ if __name__ == "__main__":
                                    os.path.join(ARGS.dest_dir, ARGS.database), CREATE_DB)
                     CREATE_DB = False
     else:
-        print("No input file or batch file specified")
+        print("No input file or batch file specified\n")
         PARSER.print_help()

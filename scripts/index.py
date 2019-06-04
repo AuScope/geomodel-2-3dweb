@@ -29,7 +29,7 @@ from diskcache import Cache
 from make_boreholes import get_blob_boreholes, get_boreholes_list, get_json_input_param
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file
-from lib.db.db_tables import QueryDB
+from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.exports.assimp_kit import AssimpKit
 
 DEBUG_LVL = logging.ERROR
@@ -59,33 +59,41 @@ if not LOGGER.hasHandlers():
 LOGGER.setLevel(DEBUG_LVL)
 
 
-
 LOCAL_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(LOCAL_DIR, 'data')
 
-# Directory where conversion parameter files are stored, one for each model
+
 INPUT_DIR = os.path.join(LOCAL_DIR, 'input')
+''' Directory where conversion parameter files are stored, one for each model
+'''
+
 CACHE_DIR = os.path.join(DATA_DIR, 'cache')
+''' Directory where WFS service information is kept
+'''
 
-
-
-# Maximum number of boreholes processed
 MAX_BOREHOLES = 9999
+''' Maximum number of boreholes processed
+'''
 
-# Timeout for querying WFS services (seconds)
 WFS_TIMEOUT = 6000
+''' Timeout for querying WFS services (seconds)
+'''
 
-# Name of our layer
 LAYER_NAME = 'boreholes'
+''' Name of our 3DPS layer
+'''
 
-# Name of the binary file holding GLTF data
 GLTF_REQ_NAME = '$blobfile.bin'
+''' Name of the binary file holding GLTF data
+'''
 
-# Stores the models' conversion parameters, key: model name
 G_PARAM_DICT = {}
+''' Stores the models' conversion parameters, key: model name
+'''
 
-# Stores owslib WebFeatureService objects, key: model name
 G_WFS_DICT = {}
+''' Stores owslib WebFeatureService objects, key: model name
+'''
 
 
 
@@ -439,7 +447,7 @@ def make_getfeatinfobyid_response(start_response, url_kvp, model_name):
     if obj_id != '':
         # Query database
         # Open up query database
-        db_path = os.path.join(DATA_DIR, 'query_data.db')
+        db_path = os.path.join(DATA_DIR, QUERY_DB_FILE)
         qdb = QueryDB(create=False, db_name=db_path)
         err_msg = qdb.get_error()
         if err_msg != '':
