@@ -1,5 +1,6 @@
+dist: xenial
 before_install:
-  - sudo apt-get install -y assimp
+  - sudo apt-get install -y libassimp3v5
 language: python
 python:
   - "3.5"
