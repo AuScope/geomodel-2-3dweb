@@ -25,7 +25,6 @@ if __name__ == "__main__":
     is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
     if is_ok and gsm_list:
         # Then, output GSM as GLTF ...
-        print("OK")
         gsm_obj = gsm_list[0]
         geom_obj, style_obj, metadata_obj = gsm_obj
         assimp_obj = AssimpKit(ERROR)
