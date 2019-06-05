@@ -1,0 +1,107 @@
+{
+    "asset": {
+        "version": "2.0",
+        "generator": "Open Asset Import Library (assimp v4.1.75708237)"
+    },
+    "accessors": [
+        {
+            "bufferView": 0,
+            "byteOffset": 0,
+            "componentType": 5126,
+            "count": 49,
+            "type": "VEC3",
+            "max": [
+                547548.25,
+                5828591.5,
+                150.1703338623047
+            ],
+            "min": [
+                534302.625,
+                5814851.0,
+                -12376.2041015625
+            ]
+        },
+        {
+            "bufferView": 1,
+            "byteOffset": 0,
+            "componentType": 5123,
+            "count": 165,
+            "type": "SCALAR",
+            "max": [
+                48.0
+            ],
+            "min": [
+                0.0
+            ]
+        }
+    ],
+    "buffers": [
+        {
+            "byteLength": 918,
+            "uri": "$blobfile.bin"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteOffset": 0,
+            "byteLength": 588,
+            "target": 34962
+        },
+        {
+            "buffer": 0,
+            "byteOffset": 588,
+            "byteLength": 330,
+            "target": 34963
+        }
+    ],
+    "materials": [
+        {
+            "name": "material",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    0.6470588445663452,
+                    0.0,
+                    1.0
+                ],
+                "metallicFactor": 0.0
+            },
+            "doubleSided": true
+        }
+    ],
+    "meshes": [
+        {
+            "name": "FLT_UN48",
+            "primitives": [
+                {
+                    "mode": 4,
+                    "material": 0,
+                    "indices": 1,
+                    "attributes": {
+                        "POSITION": 0
+                    }
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "children": [
+                1
+            ]
+        },
+        {
+            "name": "FLT_UN48_0",
+            "mesh": 0
+        }
+    ],
+    "scenes": [
+        {
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "scene": 0
+}
