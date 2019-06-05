@@ -39,8 +39,11 @@ if __name__ == "__main__":
         with open('golden.v4.1.0.json') as fp:
             golden_lines = fp.readlines()
         golden_str = ''.join(golden_lines)
-        if golden_str.rstrip('\n') == test_str:
+        if golden_str.rstrip('\n') == test_str.rstrip('\n'):
             print(MSG, "PASS")
             sys.exit(0)
+    print(test_str)
+    print()
+    print(golden_str)
     print(MSG, "FAIL!!")
     sys.exit(1)
