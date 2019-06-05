@@ -2,6 +2,7 @@
 import sys
 import os
 import ctypes
+import re
 from logging import ERROR
 
 # Add in path to local library files
@@ -36,6 +37,8 @@ if __name__ == "__main__":
         for byt in bcd.contents:
             bcd_bytes += byt
         test_str = bcd_bytes.decode('utf-8')
+        # Remove the end digits of the version number, they seem to vary
+        test_str = re.sub(r'assimp v4\.1\.\d+', 'assimp v4.1', test_str)
         with open('golden.v4.1.0.json') as fp:
             golden_lines = fp.readlines()
         golden_str = ''.join(golden_lines)
