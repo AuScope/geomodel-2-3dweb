@@ -851,21 +851,23 @@ def application(environ, start_response):
 
 
     # This sends back the second part of the GLTF object - the .bin file
-    # Format '/<model_name>/$blobfile.bin?id=12345'
+    # Format '/<model_name>/$blobfile.bin?id=12345' or '/<model_name>/$blobfile.bin?id=drag_and_drop_01234567890abcde'
     if len(path_bits) == 2 and path_bits[1] == GLTF_REQ_NAME:
-
 
         # Get the GLTF binary file associated with each GLTF file
         res_id_arr = urllib.parse.parse_qs(environ['QUERY_STRING']).get('id', [])
         if res_id_arr:
-            # Get blob from cache
-            blob, blob_sz = get_cached_blob(model_name, res_id_arr[0])
-            if blob is not None:
-                response_headers = [('Content-type', 'application/octet-stream'),
-                                    ('Content-Length', str(blob_sz)),
-                                    ('Connection', 'keep-alive')]
-                start_response('200 OK', response_headers)
-                return [blob]
+            id_val = res_id_arr[0]
+            # Check that the id format is correct
+            if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) or id_val.isnumeric():
+                # Get blob from cache
+                blob, blob_sz = get_cached_blob(model_name, id_val)
+                if blob is not None:
+                    response_headers = [('Content-type', 'application/octet-stream'),
+                                        ('Content-Length', str(blob_sz)),
+                                        ('Connection', 'keep-alive')]
+                    start_response('200 OK', response_headers)
+                    return [blob]
             LOGGER.warning("Cannot locate blob in cache")
         else:
             LOGGER.warning("Cannot locate id in borehole_dict")
