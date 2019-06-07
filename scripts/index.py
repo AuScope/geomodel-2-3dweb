@@ -24,7 +24,7 @@ from json import JSONDecodeError
 import urllib
 import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
-from diskcache import Cache
+from diskcache import Cache, Timeout
 
 from make_boreholes import get_blob_boreholes, get_boreholes_list, get_json_input_param
 from lib.imports.gocad.gocad_importer import GocadImporter
@@ -145,26 +145,32 @@ def get_cached_dict_list(model_name, param_dict, wfs_dict):
     except OSError as os_exc:
         LOGGER.error("Cannot get cached dict list: %s", str(os_exc))
         return (None, 0)
+    except Timeout as t_exc:
+        LOGGER.error("DB Timeout, cannot get cached dict list: %s", str(t_exc))
+        return (None, 0)
 
 
 
-def cache_blob(model_name, blob_id, blob, blob_sz):
+def cache_blob(model_name, blob_id, blob, blob_sz, exp_timeout=None):
     '''
     Cache a GLTF blob and its size
     :param model_name: name of model, string
     :param blob_id: blob id string, must be unique within each model
     :param blob: binary string
     :param size of blob
+    :param exp_timeout cache expiry timeout, float, in seconds
     :returns: True if blob was added to cache, false if it wasn't added
-               (usually because it is already in there)
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
             blob_key = 'blob|' + model_name + '|' + blob_id
-            return cache_obj.set(blob_key, (blob, blob_sz))
+            return cache_obj.set(blob_key, (blob, blob_sz), expire=exp_timeout)
 
     except OSError as os_exc:
         LOGGER.error("Cannot cache blob %s", str(os_exc))
+        return False
+    except Timeout as t_exc:
+        LOGGER.error("DB Timeout, cannot get cached dict list: %s", str(t_exc))
         return False
 
 
@@ -547,11 +553,14 @@ def make_getresourcebyid_response(start_response, url_kvp, model_name, param_dic
 
 
 
-def send_blob(start_response, model_name, blob_id, blob):
+def send_blob(start_response, model_name, blob_id, blob, exp_timeout=None):
     ''' Returns a blob in response
 
     :param start_response: callback function for initialising HTTP response
     :param model_name: name of model (string)
+    :param blob_id: unique id string for blob, used for caching
+    :param blob: blob object
+    :param exp_timeout: cache expiry timeout, float, in seconds
     '''
     LOGGER.debug('got blob %s', str(blob))
     gltf_bytes = b''
@@ -598,7 +607,7 @@ def send_blob(start_response, model_name, blob_id, blob):
             bcd_bytes = b''
             for bitt in bcd.contents:
                 bcd_bytes += bitt
-            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size)
+            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size, exp_timeout)
 
 
         blob = blob.contents.next
@@ -680,11 +689,8 @@ def convert(start_response, model_name, id_str, gocad_list):
     base_xyz = (0.0, 0.0, 0.0)
     gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
                               nondefault_coords=NONDEF_COORDS)
-    src_dir = 'drag_and_drop'
-    filename_str = 'otway_test.ts'
-    file_lines = gocad_list
     # First convert GOCAD to GSM
-    is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+    is_ok, gsm_list = gocad_obj.process_gocad('drag_and_drop', 'drag_and_drop.ts', gocad_list)
     # LOGGER.error("gsm_list = %s", repr(gsm_list))
     if is_ok and gsm_list:
         # Then, output GSM as GLTF ...
@@ -696,7 +702,7 @@ def convert(start_response, model_name, id_str, gocad_list):
         assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
         blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
-        return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj)
+        return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
         #for gsm_obj in gsm_list:
         #    geom_obj, style_obj, metadata_obj = gsm_obj
         #    gltf_str = metadata_obj
