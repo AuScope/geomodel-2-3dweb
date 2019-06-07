@@ -671,7 +671,7 @@ def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, 
     return [response_bytes]
 
 
-def convert(start_response, model_name, gocad_list):
+def convert(start_response, model_name, id_str, gocad_list):
     '''
     Call the conversion code to convert a GOCAD string to GLTF
 
@@ -696,7 +696,7 @@ def convert(start_response, model_name, gocad_list):
         assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
         blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
-        return send_blob(start_response, model_name, 'drag_and_drop', blob_obj)
+        return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj)
         #for gsm_obj in gsm_list:
         #    geom_obj, style_obj, metadata_obj = gsm_obj
         #    gltf_str = metadata_obj
@@ -827,13 +827,14 @@ def application(environ, start_response):
             return make_json_exception_response(start_response, get_val('version', url_kvp),
                                                 'OperationNotSupported', 'Unknown request name')
 
-        # Expecting a path '/<model_name>?service=CONVERT'
+        # Expecting a path '/<model_name>?service=CONVERT&&id=HEX_STRING'
         if service_name.lower() == 'convert':
+            id_str = get_val('id', url_kvp)
             resp_lines = environ['wsgi.input'].readlines()
             resp_list = []
             for resp_str in resp_lines:
                 resp_list.append(resp_str.decode())
-            return convert(start_response, model_name, resp_list)
+            return convert(start_response, model_name, id_str, resp_list)
 
         if service_name != '':
             return make_json_exception_response(start_response, get_val('version', url_kvp),
