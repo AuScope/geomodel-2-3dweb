@@ -36,7 +36,7 @@ DEBUG_LVL = logging.ERROR
 ''' Initialise debug level to minimal debugging
 '''
 
-NONDEF_COORDS = False
+NONDEF_COORDS = True
 ''' Will tolerate non default coordinates
 '''
 
@@ -703,11 +703,7 @@ def convert(start_response, model_name, id_str, gocad_list):
         blob_obj = assimp_obj.end_scene("")
         gltf_str = repr(blob_obj)
         return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
-        #for gsm_obj in gsm_list:
-        #    geom_obj, style_obj, metadata_obj = gsm_obj
-        #    gltf_str = metadata_obj
-    gltf_str = "ERROR: "+repr(gsm_list)
-    return gltf_str
+    return make_str_response(start_response, ' ')
 
 
 '''
