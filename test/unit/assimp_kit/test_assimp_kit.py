@@ -39,14 +39,16 @@ if __name__ == "__main__":
         test_str = bcd_bytes.decode('utf-8')
         # Remove the end digits of the version number, they seem to vary
         test_str = re.sub(r'assimp v4\.1\.\d+', 'assimp v4.1', test_str)
-        with open('golden.v4.1.0.json') as fp:
-            golden_lines = fp.readlines()
-        golden_str = ''.join(golden_lines)
-        if golden_str.rstrip('\n') == test_str.rstrip('\n'):
-            print(MSG, "PASS")
-            sys.exit(0)
+        # Different machines have different versions of assimp
+        for golden_file in ['golden.v4.1.0.json', 'golden.json']:
+            with open(golden_file) as fp:
+                golden_lines = fp.readlines()
+            golden_str = ''.join(golden_lines)
+            if golden_str.rstrip('\n') == test_str.rstrip('\n'):
+                print(MSG, "PASS")
+                sys.exit(0)
     print(test_str)
-    print()
+    print('-------------------------------------------------------------------------------------------------')
     print(golden_str)
     print(MSG, "FAIL!!")
     sys.exit(1)
