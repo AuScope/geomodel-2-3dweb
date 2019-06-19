@@ -35,13 +35,13 @@ from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 
 
-DEBUG_LVL = logging.ERROR
+LOG_LVL = logging.INFO
 ''' Initialise debug level to minimal debugging
 '''
 
 # Set up debugging
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(DEBUG_LVL)
+LOGGER.setLevel(LOG_LVL)
 
 if not LOGGER.hasHandlers():
 
@@ -58,7 +58,7 @@ if not LOGGER.hasHandlers():
     LOGGER.addHandler(HANDLER)
 
 # We are exporting using AssimpKit, could also use ColladaKit
-EXPORT_KIT = AssimpKit(DEBUG_LVL)
+EXPORT_KIT = AssimpKit(LOG_LVL)
 
 # Namespaces for WFS Borehole response
 NS = {'wfs':"http://www.opengis.net/wfs",
@@ -372,19 +372,6 @@ def get_loadconfig_dict(borehole_dict, param_obj):
     return j_dict
 
 
-def get_loadconfig(borehole_list, param_obj):
-    ''' Creates a config object of borehole GLTF objects to display in 3D
-    It prefers to create a list of NVCL boreholes
-
-    :param borehole_list: list of boreholes
-    '''
-    loadconfig_obj = []
-    for borehole_dict in borehole_list:
-        j_dict = get_loadconfig_dict(borehole_dict, param_obj)
-        loadconfig_obj.append(j_dict)
-    return loadconfig_obj
-
-
 def get_blob_boreholes(borehole_dict, param_obj):
     ''' Retrieves borehole data and writes 3D model files to a blob
 
@@ -394,9 +381,7 @@ def get_blob_boreholes(borehole_dict, param_obj):
     '''
     LOGGER.debug("get_blob_boreholes(%s)", str(borehole_dict))
     height_res = 10.0
-    if 'name' in borehole_dict and 'x' in borehole_dict and \
-                                   'y' in borehole_dict and \
-                                   'z' in borehole_dict:
+    if all(key in borehole_dict for key in ['name', 'x', 'y', 'z']):
         x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
                                   [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
@@ -437,20 +422,23 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob,
                         else outputs COLLADA (.dae) to file
     :param dest_dir: optional directory where 3D model files are written
-    :returns: config object and optional GLTF blob object
+    :returns: config object list and optional GLTF blob object
     '''
     LOGGER.debug("get_boreholes(%s, %s, %s)", str(param_obj), output_mode, dest_dir)
 
     # Get all NVCL scanned boreholes within BBOX
     borehole_list = get_boreholes_list(wfs, MAX_BOREHOLES, param_obj)
-    if borehole_list:
-        LOGGER.warning("No boreholes found for %s using %s", param_obj.modelUrlPath,
+    if not borehole_list:
+        LOGGER.warning("No NVCL boreholes found for %s using %s", param_obj.modelUrlPath,
                        param_obj.WFS_URL)
+        return [], None
+
     height_res = 10.0
     LOGGER.debug("borehole_list = %s", str(borehole_list))
     blob_obj = None
     # Parse response for all boreholes, make COLLADA files
     bh_cnt = 0
+    loadconfig_list = []
     for borehole_dict in borehole_list:
 
         # Get borehole information dictionary, and add to query db
@@ -460,20 +448,21 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             LOGGER.warning("Cannot add part to db: %s", p_obj)
             continue
 
-        if 'name' in borehole_dict and 'x' in borehole_dict and \
-                                       'y' in borehole_dict and \
-                                       'z' in borehole_dict:
-            file_name = make_borehole_filename(borehole_dict['name'])
-            x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                                      [borehole_dict['x'], borehole_dict['y']])
-            base_xyz = (x_m, y_m, borehole_dict['z'])
+        if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
 
             # Look for NVCL mineral data
             log_ids = get_borehole_logids(param_obj.NVCL_URL + '/getDatasetCollection.html',
                                           borehole_dict['nvcl_id'])
             LOGGER.debug('log_ids = %s', str(log_ids))
+            if not log_ids:
+                LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
+                continue
             url = param_obj.NVCL_URL + '/getDownsampledData.html'
             bh_data_dict = []
+            file_name = make_borehole_filename(borehole_dict['name'])
+            x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
+                                      [borehole_dict['x'], borehole_dict['y']])
+            base_xyz = (x_m, y_m, borehole_dict['z'])
             for log_id, log_type, log_name in log_ids:
                 # For the moment, only process log type '1' and 'Grp1 uTSAS'
                 # Min1,2,3 = 1st, 2nd, 3rd most common mineral
@@ -514,13 +503,14 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 elif dest_dir != '':
                     import exports.collada2gltf
                     from exports.collada_kit import ColladaKit
-                    export_kit = ColladaKit(DEBUG_LVL)
+                    export_kit = ColladaKit(LOG_LVL)
                     export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict,
                                               height_res, os.path.join(dest_dir, file_name))
                     blob_obj = None
                 else:
                     LOGGER.warning("ColladaKit cannot write blobs")
                     sys.exit(1)
+                loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
                 bh_cnt += 1
 
     LOGGER.info("Found NVCL data for %d/%d boreholes", bh_cnt, len(borehole_list))
@@ -528,10 +518,9 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
-    loadconfig = get_loadconfig(borehole_list, param_obj)
 
-    LOGGER.debug("Returning: loadconfig, blobobj = %s, %s", str(loadconfig), str(blob_obj))
-    return loadconfig, blob_obj
+    LOGGER.debug("Returning: loadconfig_list, blobobj = %s, %s", str(loadconfig_list), str(blob_obj))
+    return loadconfig_list, blob_obj
 
 
 def process_single(dest_dir, input_file, db_name, create_db=True):
@@ -545,31 +534,33 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     '''
     LOGGER.info("Processing %s", input_file)
     out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
-    LOGGER.info("Writing to: %s", out_filename)
-    with open(out_filename, 'w') as file_p:
-        param_obj = get_json_input_param(input_file)
-        try:
-            wfs = WebFeatureService(param_obj.WFS_URL, version=param_obj.WFS_VERSION,
-                                    xml=None, timeout=TIMEOUT)
-        except ServiceException as se_exc:
-            LOGGER.warning("WFS error, cannot process %s : %s", input_file, str(se_exc))
-            return
-        except ReadTimeout as rt_exc:
-            LOGGER.warning("Timeout error, cannot process %s : %s", input_file, str(rt_exc))
-            return
-        except HTTPError as he_exc:
-            LOGGER.warning("HTTP error code returned, cannot process %s : %s",
-                           input_file, str(he_exc))
-            return
+    param_obj = get_json_input_param(input_file)
+    try:
+        wfs = WebFeatureService(param_obj.WFS_URL, version=param_obj.WFS_VERSION,
+                                xml=None, timeout=TIMEOUT)
+    except ServiceException as se_exc:
+        LOGGER.warning("WFS error, cannot process %s : %s", input_file, str(se_exc))
+        return
+    except ReadTimeout as rt_exc:
+        LOGGER.warning("Timeout error, cannot process %s : %s", input_file, str(rt_exc))
+        return
+    except HTTPError as he_exc:
+        LOGGER.warning("HTTP error code returned, cannot process %s : %s",
+                       input_file, str(he_exc))
+        return
 
-        qdb = QueryDB(create=create_db, db_name=db_name)
-        err_str = qdb.get_error()
-        if err_str != '':
-            LOGGER.error("Cannot open/create database: %s", err_str)
-            sys.exit(1)
-        borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, param_obj, output_mode='GLTF',
+    qdb = QueryDB(create=create_db, db_name=db_name)
+    err_str = qdb.get_error()
+    if err_str != '':
+        LOGGER.error("Cannot open/create database: %s", err_str)
+        sys.exit(1)
+    borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, param_obj, output_mode='GLTF',
                                                       dest_dir=dest_dir)
-        json.dump(borehole_loadconfig, file_p, indent=4, sort_keys=True)
+    LOGGER.debug("borehole_loadconfig = %s", repr(borehole_loadconfig))
+    if borehole_loadconfig:
+        LOGGER.info("Writing to: %s", out_filename)
+        with open(out_filename, 'w') as file_p:
+            json.dump(borehole_loadconfig, file_p, indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
@@ -587,11 +578,9 @@ if __name__ == "__main__":
 
     # Set debug level
     if ARGS.debug:
-        DEBUG_LVL = logging.DEBUG
-    else:
-        DEBUG_LVL = logging.INFO
+        LOG_LVL = logging.DEBUG
 
-    LOGGER.setLevel(DEBUG_LVL)
+    LOGGER.setLevel(LOG_LVL)
 
     # Check and create output directory, if necessary
     if not os.path.isdir(ARGS.dest_dir):
