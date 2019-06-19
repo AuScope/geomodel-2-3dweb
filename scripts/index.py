@@ -26,11 +26,13 @@ import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from diskcache import Cache, Timeout
 
-from make_boreholes import get_blob_boreholes, get_boreholes_list, get_json_input_param
+from make_boreholes import get_json_input_param, get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.exports.assimp_kit import AssimpKit
+
+from lib.nvcl.nvcl_kit import NVCLKit
 
 DEBUG_LVL = logging.ERROR
 ''' Initialise debug level to minimal debugging
@@ -111,8 +113,8 @@ def create_borehole_dict_list(model_name, param_dict, wfs_dict):
     if model_name not in wfs_dict or model_name not in param_dict:
         LOGGER.warning("model_name %s not in wfs_dict or param_dict", model_name)
         return {}, []
-    borehole_list = get_boreholes_list(wfs_dict[model_name], MAX_BOREHOLES,
-                                       param_dict[model_name])
+    nvcl_kit = NVCLKit(param_dict[model_name], wfs=wfs_dict[model_name])
+    borehole_list = nvcl_kit.get_boreholes_list(MAX_BOREHOLES)
     result_dict = {}
     for borehole_dict in borehole_list:
         borehole_id = borehole_dict['nvcl_id']
@@ -565,6 +567,7 @@ def send_blob(start_response, model_name, blob_id, blob, exp_timeout=None):
     LOGGER.debug('got blob %s', str(blob))
     gltf_bytes = b''
     # There are 2 files in the blob, a GLTF file and a .bin file
+    # pylint: disable=W0612
     for idx in range(2):
         LOGGER.debug('blob.contents.name.data = %s', repr(blob.contents.name.data))
         LOGGER.debug('blob.contents.size = %s', repr(blob.contents.size))
@@ -701,7 +704,6 @@ def convert(start_response, model_name, id_str, gocad_list):
         assimp_obj.start_scene()
         assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
         blob_obj = assimp_obj.end_scene("")
-        gltf_str = repr(blob_obj)
         return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
     return make_str_response(start_response, ' ')
 
@@ -847,7 +849,8 @@ def application(environ, start_response):
 
 
     # This sends back the second part of the GLTF object - the .bin file
-    # Format '/<model_name>/$blobfile.bin?id=12345' or '/<model_name>/$blobfile.bin?id=drag_and_drop_01234567890abcde'
+    # Format '/<model_name>/$blobfile.bin?id=12345'
+    # or '/<model_name>/$blobfile.bin?id=drag_and_drop_01234567890abcde'
     if len(path_bits) == 2 and path_bits[1] == GLTF_REQ_NAME:
 
         # Get the GLTF binary file associated with each GLTF file
@@ -855,7 +858,8 @@ def application(environ, start_response):
         if res_id_arr:
             id_val = res_id_arr[0]
             # Check that the id format is correct
-            if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) or id_val.isnumeric():
+            if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) \
+                                                                        or id_val.isnumeric():
                 # Get blob from cache
                 blob, blob_sz = get_cached_blob(model_name, id_val)
                 if blob is not None:

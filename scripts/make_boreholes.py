@@ -7,32 +7,20 @@
 import sys
 import os
 
-import xml.etree.ElementTree as ET
 import json
 from json import JSONDecodeError
-from collections import OrderedDict
 from types import SimpleNamespace
-import itertools
 import logging
 import argparse
 
-from urllib.error import URLError
-import urllib
-import urllib.parse
-import urllib.request
-from requests.exceptions import HTTPError, ReadTimeout
-
-
 from pyproj import Proj, transform
-
-from owslib.wfs import WebFeatureService
-from owslib.fes import PropertyIsLike, etree
-from owslib.util import ServiceException
 
 from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
 from lib.exports.assimp_kit import AssimpKit
 from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
+
+from lib.nvcl.nvcl_kit import GSMLP_IDS, NVCLKit
 
 
 LOG_LVL = logging.INFO
@@ -60,42 +48,10 @@ if not LOGGER.hasHandlers():
 # We are exporting using AssimpKit, could also use ColladaKit
 EXPORT_KIT = AssimpKit(LOG_LVL)
 
-# Namespaces for WFS Borehole response
-NS = {'wfs':"http://www.opengis.net/wfs",
-      'xs':"http://www.w3.org/2001/XMLSchema",
-      'it.geosolutions':"http://www.geo-solutions.it",
-      'mo':"http://xmlns.geoscience.gov.au/minoccml/1.0",
-      'topp':"http://www.openplans.org/topp",
-      'mt':"http://xmlns.geoscience.gov.au/mineraltenementml/1.0",
-      'nvcl':"http://www.auscope.org/nvcl",
-      'gsml':"urn:cgi:xmlns:CGI:GeoSciML:2.0",
-      'ogc':"http://www.opengis.net/ogc",
-      'gsmlp':"http://xmlns.geosciml.org/geosciml-portrayal/4.0",
-      'sa':"http://www.opengis.net/sampling/1.0",
-      'ows':"http://www.opengis.net/ows",
-      'om':"http://www.opengis.net/om/1.0",
-      'xlink':"http://www.w3.org/1999/xlink",
-      'gml':"http://www.opengis.net/gml",
-      'er':"urn:cgi:xmlns:GGIC:EarthResource:1.1",
-      'xsi':"http://www.w3.org/2001/XMLSchema-instance"}
-
-
-# From GeoSciML BoreholeView 4.1
-GSMLP_IDS = ['identifier', 'name', 'description', 'purpose', 'status', 'drillingMethod',
-             'operator', 'driller', 'drillStartDate', 'drillEndDate', 'startPoint',
-             'inclinationType', 'boreholeMaterialCustodian', 'boreholeLength_m',
-             'elevation_m', 'elevation_srs', 'positionalAccuracy', 'source', 'parentBorehole_uri',
-             'metadata_uri', 'genericSymbolizer']
-
 
 MAX_BOREHOLES = 9999
 ''' Maximum number of boreholes processed
 '''
-
-TIMEOUT = 6000
-''' Timeout for querying WFS and NVCL services (seconds)
-'''
-
 
 
 def get_json_input_param(input_file):
@@ -160,178 +116,6 @@ def __clean_crs(crs):
     return pair[0]+':'+pair[1]
 
 
-def bgr2rgba(bgr):
-    ''' Converts BGR colour integer into an RGB tuple
-
-    :param bgr: BGR colour integer
-    :returns: RGB float tuple
-    '''
-    return ((bgr & 255)/255.0, ((bgr & 65280) >> 8)/255.0, (bgr >> 16)/255.0, 1.0)
-
-
-def get_borehole_data(url, log_id, height_resol, class_name):
-    ''' Retrieves borehole mineral data for a borehole
-
-    :param url: URL of the NVCL Data Service
-    :param log_id: borehole log identifier, string e.g. 'ce2df1aa-d3e7-4c37-97d5-5115fc3c33d'
-    :param height_resol: height resolution, float
-    :param class_name: name of mineral class
-    :returns: a dict: key - depth, float; value - { 'colour': RGB colour string,
-                                                    'classText': mineral name }
-    '''
-    LOGGER.debug(" get_borehole_data(%s, %s)", url, log_id)
-    # Send HTTP request, get response
-    params = {'logid' : log_id, 'outputformat': 'json', 'startdepth': 0.0,
-              'enddepth': 10000.0, 'interval': height_resol}
-    enc_params = urllib.parse.urlencode(params).encode('ascii')
-    req = urllib.request.Request(url, enc_params)
-    json_data = b''
-    try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
-            json_data = response.read()
-    except URLError as ue_exc:
-        LOGGER.warning('URLError: %s', ue_exc)
-        return OrderedDict()
-    except ConnectionResetError as cre_exc:
-        LOGGER.warning('ConnectionResetError: %s', cre_exc)
-        return OrderedDict()
-    LOGGER.debug('json_data = %s', json_data)
-    meas_list = []
-    depth_dict = OrderedDict()
-    try:
-        meas_list = json.loads(json_data.decode('utf-8'))
-    except json.decoder.JSONDecodeError:
-        LOGGER.warning("Logid not known")
-    else:
-        # Sort then group by depth
-        depth_dict = OrderedDict()
-        sorted_meas_list = sorted(meas_list, key=lambda x: x['roundedDepth'])
-        for depth, group in itertools.groupby(sorted_meas_list, lambda x: x['roundedDepth']):
-            # Filter out invalid values
-            filtered_group = itertools.filterfalse(lambda x: x['classText'].upper() == 'INVALID',
-                                                   group)
-            # Make a dict keyed on depth, value is element with largest count
-            try:
-                max_elem = max(filtered_group, key=lambda x: x['classCount'])
-            except ValueError:
-                # Sometimes 'filtered_group' is empty
-                LOGGER.warning("No valid values at depth %s", str(depth))
-                continue
-            col = bgr2rgba(max_elem['colour'])
-            depth_dict[depth] = {'className': class_name, **max_elem, 'colour': col}
-            del depth_dict[depth]['roundedDepth']
-            del depth_dict[depth]['classCount']
-
-
-    return depth_dict
-
-
-def get_borehole_logids(url, nvcl_id):
-    ''' Retrieves a set of log ids for a particular borehole
-
-    :param url: URL for the NVCL 'getDataSetCollection' service
-    :param nvcl_id: NVCL 'holeidentifier' parameter
-    :returns: a list of [log id, log type, log name]
-    '''
-    params = {'holeidentifier' : nvcl_id}
-    enc_params = urllib.parse.urlencode(params).encode('ascii')
-    req = urllib.request.Request(url, enc_params)
-    response_str = b''
-    try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
-            response_str = response.read()
-    except URLError as ue_exc:
-        LOGGER.warning('URLError: %s', ue_exc)
-        return []
-    except ConnectionResetError as cre_exc:
-        LOGGER.warning('ConnectionResetError: %s', cre_exc)
-        return []
-    root = ET.fromstring(response_str)
-    logid_list = []
-    for child in root.findall('./*/Logs/Log'):
-        is_public = child.findtext('./ispublic', default='false')
-        log_name = child.findtext('./logName', default='')
-        log_type = child.findtext('./logType', default='')
-        log_id = child.findtext('./LogID', default='')
-        if is_public == 'true' and log_name != '' and log_type != '' and log_id != '':
-            logid_list.append([log_id, log_type, log_name])
-    return logid_list
-
-
-def get_boreholes_list(wfs, max_boreholes, param_obj):
-    ''' Returns a list of borehole data within bounding box, whether they are NVCL or not
-        and a flag to say whether there are NVCL boreholes in there or not
-
-    :param wfs: handle of borehole's WFS service
-    :param max_boreholes: maximum number of boreholes to retrieve
-    :param param_obj: object containing command line parameters
-    '''
-    LOGGER.debug("get_boreholes_list(%s, %d, %s)", str(wfs), max_boreholes, str(param_obj))
-    # Can't filter for BBOX and nvclCollection==true at the same time
-    # [owslib's BBox uses 'ows:BoundingBox', not supported in WFS]
-    # so is best to do the BBOX manually
-    filter_ = PropertyIsLike(propertyname='gsmlp:nvclCollection', literal='true', wildCard='*')
-    # filter_2 = BBox([Param.BBOX['west'], Param.BBOX['south'], Param.BBOX['east'],
-    #                  Param.BBOX['north']], crs=Param.BOREHOLE_CRS)
-    # filter_3 = And([filter_, filter_2])
-    filterxml = etree.tostring(filter_.toXML()).decode("utf-8")
-    response_str = ''
-    try:
-        response = wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
-        response_str = bytes(response.read(), 'ascii')
-    except (HTTPError, ServiceException, ReadTimeout) as exc:
-        LOGGER.warning("WFS GetFeature failed, filter=%s: %s", filterxml, str(exc))
-        return []
-    borehole_list = []
-    LOGGER.debug('get_boreholes_list() resp= %s', response_str)
-    borehole_cnt = 0
-    root = ET.fromstring(response_str)
-
-    for child in root.findall('./*/gsmlp:BoreholeView', NS):
-        nvcl_id = child.attrib.get('{'+NS['gml']+'}id', '').split('.')[-1:][0]
-        is_nvcl = child.findtext('./gsmlp:nvclCollection', default="false", namespaces=NS)
-        if is_nvcl == "true" and nvcl_id.isdigit():
-            borehole_dict = {'nvcl_id': nvcl_id}
-
-            # Finds borehole collar x,y assumes units are degrees
-            x_y = child.findtext('./gsmlp:shape/gml:Point/gml:pos', default="? ?",
-                                 namespaces=NS).split(' ')
-            try:
-                if param_obj.BOREHOLE_CRS != 'EPSG:4283':
-                    borehole_dict['y'] = float(x_y[0]) # lat
-                    borehole_dict['x'] = float(x_y[1]) # lon
-                else:
-                    borehole_dict['x'] = float(x_y[0]) # lon
-                    borehole_dict['y'] = float(x_y[1]) # lat
-            except OSError as os_exc:
-                LOGGER.warning("Cannot parse collar coordinates %s", str(os_exc))
-                continue
-
-            borehole_dict['href'] = child.findtext('./gsmlp:identifier', default="", namespaces=NS)
-
-            # Finds most of the borehole details
-            for tag in GSMLP_IDS:
-                if tag != 'identifier':
-                    borehole_dict[tag] = child.findtext('./gsmlp:'+tag, default="", namespaces=NS)
-
-            elevation = child.findtext('./gsmlp:elevation_m', default="0.0", namespaces=NS)
-            try:
-                borehole_dict['z'] = float(elevation)
-            except ValueError:
-                borehole_dict['z'] = 0.0
-
-            # Only accept if within bounding box
-            if param_obj.BBOX['west'] < borehole_dict['x'] and \
-               param_obj.BBOX['east'] > borehole_dict['x'] and \
-               param_obj.BBOX['north'] > borehole_dict['y'] and \
-               param_obj.BBOX['south'] < borehole_dict['y']:
-                borehole_cnt += 1
-                borehole_list.append(borehole_dict)
-            if borehole_cnt > max_boreholes:
-                break
-    LOGGER.debug('get_boreholes_list() returns %s', str(borehole_list))
-    return borehole_list
-
 
 def get_bh_info_dict(borehole_dict, param_obj):
     ''' Returns a dict of borehole info for displaying in a popup box
@@ -381,13 +165,13 @@ def get_blob_boreholes(borehole_dict, param_obj):
     '''
     LOGGER.debug("get_blob_boreholes(%s)", str(borehole_dict))
     height_res = 10.0
+
     if all(key in borehole_dict for key in ['name', 'x', 'y', 'z']):
+        nvcl_kit = NVCLKit(param_obj)
         x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
                                   [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
-        log_ids = get_borehole_logids(param_obj.NVCL_URL + '/getDatasetCollection.html',
-                                      borehole_dict['nvcl_id'])
-        url = param_obj.NVCL_URL + '/getDownsampledData.html'
+        log_ids = nvcl_kit.get_borehole_logids(borehole_dict['nvcl_id'])
         bh_data_dict = []
         for log_id, log_type, log_name in log_ids:
             # For the moment, only process log type '1' and 'Grp1 uTSAS'
@@ -395,7 +179,7 @@ def get_blob_boreholes(borehole_dict, param_obj):
             # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
             # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
             if log_type == '1' and log_name in ['Grp1 uTSAS', 'Grp1 uTSAV', 'Grp1 uTSAT']:
-                bh_data_dict = get_borehole_data(url, log_id, height_res, log_name)
+                bh_data_dict = nvcl_kit.get_borehole_data(log_id, height_res, log_name)
                 LOGGER.debug('got bh_data_dict= %s', str(bh_data_dict))
                 break
 
@@ -411,12 +195,12 @@ def get_blob_boreholes(borehole_dict, param_obj):
     return None
 
 
-def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
+def get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     ''' Retrieves borehole data and writes 3D model files to a directory or a blob
         If 'dest_dir' is supplied, then files are written
         If output_mode != 'GLTF' then 'dest_dir' must not be ''
 
-    :param wfs: OWSLib WebFeatureService object
+    :param nvcl_kit: NVCLKit object
     :param qdb: opened query database 'QueryDB' object
     :param param_obj: input parameters
     :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob,
@@ -427,7 +211,7 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     LOGGER.debug("get_boreholes(%s, %s, %s)", str(param_obj), output_mode, dest_dir)
 
     # Get all NVCL scanned boreholes within BBOX
-    borehole_list = get_boreholes_list(wfs, MAX_BOREHOLES, param_obj)
+    borehole_list = nvcl_kit.get_boreholes_list(MAX_BOREHOLES)
     if not borehole_list:
         LOGGER.warning("No NVCL boreholes found for %s using %s", param_obj.modelUrlPath,
                        param_obj.WFS_URL)
@@ -451,13 +235,11 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
 
             # Look for NVCL mineral data
-            log_ids = get_borehole_logids(param_obj.NVCL_URL + '/getDatasetCollection.html',
-                                          borehole_dict['nvcl_id'])
+            log_ids = nvcl_kit.get_borehole_logids(borehole_dict['nvcl_id'])
             LOGGER.debug('log_ids = %s', str(log_ids))
             if not log_ids:
                 LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
                 continue
-            url = param_obj.NVCL_URL + '/getDownsampledData.html'
             bh_data_dict = []
             file_name = make_borehole_filename(borehole_dict['name'])
             x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
@@ -469,11 +251,12 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
                 # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
                 if log_type == '1' and log_name == 'Grp1 uTSAS':
-                    bh_data_dict = get_borehole_data(url, log_id, height_res, 'Grp1 uTSAS')
+                    bh_data_dict = nvcl_kit.get_borehole_data(log_id, height_res, 'Grp1 uTSAS')
                     break
             # If there's NVCL data, then create the borehole
             if bh_data_dict:
                 first_depth = -1
+                # pylint: disable=W0612
                 for vert_list, indices, colour_idx, depth, colour_info, mesh_name in \
                     colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
                     if first_depth < 0:
@@ -519,7 +302,8 @@ def get_boreholes(wfs, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
 
-    LOGGER.debug("Returning: loadconfig_list, blobobj = %s, %s", str(loadconfig_list), str(blob_obj))
+    LOGGER.debug("Returning: loadconfig_list, blobobj = %s, %s", str(loadconfig_list),
+                 str(blob_obj))
     return loadconfig_list, blob_obj
 
 
@@ -535,27 +319,18 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     LOGGER.info("Processing %s", input_file)
     out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
     param_obj = get_json_input_param(input_file)
-    try:
-        wfs = WebFeatureService(param_obj.WFS_URL, version=param_obj.WFS_VERSION,
-                                xml=None, timeout=TIMEOUT)
-    except ServiceException as se_exc:
-        LOGGER.warning("WFS error, cannot process %s : %s", input_file, str(se_exc))
+    nvcl_kit = NVCLKit(param_obj)
+    if nvcl_kit.wfs is None:
+        LOGGER.error("Cannot contact web service")
         return
-    except ReadTimeout as rt_exc:
-        LOGGER.warning("Timeout error, cannot process %s : %s", input_file, str(rt_exc))
-        return
-    except HTTPError as he_exc:
-        LOGGER.warning("HTTP error code returned, cannot process %s : %s",
-                       input_file, str(he_exc))
-        return
-
     qdb = QueryDB(create=create_db, db_name=db_name)
     err_str = qdb.get_error()
     if err_str != '':
         LOGGER.error("Cannot open/create database: %s", err_str)
         sys.exit(1)
-    borehole_loadconfig, none_obj = get_boreholes(wfs, qdb, param_obj, output_mode='GLTF',
-                                                      dest_dir=dest_dir)
+    # pylint: disable=W0612
+    borehole_loadconfig, none_obj = get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF',
+                                                  dest_dir=dest_dir)
     LOGGER.debug("borehole_loadconfig = %s", repr(borehole_loadconfig))
     if borehole_loadconfig:
         LOGGER.info("Writing to: %s", out_filename)
