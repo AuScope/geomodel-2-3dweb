@@ -489,11 +489,11 @@ if __name__ == "__main__":
                                                    os.path.basename(FILE_NAME) + ".dae"))
 
         if not SUCCESS:
-            print("Could not convert file %s", GOCAD_SRC)
+            print("Could not convert file", GOCAD_SRC)
             sys.exit(1)
 
     else:
-        print("%s does not exist", GOCAD_SRC)
+        print(GOCAD_SRC, "does not exist")
         sys.exit(1)
 
     # Always create a config file
