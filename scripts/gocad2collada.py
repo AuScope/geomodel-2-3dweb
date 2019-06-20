@@ -16,7 +16,8 @@ from types import SimpleNamespace
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
-from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp, de_concat
+from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
+from lib.imports.gocad.helpers import de_concat
 from lib.file_processing import find, create_json_config, read_json_file, reduce_extents
 from lib.file_processing import add_config2popup, add_vol_config, is_only_small
 import lib.exports.collada2gltf as collada2gltf
@@ -42,6 +43,8 @@ VOL_SLICER = True
 DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
 '''
+
+
 
 class Gocad2Collada:
     """ Converts GOCAD files to COLLADA, then GLTFs
@@ -142,7 +145,7 @@ class Gocad2Collada:
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
         if ext_str == 'VS':
-            file_lines_list = de_concat(whole_file_lines)
+            file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
             for mask_idx, file_lines in enumerate(file_lines_list):
                 if len(file_lines_list) > 1:
                     out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
@@ -176,7 +179,7 @@ class Gocad2Collada:
 
         # One VO file can produce many other files
         elif ext_str == 'VO':
-            file_lines_list = de_concat(whole_file_lines)
+            file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
             for mask_idx, file_lines in enumerate(file_lines_list):
                 if len(file_lines_list) > 1:
                     out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
@@ -205,7 +208,7 @@ class Gocad2Collada:
 
         # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
         elif ext_str in ['TS', 'PL', 'WL']:
-            file_lines_list = de_concat(whole_file_lines)
+            file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
             coll_kit_obj.start_collada()
             popup_dict = {}
             node_label = ''

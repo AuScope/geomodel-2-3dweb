@@ -17,6 +17,8 @@ from lib.db.style.style import STYLE
 from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
 from lib.db.metadata.metadata import METADATA, MapFeat
 
+from .helpers import make_line_gen
+
 # Set up debugging
 LOCAL_LOGGER = logging.getLogger("gocad_importer")
 
@@ -31,33 +33,6 @@ LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
 
 # Add handler to logger
 LOCAL_LOGGER.addHandler(LOCAL_HANDLER)
-
-
-
-def de_concat(filename_lines):
-    ''' Separates joined GOCAD entries within a file
-
-    :param filename_lines: lines from concatenated GOCAD file
-    '''
-    file_lines_list = []
-    part_list = []
-    in_file = False
-    for line in filename_lines:
-        line_str = line.rstrip(' \n\r').upper()
-        if not in_file:
-            for marker in GocadImporter.GOCAD_HEADERS.values():
-                if line_str == marker[0]:
-                    in_file = True
-                    part_list.append(line)
-                    break
-        elif in_file:
-            part_list.append(line)
-            if line_str == 'END':
-                in_file = False
-                part_list.append(line)
-                file_lines_list.append(part_list)
-                part_list = []
-    return file_lines_list
 
 
 
@@ -85,7 +60,7 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
     file_name, file_ext = os.path.splitext(filename_str)
     for line in file_lines:
         line_str = line.rstrip(' \n\r').upper()
-        splitstr_arr = line_str.split(' ')
+        field = line_str.split(' ')
         if first_line:
             first_line = False
             if file_ext.upper() != '.GP' or line_str not in GocadImporter.GOCAD_HEADERS['GP']:
@@ -96,7 +71,7 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
             in_member = True
         elif line_str == "END_MEMBERS":
             in_member = False
-        elif in_member and splitstr_arr[0] == "GOCAD":
+        elif in_member and field[0] == "GOCAD":
             in_gocad = True
         elif in_member and line_str == "END":
             in_gocad = False
@@ -115,11 +90,11 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
 
 
 
-
-
 class GocadImporter():
     ''' Class used to read GOCAD files and store their details
     '''
+    from .parsers import parse_property_header, parse_props, parse_float
+    from .parsers import parse_int, parse_xyz, parse_colour, parse_axis_unit
 
     GOCAD_HEADERS = {
         'TS':['GOCAD TSURF 1'],
@@ -129,7 +104,7 @@ class GocadImporter():
         'VO':['GOCAD VOXET 1'],
         'WL':['GOCAD WELL 1'],
     }
-    ''' Constant assigns possible headers to each flename extension
+    ''' Constant assigns possible headers to each filename extension
     '''
 
     SUPPORTED_EXTS = [
@@ -356,7 +331,7 @@ class GocadImporter():
         '''
 
 
-    def __handle_exc(self, exc):
+    def handle_exc(self, exc):
         ''' If stop_on_exc is set or debug is on, print details of exception and stop
 
         :param exc: exception
@@ -373,6 +348,7 @@ class GocadImporter():
             self.logger.debug(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
             sys.exit(1)
 
+
     def __repr__(self):
         ''' A basic print friendly representation
         '''
@@ -381,7 +357,6 @@ class GocadImporter():
             if field[-2:] != '__' and not callable(getattr(self, field)):
                 ret_str += field + ": " + repr(getattr(self, field))[:200] + "\n"
         return ret_str
-
 
 
     def __make_vertex_dict(self):
@@ -402,36 +377,6 @@ class GocadImporter():
                     vert_dict[atom.n] = idx
                     break
         return vert_dict
-
-
-    def line_gen(self, filename_str, file_lines):
-        ''' This is a Python generator function that processes lines of the GOCAD object file
-            and returns each line in various forms, from quite unprocessed to fully processed
-
-        :param filename_str: filename of gocad file
-        :param file_lines: array of strings of lines from gocad file
-        :returns: array of field strings in upper case with double quotes removed from strings,
-                 array of field string in original case without double quotes removed,
-                 line of GOCAD file in upper case,
-                 boolean, True iff it is the last line of the file
-        '''
-        for line in file_lines:
-            line_str = line.rstrip(' \n\r').upper()
-            # Look out for double-quoted strings
-            while line_str.count('"') >= 2:
-                before_tup = line_str.partition('"')
-                after_tup = before_tup[2].partition('"')
-                line_str = before_tup[0] + " " + after_tup[0].strip(' ').replace(' ', '_') \
-                           + " " + after_tup[2]
-            splitstr_arr_raw = line.rstrip(' \n\r').split()
-            splitstr_arr = line_str.split()
-
-            # Skip blank lines
-            if not splitstr_arr:
-                continue
-            yield splitstr_arr, splitstr_arr_raw, line_str, line == file_lines[-1:][0]
-        yield [], [], '', True
-
 
 
     def process_gocad(self, src_dir, filename_str, file_lines):
@@ -460,35 +405,35 @@ class GocadImporter():
             self.logger.error("process_gocad() Can't detect GOCAD file object type, return False")
             return False, []
 
-        line_gen = self.line_gen(filename_str, file_lines)
+        line_gen = make_line_gen(file_lines)
         is_last = False
         while not is_last:
-            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+            field, field_raw, line_str, is_last = next(line_gen)
 
-            if is_last and not splitstr_arr:
+            if is_last and not field:
                 break
 
-            self.logger.debug("splitstr_arr = %s line_str = %s is_last = %s",
-                              repr(splitstr_arr), repr(line_str), repr(is_last))
+            self.logger.debug("field = %s line_str = %s is_last = %s",
+                              repr(field), repr(line_str), repr(is_last))
 
             # Skip the subsets keywords
-            if splitstr_arr[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
+            if field[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
                 self.logger.debug("Skip subset keywords")
                 continue
 
             # Skip control nodes (used to denote fixed points in GOCAD)
-            if splitstr_arr[0] == "CNP":
+            if field[0] == "CNP":
                 self.logger.debug("Skip control nodes")
                 continue
 
             try:
                 # Are we in the main header?
-                if splitstr_arr[0] == "HEADER":
+                if field[0] == "HEADER":
                     self.logger.debug("Processing header")
                     is_last = self.__process_header(line_gen)
 
                 # Are we within coordinate system header?
-                elif splitstr_arr[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
+                elif field[0] == "GOCAD_ORIGINAL_COORDINATE_SYSTEM":
                     self.logger.debug("Processing coordinate system")
                     # Process coordinate header fields
                     is_last, is_error = self.__process_coord_hdr(line_gen)
@@ -497,51 +442,61 @@ class GocadImporter():
                         return False, []
 
                 # Are we in the property class header?
-                elif splitstr_arr[0] == "PROPERTY_CLASS_HEADER":
+                elif field[0] == "PROPERTY_CLASS_HEADER":
                     self.logger.debug("Processing property class header")
-                    is_last = self.__process_prop_class_hdr(line_gen, splitstr_arr)
+                    is_last = self.__process_prop_class_hdr(line_gen, field)
 
                 # Property names, this is not the class names
-                elif splitstr_arr[0] == "PROPERTIES":
+                elif field[0] == "PROPERTIES":
                     if not self.local_props:
-                        for class_name in splitstr_arr[1:]:
+                        for class_name in field[1:]:
                             self.local_props[class_name] = PROPS(class_name, debug_lvl)
-                    self.logger.debug(" properties list = %s", repr(splitstr_arr[1:]))
+                    self.logger.debug(" properties list = %s", repr(field[1:]))
 
                 # These are the property names for the point properties (e.g. PVRTX, PATOM)
-                elif splitstr_arr[0] == "PROPERTY_CLASSES":
+                elif field[0] == "PROPERTY_CLASSES":
                     if not self.local_props:
-                        for class_name in splitstr_arr[1:]:
+                        for class_name in field[1:]:
                             self.local_props[class_name] = PROPS(class_name, debug_lvl)
-                    self.logger.debug(" property classes = %s", repr(splitstr_arr[1:]))
+                    self.logger.debug(" property classes = %s", repr(field[1:]))
 
                 # This is the number of floats/ints for each property, usually it is '1',
                 # but XYZ values are '3'
-                elif splitstr_arr[0] == "ESIZES":
+                elif field[0] == "ESIZES":
                     for idx, prop_obj in enumerate(self.local_props.values(), 1):
-                        is_ok, d_sz = self.__parse_int(splitstr_arr[idx])
+                        is_ok, d_sz = self.parse_int(field[idx])
                         if is_ok:
                             prop_obj.data_sz = d_sz
-                    self.logger.debug(" property_sizes = %s", repr(splitstr_arr[1:]))
+                    self.logger.debug(" property_sizes = %s", repr(field[1:]))
 
                 # Read values representing no data for this property at a coordinate point
-                elif splitstr_arr[0] == "NO_DATA_VALUES":
+                elif field[0] == "NO_DATA_VALUES":
                     for idx, prop_obj in enumerate(self.local_props.values(), 1):
                         try:
-                            converted, fltp = self.__parse_float(splitstr_arr[idx])
+                            converted, fltp = self.parse_float(field[idx])
                             if converted:
                                 prop_obj.no_data_marker = fltp
                                 self.logger.debug("prop_obj.no_data_marker = %f",
                                                   prop_obj.no_data_marker)
                         except IndexError as exc:
-                            self.__handle_exc(exc)
-                    self.logger.debug(" property_nulls = %s", repr(splitstr_arr[1:]))
+                            self.handle_exc(exc)
+                    self.logger.debug(" property_nulls = %s", repr(field[1:]))
+
+                # Well files with ASCII well path
+                elif field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
+                    self.logger.debug("Processing ASCII well path")
+                    is_last = self.__process_ascii_well_path(line_gen, field)
+
+                # Well files with well curve block
+                elif field[0] == "WELL_CURVE":
+                    self.logger.debug("Processing well curve")
+                    is_last = self.__process_well_curve(line_gen, field)
 
                 # Atoms, with or without properties
-                elif splitstr_arr[0] == "ATOM" or splitstr_arr[0] == 'PATOM':
+                elif field[0] == "ATOM" or field[0] == 'PATOM':
                     seq_no_prev = seq_no
-                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
-                    is_ok, v_num = self.__parse_int(splitstr_arr[2])
+                    is_ok_s, seq_no = self.parse_int(field[1])
+                    is_ok, v_num = self.parse_int(field[2])
                     if not is_ok_s or not is_ok:
                         seq_no = seq_no_prev
                     else:
@@ -555,23 +510,21 @@ class GocadImporter():
                             sys.exit(1)
 
                         # Atoms with attached properties
-                        if splitstr_arr[0] == "PATOM":
+                        if field[0] == "PATOM":
                             vert_dict = self.__make_vertex_dict()
-                            self.__parse_props(splitstr_arr,
-                                               self.__vrtx_arr[vert_dict[v_num] - 1].xyz,
-                                               True)
+                            self.parse_props(field, self.__vrtx_arr[vert_dict[v_num] - 1].xyz,
+                                             True)
 
                 # Grab the vertices and properties, does not care if there are
                 # gaps in the sequence number
-                elif splitstr_arr[0] == "PVRTX" or  splitstr_arr[0] == "VRTX":
+                elif field[0] == "PVRTX" or  field[0] == "VRTX":
                     seq_no_prev = seq_no
-                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
-                    is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[2],
-                                                                  splitstr_arr[3],
-                                                                  splitstr_arr[4], True)
+                    is_ok_s, seq_no = self.parse_int(field[1])
+                    is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[2], field[3],
+                                                                field[4], True)
                     self.logger.debug("ParseXYZ %s %f %f %f from %s %s %s", repr(is_ok),
                                       x_flt, y_flt, z_flt,
-                                      splitstr_arr[2], splitstr_arr[3], splitstr_arr[4])
+                                      field[2], field[3], field[4])
                     if not is_ok_s or not is_ok:
                         seq_no = seq_no_prev
                     else:
@@ -581,58 +534,57 @@ class GocadImporter():
                         self.__vrtx_arr.append(VRTX(seq_no, (x_flt, y_flt, z_flt)))
 
                         # Vertices with attached properties
-                        if splitstr_arr[0] == "PVRTX":
-                            self.__parse_props(splitstr_arr, (x_flt, y_flt, z_flt))
+                        if field[0] == "PVRTX":
+                            self.parse_props(field, (x_flt, y_flt, z_flt))
 
                 # Grab the triangular edges
-                elif splitstr_arr[0] == "TRGL":
+                elif field[0] == "TRGL":
                     seq_no_prev = seq_no
-                    is_ok_s, seq_no = self.__parse_int(splitstr_arr[1])
-                    is_ok, a_int, b_int, c_int = self.__parse_xyz(False, splitstr_arr[1],
-                                                                  splitstr_arr[2],
-                                                                  splitstr_arr[3], False, False)
+                    is_ok_s, seq_no = self.parse_int(field[1])
+                    is_ok, a_int, b_int, c_int = self.parse_xyz(False, field[1], field[2],
+                                                                field[3], False, False)
                     if not is_ok or not is_ok_s:
                         seq_no = seq_no_prev
                     else:
                         self.__trgl_arr.append(TRGL(seq_no, (a_int, b_int, c_int)))
 
                 # Grab the segments
-                elif splitstr_arr[0] == "SEG":
-                    is_ok_a, a_int = self.__parse_int(splitstr_arr[1])
-                    is_ok_b, b_int = self.__parse_int(splitstr_arr[2])
+                elif field[0] == "SEG":
+                    is_ok_a, a_int = self.parse_int(field[1])
+                    is_ok_b, b_int = self.parse_int(field[2])
                     if is_ok_a and is_ok_b:
                         self.__seg_arr.append(SEG((a_int, b_int)))
 
                 # Grab metadata - see 'metadata.py' for more info
-                elif splitstr_arr[0] in ("STRATIGRAPHIC_POSITION", "GEOLOGICAL_FEATURE"):
-                    self.meta_obj.geofeat_name = splitstr_arr[1]
-                    if splitstr_arr[0] == 'STRATIGRAPHIC_POSITION':
+                elif field[0] in ("STRATIGRAPHIC_POSITION", "GEOLOGICAL_FEATURE"):
+                    self.meta_obj.geofeat_name = field[1]
+                    if field[0] == 'STRATIGRAPHIC_POSITION':
                         is_ok, self.meta_obj.geoevent_numeric_age_range = \
-                                               self.__parse_int(splitstr_arr[-1:][0], 0)
+                                               self.parse_int(field[-1:][0], 0)
                         self.meta_obj.mapped_feat = MapFeat.GEOLOGICAL_UNIT
 
-                elif splitstr_arr[0] == "GEOLOGICAL_TYPE":
-                    if splitstr_arr[1] == "FAULT":
+                elif field[0] == "GEOLOGICAL_TYPE":
+                    if field[1] == "FAULT":
                         self.meta_obj.mapped_feat = MapFeat.SHEAR_DISP_STRUCT
-                    elif  splitstr_arr[1] == "INTRUSIVE":
+                    elif  field[1] == "INTRUSIVE":
                         self.meta_obj.mapped_feat = MapFeat.GEOLOGICAL_UNIT
-                    elif splitstr_arr[1] in ("BOUNDARY", "UNCONFORMITY", "INTRAFORMATIONAL"):
+                    elif field[1] in ("BOUNDARY", "UNCONFORMITY", "INTRAFORMATIONAL"):
                         self.meta_obj.mapped_feat = MapFeat.CONTACT
 
 
                 # What kind of property is this? Is it a measurement,
                 # or a reference to a rock colour table?
-                elif splitstr_arr[0] == "PROPERTY_SUBCLASS":
-                    if len(splitstr_arr) > 2 and splitstr_arr[2] == "ROCK":
-                        prop_idx = splitstr_arr[1]
+                elif field[0] == "PROPERTY_SUBCLASS":
+                    if len(field) > 2 and field[2] == "ROCK":
+                        prop_idx = field[1]
                         self.prop_dict[prop_idx].is_index_data = True
                         self.logger.debug("self.prop_dict[%s].is_index_data = True", prop_idx)
                         # Sometimes there is an array of indexes and labels
-                        self.logger.debug(" len(splitstr_arr) = %d", len(splitstr_arr))
-                        if len(splitstr_arr) > 4:
-                            for idx in range(4, len(splitstr_arr), 2):
-                                rock_label = splitstr_arr[idx]
-                                is_ok, int_val = self.__parse_int(splitstr_arr[1+idx])
+                        self.logger.debug(" len(field) = %d", len(field))
+                        if len(field) > 4:
+                            for idx in range(4, len(field), 2):
+                                rock_label = field[idx]
+                                is_ok, int_val = self.parse_int(field[1+idx])
                                 if is_ok:
                                     rock_index = int_val
                                     self.rock_label_idx.setdefault(prop_idx, {})
@@ -641,179 +593,171 @@ class GocadImporter():
                                                       prop_idx, repr(self.rock_label_idx[prop_idx]))
 
                 # Extract binary file name
-                elif splitstr_arr[0] == "PROP_FILE":
-                    self.prop_dict[splitstr_arr[1]].file_name = os.path.join(src_dir,
-                                                                             splitstr_arr_raw[2])
+                elif field[0] == "PROP_FILE":
+                    self.prop_dict[field[1]].file_name = os.path.join(src_dir, field_raw[2])
                     self.logger.debug("self.prop_dict[%s].file_name = %s",
-                                      splitstr_arr[1], self.prop_dict[splitstr_arr[1]].file_name)
+                                      field[1], self.prop_dict[field[1]].file_name)
 
                 # Size of each value in binary file (measured in bytes, usually 1,2,4)
-                elif splitstr_arr[0] == "PROP_ESIZE":
-                    is_ok, int_val = self.__parse_int(splitstr_arr[2])
+                elif field[0] == "PROP_ESIZE":
+                    is_ok, int_val = self.parse_int(field[2])
                     if is_ok:
-                        self.prop_dict[splitstr_arr[1]].data_sz = int_val
-                        self.logger.debug("self.prop_dict[%s].data_sz = %d", splitstr_arr[1],
-                                          self.prop_dict[splitstr_arr[1]].data_sz)
+                        self.prop_dict[field[1]].data_sz = int_val
+                        self.logger.debug("self.prop_dict[%s].data_sz = %d", field[1],
+                                          self.prop_dict[field[1]].data_sz)
 
                 # The type of non-float value in binary file: OCTET, SHORT, RGBA
                 # IF this is present, then it is assumed not to be floating point
                 # FIX ME: Must support 'RGBA' storage type too
-                elif splitstr_arr[0] == "PROP_STORAGE_TYPE":
+                elif field[0] == "PROP_STORAGE_TYPE":
                     # Single byte integer
-                    if splitstr_arr[2] == "OCTET":
-                        self.prop_dict[splitstr_arr[1]].data_type = "b"
+                    if field[2] == "OCTET":
+                        self.prop_dict[field[1]].data_type = "b"
                     # Short int, 2 bytes long
-                    elif splitstr_arr[2] == "SHORT":
-                        self.prop_dict[splitstr_arr[1]].data_type = "h"
+                    elif field[2] == "SHORT":
+                        self.prop_dict[field[1]].data_type = "h"
                     # Colour data
-                    elif splitstr_arr[2] == "RGBA":
+                    elif field[2] == "RGBA":
                         self.logger.error("Unsupported storage type: RGBA")
                         sys.exit(1)
                     else:
-                        self.logger.error("Unknown type %s", splitstr_arr[2])
+                        self.logger.error("Unknown type %s", field[2])
                         sys.exit(1)
                     self.logger.debug("self.prop_dict[%s].data_type = %s",
-                                      splitstr_arr[1], self.prop_dict[splitstr_arr[1]].data_type)
+                                      field[1], self.prop_dict[field[1]].data_type)
 
                 # If binary file contains integers, are they signed integers?
-                elif splitstr_arr[0] == "PROP_SIGNED":
-                    self.prop_dict[splitstr_arr[1]].signed_int = (splitstr_arr[2] == "1")
+                elif field[0] == "PROP_SIGNED":
+                    self.prop_dict[field[1]].signed_int = (field[2] == "1")
                     self.logger.debug("self.prop_dict[%s].signed_int = %s",
-                                      splitstr_arr[1],
-                                      repr(self.prop_dict[splitstr_arr[1]].signed_int))
+                                      field[1],
+                                      repr(self.prop_dict[field[1]].signed_int))
 
                 # Type of value in binary file: IBM, IEEE
                 # NB: We do not support IBM-style floats
-                elif splitstr_arr[0] == "PROP_ETYPE":
-                    if splitstr_arr[2] != "IEEE":
-                        self.logger.error("Cannot process %s type floating points", splitstr_arr[1])
+                elif field[0] == "PROP_ETYPE":
+                    if field[2] != "IEEE":
+                        self.logger.error("Cannot process %s type floating points", field[1])
                         sys.exit(1)
 
                 # Binary file format: RAW or SEGY
                 # NB: Cannot process SEGY formats
-                elif splitstr_arr[0] == "PROP_EFORMAT":
-                    if splitstr_arr[2] != "RAW":
-                        self.logger.error("Cannot process %s format volume data", splitstr_arr[1])
+                elif field[0] == "PROP_EFORMAT":
+                    if field[2] != "RAW":
+                        self.logger.error("Cannot process %s format volume data", field[1])
                         sys.exit(1)
 
                 # Offset in bytes within binary file
-                elif splitstr_arr[0] == "PROP_OFFSET":
-                    is_ok, int_val = self.__parse_int(splitstr_arr[2])
+                elif field[0] == "PROP_OFFSET":
+                    is_ok, int_val = self.parse_int(field[2])
                     if is_ok:
-                        self.prop_dict[splitstr_arr[1]].offset = int_val
+                        self.prop_dict[field[1]].offset = int_val
                         self.logger.debug("self.prop_dict[%s].offset = %d",
-                                          splitstr_arr[1], self.prop_dict[splitstr_arr[1]].offset)
+                                          field[1], self.prop_dict[field[1]].offset)
 
                 # The number that is used to represent 'no data' in binary file
-                elif splitstr_arr[0] == "PROP_NO_DATA_VALUE":
-                    converted, fltp = self.__parse_float(splitstr_arr[2])
+                elif field[0] == "PROP_NO_DATA_VALUE":
+                    converted, fltp = self.parse_float(field[2])
                     if converted:
-                        self.prop_dict[splitstr_arr[1]].no_data_marker = fltp
+                        self.prop_dict[field[1]].no_data_marker = fltp
                         self.logger.debug("self.prop_dict[%s].no_data_marker = %f",
-                                          splitstr_arr[1],
-                                          self.prop_dict[splitstr_arr[1]].no_data_marker)
+                                          field[1],
+                                          self.prop_dict[field[1]].no_data_marker)
 
                 # Layout of VOXET data
                 elif self.__is_vo:
-                    if splitstr_arr[0] == "AXIS_O":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], True)
+                    if field[0] == "AXIS_O":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], True)
                         if is_ok:
                             self.__axis_o = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.__axis_o = %s", repr(self.__axis_o))
 
-                    elif splitstr_arr[0] == "AXIS_U":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_U":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.__axis_u = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.__axis_u = %s", repr(self.__axis_u))
 
-                    elif splitstr_arr[0] == "AXIS_V":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_V":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.__axis_v = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.__axis_v = %s", repr(self.__axis_v))
 
-                    elif splitstr_arr[0] == "AXIS_W":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_W":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.__axis_w = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.axis_w= %s", repr(self.__axis_w))
 
-                    elif splitstr_arr[0] == "AXIS_N":
-                        is_ok, x_int, y_int, z_int = self.__parse_xyz(False, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_N":
+                        is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.vol_sz = (x_int, y_int, z_int)
                             self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
 
-                    elif splitstr_arr[0] == "AXIS_MIN":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_MIN":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.__axis_min = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.__axis_min= %s", repr(self.__axis_min))
 
-                    elif splitstr_arr[0] == "AXIS_MAX":
-                        is_ok, x_flt, y_flt, z_flt = self.__parse_xyz(True, splitstr_arr[1],
-                                                                      splitstr_arr[2],
-                                                                      splitstr_arr[3], False, False)
+                    elif field[0] == "AXIS_MAX":
+                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                                    field[3], False, False)
                         if is_ok:
                             self.__axis_max = (x_flt, y_flt, z_flt)
                             self.logger.debug("self.__axis_max= %s", repr(self.__axis_max))
 
-                    elif splitstr_arr[0] == "AXIS_UNIT":
-                        self.__process_axis_unit(splitstr_arr)
+                    elif field[0] == "AXIS_UNIT":
+                        self.parse_axis_unit(field)
 
-                    elif splitstr_arr[0] == "FLAGS_ARRAY_LENGTH":
-                        is_ok, int_val = self.__parse_int(splitstr_arr[1])
+                    elif field[0] == "FLAGS_ARRAY_LENGTH":
+                        is_ok, int_val = self.parse_int(field[1])
                         if is_ok:
                             self.flags_array_length = int_val
                             self.logger.debug("self.flags_array_length= %d",
                                               self.flags_array_length)
 
-                    elif splitstr_arr[0] == "FLAGS_BIT_LENGTH":
-                        is_ok, int_val = self.__parse_int(splitstr_arr[1])
+                    elif field[0] == "FLAGS_BIT_LENGTH":
+                        is_ok, int_val = self.parse_int(field[1])
                         if is_ok:
                             self.flags_bit_length = int_val
                             self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
 
-                    elif splitstr_arr[0] == "FLAGS_ESIZE":
-                        is_ok, int_val = self.__parse_int(splitstr_arr[1])
+                    elif field[0] == "FLAGS_ESIZE":
+                        is_ok, int_val = self.parse_int(field[1])
                         if is_ok:
                             self.flags_bit_size = int_val
                             self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
 
-                    elif splitstr_arr[0] == "FLAGS_OFFSET":
-                        is_ok, int_val = self.__parse_int(splitstr_arr[1])
+                    elif field[0] == "FLAGS_OFFSET":
+                        is_ok, int_val = self.parse_int(field[1])
                         if is_ok:
                             self.flags_offset = int_val
                             self.logger.debug("self.flags_offset= %d", self.flags_offset)
 
-                    elif splitstr_arr[0] == "FLAGS_FILE":
-                        self.flags_file = os.path.join(src_dir, splitstr_arr_raw[1])
+                    elif field[0] == "FLAGS_FILE":
+                        self.flags_file = os.path.join(src_dir, field_raw[1])
                         self.logger.debug("self.flags_file= %s", self.flags_file)
 
-                    elif splitstr_arr[0] == "REGION":
-                        self.region_dict[splitstr_arr[2]] = splitstr_arr[1]
+                    elif field[0] == "REGION":
+                        self.region_dict[field[2]] = field[1]
                         self.logger.debug("self.region_dict[%s] = %s",
-                                          splitstr_arr[2], splitstr_arr[1])
+                                          field[2], field[1])
 
                 # If a well object
                 elif self.__is_wl:
                     pass
 
             except IndexError as exc:
-                self.__handle_exc(exc)
+                self.handle_exc(exc)
 
             # END OF TEXT PROCESSING LOOP
 
@@ -997,40 +941,7 @@ class GocadImporter():
         return False
 
 
-    def __parse_property_header(self, prop_obj, line_str):
-        ''' Parses the PROPERTY header, extracting the colour table info
-            and storing it in PROPS object
 
-        :params prop_obj: a PROPS object to store the data
-        :params line_str: current line
-        '''
-        name_str, sep, value_str = line_str.partition(':')
-        name_str = name_str.strip()
-        value_str = value_str.strip()
-        if name_str == '*COLORMAP*SIZE':
-            self.logger.debug("colourmap-size %s", value_str)
-        elif name_str == '*COLORMAP*NBCOLORS':
-            self.logger.debug("numcolours %s", value_str)
-        elif name_str == 'HIGH_CLIP':
-            self.logger.debug("highclip %s", value_str)
-        elif name_str == 'LOW_CLIP':
-            self.logger.debug("lowclip %s", value_str)
-        # Read in the name of the colour map for this property
-        elif name_str == 'COLORMAP':
-            prop_obj.colourmap_name = value_str
-            self.logger.debug("prop_obj.colourmap_name = %s", prop_obj.colourmap_name)
-        # Read in the colour map for this property
-        elif name_str in ('*COLORMAP*'+ prop_obj.colourmap_name + '*COLORS', \
-                          '*' + prop_obj.colourmap_name + '*ROCK_COLORS'):
-            lut_arr = value_str.split(' ')
-            for idx in range(0, len(lut_arr), 4):
-                try:
-                    prop_obj.colour_map[int(lut_arr[idx])] = (float(lut_arr[idx+1]),
-                                                              float(lut_arr[idx+2]),
-                                                              float(lut_arr[idx+3]))
-                    self.logger.debug("prop_obj.colour_map = %s", prop_obj.colour_map)
-                except (IndexError, OverflowError, ValueError) as exc:
-                    self.__handle_exc(exc)
 
 
 
@@ -1041,6 +952,7 @@ class GocadImporter():
             self.logger.error("Cannot process voxel file, cube size is not defined, " \
                               "missing 'AXIS_N'")
             sys.exit(1)
+        # pylint: disable=W0612
         for file_idx, prop_obj in self.prop_dict.items():
             # Sometimes filename needs a .vo on the end
             if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:] == "@@" and \
@@ -1087,8 +999,8 @@ class GocadImporter():
                 for z_val in range(self.vol_sz[2]):
                     for y_val in range(self.vol_sz[1]):
                         for x_val in range(self.vol_sz[0]):
-                            converted, fltp = self.__parse_float(f_arr[fl_idx],
-                                                                 prop_obj.no_data_marker)
+                            converted, fltp = self.parse_float(f_arr[fl_idx],
+                                                               prop_obj.no_data_marker)
                             # self.logger.debug("fp[%d, %d, %d] = %f", x_val,y_val,z_val, fp)
                             fl_idx += 1
                             if not converted:
@@ -1196,172 +1108,6 @@ class GocadImporter():
         return True
 
 
-
-    def __parse_props(self, splitstr_arr, coord_tup, is_patom=False):
-        ''' This parses a line of properties associated with a PVTRX or PATOM line
-
-        :param splitstr_arr: array of strings representing line with properties
-        :param coord_tup: (X,Y,Z) float tuple of the coordinates
-        :param is_patom: optional, True if this is from a PATOM, default False
-        '''
-        if is_patom:
-            # For PATOM, properties start at the 4th column
-            col_idx = 3
-        else:
-            # For PVRTX, properties start at the 6th column
-            col_idx = 5
-
-        # Loop over each property in line
-        for prop_obj in self.local_props.values():
-            # Property has one float
-            if prop_obj.data_sz == 1:
-                fp_str = splitstr_arr[col_idx]
-                # Skip GOCAD control nodes e.g. 'CNXY', 'CNXYZ'
-                if fp_str[:2].upper() == 'CN':
-                    col_idx += 1
-                    fp_str = splitstr_arr[col_idx]
-                converted, fltp = self.__parse_float(fp_str, prop_obj.no_data_marker)
-                if converted:
-                    prop_obj.assign_to_xyz(coord_tup, fltp)
-                    self.logger.debug("prop_obj.data_xyz[%s] = %f", repr(coord_tup), fltp)
-                col_idx += 1
-            # Property has 3 floats i.e. XYZ
-            elif prop_obj.data_sz == 3:
-                fp_str_x = splitstr_arr[col_idx]
-                # Skip GOCAD control nodes e.g. 'CNXY', 'CNXYZ'
-                if fp_str_x[:2].upper() == 'CN':
-                    col_idx += 1
-                    fp_str_x = splitstr_arr[col_idx]
-                fp_str_y = splitstr_arr[col_idx+1]
-                fp_str_z = splitstr_arr[col_idx+2]
-                converted_x, fp_x = self.__parse_float(fp_str_x, prop_obj.no_data_marker)
-                converted_y, fp_y = self.__parse_float(fp_str_y, prop_obj.no_data_marker)
-                converted_z, fp_z = self.__parse_float(fp_str_z, prop_obj.no_data_marker)
-                if converted_z and converted_y and converted_x:
-                    prop_obj.assign_to_xyz(coord_tup, (fp_x, fp_y, fp_z))
-                    self.logger.debug("prop_obj.data_xyz[%s] = (%f,%f,%f)",
-                                      repr(coord_tup), fp_x, fp_y, fp_z)
-                col_idx += 3
-            else:
-                self.logger.error("Cannot process property size of != 3 and !=1: %d %s",
-                                  prop_obj.data_sz, repr(prop_obj))
-                sys.exit(1)
-
-
-    def __parse_float(self, fp_str, null_val=None):
-        ''' Converts a string to float, handles infinite values
-
-        :param fp_str: string to convert to a float
-        :param null_val: value representing 'no data'
-        :returns: a boolean and a float
-            If could not convert then return (False, None)
-            else if 'null_val' is defined return (False, null_val)
-        '''
-        # Handle GOCAD's C++ floating point infinity for Windows and Linux
-        if fp_str in ["1.#INF", "INF"]:
-            fltp = sys.float_info.max
-        elif fp_str in ["-1.#INF", "-INF"]:
-            fltp = -sys.float_info.max
-        else:
-            try:
-                fltp = float(fp_str)
-                if null_val is not None and fltp == null_val:
-                    return False, null_val
-            except (OverflowError, ValueError) as exc:
-                self.__handle_exc(exc)
-                return False, 0.0
-        return True, fltp
-
-
-    def __parse_int(self, int_str, null_val=None):
-        ''' Converts a string to an int
-
-        :param int_str: string to convert to int
-        :param null_val: value representing 'no data'
-        :returns: a boolean and an integer
-            If could not convert then return (False, None)
-            else if 'null_val' is defined return (False, null_val)
-        '''
-        try:
-            num = int(int_str)
-        except (OverflowError, ValueError) as exc:
-            self.__handle_exc(exc)
-            return False, null_val
-        return True, num
-
-
-    def __parse_xyz(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True):
-        ''' Helpful function to read XYZ cooordinates
-
-        :param is_float: if true parse x y z as floats else try integers
-        :param x_str, y_str, z_str: X,Y,Z coordinates in string form
-        :param do_minmax: calculate min/max of the X,Y,Z coords
-        :param convert: convert from kms to metres if necessary
-        :returns: returns tuple of four parameters: success - true if could convert
-            the strings to floats/ints
-            x,y,z - floating point values, converted to metres if units are kms
-        '''
-        x_val = y_val = z_val = None
-        if is_float:
-            converted1, x_val = self.__parse_float(x_str)
-            converted2, y_val = self.__parse_float(y_str)
-            converted3, z_val = self.__parse_float(z_str)
-            if not converted1 or not converted2 or not converted3:
-                return False, None, None, None
-        else:
-            try:
-                x_val = int(x_str)
-                y_val = int(y_str)
-                z_val = int(z_str)
-            except (OverflowError, ValueError) as exc:
-                self.__handle_exc(exc)
-                return False, None, None, None
-
-        # Convert to metres if units are kms
-        if convert and isinstance(x_val, float):
-            x_val *= self.xyz_mult[0]
-            y_val *= self.xyz_mult[1]
-            z_val *= self.xyz_mult[2]
-
-        # Calculate and store minimum and maximum XYZ
-        if do_minmax:
-            self.geom_obj.calc_minmax(x_val, y_val, z_val)
-            x_val += self.base_xyz[0]
-            y_val += self.base_xyz[1]
-            z_val += self.base_xyz[2]
-
-        return True, x_val, y_val, z_val
-
-
-
-    def __parse_colour(self, colour_str):
-        ''' Parse a colour string into RGBA tuple.
-
-        :param colour_str: colour can either be spaced RGBA/RGB floats, or '#' + 6 digit hex string
-        :returns: a tuple with 4 floats, (R,G,B,A)
-        '''
-        rgba_tup = (1.0, 1.0, 1.0, 1.0)
-        try:
-            if colour_str[0] != '#':
-                rgbsplit_arr = colour_str.split(' ')
-                if len(rgbsplit_arr) == 3:
-                    rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]),
-                                float(rgbsplit_arr[2]), 1.0)
-                elif len(rgbsplit_arr) == 4:
-                    rgba_tup = (float(rgbsplit_arr[0]), float(rgbsplit_arr[1]),
-                                float(rgbsplit_arr[2]), float(rgbsplit_arr[3]))
-                else:
-                    self.logger.debug("Could not parse colour %s", repr(colour_str))
-            else:
-                rgba_tup = (float(int(colour_str[1:3], 16))/255.0,
-                            float(int(colour_str[3:5], 16))/255.0,
-                            float(int(colour_str[5:7], 16))/255.0, 1.0)
-        except (ValueError, OverflowError, IndexError) as exc:
-            self.__handle_exc(exc)
-            rgba_tup = (1.0, 1.0, 1.0, 1.0)
-        return rgba_tup
-
-
     def __check_vertex(self, num):
         ''' If vertex exists then returns true else false
 
@@ -1380,21 +1126,22 @@ class GocadImporter():
                   the second is True iff there is an unrecoverable error
         '''
         while True:
-            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+            # pylint: disable=W0612
+            field, field_raw, line_str, is_last = next(line_gen)
 
             # End of sequence?
             if is_last:
                 return True, False
 
             # Are we leaving coordinate system header?
-            if splitstr_arr[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
+            if field[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
                 self.logger.debug("Coord System End")
                 return False, False
 
             # Within coordinate system header and not using the default coordinate system
-            if splitstr_arr[0] == "NAME":
-                self.coord_sys_name = splitstr_arr[1]
-                if splitstr_arr[1] != "DEFAULT":
+            if field[0] == "NAME":
+                self.coord_sys_name = field[1]
+                if field[1] != "DEFAULT":
                     self.uses_default_coords = False
                     self.logger.debug("uses_default_coords False")
 
@@ -1402,33 +1149,18 @@ class GocadImporter():
                     # If does not support default coords then exit
                     if not self.nondefault_coords:
                         self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s",
-                                            repr(splitstr_arr[1]))
+                                            repr(field[1]))
                         return False, True
 
             # Does coordinate system use inverted z-axis?
-            elif splitstr_arr[0] == "ZPOSITIVE" and splitstr_arr[1] == "DEPTH":
+            elif field[0] == "ZPOSITIVE" and field[1] == "DEPTH":
                 self.invert_zaxis = True
                 self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
 
             # Axis units - check if units are kilometres, and update coordinate multiplier
-            elif splitstr_arr[0] == "AXIS_UNIT":
-                self.__process_axis_unit(splitstr_arr)
+            elif field[0] == "AXIS_UNIT":
+                self.parse_axis_unit(field)
 
-
-    def __process_axis_unit(self, splitstr_arr):
-        ''' Processes the AXIS_UNIT keyword
-        :param splitstr_arr: array of field strings
-        '''
-        for idx in range(0, 3):
-            unit_str = splitstr_arr[idx+1].strip('"').strip(' ').strip("'")
-            if unit_str == 'KM':
-                self.xyz_mult[idx] = 1000.0
-            # Warn if not metres or kilometres or unitless etc.
-            elif unit_str not in ['M', 'UNITLESS', 'NUMBER', 'MS', 'NONE']:
-                self.logger.warning("WARNING - nonstandard units in 'AXIS_UNIT' %s",
-                                    splitstr_arr[idx+1])
-            else:
-                self.xyz_unit[idx] = unit_str
 
 
     def __process_header(self, line_gen):
@@ -1437,29 +1169,31 @@ class GocadImporter():
         :returns: a boolean, is True iff we are at last line
         '''
         while True:
-            splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+            # pylint: disable=W0612
+            field, field_raw, line_str, is_last = next(line_gen)
             # Are we on the last line?
             if is_last:
                 self.logger.debug("Process header: last line")
                 return True
 
             # Are we out of the header?
-            if splitstr_arr[0] == "}" or is_last:
+            if field[0] == "}" or is_last:
                 self.logger.debug("End of header")
                 return False
 
             # When in the HEADER get the colours
+            # pylint: disable=W0612
             name_str, sep, value_str = line_str.partition(':')
             name_str = name_str.strip()
             value_str = value_str.strip()
             self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
             if name_str in ('*SOLID*COLOR', '*ATOMS*COLOR'):
-                self.style_obj.add_rgba_tup(self.__parse_colour(value_str))
+                self.style_obj.add_rgba_tup(self.parse_colour(value_str))
                 self.logger.debug("self.style_obj.rgba_tup = %s",
                                   repr(self.style_obj.get_rgba_tup()))
             elif name_str[:9] == '*REGIONS*' and name_str[-12:] == '*SOLID*COLOR':
                 region_name = name_str.split('*')[2]
-                self.region_colour_dict[region_name] = self.__parse_colour(value_str)
+                self.region_colour_dict[region_name] = self.parse_colour(value_str)
                 self.logger.debug("region_colour_dict[%s] = %s", region_name,
                                   repr(self.region_colour_dict[region_name]))
             # Get header name
@@ -1468,52 +1202,179 @@ class GocadImporter():
                 self.logger.debug("self.header_name = %s", self.header_name)
 
 
-    def __process_prop_class_hdr(self, line_gen, splitstr_arr):
+    def __process_ascii_well_path(self, line_gen, field):
+        ''' Process ascii well path header
+        :param line_gen: line generator
+        :param field: array of field strings from first line of prop class header
+        :returns: a boolean, is True iff we are at last line
+        '''
+        self.logger.debug("START ascii well path, field = %s %s", repr(field[0]), repr(field[1]))
+        zm_units = 'M'
+        convert = False
+        well_path = []
+        marker_list = []
+        while True:
+            # KB height
+            if field[0] == 'KB':
+                # pylint: disable=W0612
+                is_ok, kelly_b = self.parse_float(field[1])
+
+            # PATH_ZM_UNIT 'M' or 'KM'
+            if field[0] == 'PATH_ZM_UNIT':
+                zm_units = field[1]
+                if zm_units not in ['M', 'KM']:
+                    self.logger.error("Cannot process PATH_ZM_UNITS = %s", zm_units)
+                    sys.exit(1)
+
+            # WREF X Y Z
+            elif field[0] == 'WREF':
+                is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], False,
+                                                      False)
+                if not is_ok:
+                    self.logger.error("Cannot process WREF: %s", repr(field))
+                    sys.exit(1)
+                well_path = [(x_x, y_y, z_z)]
+
+            elif well_path is not None:
+                # PATH meas-Z Z X-diff Y-diff
+                if field[0] == 'PATH':
+                    convert = (zm_units == 'KM')
+                    is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4],
+                                                          False, convert)
+                    if not is_ok:
+                        self.logger.error("Cannot read PATH %s", repr(field))
+                        sys.exit(1)
+                    old_x = well_path[-1][0]
+                    old_y = well_path[-1][1]
+                    well_path.append((old_x + x_d, old_y + y_d, z_z))
+
+                # VRTX X Y Z
+                elif field[0] == 'VRTX':
+                    convert = (zm_units == 'KM')
+                    is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3],
+                                                          False, convert)
+                    if not is_ok:
+                        self.logger.error("Cannot read VRTX %s", repr(field))
+                        sys.exit(1)
+                    well_path.append((x_x, y_y, z_z))
+
+                # MRKR name flag Z-meas
+                elif field[0] == 'MRKR':
+                    is_ok, z_flt = self.parse_float(field[3])
+                    if is_ok:
+                        marker_name = field[1]
+                        field, marker_info = self.__process_well_info(field, line_gen)
+                        marker_list.append((marker_name, z_flt, marker_info))
+                        continue
+
+                # ZONE name Z-meas1 Z-meas2 index
+                elif field[0] == 'ZONE':
+                    is_ok1, z1_flt = self.parse_float(field[2])
+                    is_ok2, z2_flt = self.parse_float(field[3])
+                    if is_ok1 and is_ok2:
+                        zone_name = field[1]
+                        self.logger.debug("field = %s", repr(field))
+                        field, zone_info = self.__process_well_info(field, line_gen)
+                        marker_list.append((zone_name, (z1_flt + z2_flt) / 2.0, zone_info))
+                        continue
+
+
+            # Read next line
+            # pylint: disable=W0612
+            field, field_raw, line_str, is_last = next(line_gen)
+            if field[0] in ['END', 'WELL_CURVE']:
+                break
+
+
+        self.logger.debug("END ascii well path = %s marker_list = %s",
+                          repr(well_path[1:]), repr(marker_list))
+
+        # Do not return the first element in well_path, it is a WREF, not a PATH
+        return is_last, well_path[1:], marker_list
+
+
+    def __process_well_info(self, field, line_gen):
+        ''' Process the information after a well marker or well zone is defined
+        :param line_gen: line generator
+        :param field: array of field strings from first line of prop class header
+        :returns: a boolean, is True iff we are at last line
+        '''
+        info = {}
+        while True:
+            # FEATURE name1,name2
+            if field[0] == 'FEATURE':
+                info['feature_names'] = field[1].split(',')
+
+            # UNIT name1,name2
+            elif field[0] == 'UNIT':
+                info['unit_names'] = field[1].split(',')
+
+            # Read next line
+            # pylint: disable=W0612
+            field, field_raw, line_str, is_last = next(line_gen)
+
+            # Break out if not a well info field
+            if field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
+                break
+        return field, info
+
+
+    def __process_well_curve(self, line_gen, field):
+        ''' Process well curve
+        :param line_gen: line generator
+        :param field: array of field strings from first line of prop class header
+        :returns: a boolean, is True iff we are at last line
+        '''
+        return False
+
+
+    def __process_prop_class_hdr(self, line_gen, field):
         ''' Process the property class header
         :param line_gen: line generator
-        :param splitstr_arr: array of field strings from first line of prop class header
+        :param field: array of field strings from first line of prop class header
         :returns: a boolean, is True iff we are at last line
         '''
         self.logger.debug("START property class header")
-        prop_class_index = splitstr_arr[1]
+        prop_class_index = field[1]
         # There are two kinds of PROPERTY_CLASS_HEADER
         # First, properties attached to local points
-        if splitstr_arr[2] == '{':
+        if field[2] == '{':
             while True:
-                splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+                # pylint: disable=W0612
+                field, field_raw, line_str, is_last = next(line_gen)
                 # Are we on the last line?
                 if is_last:
                     self.logger.debug("Property class header: last line")
                     return True
 
                 # Leaving header
-                if splitstr_arr[0] == "}":
+                if field[0] == "}":
                     self.logger.debug("Property class header: end header")
                     return False
 
                 # When in the PROPERTY CLASS headers, get the colour table
                 if prop_class_index in self.local_props:
-                    self.__parse_property_header(self.local_props[prop_class_index], line_str)
+                    self.parse_property_header(self.local_props[prop_class_index], line_str)
 
         # Second, properties of binary files
-        elif splitstr_arr[3] == '{':
+        elif field[3] == '{':
             if prop_class_index not in self.prop_dict:
-                self.prop_dict[prop_class_index] = PROPS(splitstr_arr[2],
+                self.prop_dict[prop_class_index] = PROPS(field[2],
                                                          self.logger.getEffectiveLevel())
             while True:
-                splitstr_arr, splitstr_arr_raw, line_str, is_last = next(line_gen)
+                field, field_raw, line_str, is_last = next(line_gen)
                 # Are we on the last line?
                 if is_last:
                     self.logger.debug("Property class header: last line")
                     return True
 
                 # Leaving header
-                if splitstr_arr[0] == "}":
+                if field[0] == "}":
                     self.logger.debug("Property class header: end header")
                     return False
 
                 # When in the PROPERTY CLASS headers, get the colour table
-                self.__parse_property_header(self.prop_dict[prop_class_index], line_str)
+                self.parse_property_header(self.prop_dict[prop_class_index], line_str)
 
         else:
             self.logger.error("Cannot parse property header")
