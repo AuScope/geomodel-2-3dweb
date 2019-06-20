@@ -1,0 +1,270 @@
+'''
+Functions to process multiple lines used for specialist purposes
+'''
+
+import sys
+
+from lib.imports.gocad.props import PROPS
+
+def process_coord_hdr(self, line_gen):
+    ''' Process fields within coordinate header.
+    :param line_gen: line generator
+    :returns: two booleans, the first is True iff reached end of sequence,
+              the second is True iff there is an unrecoverable error
+    '''
+    while True:
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+
+        # End of sequence?
+        if is_last:
+            return True, False
+
+        # Are we leaving coordinate system header?
+        if field[0] == "END_ORIGINAL_COORDINATE_SYSTEM":
+            self.logger.debug("Coord System End")
+            return False, False
+
+        # Within coordinate system header and not using the default coordinate system
+        if field[0] == "NAME":
+            self.coord_sys_name = field[1]
+            if field[1] != "DEFAULT":
+                self.uses_default_coords = False
+                self.logger.debug("uses_default_coords False")
+
+                # NOTE: I can't support non default coords yet - need to enter via command line?
+                # If does not support default coords then exit
+                if not self.nondefault_coords:
+                    self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s",
+                                        repr(field[1]))
+                    return False, True
+
+        # Does coordinate system use inverted z-axis?
+        elif field[0] == "ZPOSITIVE" and field[1] == "DEPTH":
+            self.invert_zaxis = True
+            self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
+
+        # Axis units - check if units are kilometres, and update coordinate multiplier
+        elif field[0] == "AXIS_UNIT":
+            self.parse_axis_unit(field)
+
+
+
+def process_header(self, line_gen):
+    ''' Process fields in the GOCAD header
+    :param line_gen: line generator
+    :returns: a boolean, is True iff we are at last line
+    '''
+    while True:
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+        # Are we on the last line?
+        if is_last:
+            self.logger.debug("Process header: last line")
+            return True
+
+        # Are we out of the header?
+        if field[0] == "}" or is_last:
+            self.logger.debug("End of header")
+            return False
+
+        # When in the HEADER get the colours
+        # pylint: disable=W0612
+        name_str, sep, value_str = line_str.partition(':')
+        name_str = name_str.strip()
+        value_str = value_str.strip()
+        self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
+        if name_str in ('*SOLID*COLOR', '*ATOMS*COLOR'):
+            self.style_obj.add_rgba_tup(self.parse_colour(value_str))
+            self.logger.debug("self.style_obj.rgba_tup = %s",
+                              repr(self.style_obj.get_rgba_tup()))
+        elif name_str[:9] == '*REGIONS*' and name_str[-12:] == '*SOLID*COLOR':
+            region_name = name_str.split('*')[2]
+            self.region_colour_dict[region_name] = self.parse_colour(value_str)
+            self.logger.debug("region_colour_dict[%s] = %s", region_name,
+                              repr(self.region_colour_dict[region_name]))
+        # Get header name
+        elif name_str == 'NAME':
+            self.header_name = value_str.replace('/', '-')
+            self.logger.debug("self.header_name = %s", self.header_name)
+
+
+def process_ascii_well_path(self, line_gen, field):
+    ''' Process ascii well path header
+    :param line_gen: line generator
+    :param field: array of field strings from first line of prop class header
+    :returns: a boolean, is True iff we are at last line
+    '''
+    self.logger.debug("START ascii well path, field = %s %s", repr(field[0]), repr(field[1]))
+    zm_units = 'M'
+    convert = False
+    well_path = []
+    marker_list = []
+    while True:
+        # KB height
+        if field[0] == 'KB':
+            # pylint: disable=W0612
+            is_ok, kelly_b = self.parse_float(field[1])
+
+        # PATH_ZM_UNIT 'M' or 'KM'
+        if field[0] == 'PATH_ZM_UNIT':
+            zm_units = field[1]
+            if zm_units not in ['M', 'KM']:
+                self.logger.error("Cannot process PATH_ZM_UNITS = %s", zm_units)
+                sys.exit(1)
+
+        # WREF X Y Z
+        elif field[0] == 'WREF':
+            is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], False,
+                                                  False)
+            if not is_ok:
+                self.logger.error("Cannot process WREF: %s", repr(field))
+                sys.exit(1)
+            well_path = [(x_x, y_y, z_z)]
+
+        elif well_path is not None:
+            # PATH meas-Z Z X-diff Y-diff
+            if field[0] == 'PATH':
+                convert = (zm_units == 'KM')
+                is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4],
+                                                      False, convert)
+                if not is_ok:
+                    self.logger.error("Cannot read PATH %s", repr(field))
+                    sys.exit(1)
+                old_x = well_path[-1][0]
+                old_y = well_path[-1][1]
+                well_path.append((old_x + x_d, old_y + y_d, z_z))
+
+            # VRTX X Y Z
+            elif field[0] == 'VRTX':
+                convert = (zm_units == 'KM')
+                is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3],
+                                                      False, convert)
+                if not is_ok:
+                    self.logger.error("Cannot read VRTX %s", repr(field))
+                    sys.exit(1)
+                well_path.append((x_x, y_y, z_z))
+
+            # MRKR name flag Z-meas
+            elif field[0] == 'MRKR':
+                is_ok, z_flt = self.parse_float(field[3])
+                if is_ok:
+                    marker_name = field[1]
+                    field, marker_info = self.process_well_info(field, line_gen)
+                    marker_list.append((marker_name, z_flt, marker_info))
+                    continue
+
+            # ZONE name Z-meas1 Z-meas2 index
+            elif field[0] == 'ZONE':
+                is_ok1, z1_flt = self.parse_float(field[2])
+                is_ok2, z2_flt = self.parse_float(field[3])
+                if is_ok1 and is_ok2:
+                    zone_name = field[1]
+                    self.logger.debug("field = %s", repr(field))
+                    field, zone_info = self.process_well_info(field, line_gen)
+                    marker_list.append((zone_name, (z1_flt + z2_flt) / 2.0, zone_info))
+                    continue
+
+
+        # Read next line
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+        if field[0] in ['END', 'WELL_CURVE']:
+            break
+
+
+    self.logger.debug("END ascii well path = %s marker_list = %s",
+                      repr(well_path[1:]), repr(marker_list))
+
+    # Do not return the first element in well_path, it is a WREF, not a PATH
+    return is_last, well_path[1:], marker_list
+
+
+def process_well_info(self, field, line_gen):
+    ''' Process the information after a well marker or well zone is defined
+    :param line_gen: line generator
+    :param field: array of field strings from first line of prop class header
+    :returns: a boolean, is True iff we are at last line
+    '''
+    info = {}
+    while True:
+        # FEATURE name1,name2
+        if field[0] == 'FEATURE':
+            info['feature_names'] = field[1].split(',')
+
+        # UNIT name1,name2
+        elif field[0] == 'UNIT':
+            info['unit_names'] = field[1].split(',')
+
+        # Read next line
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+
+        # Break out if not a well info field
+        if field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
+            break
+    return field, info
+
+
+def process_well_curve(self, line_gen, field):
+    ''' Process well curve
+    :param line_gen: line generator
+    :param field: array of field strings from first line of prop class header
+    :returns: a boolean, is True iff we are at last line
+    '''
+    return False
+
+
+def process_prop_class_hdr(self, line_gen, field):
+    ''' Process the property class header
+    :param line_gen: line generator
+    :param field: array of field strings from first line of prop class header
+    :returns: a boolean, is True iff we are at last line
+    '''
+    self.logger.debug("START property class header")
+    prop_class_index = field[1]
+    # There are two kinds of PROPERTY_CLASS_HEADER
+    # First, properties attached to local points
+    if field[2] == '{':
+        while True:
+            # pylint: disable=W0612
+            field, field_raw, line_str, is_last = next(line_gen)
+            # Are we on the last line?
+            if is_last:
+                self.logger.debug("Property class header: last line")
+                return True
+
+            # Leaving header
+            if field[0] == "}":
+                self.logger.debug("Property class header: end header")
+                return False
+
+            # When in the PROPERTY CLASS headers, get the colour table
+            if prop_class_index in self.local_props:
+                self.parse_property_header(self.local_props[prop_class_index], line_str)
+
+    # Second, properties of binary files
+    elif field[3] == '{':
+        if prop_class_index not in self.prop_dict:
+            self.prop_dict[prop_class_index] = PROPS(field[2],
+                                                     self.logger.getEffectiveLevel())
+        while True:
+            field, field_raw, line_str, is_last = next(line_gen)
+            # Are we on the last line?
+            if is_last:
+                self.logger.debug("Property class header: last line")
+                return True
+
+            # Leaving header
+            if field[0] == "}":
+                self.logger.debug("Property class header: end header")
+                return False
+
+            # When in the PROPERTY CLASS headers, get the colour table
+            self.parse_property_header(self.prop_dict[prop_class_index], line_str)
+
+    else:
+        self.logger.error("Cannot parse property header")
+        sys.exit(1)
+
+    self.logger.debug("END property class header")
