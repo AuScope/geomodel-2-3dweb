@@ -22,7 +22,6 @@ AXIS_N 241 376 116
 AXIS_NAME "axis-1" "axis-2" "axis-3"
 AXIS_UNIT " number" " number" " number" 
 AXIS_TYPE even even even
-
 REGION Quartz 8 
 REGION Slate 9 
 END

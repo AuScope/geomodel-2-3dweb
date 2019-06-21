@@ -97,6 +97,7 @@ class GocadImporter():
     from .parsers import parse_int, parse_xyz, parse_colour, parse_axis_unit
     from .processors import process_coord_hdr, process_header, process_ascii_well_path
     from .processors import process_well_info, process_well_curve, process_prop_class_hdr
+    from .processors import process_vol_data
 
     GOCAD_HEADERS = {
         'TS':['GOCAD TSURF 1'],
@@ -248,31 +249,31 @@ class GocadImporter():
         ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
-        self.__axis_u = None
+        self.axis_u = []
         ''' U-axis volume vector
         '''
 
-        self.__axis_v = None
+        self.axis_v = []
         ''' V-axis volume vector
         '''
 
-        self.__axis_w = None
+        self.axis_w = []
         ''' W-axis volume vector
         '''
 
-        self.__axis_o = None
+        self.axis_o = []
         ''' Volume's origin (X,Y,Z)
         '''
 
-        self.__axis_min = None
+        self.axis_min = []
         ''' 3 dimensional minimum point of voxet volume
         '''
 
-        self.__axis_max = None
+        self.axis_max = []
         ''' 3 dimensional maximum point of voxet volume
         '''
 
-        self.vol_sz = None
+        self.vol_sz = []
         ''' Size of voxet volume
         '''
 
@@ -409,9 +410,12 @@ class GocadImporter():
 
         line_gen = make_line_gen(file_lines)
         is_last = False
+        # Retry flag forces parsing of the field array without asking for the next line
+        retry = False
         while not is_last:
-            field, field_raw, line_str, is_last = next(line_gen)
-
+            if not retry:
+                field, field_raw, line_str, is_last = next(line_gen)
+            retry = False
             if is_last and not field:
                 break
 
@@ -484,15 +488,23 @@ class GocadImporter():
                             self.handle_exc(exc)
                     self.logger.debug(" property_nulls = %s", repr(field[1:]))
 
-                # Well files with ASCII well path
-                elif field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
-                    self.logger.debug("Processing ASCII well path")
-                    is_last = self.process_ascii_well_path(line_gen, field)
+                # If a well object
+                elif self.__is_wl:
+                    # All well files
+                    if field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
+                        self.logger.debug("Processing ASCII well path")
+                        field, field_raw, is_last = self.process_ascii_well_path(line_gen, field)
+                        retry = True
 
-                # Well files with well curve block
-                elif field[0] == "WELL_CURVE":
-                    self.logger.debug("Processing well curve")
-                    is_last = self.process_well_curve(line_gen, field)
+                    # Well files with well curve block
+                    elif field[0] == "WELL_CURVE":
+                        self.logger.debug("Processing well curve")
+                        field, field_raw, is_last = self.process_well_curve(line_gen, field)
+
+                    elif field[0] == "BINARY_DATA_FILE":
+                        pass
+                    elif field[0] == "WP_CATALOG_FILE":
+                        pass
 
                 # Atoms, with or without properties
                 elif field[0] == "ATOM" or field[0] == 'PATOM':
@@ -666,97 +678,10 @@ class GocadImporter():
                                           field[1],
                                           self.prop_dict[field[1]].no_data_marker)
 
-                # Layout of VOXET data
-                elif self.__is_vo:
-                    if field[0] == "AXIS_O":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], True)
-                        if is_ok:
-                            self.__axis_o = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.__axis_o = %s", repr(self.__axis_o))
-
-                    elif field[0] == "AXIS_U":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.__axis_u = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.__axis_u = %s", repr(self.__axis_u))
-
-                    elif field[0] == "AXIS_V":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.__axis_v = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.__axis_v = %s", repr(self.__axis_v))
-
-                    elif field[0] == "AXIS_W":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.__axis_w = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.axis_w= %s", repr(self.__axis_w))
-
-                    elif field[0] == "AXIS_N":
-                        is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.vol_sz = (x_int, y_int, z_int)
-                            self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
-
-                    elif field[0] == "AXIS_MIN":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.__axis_min = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.__axis_min= %s", repr(self.__axis_min))
-
-                    elif field[0] == "AXIS_MAX":
-                        is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                                    field[3], False, False)
-                        if is_ok:
-                            self.__axis_max = (x_flt, y_flt, z_flt)
-                            self.logger.debug("self.__axis_max= %s", repr(self.__axis_max))
-
-                    elif field[0] == "AXIS_UNIT":
-                        self.parse_axis_unit(field)
-
-                    elif field[0] == "FLAGS_ARRAY_LENGTH":
-                        is_ok, int_val = self.parse_int(field[1])
-                        if is_ok:
-                            self.flags_array_length = int_val
-                            self.logger.debug("self.flags_array_length= %d",
-                                              self.flags_array_length)
-
-                    elif field[0] == "FLAGS_BIT_LENGTH":
-                        is_ok, int_val = self.parse_int(field[1])
-                        if is_ok:
-                            self.flags_bit_length = int_val
-                            self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
-
-                    elif field[0] == "FLAGS_ESIZE":
-                        is_ok, int_val = self.parse_int(field[1])
-                        if is_ok:
-                            self.flags_bit_size = int_val
-                            self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
-
-                    elif field[0] == "FLAGS_OFFSET":
-                        is_ok, int_val = self.parse_int(field[1])
-                        if is_ok:
-                            self.flags_offset = int_val
-                            self.logger.debug("self.flags_offset= %d", self.flags_offset)
-
-                    elif field[0] == "FLAGS_FILE":
-                        self.flags_file = os.path.join(src_dir, field_raw[1])
-                        self.logger.debug("self.flags_file= %s", self.flags_file)
-
-                    elif field[0] == "REGION":
-                        self.region_dict[field[2]] = field[1]
-                        self.logger.debug("self.region_dict[%s] = %s",
-                                          field[2], field[1])
-
-                # If a well object
-                elif self.__is_wl:
-                    pass
+                # Process VOXET data
+                elif self.__is_vo and field[0][:4] == "AXIS":
+                    self.logger.debug('field[0][:4] = %s', field[0][:4])
+                    field, field_raw, is_last = self.process_vol_data(line_gen, field, field_raw, src_dir)
 
             except IndexError as exc:
                 self.handle_exc(exc)
@@ -853,15 +778,15 @@ class GocadImporter():
         '''
         # Convert GOCAD's volume geometry spec
         if self.__is_vo and self.vol_sz:
-            geom_obj.vol_origin = self.__axis_o
+            geom_obj.vol_origin = self.axis_o
             geom_obj.vol_sz = self.vol_sz
-            min_vec = np.array(self.__axis_min)
-            max_vec = np.array(self.__axis_max)
+            min_vec = np.array(self.axis_min)
+            max_vec = np.array(self.axis_max)
             mult_vec = max_vec - min_vec
 
-            geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.__axis_u)).tolist())
-            geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.__axis_v)).tolist())
-            geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.__axis_w)).tolist())
+            geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).tolist())
+            geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
+            geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
 
         # Re-enumerate all geometries, because some GOCAD files have missing vertex numbers
         vert_dict = self.__make_vertex_dict()
@@ -950,7 +875,7 @@ class GocadImporter():
     def __read_voxel_binary_files(self):
         ''' Open up and read binary voxel file
         '''
-        if self.vol_sz is None:
+        if not self.vol_sz:
             self.logger.error("Cannot process voxel file, cube size is not defined, " \
                               "missing 'AXIS_N'")
             sys.exit(1)
@@ -995,9 +920,9 @@ class GocadImporter():
                 self.logger.debug("elem_offset = %s", repr(elem_offset))
                 f_arr = np.fromfile(prop_obj.file_name, dtype=d_typ, count=num_voxels+elem_offset)
                 fl_idx = elem_offset
-                mult = [(self.__axis_max[0]-self.__axis_min[0])/self.vol_sz[0],
-                        (self.__axis_max[1]-self.__axis_min[1])/self.vol_sz[1],
-                        (self.__axis_max[2]-self.__axis_min[2])/self.vol_sz[2]]
+                mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
+                        (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
+                        (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
                 for z_val in range(self.vol_sz[2]):
                     for y_val in range(self.vol_sz[1]):
                         for x_val in range(self.vol_sz[0]):
@@ -1010,18 +935,18 @@ class GocadImporter():
                             prop_obj.assign_to_3d(x_val, y_val, z_val, fltp)
 
                             # Calculate the XYZ coords and their maxs & mins
-                            x_coord = self.__axis_o[0]+ \
-                              (float(x_val)*self.__axis_u[0]*mult[0] + \
-                              float(y_val)*self.__axis_u[1]*mult[1] + \
-                              float(z_val)*self.__axis_u[2]*mult[2])
-                            y_coord = self.__axis_o[1]+ \
-                              (float(x_val)*self.__axis_v[0]*mult[0] + \
-                              float(y_val)*self.__axis_v[1]*mult[1] + \
-                              float(z_val)*self.__axis_v[2]*mult[2])
-                            z_coord = self.__axis_o[2]+ \
-                              (float(x_val)*self.__axis_w[0]*mult[0] + \
-                              float(y_val)*self.__axis_w[1]*mult[1] + \
-                              float(z_val)*self.__axis_w[2]*mult[2])
+                            x_coord = self.axis_o[0]+ \
+                              (float(x_val)*self.axis_u[0]*mult[0] + \
+                              float(y_val)*self.axis_u[1]*mult[1] + \
+                              float(z_val)*self.axis_u[2]*mult[2])
+                            y_coord = self.axis_o[1]+ \
+                              (float(x_val)*self.axis_v[0]*mult[0] + \
+                              float(y_val)*self.axis_v[1]*mult[1] + \
+                              float(z_val)*self.axis_v[2]*mult[2])
+                            z_coord = self.axis_o[2]+ \
+                              (float(x_val)*self.axis_w[0]*mult[0] + \
+                              float(y_val)*self.axis_w[1]*mult[1] + \
+                              float(z_val)*self.axis_w[2]*mult[2])
                             self.geom_obj.calc_minmax(x_coord, y_coord, z_coord)
 
             except IOError as io_exc:

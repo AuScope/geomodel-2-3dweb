@@ -31,4 +31,4 @@ PROP_ETYPE 1  IEEE
 PROP_FORMAT 1 RAW
 PROP_OFFSET 1 0
 PROP_FILE 1 tiny_voxet_test_file@@
-
+END

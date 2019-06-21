@@ -3,8 +3,10 @@ Functions to process multiple lines used for specialist purposes
 '''
 
 import sys
+import os
 
 from lib.imports.gocad.props import PROPS
+
 
 def process_coord_hdr(self, line_gen):
     ''' Process fields within coordinate header.
@@ -122,6 +124,15 @@ def process_ascii_well_path(self, line_gen, field):
                 sys.exit(1)
             well_path = [(x_x, y_y, z_z)]
 
+        elif field[0] == 'DEVIATION_SURVEY':
+            pass
+        elif field[0] == 'STATION':
+            pass
+        elif field[0] == 'DATUM':
+            pass
+        elif field[0] == 'ZM_NUMPTS':
+            pass
+
         elif well_path is not None:
             # PATH meas-Z Z X-diff Y-diff
             if field[0] == 'PATH':
@@ -169,7 +180,7 @@ def process_ascii_well_path(self, line_gen, field):
         # Read next line
         # pylint: disable=W0612
         field, field_raw, line_str, is_last = next(line_gen)
-        if field[0] in ['END', 'WELL_CURVE']:
+        if is_last or field[0] in ['END', 'WELL_CURVE']:
             break
 
 
@@ -201,7 +212,7 @@ def process_well_info(self, field, line_gen):
         field, field_raw, line_str, is_last = next(line_gen)
 
         # Break out if not a well info field
-        if field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
+        if is_last or field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
             break
     return field, info
 
@@ -212,7 +223,31 @@ def process_well_curve(self, line_gen, field):
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line
     '''
-    return False
+    while True:
+        # Read next line
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+        if field[0] == "PROPERTY":
+            # Call function to get properties
+            pass
+        elif field[0] in ["LOG_FRAME_TYPE PERIODIC",
+                          "LOG_FRAME_TOP", "LOG_FRAME_BOTTOM",
+                          "LOG_FRAME_RATE", "LOG_FRAME_TYPE"]:
+            pass
+        elif field[0] == "ZM_UNIT":
+            pass
+        elif field[0] == "INTERPOLATION":
+            pass
+        elif field[0] == "BLOCKED_INTERPOLATION_METHOD":
+            pass
+        elif field[0] == "NPTS":
+            pass
+        elif field[0] == "SEEK":
+            pass
+        if is_last or field[0] in ['END', 'END_CURVE']:
+            break
+
+    return field, field_raw, is_last
 
 
 def process_prop_class_hdr(self, line_gen, field):
@@ -268,3 +303,110 @@ def process_prop_class_hdr(self, line_gen, field):
         sys.exit(1)
 
     self.logger.debug("END property class header")
+
+
+def process_vol_data(self, line_gen, field, field_raw, src_dir):
+    ''' Process all the voxet data fields
+        :param line_gen: line generator
+        :param field: array of field strings
+        :param field: array of field strings, not space separated
+        :param src_dir: source directory of voxet file
+    '''
+    self.logger.info("START process_vol_data(field = %s)", repr(field))
+    while True:
+        self.logger.debug('process_vol_data processing: field= %s', repr(field))
+        if field[0] == "AXIS_O":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], True)
+            if is_ok:
+                self.axis_o = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_o = %s", repr(self.axis_o))
+
+        elif field[0] == "AXIS_U":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.axis_u = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_u = %s", repr(self.axis_u))
+
+        elif field[0] == "AXIS_V":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.axis_v = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_v = %s", repr(self.axis_v))
+
+        elif field[0] == "AXIS_W":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.axis_w = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_w= %s", repr(self.axis_w))
+
+        elif field[0] == "AXIS_N":
+            is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.vol_sz = (x_int, y_int, z_int)
+                self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
+
+        elif field[0] == "AXIS_MIN":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.axis_min = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_min= %s", repr(self.axis_min))
+
+        elif field[0] == "AXIS_MAX":
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
+                                                        field[3], False, False)
+            if is_ok:
+                self.axis_max = (x_flt, y_flt, z_flt)
+                self.logger.debug("self.axis_max= %s", repr(self.axis_max))
+
+        elif field[0] == "AXIS_UNIT":
+            self.parse_axis_unit(field)
+
+        elif field[0] in ["AXIS_NAME", "AXIS_TYPE", "AXIS_D", "AXIS_LABEL_MAX"]:
+            pass
+
+        elif field[0] == "FLAGS_ARRAY_LENGTH":
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.flags_array_length = int_val
+                self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
+
+        elif field[0] == "FLAGS_BIT_LENGTH":
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.flags_bit_length = int_val
+                self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
+
+        elif field[0] == "FLAGS_ESIZE":
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.flags_bit_size = int_val
+                self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
+
+        elif field[0] == "FLAGS_OFFSET":
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.flags_offset = int_val
+                self.logger.debug("self.flags_offset= %d", self.flags_offset)
+
+        elif field[0] == "FLAGS_FILE":
+            self.flags_file = os.path.join(src_dir, field_raw[1])
+            self.logger.debug("self.flags_file= %s", self.flags_file)
+
+        elif field[0] == "REGION":
+            self.region_dict[field[2]] = field[1]
+            self.logger.debug("self.region_dict[%s] = %s", field[2], field[1])
+
+        else:
+            self.logger.debug('Exiting volume data')
+            return field, field_raw, False
+
+        # pylint: disable=W0612
+        field, field_raw, line_str, is_last = next(line_gen)
+        if is_last:
+            return field, field_raw, True

@@ -9,7 +9,6 @@ AXIS_N 1 1 1
 AXIS_NAME axis-1 axis-2 axis-3
 AXIS_UNIT "number" "number" "number"
 AXIS_TYPE even even even
-
 PROPERTY 1 RockCode
 PROPERTY_CLASS 1 rockcode
 INTERPOLATION_METHOD  Block
@@ -36,6 +35,4 @@ PROP_ETYPE 1  IEEE
 PROP_FORMAT 1 RAW
 PROP_OFFSET 1 0
 PROP_FILE 1 tiny_voxet_test_file@@
-
-
-
+END
