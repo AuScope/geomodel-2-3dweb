@@ -34,6 +34,7 @@ def convert_file(daefile_str):
         convert_one_file(daefile_str)
     else:
         src_dir = os.path.dirname(daefile_str)
+        # pylint:disable=W0612
         file_name, file_ext = os.path.splitext(daefile_str)
         wildcard_str = os.path.join(src_dir, file_name+"_*.dae")
         collfile_list = glob.glob(wildcard_str)
@@ -45,6 +46,7 @@ def convert_one_file(daefile_str):
 
     :param daefile_str: filename to be converted
     '''
+    # pylint:disable=W0612
     file_name, file_ext = os.path.splitext(daefile_str)
     # COLLADA2GLTF does not like single filename without path as -o parameter
     file_name = os.path.abspath(file_name)

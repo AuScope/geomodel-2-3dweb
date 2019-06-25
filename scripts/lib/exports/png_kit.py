@@ -72,6 +72,7 @@ class PngKit:
             for x_val in range(0, geom_obj.vol_sz[0]):
                 for y_val in range(0, geom_obj.vol_sz[1]):
                     try:
+                        # pylint:disable=W0612
                         (r_val, g_val, b_val, a_val) = make_false_colour_tup(
                             geom_obj.vol_data[x_val][y_val][z_val],
                             geom_obj.get_min_data(),
