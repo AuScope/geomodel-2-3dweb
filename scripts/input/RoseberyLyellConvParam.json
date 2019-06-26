@@ -959,63 +959,90 @@
                 "FileNameKey": "Avebury.gltf",
                 "Insert": {
                     "display_name": "Avebury",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Hellyer.gltf",
                 "Insert": {
                     "display_name": "Hellyer",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Henty.gltf",
                 "Insert": {
                     "display_name": "Henty",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Mt_Lindsay.gltf",
                 "Insert": {
                     "display_name": "Mt Lindsay",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Queenstown.gltf",
                 "Insert": {
                     "display_name": "Queenstown",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Renison.gltf",
                 "Insert": {
                     "display_name": "Renison",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Rosebery.gltf",
                 "Insert": {
                     "display_name": "Rosebery",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Strahan.gltf",
                 "Insert": {
                     "display_name": "Strahan",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
                 "FileNameKey": "Zeehan.gltf",
                 "Insert": {
                     "display_name": "Zeehan",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             }
         ],
@@ -1082,105 +1109,135 @@
                 "FileNameKey": "352000mE_5320000mN.gltf",
                 "Insert": {
                     "display_name": "352000mE 5320000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "352000mE_5335000mN.gltf",
                 "Insert": {
                     "display_name": "352000mE 5335000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "352000mE_5355000mN.gltf",
                 "Insert": {
                     "display_name": "352000mE 5355000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "352000mE_5375000mN.gltf",
                 "Insert": {
                     "display_name": "352000mE 5375000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "352000mE_5395000mN.gltf",
                 "Insert": {
                     "display_name": "352000mE 5395000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "372000mE_5320000mN.gltf",
                 "Insert": {
                     "display_name": "372000mE 5320000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "372000mE_5335000mN.gltf",
                 "Insert": {
                     "display_name": "372000mE 5335000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "372000mE_5355000mN.gltf",
                 "Insert": {
                     "display_name": "372000mE 5355000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "372000mE_5375000mN.gltf",
                 "Insert": {
                     "display_name": "372000mE 5375000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "372000mE_5395000mN.gltf",
                 "Insert": {
                     "display_name": "372000mE 5395000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "397000mE_5320000mN.gltf",
                 "Insert": {
                     "display_name": "397000mE 5320000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "397000mE_5335000mN.gltf",
                 "Insert": {
                     "display_name": "397000mE 5335000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "397000mE_5355000mN.gltf",
                 "Insert": {
                     "display_name": "397000mE 5355000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "397000mE_5375000mN.gltf",
                 "Insert": {
                     "display_name": "397000mE 5375000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             },
             {
                 "FileNameKey": "397000mE_5395000mN.gltf",
                 "Insert": {
                     "display_name": "397000mE 5395000mN",
-                    "is_labelled": true
+                    "styling": {
+                        "is_labelled": true
+                    }
                 }
             }
         ],

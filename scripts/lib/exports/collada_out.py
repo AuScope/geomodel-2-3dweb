@@ -85,6 +85,8 @@ class ColladaOut():
         :param geomnode_list: list of pycollada 'GeometryNode' objects
         :param vrtx: VTRX object
         :param point_cnt: pyramid counter within this file
+        :param point_sz: size of pyramid
+        :param colour_num: integer index into mesh materials, determines colour of pyramid
         :returns: the pyramid's geometry label
         '''
 
@@ -165,6 +167,7 @@ class ColladaOut():
         '''
         cb_gen = colour_borehole_gen(pos, "borehole-{0}".format(borehole_label),
                                      colour_info_dict, ht_resol)
+        # pylint:disable=W0612
         for vert_list, indices, colour_idx, depth, colour_info, mesh_name in cb_gen:
             vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list),
                                                   ('X', 'Y', 'Z'))
