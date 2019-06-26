@@ -39,7 +39,7 @@ class ColladaKit:
     LINE_WIDTH = 1000
     ''' Width of lines created for GOCAD PL files '''
 
-    POINT_SIZE = 1000
+    POINT_SIZE = 300
     ''' Size of object used to represent point data '''
 
     def __init__(self, debug_level):
