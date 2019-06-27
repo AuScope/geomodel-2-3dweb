@@ -58,7 +58,11 @@ Here is an example conversion parameter file
             {
                 "FileNameKey": "Faults_Muskrat_Creek_0.gltf",
                 "Insert": {
-                    "display_name": "Fault 1"
+                    "display_name": "Fault 1",
+                    "styling": {
+                        "is_labelled": true,
+                        "scale": 2.0
+                    }
                 }
             },
             {
@@ -115,10 +119,17 @@ When displaying volume data, an optional colour table can be specified so that a
 
 The optional "GroupStructure" section is used to define what labels are seen in the website's sidebar, and to insert additional parameters into the model's configuration file
 
-The "GroupStructure" contains labels for the groups in the sidebar (i.e. "Surface Geology" and "Muskrat Creek Faults" are group names in the example above). Within each group
-there is an array of structures:
+The "GroupStructure" contains labels for the groups in the sidebar (i.e. "Surface Geology" and "Muskrat Creek Faults" are group names in the example above).
+Within each group there is an array of structures:
 
 * "FileNameKey" - name of the GLTF or PNG file for the model part
 * "Insert" - a structure to be inserted into the model configuration file for that model part
 
-Thus the "Insert" can be used to change the labels of the parts and make the website open a window when the model is clicked on, as in the "Surface Geology" example above
+Thus the "Insert" can be used to insert:
+
+* "display_name" - the label associated with the part in the sidebar
+* "3dobject_label" & "reference_url" - make the website open a URL in a new window when the model part is double clicked on (as in the "Surface Geology" example above)
+* "styling" - change the style of the model part:
+    1) "is_labelled" if true, then the object will be labelled in the scene with its "display_name". Default: false
+    2) "scale" will scale the object in the z-direction, 1.0 is unscaled, 2.0 will double its height etc. Default: 1.0
+
