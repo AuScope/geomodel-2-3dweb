@@ -248,7 +248,7 @@
     <geometry id="geometry0000000000" name="GPTEST-ALFORD-0000000000">
       <mesh>
         <source id="pointverts-array-0000000000">
-          <float_array count="15" id="pointverts-array-0000000000-array">753699.8 6248200 2040.698 754699.8 6249200 40.69782 754699.8 6247200 40.69782 752699.8 6247200 40.69782 752699.8 6249200 40.69782</float_array>
+          <float_array count="15" id="pointverts-array-0000000000-array">753699.8 6248200 640.6978 753999.8 6248500 40.69782 753999.8 6247900 40.69782 753399.8 6247900 40.69782 753399.8 6248500 40.69782</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000000-array" stride="3">
               <param name="X" type="float" />
@@ -269,7 +269,7 @@
     <geometry id="geometry0000000001" name="GPTEST-ANABAMA-0000000001">
       <mesh>
         <source id="pointverts-array-0000000001">
-          <float_array count="15" id="pointverts-array-0000000001-array">995391.1 6359926 2200.792 996391.1 6360926 200.7921 996391.1 6358926 200.7921 994391.1 6358926 200.7921 994391.1 6360926 200.7921</float_array>
+          <float_array count="15" id="pointverts-array-0000000001-array">995391.1 6359926 800.7921 995691.1 6360226 200.7921 995691.1 6359626 200.7921 995091.1 6359626 200.7921 995091.1 6360226 200.7921</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000001-array" stride="3">
               <param name="X" type="float" />
@@ -290,7 +290,7 @@
     <geometry id="geometry0000000002" name="GPTEST-ANABAMA_HILL-0000000002">
       <mesh>
         <source id="pointverts-array-0000000002">
-          <float_array count="15" id="pointverts-array-0000000002-array">988411 6367907 2304.272 989411 6368907 304.2718 989411 6366907 304.2718 987411 6366907 304.2718 987411 6368907 304.2718</float_array>
+          <float_array count="15" id="pointverts-array-0000000002-array">988411 6367907 904.2718 988711 6368207 304.2718 988711 6367607 304.2718 988111 6367607 304.2718 988111 6368207 304.2718</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000002-array" stride="3">
               <param name="X" type="float" />
@@ -311,7 +311,7 @@
     <geometry id="geometry0000000003" name="GPTEST-ANABAMA_HILL_EAST-0000000003">
       <mesh>
         <source id="pointverts-array-0000000003">
-          <float_array count="15" id="pointverts-array-0000000003-array">991451.6 6368738 2260.204 992451.6 6369738 260.2038 992451.6 6367738 260.2038 990451.6 6367738 260.2038 990451.6 6369738 260.2038</float_array>
+          <float_array count="15" id="pointverts-array-0000000003-array">991451.6 6368738 860.2038 991751.6 6369038 260.2038 991751.6 6368438 260.2038 991151.6 6368438 260.2038 991151.6 6369038 260.2038</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000003-array" stride="3">
               <param name="X" type="float" />
@@ -332,7 +332,7 @@
     <geometry id="geometry0000000004" name="GPTEST-BASSANIO-0000000004">
       <mesh>
         <source id="pointverts-array-0000000004">
-          <float_array count="15" id="pointverts-array-0000000004-array">1016219 6509553 2072 1017219 6510553 72.00034 1017219 6508553 72.00034 1015219 6508553 72.00034 1015219 6510553 72.00034</float_array>
+          <float_array count="15" id="pointverts-array-0000000004-array">1016219 6509553 672.0003 1016519 6509853 72.00034 1016519 6509253 72.00034 1015919 6509253 72.00034 1015919 6509853 72.00034</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000004-array" stride="3">
               <param name="X" type="float" />
@@ -353,7 +353,7 @@
     <geometry id="geometry0000000005" name="GPTEST-BENDIGO-0000000005">
       <mesh>
         <source id="pointverts-array-0000000005">
-          <float_array count="15" id="pointverts-array-0000000005-array">915573 6317679 2238.612 916573 6318679 238.6119 916573 6316679 238.6119 914573 6316679 238.6119 914573 6318679 238.6119</float_array>
+          <float_array count="15" id="pointverts-array-0000000005-array">915573 6317679 838.6119 915873 6317979 238.6119 915873 6317379 238.6119 915273 6317379 238.6119 915273 6317979 238.6119</float_array>
           <technique_common>
             <accessor count="5" source="#pointverts-array-0000000005-array" stride="3">
               <param name="X" type="float" />
