@@ -1068,39 +1068,39 @@
         ],
         "Grav model grids density": [
             {
-                "FileNameKey": "RL_Grav_model_grids_density_B_Forward@@.PNG",
-                "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 1"
-                }
-            },
-            {
-                "FileNameKey": "RL_Grav_model_grids_density_C_Residual_homogeneous@@.PNG",
-                "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 2"
-                }
-            },
-            {
                 "FileNameKey": "RL_Grav_model_grids_density_A_Observed@@.PNG",
                 "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 3"
+                    "display_name": "A Observed"
                 }
             },
             {
-                "FileNameKey": "RL_Grav_model_grids_density_D_Heterogeneous@@.PNG",
+                "FileNameKey": "RL_Grav_model_grids_density_B_Forward@@.PNG",
                 "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 4"
+                    "display_name": "B Forward"
                 }
             },
             {
                 "FileNameKey": "RL_Grav_model_grids_density_C_Homogeneous@@.PNG",
                 "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 5"
+                    "display_name": "C Homogeneous"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_C_Residual_homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "C Residual Homogeneous"
+                }
+            },
+            {
+                "FileNameKey": "RL_Grav_model_grids_density_D_Heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "D Heterogeneous"
                 }
             },
             {
                 "FileNameKey": "RL_Grav_model_grids_density_D_Residual_Heterogeneous@@.PNG",
                 "Insert": {
-                    "display_name": "RL GRAV MODEL GRIDS DENSITY 6"
+                    "display_name": "D Residual Heterogeneous"
                 }
             }
         ],
