@@ -152,8 +152,9 @@ class PROPS:
         return numpy.dtype('>'+self.data_type+str(self.data_sz))
 
 
-    def read_colour_table_csv(self, csv_file):
-        ''' Reads a colour table from CSV file for use in VOXET colours
+    def read_colour_table_csv(self, csv_file, transp_list):
+        ''' Reads an RGB colour table from CSV file for use in VOXET colours
+            CSV Format: col#1: integer index, col#2: R-value, col#3: G-value, col#4: B-value
             csv_file - filename of  CSV file to read, without path
             Sets the 'colour_map' and 'rock_label_table' class attibutes
             'colour_map' is a dict, key is integer, value is (R,G,B,A) tuple of floats
@@ -165,10 +166,13 @@ class PROPS:
             self.logger.error("Cannot find CSV file: %s", csv_file)
             sys.exit(1)
         try:
-            csvfilehandle = open(csv_file, 'r')
-            spamreader = csv.reader(csvfilehandle)
-            for row in spamreader:
-                col_tab[int(row[0])] = (float(row[2]), float(row[3]), float(row[4]), 1.0)
+            csv_filehandle = open(csv_file, 'r')
+            csv_reader = csv.reader(csv_filehandle)
+            for row in csv_reader:
+                a_val = 1.0
+                if int(row[0]) in transp_list:
+                    a_val = 0.0
+                col_tab[int(row[0])] = (float(row[2]), float(row[3]), float(row[4]), a_val)
                 lab_tab[int(row[0])] = row[1]
         except OSError as os_exc:
             self.logger.error("Cannot read CSV file %s %s", csv_file, os_exc)

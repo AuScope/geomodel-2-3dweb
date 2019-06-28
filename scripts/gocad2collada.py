@@ -71,7 +71,8 @@ class Gocad2Collada:
         # Coordinate Offsets are stored here, key is filename, value is (x,y,z)
         self.coord_offset = {}
 
-        # Colour table files: key is GOCAD filename, value is CSV colour table filename (w/o path)
+        # Colour table files: key is GOCAD filename, value is a tuple: (CSV colour table filename (w/o path),
+        #                     list of values to be rendered as transparent)
         self.ct_file_dict = {}
 
         # Process the parameter file
@@ -403,7 +404,8 @@ class Gocad2Collada:
             for ct_obj in param_dict['VoxetColourTables']:
                 colour_table = ct_obj['colour_table']
                 filename = ct_obj['filename']
-                self.ct_file_dict[filename] = colour_table
+                transp = ct_obj.get('render_transparent',[])
+                self.ct_file_dict[filename] = (colour_table, transp)
 
         # Optional labels for sidebars
         setattr(params_obj, 'grp_struct_dict', {})

@@ -46,8 +46,8 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
     :param base_xyz: base coordinates as (x,y,z) tuple added to all 3d coordinates
     :param debug_lvl: debug level for debug output e.g. logging.DEBUG
     :param nondefault_coords: optional flag, supports non-default coordinates, default is False
-    :param ct_file_dict: a dictionary of files which contain colour tables
-                        key is GOCAD filename, val is CSV file
+    :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,
+                        list of values to be rendered transparent) key is GOCAD filename 
     :returns: a list of (ModelGeometries, STYLE, METADATA) objects
     '''
     LOCAL_LOGGER.setLevel(debug_lvl)
@@ -147,8 +147,8 @@ class GocadImporter():
         :param group_name: optional string, name of group of this gocad file is within a group,
                            default is ""
         :param nondefault_coords: optional flag, supports non-default coordinates, default is False
-        :param ct_file_dict: a dictionary of files which contain colour tables
-                             key is GOCAD filename, val is CSV file
+        :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,
+                            list of values to be rendered transparent) key is GOCAD filename 
         '''
         super().__init__()
         # Set up logging, use an attribute of class name so it is only called once
@@ -175,7 +175,7 @@ class GocadImporter():
         ''' A dictionary of files which contain colour tables
             key is GOCAD filename, val is CSV file
         '''
-        self.logger.debug("self.ct_file_dict = %s", self.ct_file_dict)
+        self.logger.debug("self.ct_file_dict = %s", repr(self.ct_file_dict))
 
         self.stop_on_exc = stop_on_exc
 
@@ -890,8 +890,8 @@ class GocadImporter():
             bin_file = os.path.basename(prop_obj.file_name)
             if bin_file in self.ct_file_dict:
                 csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name),
-                                             self.ct_file_dict[bin_file])
-                prop_obj.read_colour_table_csv(csv_file_path)
+                                             self.ct_file_dict[bin_file][0])
+                prop_obj.read_colour_table_csv(csv_file_path, self.ct_file_dict[bin_file][1])
                 self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
                 self.logger.debug("prop_obj.rock_label_table = %s", repr(prop_obj.rock_label_table))
 

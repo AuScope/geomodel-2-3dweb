@@ -58,7 +58,8 @@
     "VoxetColourTables": [
         {
             "filename": "Rosebery_Lyell_geophysics_lithologies@@",
-            "colour_table": "RL_Reclassification.csv"
+            "colour_table": "RL_Reclassification.csv",
+            "render_transparent": [1]
         }
     ],
     "GroupStructure": {
@@ -1243,39 +1244,39 @@
         ],
         "Mag model grids susc": [
             {
-                "FileNameKey": "RL_Mag_model_grids_susc_B_Forward@@.PNG",
-                "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 1"
-                }
-            },
-            {
-                "FileNameKey": "RL_Mag_model_grids_susc_C_Residual_Homogeneous@@.PNG",
-                "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 2"
-                }
-            },
-            {
                 "FileNameKey": "RL_Mag_model_grids_susc_A_Observed@@.PNG",
                 "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 3"
+                    "display_name": "A Observed"
                 }
             },
             {
-                "FileNameKey": "RL_Mag_model_grids_susc_D_heterogeneous@@.PNG",
+                "FileNameKey": "RL_Mag_model_grids_susc_B_Forward@@.PNG",
                 "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 4"
+                    "display_name": "B Forward"
                 }
             },
             {
                 "FileNameKey": "RL_Mag_model_grids_susc_C_Homogeneous@@.PNG",
                 "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 5"
+                    "display_name": "C Homogeneous"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_C_Residual_Homogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "C Residual Homogeneous"
+                }
+            },
+            {
+                "FileNameKey": "RL_Mag_model_grids_susc_D_heterogeneous@@.PNG",
+                "Insert": {
+                    "display_name": "D Heterogeneous"
                 }
             },
             {
                 "FileNameKey": "RL_Mag_model_grids_susc_E_Residual_heterogeneous@@.PNG",
                 "Insert": {
-                    "display_name": "RL MAG MODEL GRIDS SUSC 6"
+                    "display_name": "E Residual Heterogeneous"
                 }
             }
         ],
