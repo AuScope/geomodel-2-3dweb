@@ -1,0 +1,51 @@
+GOCAD Voxet 1 
+HEADER {
+name: RGBA_voxet
+ascii: off
+sections: 3 1 0 0 2 0 0 3 1 0
+painted: on
+}
+GOCAD_ORIGINAL_COORDINATE_SYSTEM
+NAME Default
+PROJECTION Unknown
+DATUM Unknown
+AXIS_NAME X Y Z
+AXIS_UNIT m m m
+ZPOSITIVE Elevation
+END_ORIGINAL_COORDINATE_SYSTEM
+CLASSIFICATION "blah blah" Seismic "blah blah"
+AXIS_O 384388.6875 7707808.859375 0 
+AXIS_U 137114.469 0 0 
+AXIS_V 0 82080.3984 0 
+AXIS_W 0 0 0 
+AXIS_MIN 0 0 0 
+AXIS_MAX 0.00970472861 0.00965850335 1 
+AXIS_N 48 29 1 
+AXIS_NAME axis-1 axis-2 axis-3
+AXIS_UNIT "number" "number" "number" 
+AXIS_TYPE even even even
+
+
+
+
+PROPERTY 1 picture
+PROPERTY_CLASS 1 picture
+PROPERTY_KIND 1 unknown
+PROPERTY_CLASS_HEADER 1 picture {
+last_selected_folder: Property
+colormap: standard
+*cnp*colormap_use: false
+*colormap*nodata*transparency: 0
+
+}
+PROPERTY_SUBCLASS 1 
+PROP_ORIGINAL_UNIT 1 none
+PROP_UNIT 1 unitless
+PROP_STORAGE_TYPE 1 RGBA
+PROP_ESIZE 1 4
+PROP_SIGNED 1 0
+PROP_ETYPE 1  IEEE
+PROP_FORMAT 1 RAW
+PROP_OFFSET 1 0
+PROP_FILE 1 RGBA_voxet@@
+END

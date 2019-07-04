@@ -47,7 +47,7 @@ class PROPS:
         '''
 
         self.data_type = "f"
-        ''' Type of data in binary file e.g. 'h' = short 2-byte int, 'f' = float, 'b' - byte
+        ''' Type of data in binary file e.g. 'h' = short 2-byte int, 'f' = float, 'b' - byte, 'rgba' - 4-byte RGBA
         '''
 
         self.signed_int = False
@@ -119,7 +119,7 @@ class PROPS:
 
     def get_str_data_type(self):
         ''' Returns a string form of the data type of the volume data
-            e.g. "INT_16", "FLOAT_32", "UINT_8"
+            e.g. "INT_16", "FLOAT_32", "UINT_8", "RGBA"
         '''
         if self.data_type == 'f' and self.data_sz == 4:
             return "FLOAT_32"
@@ -131,12 +131,14 @@ class PROPS:
             if self.signed_int:
                 return "INT_8"
             return "UINT_8"
+        if self.data_type == 'rgba':
+            return "RGBA" 
         return ""
 
 
     def make_numpy_dtype(self):
         ''' Returns a string that can be passed to 'numpy' to read a binary file
-            It takes the 'data_type' of 'f', 'b', h'
+            It takes the 'data_type' of 'f', 'b', h' & 'rgba'
         '''
         # Prepare 'numpy' binary float integer signed/unsigned data types
         # Using '>' to tell 'numpy' that it is big-endian
@@ -147,6 +149,10 @@ class PROPS:
                 return numpy.dtype('>'+self.data_type.upper())
 
             return numpy.dtype('>'+self.data_type)
+
+        # R,G,B,A 4-byte array of colour
+        if self.data_type == 'rgba':
+            return numpy.dtype([('r', numpy.uint8), ('g', numpy.uint8), ('b', numpy.uint8), ('a', numpy.uint8)])
 
         # Floating point i.e. data_type = 'f'
         return numpy.dtype('>'+self.data_type+str(self.data_sz))

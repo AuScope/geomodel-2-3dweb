@@ -28,7 +28,7 @@ def parse_property_header(self, prop_obj, line_str):
     elif name_str == 'COLORMAP':
         prop_obj.colourmap_name = value_str
         self.logger.debug("prop_obj.colourmap_name = %s", prop_obj.colourmap_name)
-    # Read in the colour map for this property
+    # Read in the colour map for this property, format is: idx1 R1 G1 B1 idx2 R2 G2 B2 ...
     elif name_str in ('*COLORMAP*'+ prop_obj.colourmap_name + '*COLORS', \
                       '*' + prop_obj.colourmap_name + '*ROCK_COLORS'):
         lut_arr = value_str.split(' ')
@@ -36,7 +36,7 @@ def parse_property_header(self, prop_obj, line_str):
             try:
                 prop_obj.colour_map[int(lut_arr[idx])] = (float(lut_arr[idx+1]),
                                                           float(lut_arr[idx+2]),
-                                                          float(lut_arr[idx+3]))
+                                                          float(lut_arr[idx+3]), 1.0)
                 self.logger.debug("prop_obj.colour_map = %s", prop_obj.colour_map)
             except (IndexError, OverflowError, ValueError) as exc:
                 self.handle_exc(exc)

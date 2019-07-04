@@ -49,41 +49,57 @@ class PngKit:
         colour_arr = array.array("B")
         z_val = geom_obj.vol_sz[2]-1
         pixel_cnt = 0
-        colour_map = style_obj.get_colour_table()
-        self.logger.debug("style_obj.get_colour_table() = %s", repr(colour_map))
-        self.logger.debug("geom_obj.get_min_data() = %s", repr(geom_obj.get_min_data()))
-        self.logger.debug("geom_obj.get_max_data() = %s", repr(geom_obj.get_max_data()))
-        # If colour table is provided within source file, use it
-        if colour_map:
-            self.logger.debug("Using style colour map")
+        # Volume data are RGBA, data is stored in geom_obj's xyz_data
+        if geom_obj.vol_data_type == 'RGBA':
+            self.logger.debug("Using in-situ RGBA data")
+            xyz_data = geom_obj.get_xyz_data()
             for x_val in range(0, geom_obj.vol_sz[0]):
                 for y_val in range(0, geom_obj.vol_sz[1]):
                     try:
-                        (r_val, g_val, b_val) = colour_map[int(
-                            geom_obj.vol_data[x_val][y_val][z_val])]
+                        pixel_colour = xyz_data.get((x_val, y_val, z_val), (0, 0, 0, 0))
                     except ValueError:
-                        (r_val, g_val, b_val) = (0.0, 0.0, 0.0)
-                    pixel_colour = [int(r_val*255.0), int(g_val*255.0), int(b_val*255.0)]
-                    colour_arr.fromlist(pixel_colour)
+                        pixel_colour = (0, 0, 0, 0)
+                    colour_arr.fromlist(list(pixel_colour))
                     pixel_cnt += 1
-        # Else use a false colour map
-        else:
-            self.logger.debug("Using false colour map")
-            for x_val in range(0, geom_obj.vol_sz[0]):
-                for y_val in range(0, geom_obj.vol_sz[1]):
-                    try:
-                        # pylint:disable=W0612
-                        (r_val, g_val, b_val, a_val) = make_false_colour_tup(
-                            geom_obj.vol_data[x_val][y_val][z_val],
-                            geom_obj.get_min_data(),
-                            geom_obj.get_max_data())
-                    except ValueError:
-                        (r_val, g_val, b_val, a_val) = (0.0, 0.0, 0.0, 0.0)
-                    pixel_colour = [int(r_val*255.0), int(g_val*255.0), int(b_val*255.0)]
-                    colour_arr.fromlist(pixel_colour)
-                    pixel_cnt += 1
+        # Volume data are floats, stored in geom_obj's vol_data
+        else:  
+            colour_map = style_obj.get_colour_table()
+            self.logger.debug("style_obj.get_colour_table() = %s", repr(colour_map))
+            self.logger.debug("geom_obj.get_min_data() = %s", repr(geom_obj.get_min_data()))
+            self.logger.debug("geom_obj.get_max_data() = %s", repr(geom_obj.get_max_data()))
+            # If colour table is provided within source file, use it
+            if colour_map:
+                self.logger.debug("Using style colour map")
+                for x_val in range(0, geom_obj.vol_sz[0]):
+                    for y_val in range(0, geom_obj.vol_sz[1]):
+                        try:
+                            val = int(geom_obj.vol_data[x_val][y_val][z_val])
+                            (r_val, g_val, b_val, a_val) = colour_map[val]
+                            pixel_colour = [int(r_val*255.0), int(g_val*255.0), int(b_val*255.0),
+                                            int(a_val*255.0)]
+                        except ValueError:
+                            pixel_colour = [0, 0, 0, 0]
+                        colour_arr.fromlist(pixel_colour)
+                        pixel_cnt += 1
+            # Else use a false colour map
+            else:
+                self.logger.debug("Using false colour map")
+                for x_val in range(0, geom_obj.vol_sz[0]):
+                    for y_val in range(0, geom_obj.vol_sz[1]):
+                        try:
+                            # pylint:disable=W0612
+                            (r_val, g_val, b_val, a_val) = make_false_colour_tup(
+                                geom_obj.vol_data[x_val][y_val][z_val],
+                                geom_obj.get_min_data(),
+                                geom_obj.get_max_data())
+                            pixel_colour = [int(r_val*255.0), int(g_val*255.0), int(b_val*255.0),
+                                            int(a_val*255.0)]
+                        except ValueError:
+                            pixel_colour = [0, 0, 0, 0]
+                        colour_arr.fromlist(pixel_colour)
+                        pixel_cnt += 1
 
-        img = PIL.Image.frombytes('RGB', (geom_obj.vol_sz[1], geom_obj.vol_sz[0]),
+        img = PIL.Image.frombytes('RGBA', (geom_obj.vol_sz[1], geom_obj.vol_sz[0]),
                                   colour_arr.tobytes())
         self.logger.info("Writing PNG file: %s.PNG", file_name)
         img.save(file_name+".PNG")

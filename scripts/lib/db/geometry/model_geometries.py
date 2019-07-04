@@ -83,8 +83,8 @@ class ModelGeometries:
         '''
 
         self.vol_data_type = "FLOAT_32"
-        ''' Type of data in 'vol_data' e.g. 'FLOAT_32' 'INT_16'
-            NB: Always stored in big-endian fashion
+        ''' Type of data in 'vol_data'/'_xyz_data' e.g. 'FLOAT_32' 'INT_16', 'RGBA'
+            NB: If >8 bits, always stored in big-endian fashion
         '''
 
         self._xyz_data = []

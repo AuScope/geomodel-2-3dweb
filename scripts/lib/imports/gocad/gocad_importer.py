@@ -622,7 +622,6 @@ class GocadImporter():
 
                 # The type of non-float value in binary file: OCTET, SHORT, RGBA
                 # IF this is present, then it is assumed not to be floating point
-                # FIX ME: Must support 'RGBA' storage type too
                 elif field[0] == "PROP_STORAGE_TYPE":
                     # Single byte integer
                     if field[2] == "OCTET":
@@ -632,8 +631,7 @@ class GocadImporter():
                         self.prop_dict[field[1]].data_type = "h"
                     # Colour data
                     elif field[2] == "RGBA":
-                        self.logger.error("Unsupported storage type: RGBA")
-                        sys.exit(1)
+                        self.prop_dict[field[1]].data_type = "rgba"
                     else:
                         self.logger.error("Unknown type %s", field[2])
                         sys.exit(1)
@@ -821,6 +819,8 @@ class GocadImporter():
         if prop_idx:
             prop = self.prop_dict[prop_idx]
             geom_obj.vol_data = prop.data_3d
+            if prop.data_xyz:
+                geom_obj.add_xyz_data(prop.data_xyz)
             geom_obj.vol_data_type = prop.get_str_data_type()
             geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                prop.no_data_marker)
@@ -926,13 +926,20 @@ class GocadImporter():
                 for z_val in range(self.vol_sz[2]):
                     for y_val in range(self.vol_sz[1]):
                         for x_val in range(self.vol_sz[0]):
-                            converted, fltp = self.parse_float(f_arr[fl_idx],
+                            # If numeric
+                            if prop_obj.data_type != 'rgba':
+                                converted, data_val = self.parse_float(f_arr[fl_idx],
                                                                prop_obj.no_data_marker)
-                            # self.logger.debug("fp[%d, %d, %d] = %f", x_val,y_val,z_val, fp)
+                                if not converted:
+                                    continue
+                                prop_obj.assign_to_3d(x_val, y_val, z_val, data_val)
+                            # If RGBA
+                            else:
+                                data_val = f_arr[fl_idx]
+                                prop_obj.assign_to_xyz((x_val, y_val, z_val), data_val)
+
+                            # self.logger.debug("fp[%d, %d, %d] = %s", x_val, y_val, z_val, repr(data_val))
                             fl_idx += 1
-                            if not converted:
-                                continue
-                            prop_obj.assign_to_3d(x_val, y_val, z_val, fltp)
 
                             # Calculate the XYZ coords and their maxs & mins
                             x_coord = self.axis_o[0]+ \

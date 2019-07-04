@@ -260,7 +260,7 @@ gocad_obj.flags_offset == 0 and gocad_obj.flags_file == './3D_geology_flags@@'""
 gocad_obj.rock_label_idx['1'][2] == 'LLEWELLYN_REPEAT' and \
 gocad_obj.rock_label_idx['1'][13] == 'DOUBLECROSSING' and \
 gocad_obj.prop_dict['1'].colourmap_name == 'ROCKCODE' and \
-gocad_obj.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922)""")
+gocad_obj.prop_dict['1'].colour_map[9]==(0.909804,0.564706,0.203922,1.0)""")
 
     #
     # Voxet data
