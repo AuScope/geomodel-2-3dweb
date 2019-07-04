@@ -93,6 +93,20 @@ echo -n "Convert single layer VOXET to PNG test, without colour table: "
 compare_and_print "$CWD/output/PNGTestNoCT@@.PNG" "$CWD/golden/PNGTestNoCT.PNG"
 
 
+
+##########################################################################################
+# Voxet with single layer RGBA values convert to PNG test
+##########################################################################################
+
+echo -n "Convert single layer RGBA voxet to PNG test: "
+
+./gocad2collada.py -g -f $CWD/output $CWD/input/RGBA_voxet.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
+
+# Check that conversion was correct
+compare_and_print "$CWD/output/RGBA_voxet@@.PNG" "$CWD/golden/RGBA_voxet.PNG"
+
+
 ##########################################################################################
 # Voxet with 3 binary files conversion & output config test
 ##########################################################################################
