@@ -1,10 +1,10 @@
-'''
-A rough implementation of a subset of the 3DPS standard V1.0
+''' A rough implementation of a subset of the 3DPS standard V1.0
  (http://docs.opengeospatial.org/is/15-001r4/15-001r4.html)
  and WFS v2.0 standard (http://www.opengeospatial.org/standards/wfs)
 
  Currently this is used to display boreholes in the geomodels website.
- In future, it will be expanded to other objects
+ In future, it will be expanded to other objects, add in a database
+ and put in a more structured and secure framework, e.g. django
 
  To get information upon double click on object:
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId=EWHDDH01_185_0&layers=boreholes&format=application%2Fjson
@@ -633,7 +633,7 @@ def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, 
         outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
 
     :param start_response: callback function for initialising HTTP response
-    :param url_kvp key-value pair dictionary of URL parameters, format: 'key': ['val1','val2' ..]
+    :param url_kvp: key-value pair dictionary of URL parameters, format: 'key': ['val1','val2' ..]
     :returns: byte array HTTP response
     '''
 
@@ -688,17 +688,16 @@ def convert(start_response, model_name, id_str, gocad_list):
     Call the conversion code to convert a GOCAD string to GLTF
 
     :param gocad_list: GOCAD file lines as a list of strings
+    :returns: a response that can be returned from the 'application()' function
     '''
     base_xyz = (0.0, 0.0, 0.0)
     gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
                               nondefault_coords=NONDEF_COORDS)
     # First convert GOCAD to GSM
     is_ok, gsm_list = gocad_obj.process_gocad('drag_and_drop', 'drag_and_drop.ts', gocad_list)
-    # LOGGER.error("gsm_list = %s", repr(gsm_list))
     if is_ok and gsm_list:
         # Then, output GSM as GLTF ...
         gsm_obj = gsm_list[0]
-        #LOGGER.error("gsm_obj = %s", repr(gsm_obj))
         geom_obj, style_obj, metadata_obj = gsm_obj
         assimp_obj = AssimpKit(DEBUG_LVL)
         assimp_obj.start_scene()
@@ -706,6 +705,182 @@ def convert(start_response, model_name, id_str, gocad_list):
         blob_obj = assimp_obj.end_scene("")
         return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
     return make_str_response(start_response, ' ')
+
+
+
+
+def process3DPS(url_kvp, request, model_name, start_response):
+    '''
+    Process an OCG 3PS request
+    Roughly trying to conform to 3DPS standard
+
+    :param request: string, 3DPS request type string
+    :param model_name: name of model
+    :param start_response: function call required to create a response
+    :returns: a response that can be returned from the 'application()' function
+    '''
+    if request.lower() == 'getcapabilities':
+        return make_getcap_response(start_response, model_name, G_PARAM_DICT)
+
+    # Check for version
+    version = get_val('version', url_kvp)
+    if version == '':
+        return make_json_exception_response(start_response, 'Unknown',
+                                            'MissingParameterValue',
+                                            'missing version parameter')
+    if version != '1.0':
+        return make_json_exception_response(start_response, 'Unknown',
+                                                'OperationProcessingFailed',
+                                                'Incorrect version, try "1.0"')
+
+    # Check request type
+    if request in ['getscene', 'getview', 'getfeatureinfobyray',
+                           'getfeatureinfobyposition']:
+        return make_json_exception_response(start_response,
+                                            get_val('version', url_kvp),
+                                            'OperationNotSupported',
+                                            'Request type is not implemented',
+                                            request.lower())
+
+    if request == 'getfeatureinfobyobjectid':
+        return make_getfeatinfobyid_response(start_response, url_kvp, model_name)
+
+    if request == 'getresourcebyid':
+        return make_getresourcebyid_response(start_response, url_kvp, model_name,
+                                                 G_PARAM_DICT, G_WFS_DICT)
+
+    # Unknown request
+    if request != '':
+        return make_json_exception_response(start_response,
+                                                get_val('version', url_kvp),
+                                                'OperationNotSupported',
+                                                'Unknown request type')
+
+    # Missing request
+    return make_json_exception_response(start_response,
+                                        get_val('version', url_kvp),
+                                        'MissingParameterValue',
+                                        'Missing request parameter')
+
+
+
+def processWFS(url_kvp, request, model_name, start_response):
+    '''
+    Process an OCG WFS request
+
+    :param url_kvp: dict of parameters extracted from the incoming URL
+    :param request: string, WFS request type string
+    :param model_name: name of model
+    :param start_response: function call required to create a response
+    :returns: a response that can be returned from the 'application()' function
+    '''
+
+    # Check for version 2.0
+    version = get_val('version', url_kvp)
+    LOGGER.debug('version = %s', version)
+    if version == '':
+        return make_json_exception_response(start_response, 'Unknown',
+                                            'MissingParameterValue',
+                                            'Missing version parameter')
+    if version != '2.0':
+        return make_json_exception_response(start_response, 'Unknown',
+                                            'OperationProcessingFailed',
+                                            'Incorrect version, try "2.0"')
+
+    # GetFeature
+    if request == 'getpropertyvalue':
+        return make_getpropvalue_response(start_response, url_kvp, model_name,
+                                          G_PARAM_DICT, G_WFS_DICT)
+    return make_json_exception_response(start_response, get_val('version', url_kvp),
+                                        'OperationNotSupported', 'Unknown request name')
+
+
+def processCONVERT(environ, url_kvp, model_name, start_response):
+    '''
+    Process a GOCAD to GLTF conversion request
+
+    :param environ: WSGI 'environ' variable
+    :param url_kvp: dict of parameters extracted from the incoming URL
+    :param model_name: name of model
+    :param start_response: function call required to create a response
+    :returns: a response that can be returned from the 'application()' function
+    '''
+    id_str = get_val('id', url_kvp)
+    resp_lines = environ['wsgi.input'].readlines()
+    resp_list = []
+    for resp_str in resp_lines:
+        resp_list.append(resp_str.decode())
+    return convert(start_response, model_name, id_str, resp_list)
+
+
+
+def processWMS(environ, url_kvp, start_response):
+    '''
+    Processes an OCG WMS request by proxying
+
+    :param environ: WSGI 'environ' variable
+    :param url_kvp: dict of parameters extracted from the incoming URL
+    :param start_response: function call required to create a response
+    :returns: a response that can be returned from the 'application()' function
+    '''
+    url_str = get_val('wmsurl', url_kvp)
+    if not checkWMS('wmsurl', url_str):
+        return make_str_response(start_response, ' ')
+
+    # Only add in WMS parameters if they are legitimate
+    for key in url_kvp.keys():
+        val = url_kvp[key][0]
+        if key not in ['service', 'wmsurl'] and checkWMS(key, val):
+            url_str += "&{0}={1}".format(key, val)
+
+    # Make the WMS request
+    req = urllib.request.Request(url_str)
+    with urllib.request.urlopen(req) as resp:
+        blob = resp.read()
+    blob_sz = len(blob)
+
+    # Send back the WMS image response
+    response_headers = [('Content-type', 'image/png'),
+                        ('Content-Length', str(blob_sz)),
+                        ('Connection', 'keep-alive')]
+    start_response('200 OK', response_headers)
+    return [blob]
+
+
+def checkWMS(key, val):
+    '''
+    Checks that a WMS URL parameter is legitimate
+    NB: Does not accept any style other than empty or 'default'
+
+    :param key: key string
+    :param val: value string
+    :returns: True if this is a legitimate WMS URL parameter
+    '''
+    lkey = key.lower()
+    lval = val.lower()
+    if lkey == 'wmsurl':
+        if (lval[:7] == 'http://' or lval[:8] == 'https://') and \
+           lval[-12:] == '?service=wms' and lval.count('?') == 1:
+            return any(c in 'abcdefghijklmnopqrstuvwxyz_-?:/.=' for c in lval)
+    if lkey == 'layers':
+        return any(c in 'abcdefghijklmnopqrstuvwxyz_-' for c in lval)
+    if lkey == 'request' and lval.isalpha():
+        return True
+    if lkey == 'version':
+        return any(c in '1234567890.' for c in lval)
+    if lkey == 'styles' and lval in ['default', '']:
+        return True
+    if lkey == 'format' and lval in ['image/png', 'image/jpeg']:
+        return True
+    if lkey in ['transparent', 'displayoutsidemaxextent'] and lval in ['true','false']:
+        return True
+    if lkey == 'bbox':
+        return any(c in '1234567890,.-' for c in lval)
+    if lkey == 'crs' and lval[:5] == 'epsg:' and lval[5:].isnumeric():
+        return True
+    if lkey in ['height','width'] and lval.isnumeric():
+        return True
+    return False
 
 
 '''
@@ -742,7 +917,7 @@ def application(environ, start_response):
     path_bits.pop(0)
 
     # If there is 'api' remove it, so to deal with both '/api/<model_name>?service=blah'
-    # and '/<model_name?service=blah'
+    # and '/<model_name>?service=blah'
     if path_bits[0] == 'api':
         path_bits.pop(0)
 
@@ -753,93 +928,41 @@ def application(environ, start_response):
 
     # Expecting a path '/<model_name>?service=<service_name>&param1=val1'
     if len(path_bits) == 1:
+        # Service name must be first
+        if environ['QUERY_STRING'][:8] != 'service=':
+            return make_str_response(start_response, ' ')
+
         url_params = urllib.parse.parse_qs(environ['QUERY_STRING'])
         # Convert all the URL parameter names to lower case with merging
         url_kvp = {}
         for key, val in url_params.items():
             url_kvp.setdefault(key.lower(), [])
             url_kvp[key.lower()] += val
-        service_name = get_val('service', url_kvp)
-        request = get_val('request', url_kvp)
+        service_name = get_val('service', url_kvp).lower()
+        request = get_val('request', url_kvp).lower()
 
         LOGGER.debug('service_name = %s', repr(service_name))
         LOGGER.debug('request = %s', repr(request))
 
-        # Roughly trying to conform to 3DPS standard
-        if service_name.lower() == '3dps':
-            if request.lower() == 'getcapabilities':
-                return make_getcap_response(start_response, model_name, G_PARAM_DICT)
-
-            # Check for version
-            version = get_val('version', url_kvp)
-            if version == '':
-                return make_json_exception_response(start_response, 'Unknown',
-                                                    'MissingParameterValue',
-                                                    'missing version parameter')
-            if version != '1.0':
-                return make_json_exception_response(start_response, 'Unknown',
-                                                    'OperationProcessingFailed',
-                                                    'Incorrect version, try "1.0"')
-
-            # Check request type
-            if request.lower() in ['getscene', 'getview', 'getfeatureinfobyray',
-                                   'getfeatureinfobyposition']:
-                return make_json_exception_response(start_response,
-                                                    get_val('version', url_kvp),
-                                                    'OperationNotSupported',
-                                                    'Request type is not implemented',
-                                                    request.lower())
-
-            if request.lower() == 'getfeatureinfobyobjectid':
-                return make_getfeatinfobyid_response(start_response, url_kvp, model_name)
-
-            if request.lower() == 'getresourcebyid':
-                return make_getresourcebyid_response(start_response, url_kvp, model_name,
-                                                     G_PARAM_DICT, G_WFS_DICT)
-
-            # Unknown request
-            if request != '':
-                return make_json_exception_response(start_response,
-                                                    get_val('version', url_kvp),
-                                                    'OperationNotSupported',
-                                                    'Unknown request type')
-
-            # Missing request
-            return make_json_exception_response(start_response,
-                                                get_val('version', url_kvp),
-                                                'MissingParameterValue',
-                                                'Missing request parameter')
+        # 3DPS request
+        if service_name == '3dps':
+            return process3DPS(url_kvp, request, model_name, start_response)
 
         # WFS request
-        if service_name.lower() == 'wfs':
-            # Check for version 2.0
-            version = get_val('version', url_kvp)
-            LOGGER.debug('version = %s', version)
-            if version == '':
-                return make_json_exception_response(start_response, 'Unknown',
-                                                    'MissingParameterValue',
-                                                    'Missing version parameter')
-            if version != '2.0':
-                return make_json_exception_response(start_response, 'Unknown',
-                                                    'OperationProcessingFailed',
-                                                    'Incorrect version, try "2.0"')
+        if service_name == 'wfs':
+            return processWFS(url_kvp, request, model_name, start_response)
 
-            # GetFeature
-            if request.lower() == 'getpropertyvalue':
-                return make_getpropvalue_response(start_response, url_kvp, model_name,
-                                                  G_PARAM_DICT, G_WFS_DICT)
-            return make_json_exception_response(start_response, get_val('version', url_kvp),
-                                                'OperationNotSupported', 'Unknown request name')
-
+        # Convert a GOCAD file to GLTF
         # Expecting a path '/<model_name>?service=CONVERT&&id=HEX_STRING'
-        if service_name.lower() == 'convert':
-            id_str = get_val('id', url_kvp)
-            resp_lines = environ['wsgi.input'].readlines()
-            resp_list = []
-            for resp_str in resp_lines:
-                resp_list.append(resp_str.decode())
-            return convert(start_response, model_name, id_str, resp_list)
+        if service_name == 'convert':
+            return processCONVERT(environ, url_kvp, model_name, start_response)
 
+        # Simple WMS proxy
+        # Expecting a path '/<model_name>?service=WMS&wmsurl=XXX
+        if service_name == 'wms':
+            return processWMS(environ, url_kvp, start_response)
+
+        # No service
         if service_name != '':
             return make_json_exception_response(start_response, get_val('version', url_kvp),
                                                 'OperationNotSupported', 'Unknown service name')
