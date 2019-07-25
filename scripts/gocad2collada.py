@@ -407,6 +407,12 @@ class Gocad2Collada:
                 transp = ct_obj.get('render_transparent',[])
                 self.ct_file_dict[filename] = (colour_table, transp)
 
+        # Optional WMS services
+        setattr(params_obj, 'wms_services', [])
+        if 'WMSServices' in param_dict:
+            for wms_svc in param_dict['WMSServices']:
+                params_obj.wms_services.append(wms_svc)
+
         # Optional labels for sidebars
         setattr(params_obj, 'grp_struct_dict', {})
         if 'GroupStructure' in param_dict:

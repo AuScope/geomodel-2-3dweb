@@ -96,6 +96,14 @@ def create_json_config(model_dict_list, output_filename, dest_dir, geo_extent, p
             else:
                 config_dict["groups"]["Not Grouped"].append(model)
 
+        # Are there WMS layers?
+        if hasattr(params, 'wms_services'):
+            for layer in params.wms_services:
+                config_dict['groups']['WMS Layers'].append({ **layer,
+                                                            "type": "WMSLayer",
+                                                            "displayed": True,
+                                                            "include": True})
+
     # Is there a proj4 definition?
     if hasattr(params, 'proj4_defn'):
         config_dict["properties"]["proj4_defn"] = params.proj4_defn

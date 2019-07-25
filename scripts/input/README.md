@@ -43,6 +43,14 @@ Here is an example conversion parameter file
                 "colour_table": "3D_geology_lithology_colours.csv"
         }
     ],
+    "WMSServices": [
+        {
+            "display_name": "Lithostratigraphy",
+            "model_url": "http://blah.gov/gis/services/WMSServer",
+            "name": "Blah_Lithostratigraphy",
+            "version": "1.3.0"
+        }    
+    ],
     "GroupStructure": {
         "Surface Geology": [
             {
@@ -115,7 +123,14 @@ When displaying volume data, an optional colour table can be specified so that a
 
 ```1,"RockySupersuite",0.968627,0.505882,0.705882```
 
-### 5. GroupStructure
+### 5. WMS Services
+
+This is an optional section that specifies a WMS layer that can be loaded onto the model. 
+
+* 'display_name' is the label in the website's sidebar for the layer, appearing in the "WMS Layers" group. 
+* 'model_url', 'name', 'version' are WMS URL parameters
+
+### 6. GroupStructure
 
 The optional "GroupStructure" section is used to define what labels are seen in the website's sidebar, and to insert additional parameters into the model's configuration file
 
