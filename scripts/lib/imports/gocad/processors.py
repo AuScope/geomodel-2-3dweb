@@ -95,7 +95,8 @@ def process_ascii_well_path(self, line_gen, field):
     ''' Process ascii well path header
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
-    :returns: a boolean, is True iff we are at last line
+    :returns: a boolean, is True iff we are at last line; well_path, list of 
+             coordinates of well path; marker_list, list of markers
     '''
     self.logger.debug("START ascii well path, field = %s %s", repr(field[0]), repr(field[1]))
     zm_units = 'M'

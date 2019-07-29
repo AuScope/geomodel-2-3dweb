@@ -493,7 +493,7 @@ class GocadImporter():
                     # All well files
                     if field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
                         self.logger.debug("Processing ASCII well path")
-                        field, field_raw, is_last = self.process_ascii_well_path(line_gen, field)
+                        is_last, well_path, marker_list = self.process_ascii_well_path(line_gen, field)
                         retry = True
 
                     # Well files with well curve block
