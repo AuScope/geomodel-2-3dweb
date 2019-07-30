@@ -14,7 +14,7 @@ mkdir -p api/data/cache
 cp $1 api/data
 
 # Assemble archive
-git archive -o $API_TAR --prefix=api/ HEAD ./lib ./make_boreholes.py ./index.py ./input
+git archive -o $API_TAR --prefix=./api/ HEAD ./lib ./make_boreholes.py ./index.py ./input
 test $? -ne 0 && exit 1
 
 # Add in data
@@ -26,7 +26,7 @@ tar vf $API_TAR --delete `tar tvf $API_TAR | grep gitignore | awk '{ printf("%s 
 test $? -ne 0 && exit 1
 
 # Remove README.md
-tar vf $API_TAR --delete api/input/README.md
+tar vf $API_TAR --delete ./api/input/README.md
 test $? -ne 0 && exit 1
 
 echo "Done. Results are in: $API_TAR"
