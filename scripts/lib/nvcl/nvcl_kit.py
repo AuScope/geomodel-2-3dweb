@@ -128,6 +128,8 @@ class NVCLKit:
                 return
             except HTTPError as he_exc:
                 LOGGER.warning("HTTP error code returned: %s", str(he_exc))
+            except OSError as os_exc:
+                LOGGER.warning("OS error: %s", str(os_exc))
         else:
             self.wfs = wfs
 
@@ -161,6 +163,9 @@ class NVCLKit:
             return OrderedDict()
         except ConnectionResetError as cre_exc:
             LOGGER.warning('ConnectionResetError: %s', cre_exc)
+            return OrderedDict()
+        except OSError as os_exc:
+            LOGGER.warning("OS error: %s", str(os_exc))
             return OrderedDict()
         LOGGER.debug('json_data = %s', json_data)
         meas_list = []
@@ -213,6 +218,9 @@ class NVCLKit:
         except ConnectionResetError as cre_exc:
             LOGGER.warning('ConnectionResetError: %s', cre_exc)
             return []
+        except OSError as os_exc:
+            LOGGER.warning('OS error: %s', str(os_exc))
+            return OrderedDict()
         root = ET.fromstring(response_str)
         logid_list = []
         for child in root.findall('./*/Logs/Log'):
@@ -268,7 +276,7 @@ class NVCLKit:
                     else:
                         borehole_dict['x'] = float(x_y[0]) # lon
                         borehole_dict['y'] = float(x_y[1]) # lat
-                except OSError as os_exc:
+                except (OSError, ValueError) as os_exc:
                     LOGGER.warning("Cannot parse collar coordinates %s", str(os_exc))
                     continue
 
