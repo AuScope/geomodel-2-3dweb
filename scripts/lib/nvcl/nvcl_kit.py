@@ -10,16 +10,16 @@ from collections import OrderedDict
 import itertools
 import logging
 
-from urllib.error import URLError
 import urllib
 import urllib.parse
 import urllib.request
-from requests.exceptions import HTTPError, ReadTimeout
+from requests.exceptions import RequestException
 
 from owslib.wfs import WebFeatureService
 from owslib.fes import PropertyIsLike, etree
 from owslib.util import ServiceException
 
+from http.client import HTTPException
 
 
 LOG_LVL = logging.INFO
@@ -122,11 +122,9 @@ class NVCLKit:
                                              xml=None, timeout=TIMEOUT)
             except ServiceException as se_exc:
                 LOGGER.warning("WFS error: %s", str(se_exc))
-                return
-            except ReadTimeout as rt_exc:
-                LOGGER.warning("Timeout error: %s", str(rt_exc))
-                return
-            except HTTPError as he_exc:
+            except RequestException as re_exc:
+                LOGGER.warning("Request error: %s", str(re_exc))
+            except HTTPException as he_exc:
                 LOGGER.warning("HTTP error code returned: %s", str(he_exc))
             except OSError as os_exc:
                 LOGGER.warning("OS error: %s", str(os_exc))
@@ -158,11 +156,8 @@ class NVCLKit:
         try:
             with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
                 json_data = response.read()
-        except URLError as ue_exc:
-            LOGGER.warning('URLError: %s', ue_exc)
-            return OrderedDict()
-        except ConnectionResetError as cre_exc:
-            LOGGER.warning('ConnectionResetError: %s', cre_exc)
+        except HTTPException as he_exc:
+            LOGGER.warning('HTTP Error: %s', he_exc)
             return OrderedDict()
         except OSError as os_exc:
             LOGGER.warning("OS error: %s", str(os_exc))
@@ -212,15 +207,12 @@ class NVCLKit:
         try:
             with urllib.request.urlopen(req, timeout=TIMEOUT) as response:
                 response_str = response.read()
-        except URLError as ue_exc:
-            LOGGER.warning('URLError: %s', ue_exc)
-            return []
-        except ConnectionResetError as cre_exc:
-            LOGGER.warning('ConnectionResetError: %s', cre_exc)
+        except HTTPException as he_exc:
+            LOGGER.warning('HTTP Error: %s', str(he_exc))
             return []
         except OSError as os_exc:
             LOGGER.warning('OS error: %s', str(os_exc))
-            return OrderedDict()
+            return []
         root = ET.fromstring(response_str)
         logid_list = []
         for child in root.findall('./*/Logs/Log'):
@@ -252,7 +244,7 @@ class NVCLKit:
         try:
             response = self.wfs.getfeature(typename='gsmlp:BoreholeView', filter=filterxml)
             response_str = bytes(response.read(), 'ascii')
-        except (HTTPError, ServiceException, ReadTimeout) as exc:
+        except (RequestException, HTTPException, ServiceException, OSError) as exc:
             LOGGER.warning("WFS GetFeature failed, filter=%s: %s", filterxml, str(exc))
             return []
         borehole_list = []
