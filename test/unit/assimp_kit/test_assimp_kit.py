@@ -38,9 +38,9 @@ if __name__ == "__main__":
             bcd_bytes += byt
         test_str = bcd_bytes.decode('utf-8')
         # Remove the end digits of the version number, they seem to vary
-        test_str = re.sub(r'assimp v4\.1\.\d+', 'assimp v4.1', test_str)
+        test_str = re.sub(r'assimp v\d+\.\d+\.\-?\d+', 'assimp', test_str)
         # Different machines have different versions of assimp
-        for golden_file in ['golden.v4.1.0.json', 'golden.json']:
+        for golden_file in ['golden.v4.1.0.json', 'golden.json', 'golden.v5.json']:
             with open(golden_file) as fp:
                 golden_lines = fp.readlines()
             golden_str = ''.join(golden_lines)
