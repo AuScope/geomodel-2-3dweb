@@ -144,7 +144,7 @@ class GocadImporter():
         :param debug_level: debug level taken from 'logging' module e.g. logging.DEBUG
         :param base_xyz: optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
             before they are output, default is (0.0, 0.0, 0.0)
-        :param group_name: optional string, name of group of this gocad file is within a group,
+        :param group_name: optional string, name of group if this gocad file is within a group,
                            default is ""
         :param nondefault_coords: optional flag, supports non-default coordinates, default is False
         :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,
