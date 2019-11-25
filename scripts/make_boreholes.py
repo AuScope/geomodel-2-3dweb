@@ -20,7 +20,7 @@ from lib.exports.assimp_kit import AssimpKit
 from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 
-from lib.nvcl.nvcl_kit import GSMLP_IDS, NVCLKit
+from nvcl_kit.reader import GSMLP_IDS, NVCLReader
 
 
 LOG_LVL = logging.INFO
@@ -77,7 +77,8 @@ def get_json_input_param(input_file):
     if 'modelUrlPath' not in param_dict['ModelProperties']:
         LOGGER.error("'modelUrlPath' not in input file %s", input_file)
         sys.exit(1)
-    setattr(param_obj, 'modelUrlPath', param_dict['ModelProperties']['modelUrlPath'])
+    param_obj.modelUrlPath = param_dict['ModelProperties']['modelUrlPath']
+    param_obj.MAX_BOREHOLES = MAX_BOREHOLES
     for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS',
                        'WFS_VERSION', 'NVCL_URL']:
         if field_name not in param_dict['BoreholeData']:
@@ -167,11 +168,11 @@ def get_blob_boreholes(borehole_dict, param_obj):
     height_res = 10.0
 
     if all(key in borehole_dict for key in ['name', 'x', 'y', 'z']):
-        nvcl_kit = NVCLKit(param_obj)
+        reader = NVCLReader(param_obj)
         x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
                                   [borehole_dict['x'], borehole_dict['y']])
         base_xyz = (x_m, y_m, borehole_dict['z'])
-        log_ids = nvcl_kit.get_borehole_logids(borehole_dict['nvcl_id'])
+        log_ids = reader.get_imagelog_data(borehole_dict['nvcl_id'])
         bh_data_dict = []
         for log_id, log_type, log_name in log_ids:
             # For the moment, only process log type '1' and 'Grp1 uTSAS'
@@ -179,7 +180,7 @@ def get_blob_boreholes(borehole_dict, param_obj):
             # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
             # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
             if log_type == '1' and log_name in ['Grp1 uTSAS', 'Grp1 uTSAV', 'Grp1 uTSAT']:
-                bh_data_dict = nvcl_kit.get_borehole_data(log_id, height_res, log_name)
+                bh_data_dict = reader.get_borehole_data(log_id, height_res, log_name)
                 LOGGER.debug('got bh_data_dict= %s', str(bh_data_dict))
                 break
 
@@ -195,12 +196,12 @@ def get_blob_boreholes(borehole_dict, param_obj):
     return None
 
 
-def get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF', dest_dir=''):
+def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     ''' Retrieves borehole data and writes 3D model files to a directory or a blob
         If 'dest_dir' is supplied, then files are written
         If output_mode != 'GLTF' then 'dest_dir' must not be ''
 
-    :param nvcl_kit: NVCLKit object
+    :param reader: NVCLReader object
     :param qdb: opened query database 'QueryDB' object
     :param param_obj: input parameters
     :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob,
@@ -211,7 +212,7 @@ def get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     LOGGER.debug("get_boreholes(%s, %s, %s)", str(param_obj), output_mode, dest_dir)
 
     # Get all NVCL scanned boreholes within BBOX
-    borehole_list = nvcl_kit.get_boreholes_list(MAX_BOREHOLES)
+    borehole_list = reader.get_boreholes_list()
     if not borehole_list:
         LOGGER.warning("No NVCL boreholes found for %s using %s", param_obj.modelUrlPath,
                        param_obj.WFS_URL)
@@ -235,9 +236,9 @@ def get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
 
             # Look for NVCL mineral data
-            log_ids = nvcl_kit.get_borehole_logids(borehole_dict['nvcl_id'])
-            LOGGER.debug('log_ids = %s', str(log_ids))
-            if not log_ids:
+            imagelog_list = reader.get_imagelog_data(borehole_dict['nvcl_id'])
+            LOGGER.debug('imagelog_list = %s', str(imagelog_list))
+            if not imagelog_list:
                 LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
                 continue
             bh_data_dict = []
@@ -245,13 +246,13 @@ def get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
                                       [borehole_dict['x'], borehole_dict['y']])
             base_xyz = (x_m, y_m, borehole_dict['z'])
-            for log_id, log_type, log_name in log_ids:
+            for il in imagelog_list:
                 # For the moment, only process log type '1' and 'Grp1 uTSAS'
                 # Min1,2,3 = 1st, 2nd, 3rd most common mineral
                 # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
                 # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-                if log_type == '1' and log_name == 'Grp1 uTSAS':
-                    bh_data_dict = nvcl_kit.get_borehole_data(log_id, height_res, 'Grp1 uTSAS')
+                if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
+                    bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
                     break
             # If there's NVCL data, then create the borehole
             if bh_data_dict:
@@ -319,8 +320,8 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     LOGGER.info("Processing %s", input_file)
     out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
     param_obj = get_json_input_param(input_file)
-    nvcl_kit = NVCLKit(param_obj)
-    if nvcl_kit.wfs is None:
+    reader = NVCLReader(param_obj)
+    if reader.wfs is None:
         LOGGER.error("Cannot contact web service")
         return
     qdb = QueryDB(create=create_db, db_name=db_name)
@@ -329,7 +330,7 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
         LOGGER.error("Cannot open/create database: %s", err_str)
         sys.exit(1)
     # pylint: disable=W0612
-    borehole_loadconfig, none_obj = get_boreholes(nvcl_kit, qdb, param_obj, output_mode='GLTF',
+    borehole_loadconfig, none_obj = get_boreholes(reader, qdb, param_obj, output_mode='GLTF',
                                                   dest_dir=dest_dir)
     LOGGER.debug("borehole_loadconfig = %s", repr(borehole_loadconfig))
     if borehole_loadconfig:
