@@ -167,25 +167,12 @@ def get_blob_boreholes(borehole_dict, param_obj):
     LOGGER.debug("get_blob_boreholes(%s)", str(borehole_dict))
     height_res = 10.0
 
-    if all(key in borehole_dict for key in ['name', 'x', 'y', 'z']):
-        reader = NVCLReader(param_obj)
-        x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                                  [borehole_dict['x'], borehole_dict['y']])
-        base_xyz = (x_m, y_m, borehole_dict['z'])
-        log_ids = reader.get_imagelog_data(borehole_dict['nvcl_id'])
-        bh_data_dict = []
-        for log_id, log_type, log_name in log_ids:
-            # For the moment, only process log type '1' and 'Grp1 uTSAS'
-            # Min1,2,3 = 1st, 2nd, 3rd most common mineral
-            # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
-            # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-            if log_type == '1' and log_name in ['Grp1 uTSAS', 'Grp1 uTSAV', 'Grp1 uTSAT']:
-                bh_data_dict = reader.get_borehole_data(log_id, height_res, log_name)
-                LOGGER.debug('got bh_data_dict= %s', str(bh_data_dict))
-                break
-
+    reader = NVCLReader(param_obj)
+    if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
+        bh_data_dict = get_nvcl_data(param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id']):
+        
         # If there's data, then create the borehole
-        if bh_data_dict:
+        if bh_data_dict != {}:
             blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
                                                  bh_data_dict, height_res, '')
             LOGGER.debug("Returning: blob_obj = %s", str(blob_obj))
@@ -194,6 +181,36 @@ def get_blob_boreholes(borehole_dict, param_obj):
         LOGGER.debug("No borehole data len=%d", len(log_ids))
 
     return None
+
+
+def get_nvcl_data(param_obj, height_res, x, y, z, nvcl_id):
+    ''' Process the output of NVCL_kit's 'get_imagelog_data()'
+        :param param_obj: NVCL_Kit constructor input
+        :param height_res: borehole data height resolution (float, metres)
+        :param x,y,z: x,y,z coordinates of borehole collar
+        :param nvcl_id: NVCL id of borehole
+        :returns: dictionary: key: depth (float)
+                              value: SimpleNamespace('classText', 'className', 'colour')
+                  Returns empty dict upon error or no data
+    '''
+    x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
+                              x, y)
+    base_xyz = (x_m, y_m, z)
+    # Look for NVCL mineral data
+    imagelog_list = reader.get_imagelog_data(nvcl_id)
+    LOGGER.debug('imagelog_list = %s', str(imagelog_list))
+    if not imagelog_list:
+        return {}
+    bh_data_dict = {}
+    for il in imagelog_list:
+        # For the moment, only process log type '1' and 'Grp1 uTSAS'
+        # Min1,2,3 = 1st, 2nd, 3rd most common mineral
+        # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
+        # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
+        if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
+            bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
+            break
+    return bh_data_dict
 
 
 def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
@@ -234,68 +251,52 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             continue
 
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-
-            # Look for NVCL mineral data
-            imagelog_list = reader.get_imagelog_data(borehole_dict['nvcl_id'])
-            LOGGER.debug('imagelog_list = %s', str(imagelog_list))
-            if not imagelog_list:
+            bh_data_dict = get_nvcl_data(param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id']):
+            if bh_data_dict = {}:
                 LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
                 continue
-            bh_data_dict = []
-            file_name = make_borehole_filename(borehole_dict['name'])
-            x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                                      [borehole_dict['x'], borehole_dict['y']])
-            base_xyz = (x_m, y_m, borehole_dict['z'])
-            for il in imagelog_list:
-                # For the moment, only process log type '1' and 'Grp1 uTSAS'
-                # Min1,2,3 = 1st, 2nd, 3rd most common mineral
-                # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
-                # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-                if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
-                    bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
-                    break
             # If there's NVCL data, then create the borehole
-            if bh_data_dict:
-                first_depth = -1
-                # pylint: disable=W0612
-                for vert_list, indices, colour_idx, depth, colour_info, mesh_name in \
-                    colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
-                    if first_depth < 0:
-                        first_depth = int(depth)
-                    popup_info = colour_info.copy()
-                    del popup_info['colour']
-                    is_ok, s_obj = qdb.add_segment(json.dumps(popup_info))
-                    if not is_ok:
-                        LOGGER.warning("Cannot add segment to db: %s", s_obj)
-                        continue
-                    # Using 'make_borehole_label()' ensures that name is the same
-                    # in both db and GLTF file
-                    bh_label = make_borehole_label(borehole_dict['name'], first_depth)
-                    bh_str = "{0}_{1}".format(bh_label.decode('utf-8'), colour_idx)
-                    is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
-                                                 s_obj, p_obj, None, None)
-                    if not is_ok:
-                        LOGGER.warning("Cannot add query to db: %s", r_obj)
-                        continue
-                    LOGGER.debug("ADD_QUERY(%s, %s)", mesh_name, param_obj.modelUrlPath)
+            first_depth = -1
+            # pylint: disable=W0612
+            for vert_list, indices, colour_idx, depth, colour_info, mesh_name in \
+                colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
+                if first_depth < 0:
+                    first_depth = int(depth)
+                popup_info = colour_info.copy()
+                del popup_info['colour']
+                is_ok, s_obj = qdb.add_segment(json.dumps(popup_info))
+                if not is_ok:
+                    LOGGER.warning("Cannot add segment to db: %s", s_obj)
+                    continue
+                # Using 'make_borehole_label()' ensures that name is the same
+                # in both db and GLTF file
+                bh_label = make_borehole_label(borehole_dict['name'], first_depth)
+                bh_str = "{0}_{1}".format(bh_label.decode('utf-8'), colour_idx)
+                is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
+                                             s_obj, p_obj, None, None)
+                if not is_ok:
+                    LOGGER.warning("Cannot add query to db: %s", r_obj)
+                    continue
+                LOGGER.debug("ADD_QUERY(%s, %s)", mesh_name, param_obj.modelUrlPath)
 
-                if output_mode == 'GLTF':
-                    blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
-                                                         bh_data_dict, height_res,
-                                                         os.path.join(dest_dir, file_name))
+            file_name = make_borehole_filename(borehole_dict['name'])
+            if output_mode == 'GLTF':
+                blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
+                                                     bh_data_dict, height_res,
+                                                     os.path.join(dest_dir, file_name))
 
-                elif dest_dir != '':
-                    import exports.collada2gltf
-                    from exports.collada_kit import ColladaKit
-                    export_kit = ColladaKit(LOG_LVL)
-                    export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict,
-                                              height_res, os.path.join(dest_dir, file_name))
-                    blob_obj = None
-                else:
-                    LOGGER.warning("ColladaKit cannot write blobs")
-                    sys.exit(1)
-                loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
-                bh_cnt += 1
+            elif dest_dir != '':
+                import exports.collada2gltf
+                from exports.collada_kit import ColladaKit
+                export_kit = ColladaKit(LOG_LVL)
+                export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict,
+                                          height_res, os.path.join(dest_dir, file_name))
+                blob_obj = None
+            else:
+                LOGGER.warning("ColladaKit cannot write blobs")
+                sys.exit(1)
+            loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
+            bh_cnt += 1
 
     LOGGER.info("Found NVCL data for %d/%d boreholes", bh_cnt, len(borehole_list))
     if output_mode != 'GLTF':
