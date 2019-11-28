@@ -169,7 +169,7 @@ def get_blob_boreholes(borehole_dict, param_obj):
 
     reader = NVCLReader(param_obj)
     if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-        bh_data_dict = get_nvcl_data(param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id']):
+        bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
         
         # If there's data, then create the borehole
         if bh_data_dict != {}:
@@ -183,8 +183,9 @@ def get_blob_boreholes(borehole_dict, param_obj):
     return None
 
 
-def get_nvcl_data(param_obj, height_res, x, y, z, nvcl_id):
+def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
     ''' Process the output of NVCL_kit's 'get_imagelog_data()'
+        :param reader: NVCL_Kit object
         :param param_obj: NVCL_Kit constructor input
         :param height_res: borehole data height resolution (float, metres)
         :param x,y,z: x,y,z coordinates of borehole collar
@@ -192,16 +193,18 @@ def get_nvcl_data(param_obj, height_res, x, y, z, nvcl_id):
         :returns: dictionary: key: depth (float)
                               value: SimpleNamespace('classText', 'className', 'colour')
                   Returns empty dict upon error or no data
+                  and 'base_xyz' - (x,y,z) converted coordinate tuple in borehole
+                  CRS
     '''
     x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                              x, y)
+                              [x, y])
     base_xyz = (x_m, y_m, z)
     # Look for NVCL mineral data
     imagelog_list = reader.get_imagelog_data(nvcl_id)
     LOGGER.debug('imagelog_list = %s', str(imagelog_list))
     if not imagelog_list:
-        return {}
-    bh_data_dict = {}
+        return {}, base_xyz
+    ret_dict = {}
     for il in imagelog_list:
         # For the moment, only process log type '1' and 'Grp1 uTSAS'
         # Min1,2,3 = 1st, 2nd, 3rd most common mineral
@@ -209,8 +212,10 @@ def get_nvcl_data(param_obj, height_res, x, y, z, nvcl_id):
         # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
         if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
             bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
+            for depth in bh_data_dict:
+                ret_dict[depth] = bh_data_dict[depth].__dict__
             break
-    return bh_data_dict
+    return ret_dict, base_xyz
 
 
 def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
@@ -251,8 +256,8 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             continue
 
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-            bh_data_dict = get_nvcl_data(param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id']):
-            if bh_data_dict = {}:
+            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
+            if bh_data_dict == {}:
                 LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
                 continue
             # If there's NVCL data, then create the borehole
