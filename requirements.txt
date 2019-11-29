@@ -6,4 +6,4 @@ pycollada
 pyproj
 SQLAlchemy
 diskcache
-nvcl-kit
+nvcl_kit
