@@ -5,10 +5,10 @@
                            "URL": ""
                          },
         "MODEL_CRS": "EPSG:28354",
-        "WFS_URL": "http://geology.information.qld.gov.au/geoserver/wfs",
+        "WFS_URL": "https://geology.information.qld.gov.au/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "http://geology.information.qld.gov.au/NVCLDataServices"
+        "NVCL_URL": "https://geology.information.qld.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28354",

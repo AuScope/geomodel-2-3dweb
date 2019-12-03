@@ -5,7 +5,7 @@
                            "URL": ""
                          },
         "MODEL_CRS": "EPSG:28350",
-        "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/wfs",
+        "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"

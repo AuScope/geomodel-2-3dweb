@@ -5,10 +5,10 @@
                            "URL": ""
                          },
         "MODEL_CRS": "EPSG:28356",
-        "WFS_URL": "http://auscope.dpi.nsw.gov.au:80/geoserver/wfs",
+        "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
         "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "http://auscope.dpi.nsw.gov.au/NVCLDataServices/"
+        "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28356",

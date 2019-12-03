@@ -5,7 +5,7 @@
                            "URL": ""
                          },
         "MODEL_CRS": "EPSG:28353",
-        "WFS_URL": "http://geology.data.nt.gov.au:80/geoserver/wfs",
+        "WFS_URL": "http://geology.data.nt.gov.au:80/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geology.data.nt.gov.au:80/NVCLDataServices"
