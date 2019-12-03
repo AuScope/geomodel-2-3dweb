@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 #
 # Basic regression test script. Run from the 'regression' directory
 #
@@ -20,6 +20,7 @@ compare_and_print() {
         ;;
     "1")
         echo "FAILED"
+        diff $1 $2
         exit 1
         ;;
     *)
