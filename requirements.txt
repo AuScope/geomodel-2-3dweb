@@ -2,7 +2,7 @@ numpy
 OWSLib
 Pillow
 pyassimp
-pycollada
+pycollada == 0.7
 pyproj
 SQLAlchemy
 diskcache
