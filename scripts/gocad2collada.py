@@ -101,13 +101,14 @@ class Gocad2Collada:
         if CONVERT_COLLADA:
             collada2gltf.convert_dir(dest_dir)
 
-    def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz):
+
+    def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, coll_kit_obj):
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
-                out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
-                                                               os.path.basename(file_name)),
-                                                  mask_idx)
+                o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
+                out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
             gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
                                       nondefault_coords=NONDEF_COORDS,
                                       ct_file_dict=self.ct_file_dict)
@@ -168,7 +169,7 @@ class Gocad2Collada:
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
         if ext_str == 'VS':
-            self.process_points()
+            self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, coll_kit_obj)
 
         # One VO file can produce many other files
         elif ext_str == 'VO':
