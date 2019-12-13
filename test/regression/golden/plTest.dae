@@ -51,17 +51,17 @@
           <float_array count="12" id="lineverts-array-0000000000-00000-array">868000 7016000 1467.5 868000 7016000 2467.5 868000 7016000 1467.5 868000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000000-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000000-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000000-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000000-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -72,17 +72,17 @@
           <float_array count="12" id="lineverts-array-0000000001-00000-array">868000 7016000 1467.5 868000 7016000 2467.5 1036000 7016000 1467.5 1036000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000001-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000001-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000001-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000001-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000001-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000001-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -93,17 +93,17 @@
           <float_array count="12" id="lineverts-array-0000000002-00000-array">1036000 7016000 1467.5 1036000 7016000 2467.5 1036000 6848000 1467.5 1036000 6848000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000002-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000002-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000002-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000002-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000002-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000002-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -114,17 +114,17 @@
           <float_array count="12" id="lineverts-array-0000000003-00000-array">1036000 6848000 1467.5 1036000 6848000 2467.5 867471 6847444 -420.7528 867471 6847444 579.2472</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000003-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000003-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000003-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000003-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000003-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000003-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -135,17 +135,17 @@
           <float_array count="12" id="lineverts-array-0000000004-00000-array">867471 6847444 -420.7528 867471 6847444 579.2472 866696.1 7016373 497.9081 866696.1 7016373 1497.908</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000004-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000004-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000004-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000004-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000004-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000004-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -156,17 +156,17 @@
           <float_array count="12" id="lineverts-array-0000000005-00000-array">866696.1 7016373 497.9081 866696.1 7016373 1497.908 868000 7016000 1467.5 868000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000005-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000005-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000005-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000005-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000005-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000005-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -177,17 +177,17 @@
           <float_array count="12" id="lineverts-array-0000000006-00000-array">868000 7016000 1467.5 868000 7016000 2467.5 868000 7016000 1467.5 868000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000006-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000006-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000006-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000006-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000006-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000006-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -198,17 +198,17 @@
           <float_array count="12" id="lineverts-array-0000000007-00000-array">868000 7016000 1467.5 868000 7016000 2467.5 1036000 7016000 1467.5 1036000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000007-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000007-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000007-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000007-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000007-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000007-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -219,17 +219,17 @@
           <float_array count="12" id="lineverts-array-0000000008-00000-array">1036000 7016000 1467.5 1036000 7016000 2467.5 1036000 6848000 1467.5 1036000 6848000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000008-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000008-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000008-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000008-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000008-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000008-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -240,17 +240,17 @@
           <float_array count="12" id="lineverts-array-0000000009-00000-array">1036000 6848000 1467.5 1036000 6848000 2467.5 867471 6847444 -420.7528 867471 6847444 579.2472</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000009-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000009-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000009-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000009-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000009-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000009-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -261,17 +261,17 @@
           <float_array count="12" id="lineverts-array-0000000010-00000-array">867471 6847444 -420.7528 867471 6847444 579.2472 866696.1 7016373 497.9081 866696.1 7016373 1497.908</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000010-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000010-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000010-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000010-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000010-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000010-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -282,17 +282,17 @@
           <float_array count="12" id="lineverts-array-0000000011-00000-array">866696.1 7016373 497.9081 866696.1 7016373 1497.908 868000 7016000 1467.5 868000 7016000 2467.5</float_array>
           <technique_common>
             <accessor count="4" source="#lineverts-array-0000000011-00000-array" stride="3">
-              <param type="float" name="X"/>
-              <param type="float" name="Y"/>
-              <param type="float" name="Z"/>
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
             </accessor>
           </technique_common>
         </source>
         <vertices id="lineverts-array-0000000011-00000-vertices">
-          <input semantic="POSITION" source="#lineverts-array-0000000011-00000"/>
+          <input semantic="POSITION" source="#lineverts-array-0000000011-00000" />
         </vertices>
         <triangles count="2" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000011-00000-vertices"/>
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000011-00000-vertices" />
           <p>0 2 3 3 1 0</p>
         </triangles>
       </mesh>
@@ -300,7 +300,7 @@
   </library_geometries>
   <library_materials>
     <material id="material-00000" name="mymaterial-00000">
-      <instance_effect url="#effect-00000"/>
+      <instance_effect url="#effect-00000" />
     </material>
   </library_materials>
   <library_visual_scenes>
@@ -308,63 +308,85 @@
       <node id="line-RECTANGLE-0000000011" name="line-RECTANGLE-0000000011">
         <instance_geometry url="#geometry0000000000-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000001-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000002-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000003-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000004-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000005-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000006-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000007-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000008-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000009-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000010-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000011-00000">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00000" target="#material-00000"/>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
             </technique_common>
           </bind_material>
         </instance_geometry>
@@ -372,6 +394,6 @@
     </visual_scene>
   </library_visual_scenes>
   <scene>
-    <instance_visual_scene url="#myscene"/>
+    <instance_visual_scene url="#myscene" />
   </scene>
 </COLLADA>
