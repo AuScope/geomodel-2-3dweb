@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 before_install:
   - wget https://github.com/assimp/assimp/archive/v5.0.0.tar.gz
   - tar xvf v5.0.0.tar.gz
@@ -6,6 +6,6 @@ before_install:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/assimp-5.0.0/lib
 language: python
 python:
-  - "3.5"
+  - "3.7"
 script:
   - './.travis/travis-ci.sh'
