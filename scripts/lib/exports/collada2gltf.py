@@ -6,8 +6,13 @@ import os
 import glob
 import subprocess
 
-COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
 ''' Path where 'COLLADA2GLTF-bin' is located '''
+if 'COLLADA2GLTF_BIN' in os.environ:
+    COLLADA2GLTF_BIN = os.environ['COLLADA2GLTF_BIN']
+elif 'HOME' in os.environ:
+    COLLADA2GLTF_BIN = os.path.join(os.environ['HOME'], 'github', 'COLLADA2GLTF', 'build')
+else:
+    COLLADA2GLTF_BIN = "."
 
 REMOVE_COLLADA = True
 ''' Removes COLLADA file after conversion '''
@@ -46,12 +51,16 @@ def convert_one_file(daefile_str):
 
     :param daefile_str: filename to be converted
     '''
+    collada_bin = os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin")
+    if not os.path.exists(collada_bin):
+        print("Cannot convert to .dae: 'COLLADA2GLTF_BIN' is not set correctly in", __name__, " nor as env var")
+        return
+
     # pylint:disable=W0612
     file_name, file_ext = os.path.splitext(daefile_str)
     # COLLADA2GLTF does not like single filename without path as -o parameter
     file_name = os.path.abspath(file_name)
-    cmd_list = [os.path.join(COLLADA2GLTF_BIN, "COLLADA2GLTF-bin"),
-                "-i", daefile_str, "-o", file_name+".gltf"]
+    cmd_list = [collada_bin, "-i", daefile_str, "-o", file_name+".gltf"]
     try:
         cmd_proc = subprocess.run(cmd_list)
     except OSError as os_exc:
