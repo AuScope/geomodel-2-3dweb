@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 pushd unit/gocad_import > /dev/null
 coverage erase
