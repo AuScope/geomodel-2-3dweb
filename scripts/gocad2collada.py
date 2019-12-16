@@ -82,6 +82,9 @@ class Gocad2Collada:
         # Config Builder object
         self.config_build_obj = ConfigBuilder()
 
+        # Output kits
+        self.coll_kit_obj = ColladaKit(DEBUG_LVL)
+        self.png_kit_obj = PngKit(DEBUG_LVL)
 
     def find_and_process(self, src_dir, dest_dir, ext_list):
         ''' Searches for files in local directory and processes them
@@ -102,7 +105,9 @@ class Gocad2Collada:
             collada2gltf.convert_dir(dest_dir)
 
 
-    def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, coll_kit_obj):
+    def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir):
+        '''
+        '''
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         for mask_idx, file_lines in enumerate(file_lines_list):
@@ -127,7 +132,7 @@ class Gocad2Collada:
             for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
-                popup_dict = coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
+                popup_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name,
@@ -136,6 +141,112 @@ class Gocad2Collada:
                 self.config_build_obj.add_ext(geom_obj.get_extent())
 
 
+    def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
+        file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        for mask_idx, file_lines in enumerate(file_lines_list):
+            if len(file_lines_list) > 1:
+                out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
+                                                               os.path.basename(file_name)),
+                                                  mask_idx)
+            gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                                      nondefault_coords=NONDEF_COORDS,
+                                      ct_file_dict=self.ct_file_dict)
+
+            # Check that conversion worked
+            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+            if not is_ok:
+                self.logger.warning("Could not process %s", filename_str)
+                continue
+
+            # Loop around when several binary files in one GOCAD VOXET object
+            for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
+                out_filename = os.path.join(dest_dir, os.path.basename(meta_obj.src_filename))
+                self.write_single_volume((geom_obj, style_obj, meta_obj),
+                                         src_dir, out_filename, prop_idx)
+                self.config_build_obj.add_ext(geom_obj.get_extent())
+            has_result = True
+
+
+
+    def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
+        file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        self.coll_kit_obj.start_collada()
+        popup_dict = {}
+        node_label = ''
+        for file_lines in file_lines_list:
+            gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                                      nondefault_coords=NONDEF_COORDS)
+            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+            if not is_ok:
+                self.logger.warning("WARNING - could not process %s", filename_str)
+                continue
+            for geom_obj, style_obj, meta_obj in gsm_list:
+
+                # Check that conversion worked and write out files
+                if ext_str == 'TS' and geom_obj.vrtx_arr and geom_obj.trgl_arr \
+                           or (ext_str in ['PL', 'WL']) and geom_obj.vrtx_arr  \
+                           and geom_obj.seg_arr:
+                    p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
+                                                                          style_obj, meta_obj)
+                    popup_dict.update(p_dict)
+                    self.config_build_obj.add_ext(geom_obj.get_extent())
+                    has_result = True
+
+        if has_result:
+            self.config_build_obj.add_config(self.params.grp_struct_dict,
+                                          os.path.basename(file_name),
+                                          popup_dict, file_name)
+            self.coll_kit_obj.end_collada(out_filename, node_label)
+
+
+    def process_groups(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename):
+        ''' Process GOCAD group file
+        :param whole_file_lines: list of strings taken from file's lines
+        :param dest_dir: destination directory
+        :param file_name: source file name
+        :param base_xyz: [x,y,z] offset for writing out coordinates
+        :param file_name_str: 
+        :param src_dir: source directory
+        '''
+        gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
+                                    DEBUG_LVL, NONDEF_COORDS, self.ct_file_dict)
+
+        # If there are too many entries in the GP file, then use one COLLADA file only
+        if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
+            self.logger.debug("All group objects in one COLLADA file")
+            self.coll_kit_obj.start_collada()
+            popup_dict = {}
+            node_label = ''
+            for geom_obj, style_obj, meta_obj in gsm_list:
+                p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj, style_obj,
+                                                                  meta_obj)
+                popup_dict.update(p_dict)
+                self.config_build_obj.add_ext(geom_obj.get_extent())
+                has_result = True
+            if has_result:
+                self.config_build_obj.add_config(self.params.grp_struct_dict,
+                                            os.path.basename(file_name), popup_dict,
+                                            file_name)
+                self.coll_kit_obj.end_collada(out_filename, node_label)
+
+        # Else place each GOCAD object in its own COLLADA file
+        else:
+            for file_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
+                if geom_obj.is_volume():
+                    out_filename = os.path.join(dest_dir,
+                                                os.path.basename(meta_obj.src_filename))
+                    self.write_single_volume((geom_obj, style_obj, meta_obj),
+                                             src_dir, out_filename, file_idx)
+                else:
+                    prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
+                    p_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
+                                                        prop_filename)
+                    self.config_build_obj.add_config(self.params.grp_struct_dict,
+                                                meta_obj.name,
+                                                p_dict, prop_filename)
+                self.config_build_obj.add_ext(geom_obj.get_extent())
+                has_result = True
+        return has_result
 
 
     def process(self, filename_str, dest_dir):
@@ -156,8 +267,6 @@ class Gocad2Collada:
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         ext_str = file_ext.lstrip('.').upper()
         src_dir = os.path.dirname(filename_str)
-        coll_kit_obj = ColladaKit(DEBUG_LVL)
-        png_kit_obj = PngKit(DEBUG_LVL)
         # Open GOCAD file and read all its contents, assume it fits in memory
         try:
             file_d = open(filename_str, 'r')
@@ -165,116 +274,26 @@ class Gocad2Collada:
         except OSError as os_exc:
             self.logger.error("Can't open or read - skipping file %s %s", filename_str, os_exc)
             return False, [], []
-        has_result = False
+        ok = False
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
         if ext_str == 'VS':
-            self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, coll_kit_obj)
+            ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
         # One VO file can produce many other files
         elif ext_str == 'VO':
-            file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
-            for mask_idx, file_lines in enumerate(file_lines_list):
-                if len(file_lines_list) > 1:
-                    out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
-                                                                   os.path.basename(file_name)),
-                                                      mask_idx)
-                gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                                          nondefault_coords=NONDEF_COORDS,
-                                          ct_file_dict=self.ct_file_dict)
-
-                # Check that conversion worked
-                is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
-                if not is_ok:
-                    self.logger.warning("Could not process %s", filename_str)
-                    continue
-
-                # Loop around when several binary files in one GOCAD VOXET object
-                for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
-                    out_filename = os.path.join(dest_dir, os.path.basename(meta_obj.src_filename))
-                    self.write_single_volume((coll_kit_obj, png_kit_obj),
-                                             (geom_obj, style_obj, meta_obj),
-                                             src_dir, out_filename, prop_idx)
-                    self.config_build_obj.add_ext(geom_obj.get_extent())
-                has_result = True
-
+            ok = self.process_volumes(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
         # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
         elif ext_str in ['TS', 'PL', 'WL']:
-            file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
-            coll_kit_obj.start_collada()
-            popup_dict = {}
-            node_label = ''
-            for file_lines in file_lines_list:
-                gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                                          nondefault_coords=NONDEF_COORDS)
-                is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
-                if not is_ok:
-                    self.logger.warning("WARNING - could not process %s", filename_str)
-                    continue
-                for geom_obj, style_obj, meta_obj in gsm_list:
-
-                    # Check that conversion worked and write out files
-                    if ext_str == 'TS' and geom_obj.vrtx_arr and geom_obj.trgl_arr \
-                               or (ext_str in ['PL', 'WL']) and geom_obj.vrtx_arr  \
-                               and geom_obj.seg_arr:
-                        p_dict, node_label = coll_kit_obj.add_geom_to_collada(geom_obj,
-                                                                              style_obj, meta_obj)
-                        popup_dict.update(p_dict)
-                        self.config_build_obj.add_ext(geom_obj.get_extent())
-                        has_result = True
-
-            if has_result:
-                self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                              os.path.basename(file_name),
-                                              popup_dict, file_name)
-                coll_kit_obj.end_collada(out_filename, node_label)
-
+            ok = self.process_others(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename)
 
         # Process group files, depending on the number of GOCAD objects inside
         elif ext_str == 'GP':
-            gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
-                                        DEBUG_LVL, NONDEF_COORDS, self.ct_file_dict)
-
-            # If there are too many entries in the GP file, then use one COLLADA file only
-            if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
-                self.logger.debug("All group objects in one COLLADA file")
-                coll_kit_obj.start_collada()
-                popup_dict = {}
-                node_label = ''
-                for geom_obj, style_obj, meta_obj in gsm_list:
-                    p_dict, node_label = coll_kit_obj.add_geom_to_collada(geom_obj, style_obj,
-                                                                          meta_obj)
-                    popup_dict.update(p_dict)
-                    self.config_build_obj.add_ext(geom_obj.get_extent())
-                    has_result = True
-                if has_result:
-                    self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                                os.path.basename(file_name), popup_dict,
-                                                file_name)
-                    coll_kit_obj.end_collada(out_filename, node_label)
-
-            # Else place each GOCAD object in its own COLLADA file
-            else:
-                for file_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
-                    if geom_obj.is_volume():
-                        out_filename = os.path.join(dest_dir,
-                                                    os.path.basename(meta_obj.src_filename))
-                        self.write_single_volume((coll_kit_obj, png_kit_obj),
-                                                 (geom_obj, style_obj, meta_obj),
-                                                 src_dir, out_filename, file_idx)
-                    else:
-                        prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
-                        p_dict = coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
-                                                            prop_filename)
-                        self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                                    meta_obj.name,
-                                                    p_dict, prop_filename)
-                    self.config_build_obj.add_ext(geom_obj.get_extent())
-                    has_result = True
+            ok = self.process_groups(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename)
 
         file_d.close()
-        if has_result:
+        if ok:
             self.logger.debug("process() returns True")
             return True
 
@@ -282,16 +301,14 @@ class Gocad2Collada:
         return False
 
 
-    def write_single_volume(self, kit_obj, gsm_obj, src_dir, out_filename, prop_idx):
+    def write_single_volume(self, gsm_obj, src_dir, out_filename, prop_idx):
         ''' Write a single volume to disk
-        :param kit_obj: a tuple of (ColladaKit, PngKit) objects, used to output COLLADA & PNG files
         :param gsm_obj: (MODEL_GEOMETRY, STYLE, METADATA) tuple, contains the geometry of the
                         volume, the volume's style & metadata
         :param src_dir: source directory where there are 3rd party model files
         :param out_filename: output filename without extension
         :param prop_idx: property index of volume's properties, integer
         '''
-        coll_kit_obj, png_kit_obj = kit_obj
         geom_obj, style_obj, meta_obj = gsm_obj
         self.logger.debug("write_single_volume(geom_obj=%s, style_obj=%s, meta_obj=%s)",
                           repr(geom_obj), repr(style_obj), repr(meta_obj))
@@ -310,7 +327,7 @@ class Gocad2Collada:
 
                 else:
                     # Produce GLTFs from voxet file
-                    popup_list = coll_kit_obj.write_vol_collada(geom_obj, style_obj, meta_obj,
+                    popup_list = self.coll_kit_obj.write_vol_collada(geom_obj, style_obj, meta_obj,
                                                                 out_filename)
                     for popup_dict_key, popup_dict, out_file in popup_list:
                         self.config_build_obj.add_config(self.params.grp_struct_dict,
@@ -319,7 +336,7 @@ class Gocad2Collada:
 
             # Produce a PNG file from voxet file
             else:
-                popup_dict = png_kit_obj.write_single_voxel_png(geom_obj, style_obj, meta_obj,
+                popup_dict = self.png_kit_obj.write_single_voxel_png(geom_obj, style_obj, meta_obj,
                                                                 out_filename)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             "{0}_{1}".format(meta_obj.name, prop_idx+1),
