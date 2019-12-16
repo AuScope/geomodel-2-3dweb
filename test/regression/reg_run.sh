@@ -51,13 +51,15 @@ cd ../../scripts
 # Convert various file types
 ##########################################################################################
 
+coverage erase
+
 # Loop around processing different GOCAD objects
 for i in 'pl' 'ts' 'vs' 'gp'; do
 
 echo -n "$i File test: "
 
 # Convert GOCAD to COLLADA
-./gocad2collada.py -g -f $CWD/output "$CWD/input/${i}Test.$i" input/NorthGawlerConvParam.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -f $CWD/output "$CWD/input/${i}Test.$i" input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Remove date stamps from file
@@ -77,7 +79,7 @@ done
 echo -n "Convert single layer VOXET to PNG test, with colour table: "
 
 # Convert GOCAD to PNG with colour table
-./gocad2collada.py -g -f $CWD/output $CWD/input/PNGTest.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -f $CWD/output $CWD/input/PNGTest.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -87,7 +89,7 @@ compare_and_print "$CWD/output/PNGTest@@.PNG" "$CWD/golden/PNGTest.PNG"
 echo -n "Convert single layer VOXET to PNG test, without colour table: "
 
 # Convert GOCAD to PNG without colour table
-./gocad2collada.py -g -f $CWD/output $CWD/input/PNGTestNoCT.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -f $CWD/output $CWD/input/PNGTestNoCT.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -101,7 +103,7 @@ compare_and_print "$CWD/output/PNGTestNoCT@@.PNG" "$CWD/golden/PNGTestNoCT.PNG"
 
 echo -n "Convert single layer RGBA voxet to PNG test: "
 
-./gocad2collada.py -g -f $CWD/output $CWD/input/RGBA_voxet.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -f $CWD/output $CWD/input/RGBA_voxet.vo input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -114,7 +116,7 @@ compare_and_print "$CWD/output/RGBA_voxet@@.PNG" "$CWD/golden/RGBA_voxet.PNG"
 
 echo -n "Voxet with 3 binary files conversion & output config test: "
 
-./gocad2collada.py -g -f $CWD/output -o smallConf.json $CWD/input/small_voxet/small.vo $CWD/input/small_voxet/small.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -f $CWD/output -o smallConf.json $CWD/input/small_voxet/small.vo $CWD/input/small_voxet/small.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -139,7 +141,7 @@ compare_and_print "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json"
 echo -n "Recursion test: "
 
 # Try converting all files at once
-./gocad2collada.py -g -r -f $CWD/output $CWD/input input/NorthGawlerConvParam.json >/dev/null 2>&1
+coverage run -a gocad2collada.py -g -r -f $CWD/output $CWD/input input/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that all files were converted

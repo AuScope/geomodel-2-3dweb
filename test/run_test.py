@@ -1,14 +1,27 @@
 #!/bin/sh
 
-cd unit/gocad_import
-./gocad_importer_test.py
+pushd unit/gocad_import > /dev/null
+coverage erase
+coverage run gocad_importer_test.py
 [ $? -ne 0 ] && exit 1
-cd ../assimp_kit
-./test_assimp_kit.py
+popd > /dev/null
+
+pushd unit/assimp_kit > /dev/null
+coverage erase
+coverage run test_assimp_kit.py
 [ $? -ne 0 ] && exit 1
-cd ../../regression
+popd > /dev/null
+
+pushd regression > /dev/null
 ./reg_run.sh
 [ $? -ne 0 ] && exit 1
-cd ../../scripts/lib/db
-./db_tables.py
+popd > /dev/null
+
+pushd ../scripts/lib/db > /dev/null
+coverage erase
+coverage run db_tables.py
+popd > /dev/null
+
+coverage combine unit/gocad_import/.coverage unit/assimp_kit/.coverage ../scripts/.coverage ../scripts/lib/db/.coverage
+coverage report
 

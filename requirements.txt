@@ -7,3 +7,4 @@ pyproj
 SQLAlchemy
 diskcache
 nvcl_kit
+coverage

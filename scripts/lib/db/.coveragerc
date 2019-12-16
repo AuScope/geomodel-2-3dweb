@@ -1,0 +1,4 @@
+[run]
+omit =
+    # Omit sqlalchemy etc.
+    */site-packages/*
