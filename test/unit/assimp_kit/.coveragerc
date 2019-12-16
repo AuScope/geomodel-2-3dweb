@@ -1,6 +1,6 @@
 [run]
+source =
+    ../../../scripts
 omit =
-    # Omit pyassimp etc.
-    */site-packages/*
     # Omit print_assimp - only used for debugging
     */print_assimp.py
