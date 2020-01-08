@@ -196,24 +196,25 @@ def process_well_info(self, field, line_gen):
     ''' Process the information after a well marker or well zone is defined
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
-    :returns: a boolean, is True iff we are at last line
+    :returns: a boolean, is True iff we are at last line and info dict
     '''
-    info = {}
-    while True:
-        # FEATURE name1,name2
-        if field[0] == 'FEATURE':
-            info['feature_names'] = field[1].split(',')
-
+    info = { 'feature_names': [], 'unit_names': [] }
+    depth = 0.0
+    while not is_last:
         # UNIT name1,name2
-        elif field[0] == 'UNIT':
-            info['unit_names'] = field[1].split(',')
+        if field[0] == 'UNIT':
+            info['unit_names'] += field[1].split(',')
+
+        # FEATURE name1,name2
+        elif field[0] == 'FEATURE':
+            info['feature_names'] += field[1].split(',')
 
         # Read next line
         # pylint: disable=W0612
         field, field_raw, line_str, is_last = next(line_gen)
 
         # Break out if not a well info field
-        if is_last or field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
+        if field[0] not in ['DIP', 'NORM', 'MREF', 'UNIT', 'NO_FEATURE', 'FEATURE']:
             break
     return field, info
 
@@ -224,7 +225,7 @@ def process_well_curve(self, line_gen, field):
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line
     '''
-    while True:
+    while not is_last:
         # Read next line
         # pylint: disable=W0612
         field, field_raw, line_str, is_last = next(line_gen)
@@ -245,7 +246,7 @@ def process_well_curve(self, line_gen, field):
             pass
         elif field[0] == "SEEK":
             pass
-        if is_last or field[0] in ['END', 'END_CURVE']:
+        if field[0] in ['END', 'END_CURVE']:
             break
 
     return field, field_raw, is_last
