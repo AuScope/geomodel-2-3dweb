@@ -33,6 +33,13 @@ class METADATA():
         ''' Table specifying names of rocks, key is an integer, value is the label
         '''
 
+        self.label_list = []
+        ''' Dict of objects for adding labels when displaying objects
+            Format: [ { 'name': 'name of object',
+                        'position': (x,y,z),
+                        'metadata': {dict of metadata in key,val} }, ...  ]
+        '''
+
         self.src_filename = ''
         ''' Volume data source file
         '''

@@ -158,23 +158,42 @@ def process_ascii_well_path(self, line_gen, field):
                 well_path.append((x_x, y_y, z_z))
 
             # MRKR name flag Z-meas
-            elif field[0] == 'MRKR':
+            elif field[0] == 'MRKR' and len(well_path)>0:
                 is_ok, z_flt = self.parse_float(field[3])
                 if is_ok:
                     marker_name = field[1]
                     field, marker_info = self.process_well_info(field, line_gen)
-                    marker_list.append((marker_name, z_flt, marker_info))
+                    # NB: Does not follow the curve of the well
+                    x = well_path[0][0]
+                    y = well_path[0][1]
+                    info = { 'depth': str(z_flt) }
+                    info.update(marker_info)
+                    marker_list.append({'name': marker_name,
+                                        'position': [x,y,z_flt],
+                                        'metadata': info})
                     continue
 
             # ZONE name Z-meas1 Z-meas2 index
-            elif field[0] == 'ZONE':
+            elif field[0] == 'ZONE' and len(well_path)>0:
                 is_ok1, z1_flt = self.parse_float(field[2])
                 is_ok2, z2_flt = self.parse_float(field[3])
-                if is_ok1 and is_ok2:
+                if is_ok1 and is_ok2 and len(well_path)>0:
+                    # NB: Does not follow the curve of the well
+                    x = well_path[0][0]
+                    y = well_path[0][1]
                     zone_name = field[1]
-                    self.logger.debug("field = %s", repr(field))
+                    # Put down 2 labels for zone, one for start, one for end
                     field, zone_info = self.process_well_info(field, line_gen)
-                    marker_list.append((zone_name, (z1_flt + z2_flt) / 2.0, zone_info))
+                    info = { 'depth': str(z1_flt) }
+                    info.update(marker_info)
+                    marker_list.append({'name': zone_name+' zone start',
+                                        'position': [x,y,z1_flt],
+                                        'metadata': info})
+                    info = { 'depth': str(z2_flt) }
+                    info.update(marker_info)
+                    marker_list.append({'name': zone_name+' zone end',
+                                        'position': [x,y,z2_flt],
+                                        'metadata': info})
                     continue
 
 
@@ -200,6 +219,7 @@ def process_well_info(self, field, line_gen):
     '''
     info = { 'feature_names': [], 'unit_names': [] }
     depth = 0.0
+    is_last = False
     while not is_last:
         # UNIT name1,name2
         if field[0] == 'UNIT':
@@ -225,6 +245,7 @@ def process_well_curve(self, line_gen, field):
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line
     '''
+    is_last = False
     while not is_last:
         # Read next line
         # pylint: disable=W0612

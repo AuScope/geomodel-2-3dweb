@@ -493,7 +493,8 @@ class GocadImporter():
                     # All well files
                     if field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
                         self.logger.debug("Processing ASCII well path")
-                        is_last, well_path, self.meta_obj.marker_list = self.process_ascii_well_path(line_gen, field)
+                        is_last, well_path, self.meta_obj.label_list = self.process_ascii_well_path(line_gen, field)
+
                         # Convert well path into a series of SEG types
                         if len(well_path) > 1:
                             self.__vrtx_arr.append(VRTX(1, well_path[0]))
@@ -502,7 +503,7 @@ class GocadImporter():
                                 self.__vrtx_arr.append(VRTX(idx+1, well_path[idx]))
                              
                         self.logger.debug("Well path: %s", repr(well_path))
-                        self.logger.debug("Marker list: %s", repr(self.meta_obj.marker_list))
+                        self.logger.debug("Label list: %s", repr(self.meta_obj.label_list))
                         retry = True
 
                     # Well files with well curve block
