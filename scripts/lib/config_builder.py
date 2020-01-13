@@ -126,7 +126,8 @@ class ConfigBuilder():
             LOCAL_LOGGER.error("Cannot open file %s %s", output_filename, os_exc)
 
 
-    def add_config(self, gs_dict, label_str, popup_dict, file_name, file_ext='.gltf', position=[0.0, 0.0, 0.0]):
+    def add_config(self, gs_dict, label_str, popup_dict, file_name,
+                   file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}):
         ''' Adds more config information to popup dictionary
 
         :param gs_dict: group structure dictionary (group struct dict format:
@@ -138,13 +139,28 @@ class ConfigBuilder():
         :param file_name:  file and path (without extension) of model part source file
         :param file_ext: optional file extension of 'file_name', defaults to '.gltf'
         :param position: optional [x,y,z] position of model part
+        :param styling: optional dict of styling parameters e.g.
+                        { "labels": [
+                            {
+                                "display_name": "MARKER_TOPMOROAKVELKERRI_GRP",
+                                "position": [
+                                    425500.0,
+                                    8028000.0,
+                                    228.699997
+                                ],
+                                "scale": 2.0
+                            },
+                          ]
+                        }
         :returns: a dict of model configuration info, which includes the popup dict
         '''
         LOCAL_LOGGER.debug("add_config2popup(%s, %s, %s)", label_str, file_name, file_ext)
         np_filename = os.path.basename(file_name)
         modelconf_dict = {}
+        modelconf_dict['styling'] = styling
         modelconf_dict['popups'] = popup_dict
         if file_ext.upper() == ".PNG":
+            # PNG files do not have any coordinates, so they must be supplied
             modelconf_dict['type'] = 'ImagePlane'
             modelconf_dict['position'] = position
         else:

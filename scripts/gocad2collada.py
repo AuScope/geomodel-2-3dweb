@@ -86,6 +86,7 @@ class Gocad2Collada:
         self.coll_kit_obj = ColladaKit(DEBUG_LVL)
         self.png_kit_obj = PngKit(DEBUG_LVL)
 
+
     def find_and_process(self, src_dir, dest_dir, ext_list):
         ''' Searches for files in local directory and processes them
 
@@ -167,7 +168,6 @@ class Gocad2Collada:
             has_result = True
 
 
-
     def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
         self.coll_kit_obj.start_collada()
@@ -193,9 +193,17 @@ class Gocad2Collada:
                     has_result = True
 
         if has_result:
+            # Add in any labels, if they were generated
+            s_dict = {}
+            if meta_obj.label_list:
+                s_dict = { "labels": [] }
+                for labl in meta_obj.label_list:
+                    s_dict["labels"].append({"display_name": labl['name'],
+                                             "position": labl['position'],
+                                             "scale": 2.0})
             self.config_build_obj.add_config(self.params.grp_struct_dict,
                                           os.path.basename(file_name),
-                                          popup_dict, file_name)
+                                          popup_dict, file_name, styling=s_dict)
             self.coll_kit_obj.end_collada(out_filename, node_label)
 
 
