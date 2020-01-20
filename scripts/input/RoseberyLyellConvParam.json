@@ -961,7 +961,11 @@
                 "Insert": {
                     "display_name": "Avebury",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Avebury"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -971,7 +975,11 @@
                 "Insert": {
                     "display_name": "Hellyer",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Hellyer"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -981,7 +989,11 @@
                 "Insert": {
                     "display_name": "Henty",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Henty"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -991,7 +1003,11 @@
                 "Insert": {
                     "display_name": "Mt Lindsay",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Mt Lindsay"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1001,7 +1017,11 @@
                 "Insert": {
                     "display_name": "Queenstown",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Queenstown"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1011,7 +1031,11 @@
                 "Insert": {
                     "display_name": "Renison",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Renison"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1021,7 +1045,11 @@
                 "Insert": {
                     "display_name": "Rosebery",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Rosebery"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1031,7 +1059,11 @@
                 "Insert": {
                     "display_name": "Strahan",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Strahan"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1041,7 +1073,11 @@
                 "Insert": {
                     "display_name": "Zeehan",
                     "styling": {
-                        "is_labelled": true,
+                        "labels": [
+                            {
+                                "display_name": "Zeehan"
+                            }
+                        ],
                         "scale": 2.0
                     }
                 }
@@ -1111,7 +1147,11 @@
                 "Insert": {
                     "display_name": "352000mE 5320000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "352000mE 5320000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1120,7 +1160,11 @@
                 "Insert": {
                     "display_name": "352000mE 5335000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "352000mE 5335000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1129,7 +1173,11 @@
                 "Insert": {
                     "display_name": "352000mE 5355000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "352000mE 5355000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1138,7 +1186,11 @@
                 "Insert": {
                     "display_name": "352000mE 5375000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "352000mE 5375000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1147,7 +1199,11 @@
                 "Insert": {
                     "display_name": "352000mE 5395000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "352000mE 5395000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1156,7 +1212,11 @@
                 "Insert": {
                     "display_name": "372000mE 5320000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "372000mE 5320000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1165,7 +1225,11 @@
                 "Insert": {
                     "display_name": "372000mE 5335000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "372000mE 5335000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1174,7 +1238,11 @@
                 "Insert": {
                     "display_name": "372000mE 5355000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "372000mE 5355000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1183,7 +1251,11 @@
                 "Insert": {
                     "display_name": "372000mE 5375000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "372000mE 5375000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1192,7 +1264,11 @@
                 "Insert": {
                     "display_name": "372000mE 5395000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "372000mE 5395000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1201,7 +1277,11 @@
                 "Insert": {
                     "display_name": "397000mE 5320000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "397000mE 5320000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1210,7 +1290,11 @@
                 "Insert": {
                     "display_name": "397000mE 5335000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "397000mE 5335000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1219,7 +1303,11 @@
                 "Insert": {
                     "display_name": "397000mE 5355000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "397000mE 5355000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1228,7 +1316,11 @@
                 "Insert": {
                     "display_name": "397000mE 5375000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "397000mE 5375000mN"
+                            }
+                        ]
                     }
                 }
             },
@@ -1237,7 +1329,11 @@
                 "Insert": {
                     "display_name": "397000mE 5395000mN",
                     "styling": {
-                        "is_labelled": true
+                        "labels": [
+                            {
+                                "display_name": "397000mE 5395000mN"
+                            }
+                        ]
                     }
                 }
             }

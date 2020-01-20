@@ -199,8 +199,7 @@ class Gocad2Collada:
                 s_dict = { "labels": [] }
                 for labl in meta_obj.label_list:
                     s_dict["labels"].append({"display_name": labl['name'],
-                                             "position": labl['position'],
-                                             "scale": 2.0})
+                                             "position": labl['position'] })
             self.config_build_obj.add_config(self.params.grp_struct_dict,
                                           os.path.basename(file_name),
                                           popup_dict, file_name, styling=s_dict)
