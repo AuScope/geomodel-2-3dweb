@@ -63,7 +63,7 @@ class AssimpKit:
 
 
     def add_geom(self, geom_obj, style_obj, meta_obj):
-        ''' Add a geometry ot the scene. It only does triangular meshes for the moment.
+        ''' Add a geometry to the scene. It only does triangular meshes for the moment.
         Will be expanded to include other types.
         :param geom_obj: ModelGeometries object
         :param style_obj: STYLE object

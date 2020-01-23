@@ -25,6 +25,7 @@ import urllib
 import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from diskcache import Cache, Timeout
+import pyassimp
 
 from make_boreholes import get_json_input_param, get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
@@ -72,6 +73,8 @@ INPUT_DIR = os.path.join(LOCAL_DIR, 'input')
 CACHE_DIR = os.path.join(DATA_DIR, 'cache')
 ''' Directory where WFS service information is kept
 '''
+
+GEOMODELS_DIR = os.path.join(LOCAL_DIR, os.pardir, 'assets', 'geomodels')
 
 MAX_BOREHOLES = 9999
 ''' Maximum number of boreholes processed
@@ -683,17 +686,20 @@ def make_getpropvalue_response(start_response, url_kvp, model_name, param_dict, 
     return [response_bytes]
 
 
-def convert(start_response, model_name, id_str, gocad_list):
+def convert_gocad2gltf(start_response, model_name, id_str, gocad_list):
     '''
     Call the conversion code to convert a GOCAD string to GLTF
 
+    :param start_response: function call required to create a response
+    :param model_name: name of model
+    :param id_str: sequence number string
     :param gocad_list: GOCAD file lines as a list of strings
     :returns: a response that can be returned from the 'application()' function
     '''
     base_xyz = (0.0, 0.0, 0.0)
     gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
                               nondefault_coords=NONDEF_COORDS)
-    # First convert GOCAD to GSM
+    # First convert GOCAD to GSM (geometry, style, metadata)
     is_ok, gsm_list = gocad_obj.process_gocad('drag_and_drop', 'drag_and_drop.ts', gocad_list)
     if is_ok and gsm_list:
         # Then, output GSM as GLTF ...
@@ -706,6 +712,55 @@ def convert(start_response, model_name, id_str, gocad_list):
         return send_blob(start_response, model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
     return make_str_response(start_response, ' ')
 
+
+def find_gltf(target_model_name, gltf_file):
+    # Open up and parse 'input/ProviderModelInfo.json'
+    config_file = os.path.join(INPUT_DIR, 'ProviderModelInfo.json')
+    conf_dict = read_json_file(config_file)
+    # pylint: disable=W0612
+    for prov_name, model_dict in conf_dict.items():
+        model_list = model_dict['models']
+        # For each model within a provider
+        for model_obj in model_list:
+            model_name = model_obj['modelUrlPath']
+            if model_name == target_model_name:
+                model_filepath = os.path.join(GEOMODELS_DIR, model_obj['modelDir'], gltf_file)
+                if os.path.exists(model_filepath):
+                    return model_filepath
+    return ''
+
+
+def convert_gltf2xxx(start_response, model_name, filename, format):
+    '''
+    Call the conversion code to convert GLTF string to a certain format
+
+    :param start_response: function call required to create a response
+    :param model_name: name of model
+    :param filename: filename of GLTF file to be converted
+    :param format: string indicating what format to convert to, e.g. 'DXF'
+    :returns: a response that can be returned from the 'application()' function
+    '''
+    # Use model name and file name to get full GLTF file path
+    gltf_path = find_gltf(model_name, filename)
+    if not gltf_path:
+        LOGGER.error("Cannot find %s", gltf_path)
+        return make_str_response(start_response, ' ')
+
+    # Load GLTF file
+    try:
+        assimp_obj = pyassimp.load(gltf_path, 'gltf2')
+    except AssimpError as ae:
+        LOGGER.error("Cannot load %s:%s", gltf_path, str(ae))
+        return make_str_response(start_response, ' ')
+
+    # Export as whatever format desired
+    try:
+        blob_obj = pyassimp.export_blob(assimp_obj, format, processing=None)
+    except AssimpError as ae:
+        LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
+        return make_str_response(start_response, ' ')
+
+    return send_blob(start_response, model_name, 'export_{0}_{1}'.format(model_name, filename), blob_obj, 60.0)
 
 
 
@@ -794,8 +849,20 @@ def processWFS(url_kvp, request, model_name, start_response):
     return make_json_exception_response(start_response, get_val('version', url_kvp),
                                         'OperationNotSupported', 'Unknown request name')
 
+def processEXPORT(environ, url_kvp, model_name, start_response):
+    '''
+    Export a model part to DXF etc.
+    :param environ: WSGI 'environ' variable
+    :param url_kvp: dict of parameters extracted from the incoming URL
+    :param model_name: name of model
+    :param start_response: function call required to create a response
+    :returns: a response that can be returned from the 'application()' function
+    '''
+    filename = get_val('filename', url_kvp)
+    return convert_gltf2xxx(start_response, provider_name, model_name, filename)
 
-def processCONVERT(environ, url_kvp, model_name, start_response):
+
+def processIMPORT(environ, url_kvp, model_name, start_response):
     '''
     Process a GOCAD to GLTF conversion request
 
@@ -810,8 +877,7 @@ def processCONVERT(environ, url_kvp, model_name, start_response):
     resp_list = []
     for resp_str in resp_lines:
         resp_list.append(resp_str.decode())
-    return convert(start_response, model_name, id_str, resp_list)
-
+    return convert_gocad2gltf(start_response, model_name, id_str, resp_list)
 
 
 def processWMS(environ, url_kvp, start_response):
@@ -954,8 +1020,12 @@ def application(environ, start_response):
 
         # Convert a GOCAD file to GLTF
         # Expecting a path '/<model_name>?service=CONVERT&&id=HEX_STRING'
-        if service_name == 'convert':
-            return processCONVERT(environ, url_kvp, model_name, start_response)
+        if service_name == 'import':
+            return processIMPORT(environ, url_kvp, model_name, start_response)
+
+        # Export a model part as DXF etc.
+        if service_name == 'export':
+            return processEXPORT(environ, url_kvp, model_name, start_response)
 
         # Simple WMS proxy
         # Expecting a path '/<model_name>?service=WMS&wmsurl=XXX
