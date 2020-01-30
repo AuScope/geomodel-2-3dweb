@@ -859,7 +859,8 @@ def processEXPORT(environ, url_kvp, model_name, start_response):
     :returns: a response that can be returned from the 'application()' function
     '''
     filename = get_val('filename', url_kvp)
-    return convert_gltf2xxx(start_response, provider_name, model_name, filename)
+    format = get_val('format', url_kvp)
+    return convert_gltf2xxx(start_response, model_name, filename, format)
 
 
 def processIMPORT(environ, url_kvp, model_name, start_response):
@@ -1019,11 +1020,12 @@ def application(environ, start_response):
             return processWFS(url_kvp, request, model_name, start_response)
 
         # Convert a GOCAD file to GLTF
-        # Expecting a path '/<model_name>?service=CONVERT&&id=HEX_STRING'
+        # Expecting a path '/<model_name>?service=IMPORT&&id=HEX_STRING'
         if service_name == 'import':
             return processIMPORT(environ, url_kvp, model_name, start_response)
 
         # Export a model part as DXF etc.
+        # Expecting a path '/<model_name>?service=EXPORT&&filename=MODEL_PART_FILENAME'
         if service_name == 'export':
             return processEXPORT(environ, url_kvp, model_name, start_response)
 

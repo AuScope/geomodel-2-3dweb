@@ -58,6 +58,7 @@ def get_json_input_param(input_file):
     ''' Reads the parameters from input JSON file and stores them in global 'Param' object
 
     :param input_file: filename of input parameter file
+    :return: dictionary object of input parameter file
     '''
     LOGGER.info("Opening: %s", input_file)
     with open(input_file, "r") as file_p:

@@ -126,7 +126,7 @@ class ConfigBuilder():
             LOCAL_LOGGER.error("Cannot open file %s %s", output_filename, os_exc)
 
 
-    def add_config(self, gs_dict, label_str, popup_dict, file_name,
+    def add_config(self, gs_dict, label_str, popup_dict, file_name, model_name,
                    file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}):
         ''' Adds more config information to popup dictionary
 
@@ -135,7 +135,7 @@ class ConfigBuilder():
         :param label_str: string to use as a display name for this part of the
             model, if none available in group struct dict
         :param popup_dict: information to display in popup window
-            ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } )
+            ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } where 'attr_name' is one of: 'name', 'title', 'href')
         :param file_name:  file and path (without extension) of model part source file
         :param file_ext: optional file extension of 'file_name', defaults to '.gltf'
         :param position: optional [x,y,z] position of model part
@@ -157,15 +157,19 @@ class ConfigBuilder():
         np_filename = os.path.basename(file_name)
         modelconf_dict = {}
         modelconf_dict['styling'] = styling
-        modelconf_dict['popups'] = popup_dict
+        model_url = np_filename + file_ext
+        modelconf_dict['model_url'] = model_url
         if file_ext.upper() == ".PNG":
             # PNG files do not have any coordinates, so they must be supplied
             modelconf_dict['type'] = 'ImagePlane'
             modelconf_dict['position'] = position
         else:
             modelconf_dict['type'] = 'GLTFObject'
-        model_url = np_filename + file_ext
-        modelconf_dict['model_url'] = model_url
+            # Add in URLs to export model part to DXF
+            for part_name, p_dict in popup_dict.items():
+                p_dict.setdefault('href',[])
+                p_dict['href'].append({'label': 'Export DXF', 'URL': 'http://geomodels.auscope.org/'+model_name+'?service=EXPORT&filename='+model_url+'&format=DXF'})
+        modelconf_dict['popups'] = popup_dict
 
         self.add_inserts(gs_dict, model_url, modelconf_dict, label_str.replace('_', ' '))
 

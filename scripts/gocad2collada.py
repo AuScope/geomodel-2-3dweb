@@ -76,6 +76,9 @@ class Gocad2Collada:
         #                     list of values to be rendered as transparent)
         self.ct_file_dict = {}
 
+        # Name of model as specified in its URL
+        self.model_url_path = 'unknown'
+
         # Process the parameter file
         self.params = self.initialise_params(param_file)
 
@@ -136,8 +139,8 @@ class Gocad2Collada:
                 popup_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                            meta_obj.name,
-                                            popup_dict, prop_filename)
+                                            meta_obj.name, popup_dict,
+                                            prop_filename, self.model_url_path)
                 has_result = True
                 self.config_build_obj.add_ext(geom_obj.get_extent())
 
@@ -202,7 +205,8 @@ class Gocad2Collada:
                                              "position": labl['position'] })
             self.config_build_obj.add_config(self.params.grp_struct_dict,
                                           os.path.basename(file_name),
-                                          popup_dict, file_name, styling=s_dict)
+                                          popup_dict, file_name,
+                                          self.model_url_path, styling=s_dict)
             self.coll_kit_obj.end_collada(out_filename, node_label)
 
 
@@ -233,7 +237,7 @@ class Gocad2Collada:
             if has_result:
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             os.path.basename(file_name), popup_dict,
-                                            file_name)
+                                            file_name, self.model_url_path)
                 self.coll_kit_obj.end_collada(out_filename, node_label)
 
         # Else place each GOCAD object in its own COLLADA file
@@ -249,8 +253,9 @@ class Gocad2Collada:
                     p_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
                     self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                                meta_obj.name,
-                                                p_dict, prop_filename)
+                                                meta_obj.name, p_dict,
+                                                prop_filename,
+                                                self.model_url_path)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
                 has_result = True
         return has_result
@@ -339,7 +344,7 @@ class Gocad2Collada:
                     for popup_dict_key, popup_dict, out_file in popup_list:
                         self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                     popup_dict_key, popup_dict,
-                                                    out_file)
+                                                    out_file, self.model_url_path)
 
             # Produce a PNG file from voxet file
             else:
@@ -347,7 +352,8 @@ class Gocad2Collada:
                                                                 out_filename)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             "{0}_{1}".format(meta_obj.name, prop_idx+1),
-                                            popup_dict, out_filename, file_ext='.PNG',
+                                            popup_dict, out_filename,
+                                            self.model_url_path, file_ext='.PNG',
                                             position=geom_obj.vol_origin)
 
 
@@ -390,7 +396,7 @@ class Gocad2Collada:
 
 
     def initialise_params(self, param_file):
-        ''' Reads the input parameter file and initialises the global 'PARAMS' object
+        ''' Reads the input parameter file and returns a dict version of input params
 
         :param param_file: file name of input parameter file
         '''
@@ -399,12 +405,14 @@ class Gocad2Collada:
         self.check_input_params(param_dict, param_file)
 
         # Mandatory parameters
-        for field_name in ['crs', 'name', 'init_cam_dist']:
+        for field_name in ['crs', 'name', 'init_cam_dist', 'modelUrlPath']:
             if field_name not in param_dict['ModelProperties']:
                 self.logger.error('Field "%s" not in "ModelProperties" in JSON input param file %s',
                                   field_name, param_file)
                 sys.exit(1)
             setattr(params_obj, field_name, param_dict['ModelProperties'][field_name])
+        self.model_url_path = param_dict['ModelProperties']['modelUrlPath']
+
         # Optional parameter
         if 'proj4_defn' in param_dict['ModelProperties']:
             setattr(params_obj, 'proj4_defn', param_dict['ModelProperties']['proj4_defn'])
