@@ -76,7 +76,7 @@ def process_header(self, line_gen):
         name_str = name_str.strip()
         value_str = value_str.strip()
         self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
-        if name_str in ('*SOLID*COLOR', '*ATOMS*COLOR'):
+        if name_str in ('*SOLID*COLOR', '*ATOMS*COLOR', '*LINE*COLOR'):
             self.style_obj.add_rgba_tup(self.parse_colour(value_str))
             self.logger.debug("self.style_obj.rgba_tup = %s",
                               repr(self.style_obj.get_rgba_tup()))

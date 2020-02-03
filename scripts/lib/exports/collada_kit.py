@@ -151,12 +151,11 @@ class ColladaKit:
 
         # Lines
         elif geom_obj.is_line():
-            yellow_colour = (1, 1, 0, 1)
             effect = Collada.material.Effect("effect-{0:05d}".format(self.obj_cnt), [],
                                              self.SHADING,
                                              emission=self.EMISSION,
                                              ambient=self.AMBIENT,
-                                             diffuse=yellow_colour,
+                                             diffuse=style_obj.get_rgba_tup(),
                                              specular=self.SPECULAR,
                                              shininess=self.SHININESS,
                                              double_sided=True)
