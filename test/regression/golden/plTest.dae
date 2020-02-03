@@ -14,7 +14,7 @@
               <color>0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color>1 1 0 1</color>
+              <color>0.123 0.456 0.789 0.999</color>
             </diffuse>
             <specular>
               <color>0.7 0.7 0.7 1</color>

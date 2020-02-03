@@ -382,3 +382,9 @@ gsm_list[0][2].mapped_feat == MapFeat.GEOLOGICAL_UNIT")
     test_this("Extraction of GeoSciML MappedFeatures - part 3", "test036.ts",
               "gsm_list[0][2].geofeat_name == 'VOI' and \
 gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
+
+    #
+    # PL file with coloured line
+    #
+    test_this("PL file with coloured line", "test037.pl",
+              "gsm_list[0][1].get_rgba_tup() == (0.1,0.2,0.3,0.4)")

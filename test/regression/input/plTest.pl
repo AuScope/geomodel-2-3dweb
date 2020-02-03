@@ -1,6 +1,7 @@
 GOCAD PLine 1 
 HEADER {
 name:Rectangle
+*line*color:0.123 0.456 0.789 0.999
 }
 GOCAD_ORIGINAL_COORDINATE_SYSTEM
 NAME Default
