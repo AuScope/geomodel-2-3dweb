@@ -41,7 +41,8 @@ where _config.json_ looks like this:
         "modelUrlPath": "path",
         "init_cam_dist": 0.0,
         "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-    }
+    },
+    "GroupStructure": {}
 }
 
 ```
