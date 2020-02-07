@@ -124,7 +124,7 @@ class ColladaOut():
             :returns: the line's geometry label
         '''
         matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt),
-                                             mesh.materials[0], inputs=[])
+                                             mesh.materials[obj_cnt], inputs=[])
         geom_label_list = []
 
         for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width):
@@ -145,7 +145,6 @@ class ColladaOut():
                                             input_list, "materialref-{0:05d}".format(obj_cnt))
             geom.primitives.append(triset)
             mesh.geometries.append(geom)
-            # NB: Assumes only one colour - this will be improved later on
             geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
             geom_label_list.append(geom_label)

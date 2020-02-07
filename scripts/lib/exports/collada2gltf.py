@@ -70,4 +70,4 @@ def convert_one_file(daefile_str):
             print("Conversion from COLLADA to GLTF failed: return code=", str(cmd_proc.returncode))
         elif REMOVE_COLLADA:
             print("Deleting ", daefile_str)
-        os.remove(daefile_str)
+            os.remove(daefile_str)

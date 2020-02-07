@@ -30,7 +30,8 @@ def parse_property_header(self, prop_obj, line_str):
         self.logger.debug("prop_obj.colourmap_name = %s", prop_obj.colourmap_name)
     # Read in the colour map for this property, format is: idx1 R1 G1 B1 idx2 R2 G2 B2 ...
     elif name_str in ('*COLORMAP*'+ prop_obj.colourmap_name + '*COLORS', \
-                      '*' + prop_obj.colourmap_name + '*ROCK_COLORS'):
+                      '*' + prop_obj.colourmap_name + '*ROCK_COLORS', \
+                      'COLORMAP**COLORS'):
         lut_arr = value_str.split(' ')
         for idx in range(0, len(lut_arr), 4):
             try:
