@@ -124,7 +124,7 @@ class ColladaOut():
             :returns: the line's geometry label
         '''
         matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt),
-                                             mesh.materials[obj_cnt], inputs=[])
+                                             mesh.materials[-1], inputs=[])
         geom_label_list = []
 
         for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width):
