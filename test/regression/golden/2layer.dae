@@ -1,0 +1,317 @@
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <up_axis>Y_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="effect-00000" name="effect-00000">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.111 0.222 0.333 0.444</color>
+            </diffuse>
+            <specular>
+              <color>0.7 0.7 0.7 1</color>
+            </specular>
+            <shininess>
+              <float>50.0</float>
+            </shininess>
+            <reflective>
+              <color>0.0 0.0 0.0 1.0</color>
+            </reflective>
+            <reflectivity>
+              <float>0.0</float>
+            </reflectivity>
+            <transparent>
+              <color>0.0 0.0 0.0 1.0</color>
+            </transparent>
+            <transparency>
+              <float>1.0</float>
+            </transparency>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+    </effect>
+    <effect id="effect-00001" name="effect-00001">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>0.555 0.666 0.777 0.888</color>
+            </diffuse>
+            <specular>
+              <color>0.7 0.7 0.7 1</color>
+            </specular>
+            <shininess>
+              <float>50.0</float>
+            </shininess>
+            <reflective>
+              <color>0.0 0.0 0.0 1.0</color>
+            </reflective>
+            <reflectivity>
+              <float>0.0</float>
+            </reflectivity>
+            <transparent>
+              <color>0.0 0.0 0.0 1.0</color>
+            </transparent>
+            <transparency>
+              <float>1.0</float>
+            </transparency>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+    </effect>
+    <effect id="effect-00002" name="effect-00002">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color>0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color>0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color>1.0 0.999 0.0 1.0</color>
+            </diffuse>
+            <specular>
+              <color>0.7 0.7 0.7 1</color>
+            </specular>
+            <shininess>
+              <float>50.0</float>
+            </shininess>
+            <reflective>
+              <color>0.0 0.0 0.0 1.0</color>
+            </reflective>
+            <reflectivity>
+              <float>0.0</float>
+            </reflectivity>
+            <transparent>
+              <color>0.0 0.0 0.0 1.0</color>
+            </transparent>
+            <transparency>
+              <float>1.0</float>
+            </transparency>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="geometry0000000000-00000" name="line-2LAYER-TEST_LINE1-0000000000">
+      <mesh>
+        <source id="lineverts-array-0000000000-00000">
+          <float_array count="12" id="lineverts-array-0000000000-00000-array">402285.2 5400451 -7849.86 402285.2 5400451 -6849.86 401936.1 5400354 -7922.82 401936.1 5400354 -6922.82</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000000-00000-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000000-00000-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000000-00000" />
+        </vertices>
+        <triangles count="2" material="materialref-00000">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00000-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geometry0000000001-00000" name="line-2LAYER-TEST_LINE1-0000000001">
+      <mesh>
+        <source id="lineverts-array-0000000001-00000">
+          <float_array count="12" id="lineverts-array-0000000001-00000-array">401936.1 5400354 -7922.82 401936.1 5400354 -6922.82 401466.5 5400017 -7981.021 401466.5 5400017 -6981.021</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000001-00000-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000001-00000-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000001-00000" />
+        </vertices>
+        <triangles count="2" material="materialref-00000">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000001-00000-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geometry0000000000-00001" name="line-2LAYER-TEST_LINE2-0000000000">
+      <mesh>
+        <source id="lineverts-array-0000000000-00001">
+          <float_array count="12" id="lineverts-array-0000000000-00001-array">393373.9 5398726 -368.34 393373.9 5398726 631.66 393213.6 5398696 -401.28 393213.6 5398696 598.72</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000000-00001-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000000-00001-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000000-00001" />
+        </vertices>
+        <triangles count="2" material="materialref-00001">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00001-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geometry0000000001-00001" name="line-2LAYER-TEST_LINE2-0000000001">
+      <mesh>
+        <source id="lineverts-array-0000000001-00001">
+          <float_array count="12" id="lineverts-array-0000000001-00001-array">393213.6 5398696 -401.28 393213.6 5398696 598.72 392871.2 5398622 -462.72 392871.2 5398622 537.28</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000001-00001-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000001-00001-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000001-00001" />
+        </vertices>
+        <triangles count="2" material="materialref-00001">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000001-00001-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geometry0000000000-00002" name="line-2LAYER-TEST_LINE3-0000000000">
+      <mesh>
+        <source id="lineverts-array-0000000000-00002">
+          <float_array count="12" id="lineverts-array-0000000000-00002-array">394699.6 5398500 -15.6 394699.6 5398500 984.4 394253.2 5398554 -340.14 394253.2 5398554 659.86</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000000-00002-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000000-00002-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000000-00002" />
+        </vertices>
+        <triangles count="2" material="materialref-00002">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00002-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="geometry0000000001-00002" name="line-2LAYER-TEST_LINE3-0000000001">
+      <mesh>
+        <source id="lineverts-array-0000000001-00002">
+          <float_array count="12" id="lineverts-array-0000000001-00002-array">394253.2 5398554 -340.14 394253.2 5398554 659.86 393863.5 5398669 -598.23 393863.5 5398669 401.77</float_array>
+          <technique_common>
+            <accessor count="4" source="#lineverts-array-0000000001-00002-array" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="lineverts-array-0000000001-00002-vertices">
+          <input semantic="POSITION" source="#lineverts-array-0000000001-00002" />
+        </vertices>
+        <triangles count="2" material="materialref-00002">
+          <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000001-00002-vertices" />
+          <p>0 2 3 3 1 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_materials>
+    <material id="material-00000" name="mymaterial-00000">
+      <instance_effect url="#effect-00000" />
+    </material>
+    <material id="material-00001" name="mymaterial-00001">
+      <instance_effect url="#effect-00001" />
+    </material>
+    <material id="material-00002" name="mymaterial-00002">
+      <instance_effect url="#effect-00002" />
+    </material>
+  </library_materials>
+  <library_visual_scenes>
+    <visual_scene id="myscene">
+      <node id="line-2LAYER-TEST_LINE3-0000000001" name="line-2LAYER-TEST_LINE3-0000000001">
+        <instance_geometry url="#geometry0000000000-00000">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <instance_geometry url="#geometry0000000001-00000">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00000" target="#material-00000" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <instance_geometry url="#geometry0000000000-00001">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00001" target="#material-00001" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <instance_geometry url="#geometry0000000001-00001">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00001" target="#material-00001" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <instance_geometry url="#geometry0000000000-00002">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00002" target="#material-00002" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+        <instance_geometry url="#geometry0000000001-00002">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="materialref-00002" target="#material-00002" />
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#myscene" />
+  </scene>
+</COLLADA>
