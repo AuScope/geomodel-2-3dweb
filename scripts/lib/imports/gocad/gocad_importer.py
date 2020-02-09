@@ -58,36 +58,66 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
     in_gocad = False
     gocad_lines = []
     file_name, file_ext = os.path.splitext(filename_str)
-    for line in file_lines:
+    grp_gocad_obj = GocadImporter(debug_lvl, base_xyz=base_xyz,
+                              group_name=os.path.basename(file_name).upper(),
+                              nondefault_coords=nondef_coords, ct_file_dict=ct_file_dict)
+    for line_idx, line in enumerate(file_lines):
         line_str = line.rstrip(' \n\r').upper()
         field = line_str.split(' ')
+        LOCAL_LOGGER.debug("extract_from_grp(): line_str = %s", line_str)
         if first_line:
             first_line = False
+            # Check that this isn't trying to parse a group file
             if file_ext.upper() != '.GP' or line_str not in GocadImporter.GOCAD_HEADERS['GP']:
                 LOCAL_LOGGER.error("SORRY - not a GOCAD GP file %s", repr(line_str))
                 LOCAL_LOGGER.error("    filename_str = %s", filename_str)
                 sys.exit(1)
-        if line_str == "BEGIN_MEMBERS":
+
+        # Only set 'in_gocad' if enclosed object is not another group object
+        if line_str == "BEGIN_MEMBERS" and line_idx+1 < len(file_lines) \
+                               and not is_group_header(file_lines[line_idx+1]):
             in_member = True
+            LOCAL_LOGGER.debug("extract_from_grp(): in_member = True")
         elif line_str == "END_MEMBERS":
             in_member = False
+            LOCAL_LOGGER.debug("extract_from_grp(): in_member = False")
         elif in_member and field[0] == "GOCAD":
             in_gocad = True
+            LOCAL_LOGGER.debug("extract_from_grp(): in_gocad = True")
+
+        # If at end of GOCAD object then process it
         elif in_member and line_str == "END":
             in_gocad = False
-            gocad_obj = GocadImporter(debug_lvl, base_xyz=base_xyz,
-                                      group_name=os.path.basename(file_name).upper(),
-                                      nondefault_coords=nondef_coords, ct_file_dict=ct_file_dict)
+            LOCAL_LOGGER.debug("extract_from_grp(): in_gocad = False, start processing")
+            # Make a copy of group GOCAD object, so it inherits colour defns etc.
+            # from group obj
+            gocad_obj = copy.deepcopy(grp_gocad_obj)
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, gocad_lines)
             if is_ok:
                 main_gsm_list += gsm_list
+                LOCAL_LOGGER.debug("gsm_list = %s", repr(gsm_list))
             gocad_lines = []
+
+        # If found a group header, then process it to fetch its colour defns etc.
+        elif not in_member and not in_gocad and field[0] == "HEADER":
+            LOCAL_LOGGER.debug("Processing header in GRP file")
+            line_gen = make_line_gen(file_lines[line_idx:])
+            grp_gocad_obj.process_header(line_gen)
+
+        # If in a GOCAD file, then accumulate lines for processing
         if in_member and in_gocad:
+            LOCAL_LOGGER.debug("extract_from_grp(): Appending line")
             gocad_lines.append(line)
 
     LOCAL_LOGGER.debug("extract_gocad() returning len(main_gsm_list)=%d", len(main_gsm_list))
     return main_gsm_list
 
+def is_group_header(line_str):
+    ''' Returns true iff line string is a GOCAD group header
+        :param line_str: line string
+        :returns: true iif line string is a GOCAD group header
+    '''
+    return line_str.rstrip('\n\r ').upper() in GocadImporter.GOCAD_HEADERS['GP']
 
 
 class GocadImporter():

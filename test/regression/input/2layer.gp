@@ -1,0 +1,75 @@
+GOCAD HeterogeneousGroup 1
+HEADER {
+name:test_grp1
+separate_files:off
+}
+BEGIN_MEMBERS
+GOCAD HeterogeneousGroup 1
+HEADER {
+name:test_grp2
+separate_files:off
+}
+BEGIN_MEMBERS
+GOCAD PLine 1
+HEADER {
+name:test_line1
+*atoms:false
+*line*color:0.111 0.222 0.333 0.444
+*width:1
+*extremities*size:1
+}
+PROPERTY_CLASS_HEADER Z {
+*pclip:99
+*low_clip:16136.9
+*high_clip:27750.8
+}
+ILINE
+VRTX 1 402285.1875 5400451 -7849.86035156
+VRTX 2 401936.09375 5400354.5 -7922.81982422
+VRTX 3 401466.5 5400017 -7981.02050781
+SEG 1 2 
+SEG 2 3 
+END
+GOCAD PLine 1
+HEADER {
+name:test_line2
+*width:1
+*atom_links:false
+*line*color:0.555 0.666 0.777 0.888
+*atoms:false
+}
+PROPERTY_CLASS_HEADER Z {
+*pclip:99
+*low_clip:16136.9
+*high_clip:27750.8
+}
+ILINE
+VRTX 1 393373.90625 5398726.5 -368.339996338
+VRTX 2 393213.59375 5398696 -401.279968262
+VRTX 3 392871.25 5398622.5 -462.720031738
+SEG 1 2 
+SEG 2 3 
+END
+GOCAD PLine 1
+HEADER {
+name:test_line3
+*width:2
+*atoms:false
+*line*color:1 0.999 0 1
+}
+PROPERTY_CLASS_HEADER Z {
+*low_clip:1187.67
+*high_clip:2861.02
+*pclip:99
+}
+ILINE
+VRTX 1 394699.625 5398499.5 -15.5999994278
+VRTX 2 394253.1875 5398554 -340.139984131
+VRTX 3 393863.5 5398669 -598.229980469
+SEG 1 2 
+SEG 2 3 
+END
+END_MEMBERS
+END
+END_MEMBERS
+END

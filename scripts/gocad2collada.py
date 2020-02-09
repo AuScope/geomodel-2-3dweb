@@ -224,6 +224,7 @@ class Gocad2Collada:
 
         # If there are too many entries in the GP file, then use one COLLADA file only
         if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
+            has_result = False
             self.logger.debug("All group objects in one COLLADA file")
             self.coll_kit_obj.start_collada()
             popup_dict = {}

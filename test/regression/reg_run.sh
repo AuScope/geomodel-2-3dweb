@@ -73,6 +73,22 @@ done
 
 
 ##########################################################################################
+# Convert objects nested within 2 levels of group files
+##########################################################################################
+
+echo -n "Convert objects nested within 2 levels of group files: "
+coverage run -a gocad2collada.py -g -f $CWD/output $CWD/input/2layer.gp input/TasConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - 2 layer gp conversion returned False" && exit 1
+
+# Remove date stamps from file
+egrep -v '(<created>|<modified>)' "$CWD/output/2layer.dae" > "$CWD/output/2layer2.dae"
+[ $? -ne 0 ] && echo "FAILED" && exit 1
+
+# Check that conversion was correct
+compare_and_print "$CWD/output/2layer2.dae" "$CWD/golden/2layer.dae"
+
+
+##########################################################################################
 # Convert single layer VOXET to PNG test, with and without colour table
 ##########################################################################################
 
@@ -135,10 +151,10 @@ compare_and_print "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json"
 
 
 ##########################################################################################
-# Recursion test
+# Directory recursion test
 ##########################################################################################
 
-echo -n "Recursion test: "
+echo -n "Directory recursion test: "
 
 # Try converting all files at once
 coverage run -a gocad2collada.py -g -r -f $CWD/output $CWD/input input/NorthGawlerConvParam.json >/dev/null 2>&1
