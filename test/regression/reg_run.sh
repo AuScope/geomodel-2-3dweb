@@ -89,6 +89,22 @@ compare_and_print "$CWD/output/2layer2.dae" "$CWD/golden/2layer.dae"
 
 
 ##########################################################################################
+# Inherit colour from group file
+##########################################################################################
+
+echo -n "Inherit colour from group file: "
+coverage run -a gocad2collada.py -g -f $CWD/output $CWD/input/gpColour.gp input/TasConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - inherit colour from gp returned False" && exit 1
+
+# Remove date stamps from file
+egrep -v '(<created>|<modified>)' "$CWD/output/gpColour_0.dae" > "$CWD/output/gpColour.dae"
+[ $? -ne 0 ] && echo "FAILED" && exit 1
+
+# Check that conversion was correct
+compare_and_print "$CWD/output/gpColour.dae" "$CWD/golden/gpColour.dae"
+
+
+##########################################################################################
 # Convert single layer VOXET to PNG test, with and without colour table
 ##########################################################################################
 
