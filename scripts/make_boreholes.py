@@ -103,8 +103,8 @@ def convert_coords(input_crs, output_crs, x_y):
     :param x_y: input coordinates in [x,y] format
     :returns: converted coordinates [x,y]
     '''
-    p_in = Proj(init=__clean_crs(input_crs))
-    p_out = Proj(init=__clean_crs(output_crs))
+    p_in = Proj(__clean_crs(input_crs))
+    p_out = Proj(__clean_crs(output_crs))
     return transform(p_in, p_out, x_y[0], x_y[1])
 
 def __clean_crs(crs):
