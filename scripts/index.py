@@ -26,6 +26,8 @@ import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from diskcache import Cache, Timeout
 import pyassimp
+from types import SimpleNamespace
+import inspect
 
 from make_boreholes import get_json_input_param, get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
@@ -33,7 +35,7 @@ from lib.file_processing import read_json_file
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.exports.assimp_kit import AssimpKit
 
-from lib.nvcl.nvcl_kit import NVCLKit
+from nvcl_kit.reader import NVCLReader
 
 DEBUG_LVL = logging.ERROR
 ''' Initialise debug level to minimal debugging
@@ -116,8 +118,16 @@ def create_borehole_dict_list(model_name, param_dict, wfs_dict):
     if model_name not in wfs_dict or model_name not in param_dict:
         LOGGER.warning("model_name %s not in wfs_dict or param_dict", model_name)
         return {}, []
-    nvcl_kit = NVCLKit(param_dict[model_name], wfs=wfs_dict[model_name])
-    borehole_list = nvcl_kit.get_boreholes_list(MAX_BOREHOLES)
+    param = SimpleNamespace()
+    param.MAX_BOREHOLES = MAX_BOREHOLES
+    param.NVCL_URL = param_dict[model_name].NVCL_URL
+    param.WFS_URL = param_dict[model_name].WFS_URL
+    if hasattr(param_dict[model_name], 'BOREHOLE_CRS'):
+        param.BOREHOLE_CRS = param_dict[model_name].BOREHOLE_CRS
+    if hasattr(param_dict[model_name], 'BBOX'):
+        param.BOREHOLE_CRS = param_dict[model_name].BBOX
+    reader = NVCLReader(param_dict[model_name], wfs=wfs_dict[model_name])
+    borehole_list = reader.get_boreholes_list()
     result_dict = {}
     for borehole_dict in borehole_list:
         borehole_id = borehole_dict['nvcl_id']
@@ -246,7 +256,7 @@ def get_cached_parameters():
             if not os.path.exists(input_file):
                 continue
             # Create params and WFS service
-            param_dict[model_name] = get_json_input_param(os.path.join(INPUT_DIR, input_file))
+            param_dict[model_name] = get_json_input_param(input_file)
             wfs_dict[model_name] = MyWebFeatureService(param_dict[model_name].WFS_URL,
                                                        version=param_dict[model_name].WFS_VERSION,
                                                        xml=None, timeout=WFS_TIMEOUT)
@@ -972,7 +982,7 @@ def application(environ, start_response):
     '''
     MAIN - This is called whenever an HTTP request arrives
     '''
-    doc_root = os.path.normcase(environ['DOCUMENT_ROOT'])
+    doc_root = os.path.dirname(os.path.abspath(inspect.getsourcefile(lambda:0)))
     sys.path.append(os.path.join(doc_root, 'lib'))
     path_bits = environ['PATH_INFO'].split('/')
 
