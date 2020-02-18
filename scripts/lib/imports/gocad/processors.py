@@ -4,8 +4,52 @@ Functions to process multiple lines used for specialist purposes
 
 import sys
 import os
+import struct
+import numpy as np
 
 from lib.imports.gocad.props import PROPS
+
+
+def to_xyz_min_curve(dia1, dia2):
+    ''' Convert measured depth, inclination, azimuth to x,y,z
+        via minimum curvature method
+    :param dia1: tuple (measured depth, inclination, azimuth)
+                measured depth, metres, float
+                inclination, degrees, float, 0 = vertical, 90 = horizontal
+                azimuth, degrees, float, measured from North
+    :param dia2: tuple (measured depth, inclination, azimuth)
+    '''
+    d1, i1_d, a1_d = dia1
+    d2, i2_d, a2_d = dia2
+    i1 = np.deg2rad(i1_d)
+    i2 = np.deg2rad(i2_d)
+    a1 = np.deg2rad(a1_d)
+    a2 = np.deg2rad(a2_d)
+    dMD = d2 - d1
+    b = np.arccos(np.cos(i2 - i1) - (np.sin(i1) * np.sin(i2) * (1 - np.cos(a2 - a1))))
+    if b == 0.0:
+        rf = 0.0
+    else:
+        rf = 2 / b * np.tan(b / 2)
+    dX = dMD / 2 * (np.sin(i1) * np.sin(a1) + np.sin(i2) * np.sin(a2)) * rf
+    dY = dMD / 2 * (np.sin(i1) * np.cos(a1) + np.sin(i2) * np.cos(a2)) * rf
+    dZ = dMD / 2 * (np.cos(i1) + np.cos(i2)) * rf
+    return dX, dY, dZ
+
+
+def to_dia(sdia):
+    ''' Converts a 4-tuple to 3-tuple of floats
+    :param sdia: 4-tuple ('STATION', d, i, a)
+    :returns True/False, three float tuple
+    '''
+    try:
+        stat, d_str, i_str, a_str = sdia
+        d = float(d_str)
+        i = float(i_str)
+        a = float(a_str)
+    except ValueError:
+        return False, []
+    return True, [d, i, a]
 
 
 def process_coord_hdr(self, line_gen):
@@ -91,6 +135,7 @@ def process_header(self, line_gen):
             self.logger.debug("self.header_name = %s", self.header_name)
 
 
+
 def process_ascii_well_path(self, line_gen, field):
     ''' Process ascii well path header
     :param line_gen: line generator
@@ -104,7 +149,7 @@ def process_ascii_well_path(self, line_gen, field):
     well_path = []
     marker_list = []
     while True:
-        # KB height
+        # KB = kelly bush height
         if field[0] == 'KB':
             # pylint: disable=W0612
             is_ok, kelly_b = self.parse_float(field[1])
@@ -124,17 +169,42 @@ def process_ascii_well_path(self, line_gen, field):
                 self.logger.error("Cannot process WREF: %s", repr(field))
                 sys.exit(1)
             well_path = [(x_x, y_y, z_z)]
+            prev_stat = None
 
         elif field[0] == 'DEVIATION_SURVEY':
             pass
+
         elif field[0] == 'STATION':
-            pass
+            """ Well path. Format is: STATION MD INC AZ
+                    MD = measured depth
+                    INC = inclination (degrees)
+                    AZ = azimuth (degrees)
+            """
+            if len(field) == 4:
+                parse_ok = True
+                if prev_stat:
+                    ok1, dia1 = to_dia(prev_stat)
+                    ok2, dia2 = to_dia(field)
+                    if ok1 and ok2:
+                        x_d, y_d, z_d = to_xyz_min_curve(dia1, dia2)
+                        self.logger.debug("Converted from %s to %s => %f, %f, %f", repr(prev_stat), repr(field), x_d, y_d, z_d)
+                        if len(well_path) > 0:
+                            old_x = well_path[-1][0]
+                            old_y = well_path[-1][1]
+                            old_z = well_path[-1][2]
+                            well_path.append((old_x + x_d, old_y + y_d, old_z + z_d))
+                if parse_ok:
+                    prev_stat = field
+
         elif field[0] == 'DATUM':
             pass
-        elif field[0] == 'ZM_NUMPTS':
-            pass
+
+        elif field[0] == 'ZM_NMPTS':
+            # pylint: disable=W0612
+            is_ok, num_pts = self.parse_int(field[1])
 
         elif well_path is not None:
+            # Well path
             # PATH meas-Z Z X-diff Y-diff
             if field[0] == 'PATH':
                 convert = (zm_units == 'KM')
@@ -147,6 +217,7 @@ def process_ascii_well_path(self, line_gen, field):
                 old_y = well_path[-1][1]
                 well_path.append((old_x + x_d, old_y + y_d, z_z))
 
+            # Vertex indicating path
             # VRTX X Y Z
             elif field[0] == 'VRTX':
                 convert = (zm_units == 'KM')
@@ -157,6 +228,7 @@ def process_ascii_well_path(self, line_gen, field):
                     sys.exit(1)
                 well_path.append((x_x, y_y, z_z))
 
+            # Well marker
             # MRKR name flag Z-meas
             elif field[0] == 'MRKR' and len(well_path)>0:
                 is_ok, z_flt = self.parse_float(field[3])
@@ -271,6 +343,19 @@ def process_well_curve(self, line_gen, field):
             break
 
     return field, field_raw, is_last
+
+
+def process_well_binary_file(self, file_name):
+    try:
+        stat_obj = os.stat(file_name)
+        num_flts = int(stat_obj.st_size / 4 )
+        self.logger.debug('num_flts=%s', repr(num_flts))
+        with open(file_name, 'rb') as f:
+            flt_arr = struct.unpack('>{}f'.format(num_flts), f.read(4*num_flts))
+    except OSError as oe:
+        self.logger.error("ERROR - Cannot read well binary file: %s: %s", file_name, repr(oe))
+        return []
+    return flt_arr
 
 
 def process_prop_class_hdr(self, line_gen, field):

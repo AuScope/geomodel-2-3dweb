@@ -126,7 +126,7 @@ class GocadImporter():
     from .parsers import parse_property_header, parse_props, parse_float
     from .parsers import parse_int, parse_xyz, parse_colour, parse_axis_unit
     from .processors import process_coord_hdr, process_header, process_ascii_well_path
-    from .processors import process_well_info, process_well_curve, process_prop_class_hdr
+    from .processors import process_well_info, process_well_curve, process_prop_class_hdr, process_well_binary_file
     from .processors import process_vol_data
 
     GOCAD_HEADERS = {
@@ -542,9 +542,22 @@ class GocadImporter():
                         field, field_raw, is_last = self.process_well_curve(line_gen, field)
 
                     elif field[0] == "BINARY_DATA_FILE":
-                        pass
+                        bin_file = os.path.join(src_dir, field_raw[1].strip('"'))
+                        flt_arr = self.process_well_binary_file(bin_file)
+                        self.logger.debug('bin_flts=%s', repr(flt_arr[:40]))
+
                     elif field[0] == "WP_CATALOG_FILE":
-                        pass
+                        bin_file = os.path.join(src_dir, field_raw[1].strip('"'))
+                        flt_arr = self.process_well_binary_file(bin_file)
+                        self.logger.debug('wp_flts=%s', repr(flt_arr[:40]))
+
+                    elif field[0] == "STATION":
+                        """ Format is:  STATION MD INC AZ
+                            MD = measured depth
+                            INC = inclination
+                            AZ = azimuth
+                        """
+                        well_path = self.process_station_well_path(line_gen, field)
 
                 # Atoms, with or without properties
                 elif field[0] == "ATOM" or field[0] == 'PATOM':
