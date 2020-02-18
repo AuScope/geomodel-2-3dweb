@@ -388,3 +388,13 @@ gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
     #
     test_this("PL file with coloured line", "test037.pl",
               "gsm_list[0][1].get_rgba_tup() == (0.1,0.2,0.3,0.4)")
+
+
+    #
+    # Parse and convert STATION keyword with meas. depth, inclination, azimuth
+    #
+    test_this("Parse and convert STATION keyword with meas. depth, inclination, azimuth",
+    # 94.4795874134504, 2005.6239995358749, 128.80712107653724)), VRTX(n=2, xyz=(990.655890123452, 2009.403974792015, 153.78217326370554
+         "test038.wl", "len(gsm_list)==1 and \
+gsm_list[0][0].vrtx_arr[0].xyz == (994.4795874134504, 2005.6239995358749, 128.80712107653724) and \
+gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.78217326370554)")
