@@ -89,9 +89,12 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
         elif in_member and line_str == "END":
             in_gocad = False
             LOCAL_LOGGER.debug("extract_from_grp(): in_gocad = False, start processing")
-            # Make a copy of group GOCAD object, so it inherits colour defns etc.
+            gocad_obj = GocadImporter(debug_lvl, base_xyz=base_xyz,
+                              group_name=os.path.basename(file_name).upper(),
+                              nondefault_coords=nondef_coords, ct_file_dict=ct_file_dict)
+            # Make a copy of style of group GOCAD object, so it inherits colour defns etc.
             # from group obj
-            gocad_obj = copy.deepcopy(grp_gocad_obj)
+            gocad_obj.style_obj = copy.deepcopy(grp_gocad_obj.style_obj)
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, gocad_lines)
             if is_ok:
                 main_gsm_list += gsm_list
