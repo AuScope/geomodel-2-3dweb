@@ -169,6 +169,10 @@ class GocadImporter():
     ''' Don't read flags file
     '''
 
+    WELL_LINE_WIDTH = 10
+    ''' Line width for drawing wells
+    '''
+
 
     def __init__(self, debug_level, base_xyz=(0.0, 0.0, 0.0), group_name="",
                  nondefault_coords=False, stop_on_exc=True, ct_file_dict={}):
@@ -842,9 +846,10 @@ class GocadImporter():
             geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
             geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
 
-        # If it's a well, then set line to vertical
+        # If it's a well, then set line to vertical with a narrow width
         if self.__is_wl:
             geom_obj.is_vert_line = True
+            geom_obj.line_width = self.WELL_LINE_WIDTH
 
         # Re-enumerate all geometries, because some GOCAD files have missing vertex numbers
         vert_dict = self.__make_vertex_dict()

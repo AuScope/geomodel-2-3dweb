@@ -108,6 +108,10 @@ class ModelGeometries:
         ''' Is true for wells that are represented by vertical lines
         '''
 
+        self.line_width = 1000
+        ''' If this contains lines, desired line width
+        '''
+
     def __repr__(self):
         ''' Print friendly representation
         '''
