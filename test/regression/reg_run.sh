@@ -54,7 +54,7 @@ cd ../../scripts
 coverage erase
 
 # Loop around processing different GOCAD objects
-for i in 'pl' 'ts' 'vs' 'gp'; do
+for i in 'pl' 'ts' 'vs' 'gp' 'wl'; do
 
 echo -n "$i File test: "
 
