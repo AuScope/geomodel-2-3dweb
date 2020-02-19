@@ -111,7 +111,7 @@ class ColladaOut():
         return geom_label
 
 
-    def make_line(self, mesh, geometry_name, geomnode_list, seg_arr, vrtx_arr, obj_cnt, line_width):
+    def make_line(self, mesh, geometry_name, geomnode_list, seg_arr, vrtx_arr, obj_cnt, line_width, z_expand):
         ''' Makes a line using pycollada objects
 
             :param mesh: pycollada 'Collada' object
@@ -121,13 +121,14 @@ class ColladaOut():
             :param vrtx_arr: array of VRTX objects, all points along line
             :param obj_cnt: object counter within this file (an object may contain many lines)
             :param line_width: line width, float
+            :param z_expand: is true if line width is drawn in z-direction else x-direction
             :returns: the line's geometry label
         '''
         matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt),
                                              mesh.materials[-1], inputs=[])
         geom_label_list = []
 
-        for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width):
+        for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width, z_expand):
 
             vert_src = Collada.source.FloatSource(
                 "lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt),

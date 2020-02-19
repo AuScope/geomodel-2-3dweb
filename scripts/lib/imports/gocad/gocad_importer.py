@@ -842,6 +842,10 @@ class GocadImporter():
             geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
             geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
 
+        # If it's a well, then set line to vertical
+        if self.__is_wl:
+            geom_obj.is_vert_line = True
+
         # Re-enumerate all geometries, because some GOCAD files have missing vertex numbers
         vert_dict = self.__make_vertex_dict()
         for v_old in self.__vrtx_arr:

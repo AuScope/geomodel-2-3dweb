@@ -72,12 +72,13 @@ def tri_gen(trgl_arr, vrtx_arr, mesh_name):
     yield vrtx_list, trgl_list, bytes(mesh_name, 'ascii')
 
 
-def line_gen(seg_arr, vrtx_arr, line_width):
+def line_gen(seg_arr, vrtx_arr, line_width, z_expand):
     ''' A generator which is used to make lines
 
     :param seg_arr: line segment array, an array of SEG objects
     :param vrtx_arr: vertex array, an array of VRTX objects
     :param line_width: line width, float
+    :param z_expand: if true will expand width in z-direction, else x-direction
     :returns point_cnt, vert_floats, indices: point_cnt - count of iterations;
         vert_floats - list of (x,y,z) vertices, floats;
         indices - integer index pointers to which vertices are joined as triangles
@@ -86,8 +87,14 @@ def line_gen(seg_arr, vrtx_arr, line_width):
     for point_cnt, line in enumerate(seg_arr):
         v_0 = vrtx_arr[line.ab[0]-1]
         v_1 = vrtx_arr[line.ab[1]-1]
-        vert_floats = list(v_0.xyz) + [v_0.xyz[0], v_0.xyz[1], v_0.xyz[2]+line_width] + \
-                      list(v_1.xyz) + [v_1.xyz[0], v_1.xyz[1], v_1.xyz[2]+line_width]
+        if z_expand:
+            z_width = line_width
+            x_width = 0
+        else:
+            x_width = line_width
+            z_width = 0
+        vert_floats = list(v_0.xyz) + [v_0.xyz[0]+x_width, v_0.xyz[1], v_0.xyz[2]+z_width] + \
+                      list(v_1.xyz) + [v_1.xyz[0]+x_width, v_1.xyz[1], v_1.xyz[2]+z_width]
         indices = [0, 2, 3, 3, 1, 0]
 
         yield point_cnt, vert_floats, indices

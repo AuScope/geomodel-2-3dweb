@@ -104,6 +104,10 @@ class ModelGeometries:
         ''' Array of values indicating no data exists at a point in space
         '''
 
+        self.is_vert_line = False
+        ''' Is true for wells that are represented by vertical lines
+        '''
+
     def __repr__(self):
         ''' Print friendly representation
         '''

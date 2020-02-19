@@ -167,7 +167,7 @@ class ColladaKit:
             geom_label_list = self.collout_obj.make_line(self.mesh_obj, geometry_name,
                                                          self.geomnode_list, geom_obj.seg_arr,
                                                          geom_obj.vrtx_arr, self.obj_cnt,
-                                                         self.LINE_WIDTH)
+                                                         self.LINE_WIDTH, not geom_obj.is_vert_line)
             for geom_label in geom_label_list:
                 popup_dict[geom_label] = {'title': meta_obj.name, 'name': meta_obj.name}
                 node_label = geom_label
