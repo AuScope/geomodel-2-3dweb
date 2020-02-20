@@ -114,6 +114,7 @@ class Gocad2Collada:
         '''
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
+        has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
@@ -147,6 +148,7 @@ class Gocad2Collada:
 
     def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
@@ -169,6 +171,7 @@ class Gocad2Collada:
                                          src_dir, out_filename, prop_idx)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
             has_result = True
+        return has_result
 
 
     def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
@@ -176,6 +179,7 @@ class Gocad2Collada:
         self.coll_kit_obj.start_collada()
         popup_dict = {}
         node_label = ''
+        has_result = False
         for file_lines in file_lines_list:
             gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
                                       nondefault_coords=NONDEF_COORDS)
@@ -223,8 +227,8 @@ class Gocad2Collada:
                                     DEBUG_LVL, NONDEF_COORDS, self.ct_file_dict)
 
         # If there are too many entries in the GP file, then use one COLLADA file only
+        has_result = False
         if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
-            has_result = False
             self.logger.debug("All group objects in one COLLADA file")
             self.coll_kit_obj.start_collada()
             popup_dict = {}

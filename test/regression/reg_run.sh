@@ -71,6 +71,16 @@ compare_and_print "$CWD/output/${i}Test2.dae" "$CWD/golden/${i}Test.dae"
 
 done
 
+# Test second type of well file
+echo -n "wl Type 2 File test: "
+coverage run -a gocad2collada.py -g -f $CWD/output "$CWD/input/wl2Test.wl" input/NorthGawlerConvParam.json >/dev/null 2>&1
+[ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
+egrep -v '(<created>|<modified>)' "$CWD/output/wl2Test.dae" > "$CWD/output/wl2Test2.dae"
+[ $? -ne 0 ] && echo "FAILED" && exit 1
+compare_and_print "$CWD/output/wl2Test2.dae" "$CWD/golden/wl2Test.dae"
+
+
+
 
 ##########################################################################################
 # Convert objects nested within 2 levels of group files
