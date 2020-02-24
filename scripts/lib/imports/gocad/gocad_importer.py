@@ -139,6 +139,7 @@ class GocadImporter():
         'GP':['GOCAD HETEROGENEOUSGROUP 1', 'GOCAD HOMOGENEOUSGROUP 1'],
         'VO':['GOCAD VOXET 1'],
         'WL':['GOCAD WELL 1'],
+        'SG':['GOCAD SGRID 1'],
     }
     ''' Constant assigns possible headers to each filename extension
     '''
@@ -149,7 +150,8 @@ class GocadImporter():
         'PL',
         'GP',
         'VO',
-        'WL'
+        'WL',
+        'SG'
     ]
     ''' List of file extensions to search for
     '''
@@ -262,6 +264,10 @@ class GocadImporter():
         ''' True iff it is a GOCAD WELL file
         '''
 
+        self.__is_sg = False
+        ''' True iff it is a GOCAD SGRID file
+        '''
+
         self.xyz_mult = [1.0, 1.0, 1.0]
         ''' Used to convert to metres if the units are in kilometres
         '''
@@ -334,6 +340,14 @@ class GocadImporter():
         ''' Name of flags file associated with voxel file
         '''
 
+        self.points_offset = 0
+        ''' Offset within points file (SGRID)
+        '''
+
+        self.points_file = ""
+        ''' Points file (SGRID)
+        '''
+
         self.region_dict = {}
         ''' Labels and bit numbers for each region in a flags file,
             key is number (as string), value is label
@@ -341,6 +355,10 @@ class GocadImporter():
 
         self.region_colour_dict = {}
         ''' Region colour dict, key is region name, value is RGB (float, float, float)
+        '''
+
+        self.sgrid_cell_align = True
+        ''' Is SGRID aligned to cells or points ?
         '''
 
         self.np_filename = ""
@@ -738,8 +756,15 @@ class GocadImporter():
 
                 # Process VOXET data
                 elif self.__is_vo and field[0][:4] == "AXIS":
-                    self.logger.debug('field[0][:4] = %s', field[0][:4])
+                    self.logger.debug('VOXET: found field[0] = %s', field[0])
                     field, field_raw, is_last = self.process_vol_data(line_gen, field, field_raw, src_dir)
+
+
+                # Process SGRID data
+                elif self.__is_sg and field[0][:4] == "AXIS":
+                    self.logger.debug('SGRID: field[0] = %s', field[0])
+                    field, field_raw, is_last = self.process_vol_data(line_gen, field, field_raw, src_dir)
+
 
             except IndexError as exc:
                 self.handle_exc(exc)
@@ -929,6 +954,10 @@ class GocadImporter():
             if ext_str == 'WL' and first_line_str in self.GOCAD_HEADERS['WL']:
                 self.__is_wl = True
                 return True
+            if ext_str == 'SG' and first_line_str in self.GOCAD_HEADERS['SG']:
+                self.__is_sg = True
+                return True
+
 
         return False
 

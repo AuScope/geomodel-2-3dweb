@@ -413,8 +413,9 @@ def process_prop_class_hdr(self, line_gen, field):
     self.logger.debug("END property class header")
 
 
+
 def process_vol_data(self, line_gen, field, field_raw, src_dir):
-    ''' Process all the voxet data fields
+    ''' Process all the voxet and sgrid data fields
         :param line_gen: line generator
         :param field: array of field strings
         :param field: array of field strings, not space separated
@@ -509,6 +510,37 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
         elif field[0] == "REGION":
             self.region_dict[field[2]] = field[1]
             self.logger.debug("self.region_dict[%s] = %s", field[2], field[1])
+
+        elif field[0] == "REGION_FLAGS_ARRAY_LENGTH":
+            pass
+
+        elif field[0] == "REGION_FLAGS_BIT_LENGTH":
+            pass
+
+        elif field[0] == "REGION_FLAGS_ESIZE":
+            pass
+
+        elif field[0] == "REGION_FLAGS_OFFSET":
+            pass
+
+        elif field[0] == "REGION_FLAGS_FILE":
+            pass
+
+        elif field[0] == "PROP_ALIGNMENT":
+            # IS the SGRID aligned to CELLS or POINTS ?
+            self.sgrid_cell_alignment = (field[1] == "CELLS")
+
+        elif field[0] == "POINTS_OFFSET":
+            # Offset within points file
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.points_offset = int_val
+                self.logger.debug("self.points_offset= %d", self.points_offset)
+
+        elif field[0] == "POINTS_FILE":
+            # Name of points file
+            self.points_file = os.path.join(src_dir, field_raw[1])
+            self.logger.debug("self.points_file= %s", self.points_file)
 
         else:
             self.logger.debug('Exiting volume data')
