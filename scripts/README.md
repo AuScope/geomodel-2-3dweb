@@ -25,3 +25,5 @@ _./build_api_dir.sh output_dir/query_data.db_
 
 This will produce a tar file with today's date which can be copied to website
 
+NB: If you aren't using a borehole database, substitute an empty file for _output_dir/query_data.db_
+
