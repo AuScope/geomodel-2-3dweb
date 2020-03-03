@@ -512,23 +512,44 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
             self.logger.debug("self.region_dict[%s] = %s", field[2], field[1])
 
         elif field[0] == "REGION_FLAGS_ARRAY_LENGTH":
-            pass
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.region_flags_array_length = int_val
 
         elif field[0] == "REGION_FLAGS_BIT_LENGTH":
-            pass
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.region_flags_bit_length = int_val
 
         elif field[0] == "REGION_FLAGS_ESIZE":
-            pass
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.region_flags_bit_size = int_val
 
         elif field[0] == "REGION_FLAGS_OFFSET":
-            pass
+            is_ok, int_val = self.parse_int(field[1])
+            if is_ok:
+                self.region_flags_offset = int_val
 
         elif field[0] == "REGION_FLAGS_FILE":
-            pass
+            self.region_flags_file = os.path.join(src_dir, field_raw[1])
+            self.logger.debug("self.flags_file= %s", self.flags_file)
+
+        elif field[0] == "ASCII_DATA_FILE":
+            self.logger.warning("Sorry - cannot process ASCII_DATA_FILE keyword")
+
+        elif field[0] == "SPLIT":
+            self.logger.warning("Sorry - cannot process SPLIT keyword")
+
+        elif field[0] == "FACET_SET":
+            self.logger.warning("Sorry - cannot process FACET_SET keyword")
 
         elif field[0] == "PROP_ALIGNMENT":
-            # IS the SGRID aligned to CELLS or POINTS ?
+            # Is the SGRID aligned to CELLS or POINTS ?
             self.sgrid_cell_alignment = (field[1] == "CELLS")
+            # If aligned to cells then there are fewer data values
+            if self.sgrid_cell_alignment:
+                self.vol_sz = (self.vol_sz[0] - 1, self.vol_sz[1] - 1, self.vol_sz[2] - 1)
 
         elif field[0] == "POINTS_OFFSET":
             # Offset within points file

@@ -398,3 +398,9 @@ gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
          "test038.wl", "len(gsm_list)==1 and \
 gsm_list[0][0].vrtx_arr[0].xyz == (994.4795874134504, 2005.6239995358749, 128.80712107653724) and \
 gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.78217326370554)")
+
+
+    #
+    # Parse SGRID keywords
+    #
+    test_this("Parse SGRID keywords", "test039.sg", "len(gsm_list)==1")
