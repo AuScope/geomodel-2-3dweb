@@ -1,55 +1,96 @@
 GOCAD SGrid 1 
 HEADER {
-name:SGrid_Test
+name: Test_SGrid
+*regions*01_Region*solid*color: 0 1 1 1
+*regions*02_Region*solid*color: 0.960784 0.870588 0.701961 1
+*regions*03_Region*solid*color: 0.854902 0.647059 0.12549 1
+*regions*04_Region*solid*color: 0.87451 0.87451 0.87451 1
+*regions*05_Region*solid*color: 0.603922 0.803922 0.196078 1
 }
 GOCAD_ORIGINAL_COORDINATE_SYSTEM
 NAME Default
-AXIS_NAME "X" "Y" "Z"
-AXIS_UNIT "m" "m" "m"
+PROJECTION Unknown
+DATUM Unknown
+AXIS_NAME X Y Z
+AXIS_UNIT m m m
 ZPOSITIVE Elevation
 END_ORIGINAL_COORDINATE_SYSTEM
-AXIS_N 383 428 50 
+CLASSIFICATION ReservoirGeologicalModel "Geological Models" "Reservoir Model"
+AXIS_N 10 7 4 
 PROP_ALIGNMENT CELLS
 POINTS_OFFSET 0 
-POINTS_FILE SGrid_Test_points@@
+POINTS_FILE Test_SGrid__points@@
 FLAGS_OFFSET 0 
-FLAGS_FILE SGrid_Test_flags@@
+FLAGS_FILE Test_SGrid__flags@@
 
-REGION Area1 0 
-REGION Area2 1 
-REGION Area3 2 
-REGION Area4 3 
-REGION Area5 4 
-REGION Area6 5 
-REGION Area7 6 
-REGION Area8 7 
-REGION Area9 8 
-REGION Area10 9 
-REGION Area11 10 
-REGION Area12 11 
-REGION_FLAGS_ARRAY_LENGTH 8196200 
+REGION 00_Region 0 
+REGION 02_Region 1 
+REGION 05_Region 2 
+REGION 06_Region 3 
+REGION 03_Region 4 
+REGION 04_Region 5 
+REGION 01_Region 6 
+REGION 07_Region 7 
+REGION 08_Region 8 
+REGION 09_Region 9 
+REGION 10_Region 10 
+REGION 11_Region 11 
+REGION_FLAGS_ARRAY_LENGTH 280 
 REGION_FLAGS_BIT_LENGTH 12 
 REGION_FLAGS_ESIZE 2 
 REGION_FLAGS_OFFSET 0 
-REGION_FLAGS_FILE SGrid_Test_region_flags@@
+REGION_FLAGS_FILE Test_SGrid__region_flags@@
 
-PROPERTY 1 "Prop1"
-PROPERTY_CLASS 1 "prop1"
-PROPERTY_CLASS_HEADER 1 "prop1" {
-pclip:99
-low_clip:0
-high_clip:6
+PROPERTY 1 prop1
+PROPERTY_CLASS 1 prop1
+PROPERTY_KIND 1 prop1
+PROPERTY_CLASS_HEADER 1 prop1 {
+pclip: 99
+low_clip: 0
+high_clip: 6
+name: prop1
+unit: Euc
+kind: prop1
+*colormap*standard*colors: 0 0 0 0.560783982 85 0 1 1 170 1 0.996078014 0 255 0.498039007 0 0 
 }
 PROPERTY_SUBCLASS 1 QUANTITY Float
-PROP_ORIGINAL_UNIT 1 none
-PROP_UNIT 1 none
+PROP_ORIGINAL_UNIT 1 Euc
+PROP_UNIT 1 Euc
 PROP_NO_DATA_VALUE 1 -99999
-PROP_SAMPLE_STATS 1 7992582 3.79075 4.05431 0 6
+PROP_SAMPLE_STATS 1 162 4 0 4 4
 PROP_ESIZE 1 4
 PROP_ETYPE 1  IEEE
 PROP_ALIGNMENT 1  CELLS
 PROP_FORMAT 1 RAW
 PROP_OFFSET 1 0
-PROP_FILE 1 SGrid_Test_Prop1@@
+PROP_FILE 1 Test_SGrid_prop1@@
 
+PROPERTY 2 prop2
+PROPERTY_CLASS 2 prop2
+PROPERTY_KIND 2 prop2
+PROPERTY_CLASS_HEADER 2 prop2 {
+*colormap*nodata: true
+pclip: 99
+colormap: flag
+last_selected_folder: Property
+*colormap*high_clip_transparent: false
+low_clip: 2.62
+high_clip: 2.72
+name: prop2
+*colormap*nodata*transparency: 1
+unit: Euc
+kind: prop2
+*colormap*flag*colors: 0 0 0 1 128 1 1 1 255 1 0 0 
+}
+PROPERTY_SUBCLASS 2 QUANTITY Float
+PROP_ORIGINAL_UNIT 2 Euc
+PROP_UNIT 2 Euc
+PROP_NO_DATA_VALUE 2 -99999
+PROP_SAMPLE_STATS 2 162 2.665 5.28845e-005 2.65142 2.68076
+PROP_ESIZE 2 4
+PROP_ETYPE 2  IEEE
+PROP_ALIGNMENT 2  CELLS
+PROP_FORMAT 2 RAW
+PROP_OFFSET 2 0
+PROP_FILE 2 Test_SGrid_prop2@@
 END

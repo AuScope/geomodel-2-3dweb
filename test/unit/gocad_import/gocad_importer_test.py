@@ -403,4 +403,4 @@ gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.7821
     #
     # Parse SGRID keywords
     #
-    test_this("Parse SGRID keywords", "test039.sg", "len(gsm_list)==1")
+    test_this("Parse SGRID keywords", "test039.sg", "len(gsm_list)==2")
