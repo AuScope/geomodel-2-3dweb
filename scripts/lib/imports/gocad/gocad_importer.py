@@ -1042,7 +1042,7 @@ class GocadImporter():
                                 else:
                                     data_val = fp_arr[fp_idx]
                                     prop_obj.assign_to_xyz((x_coord, y_coord, z_coord), data_val)
-                            fp_idx += 1
+                                fp_idx += 1
                 # If SGRID
                 elif self.__is_sg:
                     # SGRID gets its coordinates from a points file
