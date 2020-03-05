@@ -301,10 +301,10 @@ gsm_list[0][2].get_property_name(1) == 'J'""")
     # Values of properties
     #
     test_this("Values of properties", "test028.ts",
-              """gsm_list[0][0].get_xyz_data(0)[(459395.951171875,
+              """gsm_list[0][0].get_loose_3d_data(True, 0)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 1057.0 \
-and gsm_list[0][0].get_xyz_data(1)[(459395.951171875,
+and gsm_list[0][0].get_loose_3d_data(True, 1)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 927.0""")
 
@@ -342,10 +342,10 @@ and gocad_obj.region_dict['9'] == 'SLATE'""")
     # Handle control nodes
     #
     test_this("Handle control nodes", "test031.ts",
-              """gsm_list[0][0].get_xyz_data(0)[(459395.951171875,
+              """gsm_list[0][0].get_loose_3d_data(True, 0)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 1057.0 \
-             and gsm_list[0][0].get_xyz_data(1)[(459395.951171875,
+             and gsm_list[0][0].get_loose_3d_data(True, 1)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 927.0""")
 
@@ -353,7 +353,7 @@ and gocad_obj.region_dict['9'] == 'SLATE'""")
     # ATOMS with and without properties
     #
     test_this("ATOMS with and without properties", "test032.ts",
-              """gsm_list[0][0].get_xyz_data()[(459876.3125,
+              """gsm_list[0][0].get_loose_3d_data(True)[(459876.3125,
                                                 8241554.9453125,
                                                 -485.6229248046875)] == 1050.0 \
 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr""")
@@ -365,7 +365,7 @@ and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr""")
                "len(gsm_list)==6 and \
 gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) \
 and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].get_property_name() == 'OBJECTID' \
-and gsm_list[0][0].get_xyz_data()[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
+and gsm_list[0][0].get_loose_3d_data(True)[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
 
     #
     # Extraction of metadata

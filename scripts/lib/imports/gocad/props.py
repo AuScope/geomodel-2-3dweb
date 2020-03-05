@@ -62,6 +62,10 @@ class PROPS:
         ''' Property data attached to XYZ points (index is XYZ coordinate)
         '''
 
+        self.data_ijk = defaultdict(list)
+        ''' Property data attached to XYZ points (index is IJK int indexes)
+        '''
+
         self.data_stats = {'min': sys.float_info.max, 'max': -sys.float_info.max}
         ''' Property data statistics: min & max
         '''
@@ -207,13 +211,40 @@ class PROPS:
             self.__calc_minmax(val)
 
 
+    def assign_to_ijk(self, ijk, val):
+        ''' Assigns a value to ijk dict
+            ijk - (I,J,K) tuple array indexes (ints)
+            val - value to be assigned (float or tuple)
+        '''
+        self.data_ijk[ijk] = val
+        if isinstance(val, float):
+            self.__calc_minmax(val)
+
+
     def append_to_xyz(self, xyz, val):
         ''' Appends a value to xyz dict
             xyz - (X,Y,Z) tuple array indexes (floats)
             val - value to be assigned
         '''
+        x,y,z = xyz
+        if not isinstance(x, float) or not is_instance(y, float) or \
+           not isinstance(z, float):
+            self.logger.error("Internal error: adding float index to int array %s", repr(xyz))
+            sys.exit(1)
         self.data_xyz[xyz].append(val)
 
+
+    def append_to_ijk(self, ijk, val):
+        ''' Appends a value to xyz dict
+            ijk - (I,J,K) tuple array indexes (ints)
+            val - value to be assigned
+        '''
+        i,j,k = ijk
+        if not isinstance(i, int) or not is_instance(j, int) or \
+           not isinstance(k, int):
+            self.logger.error("Internal error: adding float index to int array %s", repr(ijk))
+            sys.exit(1)
+        self.data_ijk[ijk].append(val)
 
 
     def __calc_minmax(self, fltp):

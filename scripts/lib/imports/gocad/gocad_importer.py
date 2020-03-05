@@ -902,7 +902,7 @@ class GocadImporter():
         if local_prop_idx_list:
             for local_prop_idx in local_prop_idx_list:
                 prop = self.local_props[local_prop_idx]
-                geom_obj.add_xyz_data(prop.data_xyz)
+                geom_obj.add_loose_3d_data(True, prop.data_xyz)
                 geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                    prop.no_data_marker)
 
@@ -911,8 +911,12 @@ class GocadImporter():
         if prop_idx:
             prop = self.prop_dict[prop_idx]
             geom_obj.vol_data = prop.data_3d
+            # Add 3d data indexed on XYZ coords
             if prop.data_xyz:
-                geom_obj.add_xyz_data(prop.data_xyz)
+                geom_obj.add_loose_3d_data(True, prop.data_xyz)
+            # Add 3d data indexed on IJK indexes
+            if prop.data_ijk:
+                geom_obj.add_loose_3d_data(False, prop.data_ijk)
             geom_obj.vol_data_type = prop.get_str_data_type()
             geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                prop.no_data_marker)
@@ -1042,6 +1046,8 @@ class GocadImporter():
                                 else:
                                     data_val = fp_arr[fp_idx]
                                     prop_obj.assign_to_xyz((x_coord, y_coord, z_coord), data_val)
+                                    prop_obj.assign_to_ijk((x_val, y_val, z_val), data_val)
+
                                 fp_idx += 1
                 # If SGRID
                 elif self.__is_sg:
@@ -1071,6 +1077,7 @@ class GocadImporter():
                                 x_coord, y_coord, z_coord = self.__calc_sg_xyz(x_val, y_val, z_val, pt_arr)
                                 data_val = fp_arr[fp_idx]
                                 prop_obj.assign_to_xyz((x_coord, y_coord, z_coord), data_val)
+                                prop_obj.assign_to_ijk((x_val, y_val, z_val), data_val)
                                 fp_idx += 1
 
                                 # self.logger.debug("fp[%d, %d, %d] = %s", x_val, y_val, z_val, repr(data_val))
@@ -1195,7 +1202,7 @@ class GocadImporter():
                                 key = self.region_dict[str(cnt)]
                                 # self.logger.debug('cnt = %d bit = %d', cnt, bit)
                                 # self.logger.debug('key = %s', key)
-                                self.flags_prop.append_to_xyz((x_val, y_val, z_val), key)
+                                self.flags_prop.append_to_ijk((x_val, y_val, z_val), key)
                             cnt -= 1
                         f_idx += 1
 

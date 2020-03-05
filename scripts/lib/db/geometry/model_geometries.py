@@ -92,6 +92,12 @@ class ModelGeometries:
             This is an array of a dictionary mapping (X,Y,Z) => [data1, data2, data3, ... ]
         '''
 
+        self._ijk_data = []
+        ''' Generic property data associated with IJK volume indexes
+            First point is (0,0,0)
+            This is an array of a dictionary mapping (I,J,K) => [data1, data2, data3, ... ]
+        '''
+
         self._max_data = []
         ''' Array of maximum values in 'xyz_data' or 'vol_data'
         '''
@@ -268,19 +274,35 @@ class ModelGeometries:
         self._no_data_marker.append(no_data)
 
 
-    def add_xyz_data(self, xyz_data):
+    def add_loose_3d_data(self, is_xyz, data_dict):
         ''' Adds an instance of XYZ data
-        :param xyz_data: dictionary of (X,Y,Z) => data value to be added
+        :param is_xyz: True iff xyz data (float, float, float)
+                       else ijk (int, int, int) data
+        :param data_dict: dictionary of (X,Y,Z) => data, or (I,J,K) => data
+                          values to be added
         '''
-        self._xyz_data.append(xyz_data)
+        if data_dict:
+            assert(((isinstance(list(data_dict.keys())[0][0], float) or \
+                   isinstance(list(data_dict.keys())[0][0], np.float32)) \
+                   and is_xyz) or (not is_xyz and isinstance(list(data_dict.keys())[0][0], int)))
+            if is_xyz:
+                self._xyz_data.append(data_dict)
+            else:
+                self._ijk_data.append(data_dict)
 
 
-    def get_xyz_data(self, idx=0):
+    def get_loose_3d_data(self, is_xyz, idx=0):
         ''' Retrieves data from xyz data dictionary
+        :param is_xyz: True iff xyz data (float, float, float)
+                       else ijk (int, int, int) data
         :param idx: index for when there are multiple values for each point in space,
                     omit for volumes
-        :returns: dictionary of (X,Y,Z) => data value
+        :returns: dictionary of (X,Y,Z) => data value or (I,J,K) => data value
         '''
-        if len(self._xyz_data) > idx:
-            return self._xyz_data[idx]
+        if is_xyz:
+            if len(self._xyz_data) > idx:
+                return self._xyz_data[idx]
+        else:
+            if len(self._ijk_data) > idx:
+                return self._ijk_data[idx]
         return {}

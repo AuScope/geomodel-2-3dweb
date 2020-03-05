@@ -52,7 +52,8 @@ class PngKit:
         # Volume data are RGBA, data is stored in geom_obj's xyz_data
         if geom_obj.vol_data_type == 'RGBA':
             self.logger.debug("Using in-situ RGBA data")
-            xyz_data = geom_obj.get_xyz_data()
+            # Use False to get data using IJK int indexes
+            xyz_data = geom_obj.get_loose_3d_data(is_xyz=False)
             for x_val in range(0, geom_obj.vol_sz[0]):
                 for y_val in range(0, geom_obj.vol_sz[1]):
                     try:

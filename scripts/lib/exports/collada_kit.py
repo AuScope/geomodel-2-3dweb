@@ -172,7 +172,7 @@ class ColladaKit:
         # Points
         elif geom_obj.is_point():
             geometry_name = meta_obj.name
-            prop_dict = geom_obj.get_xyz_data()
+            prop_dict = geom_obj.get_loose_3d_data(True)
             colour_num = 0
 
             # If there are many colours, make MAX_COLORS materials
@@ -274,7 +274,7 @@ class ColladaKit:
         geomnode_list = []
         colour_num = 0
         # If there are many colours, make MAX_COLORS materials
-        prop_dict = geom_obj.get_xyz_data()
+        prop_dict = geom_obj.get_loose_3d_data(True)
         if not style_obj.has_single_colour():
             self.make_false_colour_materials(mesh, self.MAX_COLOURS)
             max_v = geom_obj.get_max_data()
@@ -285,6 +285,7 @@ class ColladaKit:
             self.make_colour_material(mesh, style_obj.get_rgba_tup(), colour_num)
 
         # Draw vertices as pyramids
+        geom_label=''
         for point_cnt, vrtx in enumerate(geom_obj.vrtx_arr):
             # If there's a colour table calculate colour, but if no data at that point
             # then skip this vertex
