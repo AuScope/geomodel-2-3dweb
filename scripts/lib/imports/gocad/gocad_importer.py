@@ -861,17 +861,19 @@ class GocadImporter():
                                     local property data values in object
         :param prop_idx: optional, if set, then will place property data in object
         '''
-        # Convert GOCAD's volume geometry spec
-        if self.__is_vo and self.vol_sz:
-            geom_obj.vol_origin = self.axis_o
-            geom_obj.vol_sz = self.vol_sz
-            min_vec = np.array(self.axis_min)
-            max_vec = np.array(self.axis_max)
-            mult_vec = max_vec - min_vec
+        # Convert GOCAD's volume geometry spec (SGRID & VOXET)
+        if self.vol_sz:
+            if self.__is_vo or self.__is_sg:
+                geom_obj.vol_sz = self.vol_sz
+            if self.__is_vo:
+                geom_obj.vol_origin = self.axis_o
+                min_vec = np.array(self.axis_min)
+                max_vec = np.array(self.axis_max)
+                mult_vec = max_vec - min_vec
 
-            geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).tolist())
-            geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
-            geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
+                geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).tolist())
+                geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
+                geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
 
         # If it's a well, then set line to vertical with a narrow width
         if self.__is_wl:

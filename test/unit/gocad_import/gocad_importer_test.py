@@ -91,6 +91,15 @@ def test_group(msg, test_file, assert_str):
 if __name__ == "__main__":
     print("GocadImporter Unit Test")
 
+    #
+    # Recognise file types - WELL
+    #
+    test_this("Recognise WELL file", "test038.wl", "gsm_list[0][0].is_line() == True")
+
+    #
+    # Recognise file types - SGRID
+    #
+    test_this("Recognise SGRID file", "test039.sg", "gsm_list[0][0].is_volume() == True")
 
     #
     # Recognise file types - VOXET
