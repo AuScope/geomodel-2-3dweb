@@ -410,6 +410,19 @@ gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.7821
 
 
     #
-    # Parse SGRID keywords
+    # Parse SGRID keywords and extract volume data
     #
-    test_this("Parse SGRID keywords", "test039.sg", "len(gsm_list)==2")
+    test_this("Parse SGRID keywords and extract volume data", "test039.sg", "len(gsm_list)==2 and " \
+"gsm_list[0][0].vol_sz==(9,6,3) and " \
+"gsm_list[1][0].vol_sz==(9,6,3) and " \
+"gsm_list[0][0].max_x==396000.0 and gsm_list[0][0].min_x==360000.0 and " \
+"gsm_list[0][0].max_y==6516000.0 and gsm_list[0][0].min_y==6492000.0 and " \
+"gsm_list[0][0].max_z==-23000.0 and gsm_list[0][0].min_z==-29000.0 and " \
+"gsm_list[1][0].max_x==396000.0 and gsm_list[1][0].min_x==360000.0 and " \
+"gsm_list[1][0].max_y==6516000.0 and gsm_list[1][0].min_y==6492000.0 and " \
+"gsm_list[1][0].max_z==-23000.0 and gsm_list[1][0].min_z==-29000.0 and " \
+"gsm_list[0][0].vol_data_type=='FLOAT_32' and " \
+"gsm_list[1][0].vol_data_type=='FLOAT_32' and " \
+"gsm_list[0][0]._xyz_data[0][(376000.0, 6496000.0, -25000.0)]==4.0 and " \
+"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]>2.6536592 and " \
+"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]<2.6536594")
