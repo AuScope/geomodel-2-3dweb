@@ -863,17 +863,28 @@ class GocadImporter():
         '''
         # Convert GOCAD's volume geometry spec (SGRID & VOXET)
         if self.vol_sz:
-            if self.__is_vo or self.__is_sg:
+            if self.__is_sg:
                 geom_obj.vol_sz = self.vol_sz
-            if self.__is_vo:
+                self.axis_o = (self.geom_obj.min_x, self.geom_obj.min_y, self.geom_obj.min_z)
+                geom_obj.vol_origin = (self.geom_obj.min_x, self.geom_obj.min_y, self.geom_obj.min_z)
+                self.axis_min = (0.0,0.0,0.0)
+                self.axis_max = (1.0,1.0,1.0)
+                self.axis_u = (self.geom_obj.max_x - self.geom_obj.min_x, 0.0, 0.0)
+                self.axis_v = (0.0, self.geom_obj.max_y - self.geom_obj.min_y, 0.0)
+                self.axis_w = (0.0, 0.0, self.geom_obj.max_z - self.geom_obj.min_z)
+
+            elif self.__is_vo:
+                geom_obj.vol_sz = self.vol_sz
                 geom_obj.vol_origin = self.axis_o
+
+            if self.__is_vo or self.__is_sg:
                 min_vec = np.array(self.axis_min)
                 max_vec = np.array(self.axis_max)
                 mult_vec = max_vec - min_vec
 
-                geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).tolist())
-                geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
-                geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
+                geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).astype(float).tolist())
+                geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).astype(float).tolist())
+                geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).astype(float).tolist())
 
         # If it's a well, then set line to vertical with a narrow width
         if self.__is_wl:
@@ -899,7 +910,7 @@ class GocadImporter():
             atm = ATOM(vert_dict[a_old.n], vert_dict[a_old.v])
             geom_obj.atom_arr.append(atm)
 
-        # Add PVTRX, PATOM or SGRID data
+        # Add PVTRX, PATOM data
         # Multiple properties' data points are stored in one geom_obj
         if local_prop_idx_list:
             for local_prop_idx in local_prop_idx_list:
@@ -908,7 +919,7 @@ class GocadImporter():
                 geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                    prop.no_data_marker)
 
-        # Add volume data
+        # Add volume data (SGRID, VOXEL)
         # Only one set of data per geom_obj
         if prop_idx:
             prop = self.prop_dict[prop_idx]
@@ -1136,7 +1147,6 @@ class GocadImporter():
 
     def __calc_sg_xyz(self, x_idx, y_idx, z_idx, fp_arr):
         # SGRID has coordinates in points file
-        # FIXME: Is this correct?
         x_coord, y_coord, z_coord = fp_arr[x_idx][y_idx][z_idx]
         self.geom_obj.calc_minmax(x_coord, y_coord, z_coord)
         return x_coord, y_coord, z_coord

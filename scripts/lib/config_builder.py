@@ -66,13 +66,13 @@ class ConfigBuilder():
             if len(extent) < 4:
                 continue
             if extent[0] < out_extent[0]:
-                out_extent[0] = extent[0]
+                out_extent[0] = float(extent[0])
             if extent[1] > out_extent[1]:
-                out_extent[1] = extent[1]
+                out_extent[1] = float(extent[1])
             if extent[2] < out_extent[2]:
-                out_extent[2] = extent[2]
+                out_extent[2] = float(extent[2])
             if extent[3] > out_extent[3]:
-                out_extent[3] = extent[3]
+                out_extent[3] = float(extent[3])
         return out_extent
 
 
@@ -116,7 +116,7 @@ class ConfigBuilder():
                                                                 "displayed": True,
                                                                 "include": True})
 
-       # Is there a proj4 definition?
+        # Is there a proj4 definition?
         if hasattr(params, 'proj4_defn'):
             config_dict["properties"]["proj4_defn"] = params.proj4_defn
         try:

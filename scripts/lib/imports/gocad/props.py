@@ -207,7 +207,7 @@ class PROPS:
             val - value to be assigned (float or tuple)
         '''
         self.data_xyz[xyz] = val
-        if isinstance(val, float):
+        if isinstance(val, float) or isinstance(val, numpy.float32):
             self.__calc_minmax(val)
 
 
@@ -217,7 +217,7 @@ class PROPS:
             val - value to be assigned (float or tuple)
         '''
         self.data_ijk[ijk] = val
-        if isinstance(val, float):
+        if isinstance(val, float) or isinstance(val, numpy.float32):
             self.__calc_minmax(val)
 
 
@@ -250,9 +250,14 @@ class PROPS:
     def __calc_minmax(self, fltp):
         ''' Calculates minimum & maximum of floating point value and stores
             result locally in 'data_stats'
-            fp - floating point value
+            fp - floating point value (numpy or python float)
         '''
-        if fltp > self.data_stats['max']:
-            self.data_stats['max'] = fltp
-        if fltp < self.data_stats['min']:
-            self.data_stats['min'] = fltp
+        try:
+            if fltp > self.data_stats['max']:
+                # Convert to python float
+                self.data_stats['max'] = float(fltp)
+            if fltp < self.data_stats['min']:
+                # Convert to python float
+                self.data_stats['min'] = float(fltp)
+        except ValueError:
+            pass

@@ -194,21 +194,24 @@ class ModelGeometries:
     def calc_minmax(self, x_coord, y_coord, z_coord):
         ''' Calculates and stores the max and min of all x,y,z coords
 
-        :param x_coord, y_coord, z_coord: x,y,z coords
+        :param x_coord, y_coord, z_coord: x,y,z coords (python or numpy float)
         '''
-        if x_coord > self.max_x:
-            self.max_x = x_coord
-        if x_coord < self.min_x:
-            self.min_x = x_coord
-        if y_coord > self.max_y:
-            self.max_y = y_coord
-        if y_coord < self.min_y:
-            self.min_y = y_coord
-        if z_coord > self.max_z:
-            self.max_z = z_coord
-        if z_coord < self.min_z:
-            self.min_z = z_coord
-
+        try: 
+            if x_coord > self.max_x:
+                # Convert to python float
+                self.max_x = float(x_coord)
+            if x_coord < self.min_x:
+                self.min_x = float(x_coord)
+            if y_coord > self.max_y:
+                self.max_y = float(y_coord)
+            if y_coord < self.min_y:
+                self.min_y = float(y_coord)
+            if z_coord > self.max_z:
+                self.max_z = float(z_coord)
+            if z_coord < self.min_z:
+                self.min_z = float(z_coord)
+        except ValueError:
+            pass
 
     def get_extent(self):
         ''' :returns: estimate of the geographic extent of the model, using max and min
@@ -229,7 +232,10 @@ class ModelGeometries:
         u_vec = unit_vector(self.vol_axis_u)
         v_vec = unit_vector(self.vol_axis_v)
         w_vec = unit_vector(self.vol_axis_w)
-        ret = [tuple(u_vec), tuple(v_vec), tuple(w_vec)]
+        # Make sure it returns python floats
+        ret = [tuple([float(u) for u in u_vec]),
+               tuple([float(v) for v in v_vec]),
+               tuple([float(w) for w in w_vec])]
         return ret
 
 
