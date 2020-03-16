@@ -47,6 +47,17 @@ def de_concat(filename_lines, gocad_headers):
                 part_list = []
     return file_lines_list
 
+def check_vertex(num, vrtx_arr):
+    ''' If vertex exists in vertex array then returns True else False
+
+    :param num: vertex number to search for
+    :param vrtx_arr vertex array
+    '''
+    for vrtx in vrtx_arr:
+        if vrtx.n == num:
+            return True
+    return False
+
 
 def make_line_gen(file_lines):
     ''' This is a Python generator function that processes lines of the GOCAD object file
