@@ -223,7 +223,10 @@ class ColladaKit:
         self.mesh_obj.scene = myscene
         dest_path = out_filename + '.dae'
         self.logger.info("end_collada() Writing COLLADA file: %s", dest_path)
-        self.mesh_obj.write(dest_path)
+        try:
+            self.mesh_obj.write(dest_path)
+        except OSError as os_exc:
+            self.logger.error("ERROR - Cannot write file %s: %s", dest_path, repr(os_exc))
 
 
     def write_collada(self, geom_obj, style_obj, meta_obj, out_filename):
@@ -316,7 +319,11 @@ class ColladaKit:
         # Write mesh to file
         dest_path = out_filename+'.dae'
         self.logger.info("write_point_collada() Writing COLLADA file: %s", dest_path)
-        mesh.write(dest_path)
+        try:
+            mesh.write(dest_path)
+        except OSError as os_exc:
+            self.logger.error("ERROR - Cannot write file %s: %s", dest_path, repr(os_exc))
+            return {}
 
         return popup_dict
 
@@ -457,10 +464,13 @@ class ColladaKit:
                 # Write out COLLADA file
                 out_filepath = out_filename + '_' +str(file_cnt)
                 self.logger.info("write_vol_collada() Writing COLLADA file: %s.dae", out_filepath)
-                mesh.write(out_filepath+'.dae')
-
-                popup_list.append((popup_dict_key, popup_dict, out_filename))
-                popup_dict = {}
+                try:
+                    mesh.write(out_filepath+'.dae')
+                except OSError as os_exc:
+                    self.logger.error("ERROR - Cannot write file %s.dae: %s", out_filepath, repr(os_exc))
+                else:
+                    popup_list.append((popup_dict_key, popup_dict, out_filename))
+                    popup_dict = {}
 
         # The physical measurements kind uses a false colourmap, and written as one big file
         else:
@@ -508,8 +518,12 @@ class ColladaKit:
 
             dest_path = out_filename+'.dae'
             self.logger.info("write_vol_collada() Writing COLLADA file: %s", dest_path)
-            mesh.write(dest_path)
-            popup_list.append((meta_obj.get_property_name(), popup_dict, out_filename))
+            try:
+                mesh.write(dest_path)
+            except OSError as os_exc:
+                self.logger.error("ERROR - Cannot write file %s: %s", dest_path, repr(os_exc))
+            else:
+                popup_list.append((meta_obj.get_property_name(), popup_dict, out_filename))
 
         return popup_list
 
@@ -553,7 +567,11 @@ class ColladaKit:
         mesh.scenes.append(myscene)
         mesh.scene = myscene
 
-        mesh.write(out_filename+'.dae')
+        try:
+            mesh.write(out_filename+'.dae')
+        except OSError as os_exc:
+            self.logger.error("ERROR - Cannot write file %s.dae: %s", out_filename, repr(os_exc))
+
 
 
 

@@ -193,6 +193,25 @@ done
 
 echo "PASSED"
 
+##########################################################################################
+# File output exception handling tests
+##########################################################################################
+
+echo -n "File output exception handling tests: "
+
+# Make output directory read-only to test exception handling for various file types
+\rm -rf $CWD/output
+mkdir $CWD/output
+chmod a-w $CWD/output
+for f in tsTest.ts PNGTest.vo gpTest.gp vsTest.vs RGBA_voxet.vo wlTest.wl; do
+coverage run -a gocad2collada.py -g -r -f $CWD/output $CWD/input/$f input/NorthGawlerConvParam.json > output.txt 2>&1
+[ $? -ne 0 ] && echo "FAILED - test returned False $f" && exit 1
+grep 'ERROR - Cannot open file' output.txt >/dev/null 2>&1 && [ $? -ne 0 ] && echo "FAILED - $f" && exit 1
+done
+\rm output.txt
+chmod a+w $CWD/output
+echo "PASSED"
+
 
 # Remove output dir
 \rm -rf $CWD/output

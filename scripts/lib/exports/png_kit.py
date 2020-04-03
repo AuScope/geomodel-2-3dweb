@@ -102,7 +102,11 @@ class PngKit:
         img = PIL.Image.frombytes('RGBA', (geom_obj.vol_sz[1], geom_obj.vol_sz[0]),
                                   colour_arr.tobytes())
         self.logger.info("Writing PNG file: %s.PNG", file_name)
-        img.save(file_name+".PNG")
+        try:
+            img.save(file_name+".PNG")
+        except OSError as os_exc:
+            self.logger.error("ERROR - Cannot write file %s.PNG: %s", file_name, repr(os_exc))
+            return {}
         property_name = meta_obj.get_property_name()
         if property_name:
             label_str = property_name

@@ -116,7 +116,12 @@ class AssimpKit:
         # Create a file
         if out_filename != '':
             self.logger.info("Writing GLTF: %s", out_filename + self.FILE_EXT)
-            export(self.scn, out_filename + self.FILE_EXT, self.EXPORT_TYPE)
+            try:
+                export(self.scn, out_filename + self.FILE_EXT, self.EXPORT_TYPE)
+            except OSError as os_exc:
+                self.logger.error("ERROR - Cannot write file %s: %s", out_filename + self.FILE_EXT, repr(os_exc))
+                return False
+
             self.logger.info(" DONE.")
             sys.stdout.flush()
             return True
