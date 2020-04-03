@@ -62,6 +62,10 @@ class PROPS:
         ''' Property data attached to XYZ points (index is XYZ coordinate)
         '''
 
+        self.data_ijk = defaultdict(list)
+        ''' Property data attached to XYZ points (index is IJK int indexes)
+        '''
+
         self.data_stats = {'min': sys.float_info.max, 'max': -sys.float_info.max}
         ''' Property data statistics: min & max
         '''
@@ -203,7 +207,17 @@ class PROPS:
             val - value to be assigned (float or tuple)
         '''
         self.data_xyz[xyz] = val
-        if isinstance(val, float):
+        if isinstance(val, float) or isinstance(val, numpy.float32):
+            self.__calc_minmax(val)
+
+
+    def assign_to_ijk(self, ijk, val):
+        ''' Assigns a value to ijk dict
+            ijk - (I,J,K) tuple array indexes (ints)
+            val - value to be assigned (float or tuple)
+        '''
+        self.data_ijk[ijk] = val
+        if isinstance(val, float) or isinstance(val, numpy.float32):
             self.__calc_minmax(val)
 
 
@@ -212,16 +226,38 @@ class PROPS:
             xyz - (X,Y,Z) tuple array indexes (floats)
             val - value to be assigned
         '''
+        x,y,z = xyz
+        if not isinstance(x, float) or not is_instance(y, float) or \
+           not isinstance(z, float):
+            self.logger.error("Internal error: adding float index to int array %s", repr(xyz))
+            sys.exit(1)
         self.data_xyz[xyz].append(val)
 
+
+    def append_to_ijk(self, ijk, val):
+        ''' Appends a value to xyz dict
+            ijk - (I,J,K) tuple array indexes (ints)
+            val - value to be assigned
+        '''
+        i,j,k = ijk
+        if not isinstance(i, int) or not is_instance(j, int) or \
+           not isinstance(k, int):
+            self.logger.error("Internal error: adding float index to int array %s", repr(ijk))
+            sys.exit(1)
+        self.data_ijk[ijk].append(val)
 
 
     def __calc_minmax(self, fltp):
         ''' Calculates minimum & maximum of floating point value and stores
             result locally in 'data_stats'
-            fp - floating point value
+            fp - floating point value (numpy or python float)
         '''
-        if fltp > self.data_stats['max']:
-            self.data_stats['max'] = fltp
-        if fltp < self.data_stats['min']:
-            self.data_stats['min'] = fltp
+        try:
+            if fltp > self.data_stats['max']:
+                # Convert to python float
+                self.data_stats['max'] = float(fltp)
+            if fltp < self.data_stats['min']:
+                # Convert to python float
+                self.data_stats['min'] = float(fltp)
+        except ValueError:
+            pass

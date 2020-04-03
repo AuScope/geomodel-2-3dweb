@@ -297,8 +297,8 @@ class Gocad2Collada:
         if ext_str == 'VS':
             ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
-        # One VO file can produce many other files
-        elif ext_str == 'VO':
+        # One VO or SG file can produce many other files
+        elif ext_str in ['VO', 'SG']:
             ok = self.process_volumes(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
         # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file

@@ -91,6 +91,15 @@ def test_group(msg, test_file, assert_str):
 if __name__ == "__main__":
     print("GocadImporter Unit Test")
 
+    #
+    # Recognise file types - WELL
+    #
+    test_this("Recognise WELL file", "test038.wl", "gsm_list[0][0].is_line() == True")
+
+    #
+    # Recognise file types - SGRID
+    #
+    test_this("Recognise SGRID file", "test039.sg", "gsm_list[0][0].is_volume() == True")
 
     #
     # Recognise file types - VOXET
@@ -301,10 +310,10 @@ gsm_list[0][2].get_property_name(1) == 'J'""")
     # Values of properties
     #
     test_this("Values of properties", "test028.ts",
-              """gsm_list[0][0].get_xyz_data(0)[(459395.951171875,
+              """gsm_list[0][0].get_loose_3d_data(True, 0)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 1057.0 \
-and gsm_list[0][0].get_xyz_data(1)[(459395.951171875,
+and gsm_list[0][0].get_loose_3d_data(True, 1)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 927.0""")
 
@@ -342,10 +351,10 @@ and gocad_obj.region_dict['9'] == 'SLATE'""")
     # Handle control nodes
     #
     test_this("Handle control nodes", "test031.ts",
-              """gsm_list[0][0].get_xyz_data(0)[(459395.951171875,
+              """gsm_list[0][0].get_loose_3d_data(True, 0)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 1057.0 \
-             and gsm_list[0][0].get_xyz_data(1)[(459395.951171875,
+             and gsm_list[0][0].get_loose_3d_data(True, 1)[(459395.951171875,
                                                  8241423.6875,
                                                  -475.7239685058594)] == 927.0""")
 
@@ -353,7 +362,7 @@ and gocad_obj.region_dict['9'] == 'SLATE'""")
     # ATOMS with and without properties
     #
     test_this("ATOMS with and without properties", "test032.ts",
-              """gsm_list[0][0].get_xyz_data()[(459876.3125,
+              """gsm_list[0][0].get_loose_3d_data(True)[(459876.3125,
                                                 8241554.9453125,
                                                 -485.6229248046875)] == 1050.0 \
 and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr""")
@@ -365,7 +374,7 @@ and len(gsm_list[0][0].atom_arr)==4 and ATOM(6,6) in gsm_list[0][0].atom_arr""")
                "len(gsm_list)==6 and \
 gsm_list[0][0].vrtx_arr[0].xyz == (856665.6796875, 6091995.966796875, 77.90100860595703) \
 and gsm_list[0][2].name == 'TEST033-TEST-1' and gsm_list[0][2].get_property_name() == 'OBJECTID' \
-and gsm_list[0][0].get_xyz_data()[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
+and gsm_list[0][0].get_loose_3d_data(True)[(856665.6796875, 6091995.966796875, 77.90100860595703)] == 10.0")
 
     #
     # Extraction of metadata
@@ -398,3 +407,22 @@ gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
          "test038.wl", "len(gsm_list)==1 and \
 gsm_list[0][0].vrtx_arr[0].xyz == (994.4795874134504, 2005.6239995358749, 128.80712107653724) and \
 gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.78217326370554)")
+
+
+    #
+    # Parse SGRID keywords and extract volume data
+    #
+    test_this("Parse SGRID keywords and extract volume data", "test039.sg", "len(gsm_list)==2 and " \
+"gsm_list[0][0].vol_sz==(9,6,3) and " \
+"gsm_list[1][0].vol_sz==(9,6,3) and " \
+"gsm_list[0][0].max_x==396000.0 and gsm_list[0][0].min_x==360000.0 and " \
+"gsm_list[0][0].max_y==6516000.0 and gsm_list[0][0].min_y==6492000.0 and " \
+"gsm_list[0][0].max_z==-23000.0 and gsm_list[0][0].min_z==-29000.0 and " \
+"gsm_list[1][0].max_x==396000.0 and gsm_list[1][0].min_x==360000.0 and " \
+"gsm_list[1][0].max_y==6516000.0 and gsm_list[1][0].min_y==6492000.0 and " \
+"gsm_list[1][0].max_z==-23000.0 and gsm_list[1][0].min_z==-29000.0 and " \
+"gsm_list[0][0].vol_data_type=='FLOAT_32' and " \
+"gsm_list[1][0].vol_data_type=='FLOAT_32' and " \
+"gsm_list[0][0]._xyz_data[0][(376000.0, 6496000.0, -25000.0)]==4.0 and " \
+"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]>2.6536592 and " \
+"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]<2.6536594")

@@ -17,7 +17,7 @@ from lib.db.style.style import STYLE
 from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
 from lib.db.metadata.metadata import METADATA, MapFeat
 
-from .helpers import make_line_gen
+from .helpers import make_line_gen, check_vertex
 
 # Set up debugging
 LOCAL_LOGGER = logging.getLogger("gocad_importer")
@@ -115,6 +115,7 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
     LOCAL_LOGGER.debug("extract_gocad() returning len(main_gsm_list)=%d", len(main_gsm_list))
     return main_gsm_list
 
+
 def is_group_header(line_str):
     ''' Returns true iff line string is a GOCAD group header
         :param line_str: line string
@@ -131,6 +132,7 @@ class GocadImporter():
     from .processors import process_coord_hdr, process_header, process_ascii_well_path
     from .processors import process_well_info, process_well_curve, process_prop_class_hdr, process_well_binary_file
     from .processors import process_vol_data
+    from .volumes import read_volume_binary_files, calc_vo_xyz, calc_sg_xyz, read_region_flags_file
 
     GOCAD_HEADERS = {
         'TS':['GOCAD TSURF 1'],
@@ -233,7 +235,8 @@ class GocadImporter():
         '''
 
         self.flags_prop = None
-        ''' PROPS object used for the voxet flags file which has region data in it
+        ''' PROPS object used for the voxet flags file which has region data in
+            it and for SGRID files
         '''
 
         self.invert_zaxis = False
@@ -244,27 +247,27 @@ class GocadImporter():
         ''' OrderedDict of PROPS objects for attached PVRTX and PATOM properties
         '''
 
-        self.__is_ts = False
+        self._is_ts = False
         ''' True iff it is a GOCAD TSURF file
         '''
 
-        self.__is_vs = False
+        self._is_vs = False
         ''' True iff it is a GOCAD VSET file
         '''
 
-        self.__is_pl = False
+        self._is_pl = False
         ''' True iff it is a GOCAD PLINE file
         '''
 
-        self.__is_vo = False
+        self._is_vo = False
         ''' True iff it is a GOCAD VOXET file
         '''
 
-        self.__is_wl = False
+        self._is_wl = False
         ''' True iff it is a GOCAD WELL file
         '''
 
-        self.__is_sg = False
+        self._is_sg = False
         ''' True iff it is a GOCAD SGRID file
         '''
 
@@ -276,19 +279,19 @@ class GocadImporter():
         ''' Units of XYZ axes
         '''
 
-        self.__vrtx_arr = []
+        self._vrtx_arr = []
         ''' Array of named tuples 'VRTX' used to store vertex data
         '''
 
-        self.__atom_arr = []
+        self._atom_arr = []
         ''' Array of named tuples 'ATOM' used to store atom data
         '''
 
-        self.__trgl_arr = []
+        self._trgl_arr = []
         ''' Array of named tuples 'TRGL' used store triangle face data
         '''
 
-        self.__seg_arr = []
+        self._seg_arr = []
         ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
@@ -425,12 +428,12 @@ class GocadImporter():
         '''
         vert_dict = {}
         # Assign vertices to dict
-        for idx, vrtx in enumerate(self.__vrtx_arr, 1):
+        for idx, vrtx in enumerate(self._vrtx_arr, 1):
             vert_dict[vrtx.n] = idx
 
         # Assign atoms to dict
-        for atom in self.__atom_arr:
-            for idx, vert in enumerate(self.__vrtx_arr, 1):
+        for atom in self._atom_arr:
+            for idx, vert in enumerate(self._vrtx_arr, 1):
                 if vert.n == atom.v:
                     vert_dict[atom.n] = idx
                     break
@@ -544,7 +547,7 @@ class GocadImporter():
                     self.logger.debug(" property_nulls = %s", repr(field[1:]))
 
                 # If a well object
-                elif self.__is_wl:
+                elif self._is_wl:
                     # All well files
                     if field[0] == "PATH_ZM_UNIT" or field[0] == "WREF":
                         self.logger.debug("Processing ASCII well path")
@@ -552,10 +555,10 @@ class GocadImporter():
 
                         # Convert well path into a series of SEG types
                         if len(well_path) > 1:
-                            self.__vrtx_arr.append(VRTX(1, well_path[0]))
+                            self._vrtx_arr.append(VRTX(1, well_path[0]))
                             for idx in range(1,len(well_path)):
-                                self.__seg_arr.append(SEG((idx, idx+1)))
-                                self.__vrtx_arr.append(VRTX(idx+1, well_path[idx]))
+                                self._seg_arr.append(SEG((idx, idx+1)))
+                                self._vrtx_arr.append(VRTX(idx+1, well_path[idx]))
                              
                         self.logger.debug("Well path: %s", repr(well_path))
                         self.logger.debug("Label list: %s", repr(self.meta_obj.label_list))
@@ -592,8 +595,8 @@ class GocadImporter():
                     if not is_ok_s or not is_ok:
                         seq_no = seq_no_prev
                     else:
-                        if self.__check_vertex(v_num):
-                            self.__atom_arr.append(ATOM(seq_no, v_num))
+                        if check_vertex(v_num, self._vrtx_arr):
+                            self._atom_arr.append(ATOM(seq_no, v_num))
                         else:
                             self.logger.error("ATOM refers to VERTEX that has not been defined yet")
                             self.logger.error("    seq_no = %d", seq_no)
@@ -604,7 +607,7 @@ class GocadImporter():
                         # Atoms with attached properties
                         if field[0] == "PATOM":
                             vert_dict = self.__make_vertex_dict()
-                            self.parse_props(field, self.__vrtx_arr[vert_dict[v_num] - 1].xyz,
+                            self.parse_props(field, self._vrtx_arr[vert_dict[v_num] - 1].xyz,
                                              True)
 
                 # Grab the vertices and properties, does not care if there are
@@ -623,7 +626,7 @@ class GocadImporter():
                         # Add vertex
                         if self.invert_zaxis:
                             z_flt = -1.0 * z_flt
-                        self.__vrtx_arr.append(VRTX(seq_no, (x_flt, y_flt, z_flt)))
+                        self._vrtx_arr.append(VRTX(seq_no, (x_flt, y_flt, z_flt)))
 
                         # Vertices with attached properties
                         if field[0] == "PVRTX":
@@ -638,14 +641,14 @@ class GocadImporter():
                     if not is_ok or not is_ok_s:
                         seq_no = seq_no_prev
                     else:
-                        self.__trgl_arr.append(TRGL(seq_no, (a_int, b_int, c_int)))
+                        self._trgl_arr.append(TRGL(seq_no, (a_int, b_int, c_int)))
 
                 # Grab the segments
                 elif field[0] == "SEG":
                     is_ok_a, a_int = self.parse_int(field[1])
                     is_ok_b, b_int = self.parse_int(field[2])
                     if is_ok_a and is_ok_b:
-                        self.__seg_arr.append(SEG((a_int, b_int)))
+                        self._seg_arr.append(SEG((a_int, b_int)))
 
                 # Grab metadata - see 'metadata.py' for more info
                 elif field[0] in ("STRATIGRAPHIC_POSITION", "GEOLOGICAL_FEATURE"):
@@ -755,13 +758,13 @@ class GocadImporter():
                                           self.prop_dict[field[1]].no_data_marker)
 
                 # Process VOXET data
-                elif self.__is_vo and field[0][:4] == "AXIS":
+                elif self._is_vo and field[0][:4] == "AXIS":
                     self.logger.debug('VOXET: found field[0] = %s', field[0])
                     field, field_raw, is_last = self.process_vol_data(line_gen, field, field_raw, src_dir)
 
 
                 # Process SGRID data
-                elif self.__is_sg and field[0][:4] == "AXIS":
+                elif self._is_sg and field[0][:4] == "AXIS":
                     self.logger.debug('SGRID: field[0] = %s', field[0])
                     field, field_raw, is_last = self.process_vol_data(line_gen, field, field_raw, src_dir)
 
@@ -773,8 +776,8 @@ class GocadImporter():
 
 
         # Read in any binary data files and flags files attached to voxel files
-        if self.__is_vo:
-            ret_val = self.__read_voxel_binary_files()
+        if self._is_vo or self._is_sg:
+            ret_val = self.read_volume_binary_files()
 
         # Complete initalisation of geometry object
         if self.local_props:
@@ -859,58 +862,75 @@ class GocadImporter():
                                     local property data values in object
         :param prop_idx: optional, if set, then will place property data in object
         '''
-        # Convert GOCAD's volume geometry spec
-        if self.__is_vo and self.vol_sz:
-            geom_obj.vol_origin = self.axis_o
-            geom_obj.vol_sz = self.vol_sz
-            min_vec = np.array(self.axis_min)
-            max_vec = np.array(self.axis_max)
-            mult_vec = max_vec - min_vec
+        # Convert GOCAD's volume geometry spec (SGRID & VOXET)
+        if self.vol_sz:
+            if self._is_sg:
+                geom_obj.vol_sz = self.vol_sz
+                self.axis_o = (self.geom_obj.min_x, self.geom_obj.min_y, self.geom_obj.min_z)
+                geom_obj.vol_origin = (self.geom_obj.min_x, self.geom_obj.min_y, self.geom_obj.min_z)
+                self.axis_min = (0.0,0.0,0.0)
+                self.axis_max = (1.0,1.0,1.0)
+                self.axis_u = (self.geom_obj.max_x - self.geom_obj.min_x, 0.0, 0.0)
+                self.axis_v = (0.0, self.geom_obj.max_y - self.geom_obj.min_y, 0.0)
+                self.axis_w = (0.0, 0.0, self.geom_obj.max_z - self.geom_obj.min_z)
 
-            geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).tolist())
-            geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).tolist())
-            geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).tolist())
+            elif self._is_vo:
+                geom_obj.vol_sz = self.vol_sz
+                geom_obj.vol_origin = self.axis_o
+
+            if self._is_vo or self._is_sg:
+                min_vec = np.array(self.axis_min)
+                max_vec = np.array(self.axis_max)
+                mult_vec = max_vec - min_vec
+
+                geom_obj.vol_axis_u = tuple((mult_vec * np.array(self.axis_u)).astype(float).tolist())
+                geom_obj.vol_axis_v = tuple((mult_vec * np.array(self.axis_v)).astype(float).tolist())
+                geom_obj.vol_axis_w = tuple((mult_vec * np.array(self.axis_w)).astype(float).tolist())
 
         # If it's a well, then set line to vertical with a narrow width
-        if self.__is_wl:
+        if self._is_wl:
             geom_obj.is_vert_line = True
             geom_obj.line_width = self.WELL_LINE_WIDTH
 
         # Re-enumerate all geometries, because some GOCAD files have missing vertex numbers
         vert_dict = self.__make_vertex_dict()
-        for v_old in self.__vrtx_arr:
+        for v_old in self._vrtx_arr:
             vrtx = VRTX(vert_dict[v_old.n], v_old.xyz)
             geom_obj.vrtx_arr.append(vrtx)
 
-        for t_old in self.__trgl_arr:
+        for t_old in self._trgl_arr:
             tri = TRGL(t_old.n, (vert_dict[t_old.abc[0]], vert_dict[t_old.abc[1]],
                                  vert_dict[t_old.abc[2]]))
             geom_obj.trgl_arr.append(tri)
 
-        for s_old in self.__seg_arr:
+        for s_old in self._seg_arr:
             sgm = SEG((vert_dict[s_old.ab[0]], vert_dict[s_old.ab[1]]))
             geom_obj.seg_arr.append(sgm)
 
-        for a_old in self.__atom_arr:
+        for a_old in self._atom_arr:
             atm = ATOM(vert_dict[a_old.n], vert_dict[a_old.v])
             geom_obj.atom_arr.append(atm)
 
-        # Add PVTRX, PATOM data (and eventually SGRID)
+        # Add PVTRX, PATOM data
         # Multiple properties' data points are stored in one geom_obj
         if local_prop_idx_list:
             for local_prop_idx in local_prop_idx_list:
                 prop = self.local_props[local_prop_idx]
-                geom_obj.add_xyz_data(prop.data_xyz)
+                geom_obj.add_loose_3d_data(True, prop.data_xyz)
                 geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                    prop.no_data_marker)
 
-        # Add volume data
+        # Add volume data (SGRID, VOXEL)
         # Only one set of data per geom_obj
         if prop_idx:
             prop = self.prop_dict[prop_idx]
             geom_obj.vol_data = prop.data_3d
+            # Add 3d data indexed on XYZ coords
             if prop.data_xyz:
-                geom_obj.add_xyz_data(prop.data_xyz)
+                geom_obj.add_loose_3d_data(True, prop.data_xyz)
+            # Add 3d data indexed on IJK indexes
+            if prop.data_ijk:
+                geom_obj.add_loose_3d_data(False, prop.data_ijk)
             geom_obj.vol_data_type = prop.get_str_data_type()
             geom_obj.add_stats(prop.data_stats['min'], prop.data_stats['max'],
                                prop.no_data_marker)
@@ -940,212 +960,26 @@ class GocadImporter():
 
         if ext_str in self.GOCAD_HEADERS:
             if ext_str == 'TS' and first_line_str in self.GOCAD_HEADERS['TS']:
-                self.__is_ts = True
+                self._is_ts = True
                 return True
             if ext_str == 'VS' and first_line_str in self.GOCAD_HEADERS['VS']:
-                self.__is_vs = True
+                self._is_vs = True
                 return True
             if ext_str == 'PL' and first_line_str in self.GOCAD_HEADERS['PL']:
-                self.__is_pl = True
+                self._is_pl = True
                 return True
             if ext_str == 'VO' and first_line_str in self.GOCAD_HEADERS['VO']:
-                self.__is_vo = True
+                self._is_vo = True
                 return True
             if ext_str == 'WL' and first_line_str in self.GOCAD_HEADERS['WL']:
-                self.__is_wl = True
+                self._is_wl = True
                 return True
             if ext_str == 'SG' and first_line_str in self.GOCAD_HEADERS['SG']:
-                self.__is_sg = True
+                self._is_sg = True
                 return True
 
 
         return False
-
-
-
-
-
-
-    def __read_voxel_binary_files(self):
-        ''' Open up and read binary voxel file
-        '''
-        if not self.vol_sz:
-            self.logger.error("Cannot process voxel file, cube size is not defined, " \
-                              "missing 'AXIS_N'")
-            sys.exit(1)
-        # pylint: disable=W0612
-        for file_idx, prop_obj in self.prop_dict.items():
-            # Sometimes filename needs a .vo on the end
-            if not os.path.isfile(prop_obj.file_name) and prop_obj.file_name[-2:] == "@@" and \
-                                          os.path.isfile(prop_obj.file_name+".vo"):
-                prop_obj.file_name += ".vo"
-
-            # If there is a colour table in CSV file then read it
-            bin_file = os.path.basename(prop_obj.file_name)
-            if bin_file in self.ct_file_dict:
-                csv_file_path = os.path.join(os.path.dirname(prop_obj.file_name),
-                                             self.ct_file_dict[bin_file][0])
-                prop_obj.read_colour_table_csv(csv_file_path, self.ct_file_dict[bin_file][1])
-                self.logger.debug("prop_obj.colour_map = %s", repr(prop_obj.colour_map))
-                self.logger.debug("prop_obj.rock_label_table = %s", repr(prop_obj.rock_label_table))
-
-            # Read and process binary file
-            try:
-                # Check file size first
-                file_sz = os.path.getsize(prop_obj.file_name)
-                num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-                self.logger.debug("num_voxels = %s", repr(num_voxels))
-                est_sz = prop_obj.data_sz*num_voxels+prop_obj.offset
-                if file_sz < est_sz:
-                    self.logger.error("SORRY - Cannot process voxel file - length (%d)" \
-                                      " is less than estimated size (%d): %s",
-                                      file_sz, est_sz, prop_obj.file_name)
-                    sys.exit(1)
-
-                # Initialise data array to zeros
-                prop_obj.data_3d = np.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
-
-                # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
-                d_typ = prop_obj.make_numpy_dtype()
-
-                # Read entire file, assumes file small enough to store in memory
-                self.logger.info("Reading binary file: %s", prop_obj.file_name)
-                elem_offset = prop_obj.offset//prop_obj.data_sz
-                self.logger.debug("elem_offset = %s", repr(elem_offset))
-                f_arr = np.fromfile(prop_obj.file_name, dtype=d_typ, count=num_voxels+elem_offset)
-                fl_idx = elem_offset
-                mult = [(self.axis_max[0]-self.axis_min[0])/self.vol_sz[0],
-                        (self.axis_max[1]-self.axis_min[1])/self.vol_sz[1],
-                        (self.axis_max[2]-self.axis_min[2])/self.vol_sz[2]]
-                for z_val in range(self.vol_sz[2]):
-                    for y_val in range(self.vol_sz[1]):
-                        for x_val in range(self.vol_sz[0]):
-                            # If numeric
-                            if prop_obj.data_type != 'rgba':
-                                converted, data_val = self.parse_float(f_arr[fl_idx],
-                                                               prop_obj.no_data_marker)
-                                if not converted:
-                                    continue
-                                prop_obj.assign_to_3d(x_val, y_val, z_val, data_val)
-                            # If RGBA
-                            else:
-                                data_val = f_arr[fl_idx]
-                                prop_obj.assign_to_xyz((x_val, y_val, z_val), data_val)
-
-                            # self.logger.debug("fp[%d, %d, %d] = %s", x_val, y_val, z_val, repr(data_val))
-                            fl_idx += 1
-
-                            # Calculate the XYZ coords and their maxs & mins
-                            x_coord = self.axis_o[0]+ \
-                              (float(x_val)*self.axis_u[0]*mult[0] + \
-                              float(y_val)*self.axis_u[1]*mult[1] + \
-                              float(z_val)*self.axis_u[2]*mult[2])
-                            y_coord = self.axis_o[1]+ \
-                              (float(x_val)*self.axis_v[0]*mult[0] + \
-                              float(y_val)*self.axis_v[1]*mult[1] + \
-                              float(z_val)*self.axis_v[2]*mult[2])
-                            z_coord = self.axis_o[2]+ \
-                              (float(x_val)*self.axis_w[0]*mult[0] + \
-                              float(y_val)*self.axis_w[1]*mult[1] + \
-                              float(z_val)*self.axis_w[2]*mult[2])
-                            self.geom_obj.calc_minmax(x_coord, y_coord, z_coord)
-
-            except IOError as io_exc:
-                self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s",
-                                  prop_obj.file_name, str(io_exc), io_exc.args)
-                sys.exit(1)
-
-        # Process flags file if desired
-        if self.flags_file != '':
-            if not self.SKIP_FLAGS_FILE:
-                self.__read_flags_file()
-            else:
-                self.logger.warning("SKIP_FLAGS_FILE = True  => Skipping flags file %s",
-                                    self.flags_file)
-        return True
-
-
-
-    def __read_flags_file(self):
-        ''' This reads the flags file and looks for regions.
-        '''
-        if self.flags_array_length != self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]:
-            self.logger.warning("SORRY - Cannot process voxel flags file, inconsistent size" \
-                                " between data file and flag file")
-            self.logger.debug("__read_flags_file() return False")
-            return False
-        # Check file does not exist, sometimes needs a '.vo' on the end
-        if not os.path.isfile(self.flags_file) and self.flags_file[-2:] == "@@" and \
-                                                        os.path.isfile(self.flags_file+".vo"):
-            self.flags_file += ".vo"
-
-        try:
-            # Check file size first
-            file_sz = os.path.getsize(self.flags_file)
-            num_voxels = self.vol_sz[0]*self.vol_sz[1]*self.vol_sz[2]
-            est_sz = self.flags_bit_size*num_voxels+self.flags_offset
-            if file_sz < est_sz:
-                self.logger.error("SORRY - Cannot process voxel flags file %s - length (%d) " \
-                                  "is less than calculated size (%d)",
-                                  self.flags_file, file_sz, est_sz)
-                sys.exit(1)
-
-            # Initialise data array to zeros
-            np.zeros((self.vol_sz[0], self.vol_sz[1], self.vol_sz[2]))
-
-            # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
-            d_typ = np.dtype(('B', (self.flags_bit_size)))
-
-            # Read entire file, assumes file small enough to store in memory
-            self.logger.info("Reading binary flags file: %s", self.flags_file)
-            f_arr = np.fromfile(self.flags_file, dtype=d_typ)
-            f_idx = self.flags_offset//self.flags_bit_size
-            self.flags_prop = PROPS(self.flags_file, self.logger.getEffectiveLevel())
-            # self.debug('self.region_dict.keys() = %s', self.region_dict.keys())
-            for z_val in range(0, self.vol_sz[2]):
-                for y_val in range(0, self.vol_sz[1]):
-                    for x_val in range(0, self.vol_sz[0]):
-                        # self.logger.debug("%d %d %d %d => %s", x, y, z, f_idx, repr(f_arr[f_idx]))
-                        # convert floating point number to a bit mask
-                        bit_mask = ''
-                        # NB: Single bytes are not returned as arrays
-                        if self.flags_bit_size == 1:
-                            bit_mask = '{0:08b}'.format(f_arr[f_idx])
-                        else:
-                            for bit in range(self.flags_bit_size-1, -1, -1):
-                                bit_mask += '{0:08b}'.format(f_arr[f_idx][bit])
-                        # self.logger.debug('bit_mask= %s', bit_mask)
-                        # self.logger.debug('self.region_dict = %s', repr(self.region_dict))
-                        cnt = self.flags_bit_size*8-1
-                        # Examine the bit mask one bit at a time, starting at the highest bit
-                        for bit in bit_mask:
-                            if str(cnt) in self.region_dict and bit == '1':
-                                key = self.region_dict[str(cnt)]
-                                # self.logger.debug('cnt = %d bit = %d', cnt, bit)
-                                # self.logger.debug('key = %s', key)
-                                self.flags_prop.append_to_xyz((x_val, y_val, z_val), key)
-                            cnt -= 1
-                        f_idx += 1
-
-        except IOError as io_exc:
-            self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s",
-                              self.flags_file, str(io_exc), io_exc.args)
-            self.logger.debug("__read_flags_file() return False")
-            return False
-
-        return True
-
-
-    def __check_vertex(self, num):
-        ''' If vertex exists then returns true else false
-
-        :param num: vertex number to search for
-        '''
-        for vrtx in self.__vrtx_arr:
-            if vrtx.n == num:
-                return True
-        return False
-
 
 
 #  END OF GocadImporter CLASS

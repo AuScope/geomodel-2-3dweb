@@ -7,7 +7,7 @@
 #    http://www.energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models (North Gawler model)
 #    https://dasc.dmp.wa.gov.au/dasc/ (Sandstone model)
 # 2) SKUA/GOCAD software from the "Paradigm Academic Software Program" (http://www.pdgm.com/affiliations/academic-software-programs/)
-#    was used to produce and view the voxet files
+#    was used to produce and view the VOXET and SGRID files
 #
 
 
