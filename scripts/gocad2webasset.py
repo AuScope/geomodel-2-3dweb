@@ -16,6 +16,7 @@ from types import SimpleNamespace
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
+from lib.exports.netcdf_kit import NetCDFKit
 from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
 from lib.imports.gocad.helpers import de_concat
 from lib.file_processing import find, read_json_file
@@ -88,6 +89,7 @@ class Gocad2Collada:
         # Output kits
         self.coll_kit_obj = ColladaKit(DEBUG_LVL)
         self.png_kit_obj = PngKit(DEBUG_LVL)
+        self.netcdf_kit_obj = NetCDFKit(DEBUG_LVL)
 
 
     def find_and_process(self, src_dir, dest_dir, ext_list):
@@ -110,7 +112,8 @@ class Gocad2Collada:
 
 
     def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir):
-        '''
+        ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
+            else converts to a NetCDF file.
         '''
         file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
@@ -137,8 +140,17 @@ class Gocad2Collada:
             for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
-                popup_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
-                                                        prop_filename)
+                if len(geom_obj.vrtx_arr) < 3000:
+                    popup_dict = self.coll_kit_obj.write_collada(geom_obj,
+                                                                 style_obj,
+                                                                 meta_obj,
+                                                                 prop_filename)
+                else:
+                    popup_dict = self.netcdf_kit_obj.write_points(geom_obj,
+                                                                  style_obj,
+                                                                  meta_obj,
+                                                                  prop_filename)
+ 
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name, popup_dict,
                                             prop_filename, self.model_url_path)
@@ -294,6 +306,7 @@ class Gocad2Collada:
         ok = False
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
+        # If the VS file has too many points, then output as NetCDF4 file
         if ext_str == 'VS':
             ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 

@@ -16,6 +16,8 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 + numpy (http://www.numpy.org/)
 + diskcache (http://www.grantjenks.com/docs/diskcache/)
 + nvcl_kit (https://pypi.org/project/nvcl-kit/)
++ netCDF4 (http://unidata.github.io/netcdf4-python/netCDF4/index.html)
+NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 2. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
 3. Set 'COLLADA2GLTF_BIN' environment variable to point to the path where 'COLLADA2GLTF-bin' resides, e.g.
 ```
@@ -23,10 +25,7 @@ export COLLADA2GLTF_BIN=/home/fred/github/COLLADA2GLTF/build/
 ```
 4. Clone this repository (i.e. geomodel-2-3dweb)
 
-
-NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
-
-### To convert some GOCAD *.ts *.vs *.pl files to GLTF or COLLADA
+### To convert some GOCAD files to GLTF or COLLADA (*.ts, *.pl, small *.vs, *.wl) NetCDF4 (large *.vs), GZIP (*.vo, *.sg). *.gp files can also be converted.
 
 Run [gocad2webasset.py](scripts/gocad2webasset.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
 

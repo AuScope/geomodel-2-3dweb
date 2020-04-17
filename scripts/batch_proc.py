@@ -60,7 +60,10 @@ MODELS = [
     ("tas", "Tas", "input/TasConvParam.json", "GA/Tas"),
 
     # GA - Yilgarn
-    ("yilgarn", "Yilgarn", "input/YilgarnConvParam.json", "GA/Yilgarn-NWS")
+    ("yilgarn", "Yilgarn", "input/YilgarnConvParam.json", "GA/Yilgarn-NWS"),
+
+    ## CSIRO - RockLea Dome
+    #("rocklea", "Rocklea Dome", "input/RockleaConvParam.json", "CSIRO/RockleaDome")
 ]
 
 
@@ -90,7 +93,7 @@ if __name__ == "__main__":
             os.mkdir(outDir)
 
             # Run model conversion
-            execList = ["./gocad2collada.py", "-x", "-r", "-f", outDir, srcDir, inConvFile]
+            execList = ["./gocad2webasset.py", "-x", "-r", "-f", outDir, srcDir, inConvFile]
             print("Executing: ", execList)
             cmdProc = subprocess.run(execList)
             print("Returned: ", cmdProc)
