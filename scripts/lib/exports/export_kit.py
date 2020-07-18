@@ -29,3 +29,26 @@ class ExportKit:
         # Finally, set debug level
         ExportKit.logger.setLevel(debug_level)
         self.logger = ExportKit.logger
+
+    def start_write(self):
+        ''' Generic routine to start the process write out multiple GSM objects 
+        '''
+        pass
+
+
+    def add_geom(self, geom_obj, style_obj, meta_obj):
+        ''' Generic routine to add GSM objects to be written out in future
+        '''
+        pass
+
+
+    def end_write(self):
+        ''' Generic routine to write out the accumulated GSM objects
+        '''
+        pass
+
+
+    def write(self, geom_obj, style_obj, meta_obj):
+        ''' Generic routine to write out a single GSM object
+        '''
+        pass
