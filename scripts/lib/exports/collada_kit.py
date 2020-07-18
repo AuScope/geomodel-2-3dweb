@@ -11,7 +11,7 @@ import collada as Collada
 from lib.exports.collada_out import ColladaOut
 # from lib.exports.obj_out import ObjKit
 from lib.exports.bh_utils import make_borehole_label
-import ExportKit
+from lib.exports.export_kit import ExportKit
 from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
 class ColladaKit(ExportKit):

@@ -9,7 +9,7 @@ from ctypes import POINTER, pointer, c_byte
 from pyassimp import structs, export, export_blob, material
 
 from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
-import ExportKit
+from lib.exports.export_kit import ExportKit
 
 # import lib.exports.print_assimp as pa
 

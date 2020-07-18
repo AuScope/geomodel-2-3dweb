@@ -8,7 +8,7 @@ import array
 import PIL
 
 from lib.db.style.false_colour import make_false_colour_tup
-import ExportKit
+from lib.exports.export_kit import ExportKit
 
 class PngKit(ExportKit):
     ''' Class used to output PNG files, given geometry, style and metadata data structures

@@ -10,7 +10,7 @@ from netCDF4 import Dataset
 
 
 from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
-import ExportKit
+from lib.exports.export_kit import ExportKit
 
 class NetCDFKit(ExportKit):
     ''' Class used to output NetCDF4 files, given geometry, style and metadata data structures
