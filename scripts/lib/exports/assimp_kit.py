@@ -9,11 +9,12 @@ from ctypes import POINTER, pointer, c_byte
 from pyassimp import structs, export, export_blob, material
 
 from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
+import ExportKit
 
 # import lib.exports.print_assimp as pa
 
 
-class AssimpKit:
+class AssimpKit(ExportKit):
     ''' Class used to export geometries to assimp lib
     '''
 
@@ -30,24 +31,8 @@ class AssimpKit:
 
         :param debug_level: debug level taken from python's 'logging' module
         '''
-        # Set up logging, use an attribute of class name so it is only called once
-        if not hasattr(AssimpKit, 'logger'):
-            AssimpKit.logger = logging.getLogger(__name__)
-
-            # Create console handler
-            handler = logging.StreamHandler(sys.stdout)
-
-            # Create formatter
-            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
-
-            # Add formatter to ch
-            handler.setFormatter(formatter)
-
-            # Add handler to logger and set level
-            AssimpKit.logger.addHandler(handler)
-
-        AssimpKit.logger.setLevel(debug_level)
-        self.logger = AssimpKit.logger
+        # Call parent class
+        ExportKit.__init__(self, debug_level)
 
         self.scn = None
         ''' Assimp scene object

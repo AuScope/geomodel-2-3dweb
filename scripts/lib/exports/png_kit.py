@@ -6,9 +6,11 @@ import sys
 import logging
 import array
 import PIL
-from lib.db.style.false_colour import make_false_colour_tup
 
-class PngKit:
+from lib.db.style.false_colour import make_false_colour_tup
+import ExportKit
+
+class PngKit(ExportKit):
     ''' Class used to output PNG files, given geometry, style and metadata data structures
     '''
 
@@ -17,24 +19,8 @@ class PngKit:
 
         :param debug_level: debug level taken from python's 'logging' module
         '''
-        # Set up logging, use an attribute of class name so it is only called once
-        if not hasattr(PngKit, 'logger'):
-            PngKit.logger = logging.getLogger(__name__)
-
-            # Create console handler
-            handler = logging.StreamHandler(sys.stdout)
-
-            # Create formatter
-            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
-
-            # Add formatter to ch
-            handler.setFormatter(formatter)
-
-            # Add handler to logger and set level
-            PngKit.logger.addHandler(handler)
-
-        PngKit.logger.setLevel(debug_level)
-        self.logger = PngKit.logger
+        # Call parent class
+        ExportKit.__init__(self, debug_level)
 
 
     def write_single_voxel_png(self, geom_obj, style_obj, meta_obj, file_name):

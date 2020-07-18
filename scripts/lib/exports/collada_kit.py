@@ -11,10 +11,10 @@ import collada as Collada
 from lib.exports.collada_out import ColladaOut
 # from lib.exports.obj_out import ObjKit
 from lib.exports.bh_utils import make_borehole_label
-
+import ExportKit
 from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
 
-class ColladaKit:
+class ColladaKit(ExportKit):
     ''' Class used to output COLLADA files, given geometry, style and metadata data structures
     '''
 
@@ -44,24 +44,8 @@ class ColladaKit:
 
         :param debug_level: debug level taken from python's 'logging' module
         '''
-        # Set up logging, use an attribute of class name so it is only called once
-        if not hasattr(ColladaKit, 'logger'):
-            ColladaKit.logger = logging.getLogger(__name__)
-
-            # Create console handler
-            handler = logging.StreamHandler(sys.stdout)
-
-            # Create formatter
-            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
-
-            # Add formatter to ch
-            handler.setFormatter(formatter)
-
-            # Add handler to logger and set level
-            ColladaKit.logger.addHandler(handler)
-
-        ColladaKit.logger.setLevel(debug_level)
-        self.logger = ColladaKit.logger
+        # Call parent class
+        ExportKit.__init__(self, debug_level)
 
         # Pycollada objects used to create a single COLLADA file using multiple input files
         self.mesh_obj = None

@@ -10,8 +10,9 @@ from netCDF4 import Dataset
 
 
 from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
+import ExportKit
 
-class NetCDFKit:
+class NetCDFKit(ExportKit):
     ''' Class used to output NetCDF4 files, given geometry, style and metadata data structures
     '''
 
@@ -20,24 +21,8 @@ class NetCDFKit:
 
         :param debug_level: debug level taken from python's 'logging' module
         '''
-        # Set up logging, use an attribute of class name so it is only called once
-        if not hasattr(NetCDFKit, 'logger'):
-            NetCDFKit.logger = logging.getLogger(__name__)
-
-            # Create console handler
-            handler = logging.StreamHandler(sys.stdout)
-
-            # Create formatter
-            formatter = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
-
-            # Add formatter to ch
-            handler.setFormatter(formatter)
-
-            # Add handler to logger and set level
-            NetCDFKit.logger.addHandler(handler)
-
-        NetCDFKit.logger.setLevel(debug_level)
-        self.logger = NetCDFKit.logger
+        # Call parent class
+        ExportKit.__init__(self, debug_level)
 
 
     def write_points(self, geom_obj, style_obj, meta_obj, out_filename):
