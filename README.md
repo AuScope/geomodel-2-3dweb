@@ -17,7 +17,9 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 + diskcache (http://www.grantjenks.com/docs/diskcache/)
 + nvcl_kit (https://pypi.org/project/nvcl-kit/)
 + netCDF4 (http://unidata.github.io/netcdf4-python/netCDF4/index.html)
+
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
+
 2. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
 3. Set 'COLLADA2GLTF_BIN' environment variable to point to the path where 'COLLADA2GLTF-bin' resides, e.g.
 ```
