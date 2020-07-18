@@ -33,22 +33,31 @@ class ExportKit:
     def start_write(self):
         ''' Generic routine to start the process write out multiple GSM objects 
         '''
-        pass
+        raise NotImplementedError("Subclass must implement abstract method")
 
 
     def add_geom(self, geom_obj, style_obj, meta_obj):
         ''' Generic routine to add GSM objects to be written out in future
+
+        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling
         '''
-        pass
+        raise NotImplementedError("Subclass must implement abstract method")
 
 
     def end_write(self):
         ''' Generic routine to write out the accumulated GSM objects
         '''
-        pass
+        raise NotImplementedError("Subclass must implement abstract method")
 
 
-    def write(self, geom_obj, style_obj, meta_obj):
+    def write(self, geom_obj, style_obj, meta_obj, file_name):
         ''' Generic routine to write out a single GSM object
+
+        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling
+        :param out_filename: path & filename file to output
         '''
-        pass
+        raise NotImplementedError("Subclass must implement abstract method")
