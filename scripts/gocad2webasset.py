@@ -18,7 +18,8 @@ from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
 from lib.exports.netcdf_kit import NetCDFKit
 from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
-from lib.imports.gocad.helpers import de_concat
+from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
+from lib.imports.gocad.helpers import split_gocad_objs
 from lib.file_processing import find, read_json_file
 from lib.file_processing import is_only_small
 import lib.exports.collada2gltf as collada2gltf
@@ -91,6 +92,8 @@ class Gocad2Collada:
         self.png_kit_obj = PngKit(DEBUG_LVL)
         self.netcdf_kit_obj = NetCDFKit(DEBUG_LVL)
 
+        self.file_datastr_map = GocadFileDataStrMap()
+
 
     def find_and_process(self, src_dir, dest_dir, ext_list):
         ''' Searches for files in local directory and processes them
@@ -115,7 +118,7 @@ class Gocad2Collada:
         ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
             else converts to a NetCDF file.
         '''
-        file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
@@ -159,7 +162,7 @@ class Gocad2Collada:
 
 
     def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
-        file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        file_lines_list = split_gocad_objs(whole_file_lines)
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
@@ -187,7 +190,7 @@ class Gocad2Collada:
 
 
     def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
-        file_lines_list = de_concat(whole_file_lines, GocadImporter.GOCAD_HEADERS)
+        file_lines_list = split_gocad_objs(whole_file_lines)
         self.coll_kit_obj.start_collada()
         popup_dict = {}
         node_label = ''
@@ -293,9 +296,10 @@ class Gocad2Collada:
             base_xyz = self.coord_offset[basefile]
         popup_dict = {}
         file_name, file_ext = os.path.splitext(filename_str)
-        out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         ext_str = file_ext.lstrip('.').upper()
+        out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         src_dir = os.path.dirname(filename_str)
+
         # Open GOCAD file and read all its contents, assume it fits in memory
         try:
             file_d = open(filename_str, 'r')
@@ -307,19 +311,19 @@ class Gocad2Collada:
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
         # If the VS file has too many points, then output as NetCDF4 file
-        if ext_str == 'VS':
+        if self.file_datastr_map.is_points(filename_str):
             ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
         # One VO or SG file can produce many other files
-        elif ext_str in ['VO', 'SG']:
+        elif self.file_datastr_map.is_volume(filename_str):
             ok = self.process_volumes(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 
         # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
-        elif ext_str in ['TS', 'PL', 'WL']:
+        elif self.file_datastr_map.is_borehole(filename_str) or self.file_datastr_map.is_flat_shape(filename_str):
             ok = self.process_others(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename)
 
         # Process group files, depending on the number of GOCAD objects inside
-        elif ext_str == 'GP':
+        elif self.file_datastr_map.is_mixture(filename_str):
             ok = self.process_groups(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename)
 
         file_d.close()
@@ -376,7 +380,7 @@ class Gocad2Collada:
 
 
     def check_input_params(self, param_dict, param_file):
-        """ Checks that the input parameter file has all the madatory fields and
+        """ Checks that the input parameter file has all the mandatory fields and
             that there are no duplicate labels
 
             :param param_dict: parameter file as a dict

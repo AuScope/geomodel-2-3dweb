@@ -4,6 +4,7 @@ A collection GOCAD helper functions
 import logging
 import sys
 
+from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
 
 # Set up debugging
 LOCAL_LOGGER = logging.getLogger("helpers")
@@ -21,12 +22,12 @@ LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
 LOCAL_LOGGER.addHandler(LOCAL_HANDLER)
 
 
-def de_concat(filename_lines, gocad_headers):
+def split_gocad_objs(filename_lines):
     ''' Separates joined GOCAD entries within a file
 
     :param filename_lines: lines from concatenated GOCAD file
-    :param gocad_headers: the GocadImporters.GOCAD_HEADERS dict
     '''
+    gocad_headers = GocadFileDataStrMap.GOCAD_HEADERS
     file_lines_list = []
     part_list = []
     in_file = False

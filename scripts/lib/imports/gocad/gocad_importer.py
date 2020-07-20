@@ -16,6 +16,7 @@ from lib.imports.gocad.props import PROPS
 from lib.db.style.style import STYLE
 from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
 from lib.db.metadata.metadata import METADATA, MapFeat
+from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
 
 from .helpers import make_line_gen, check_vertex
 
@@ -68,7 +69,7 @@ def extract_from_grp(src_dir, filename_str, file_lines, base_xyz, debug_lvl,
         if first_line:
             first_line = False
             # Check that this isn't trying to parse a group file
-            if file_ext.upper() != '.GP' or line_str not in GocadImporter.GOCAD_HEADERS['GP']:
+            if file_ext.upper() != '.GP' or line_str not in GocadFileDataStrMap.GOCAD_HEADERS['GP']:
                 LOCAL_LOGGER.error("SORRY - not a GOCAD GP file %s", repr(line_str))
                 LOCAL_LOGGER.error("    filename_str = %s", filename_str)
                 sys.exit(1)
@@ -121,7 +122,7 @@ def is_group_header(line_str):
         :param line_str: line string
         :returns: true iif line string is a GOCAD group header
     '''
-    return line_str.rstrip('\n\r ').upper() in GocadImporter.GOCAD_HEADERS['GP']
+    return line_str.rstrip('\n\r ').upper() in GocadFileDataStrMap.GOCAD_HEADERS['GP']
 
 
 class GocadImporter():
@@ -133,18 +134,6 @@ class GocadImporter():
     from .processors import process_well_info, process_well_curve, process_prop_class_hdr, process_well_binary_file
     from .processors import process_vol_data
     from .volumes import read_volume_binary_files, calc_vo_xyz, calc_sg_xyz, read_region_flags_file
-
-    GOCAD_HEADERS = {
-        'TS':['GOCAD TSURF 1'],
-        'VS':['GOCAD VSET 1'],
-        'PL':['GOCAD PLINE 1'],
-        'GP':['GOCAD HETEROGENEOUSGROUP 1', 'GOCAD HOMOGENEOUSGROUP 1'],
-        'VO':['GOCAD VOXET 1'],
-        'WL':['GOCAD WELL 1'],
-        'SG':['GOCAD SGRID 1'],
-    }
-    ''' Constant assigns possible headers to each filename extension
-    '''
 
     SUPPORTED_EXTS = [
         'TS',
@@ -163,7 +152,6 @@ class GocadImporter():
     ''' Coordinate offsets, when file contains a coordinate system  that is not "DEFAULT"
         The named coordinate system and (X,Y,Z) offset will apply
     '''
-
 
     stop_on_exc = True
     ''' Stop upon exception, regardless of debug level
@@ -950,31 +938,31 @@ class GocadImporter():
         # Look for other GOCAD file types within a group file
         if ext_str == 'GP':
             found = False
-            for key in self.GOCAD_HEADERS:
-                if key != 'GP' and first_line_str in self.GOCAD_HEADERS[key]:
+            for key in GocadFileDataStrMap.GOCAD_HEADERS:
+                if key != 'GP' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS[key]:
                     ext_str = key
                     found = True
                     break
             if not found:
                 return False
 
-        if ext_str in self.GOCAD_HEADERS:
-            if ext_str == 'TS' and first_line_str in self.GOCAD_HEADERS['TS']:
+        if ext_str in GocadFileDataStrMap.GOCAD_HEADERS:
+            if ext_str == 'TS' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['TS']:
                 self._is_ts = True
                 return True
-            if ext_str == 'VS' and first_line_str in self.GOCAD_HEADERS['VS']:
+            if ext_str == 'VS' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['VS']:
                 self._is_vs = True
                 return True
-            if ext_str == 'PL' and first_line_str in self.GOCAD_HEADERS['PL']:
+            if ext_str == 'PL' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['PL']:
                 self._is_pl = True
                 return True
-            if ext_str == 'VO' and first_line_str in self.GOCAD_HEADERS['VO']:
+            if ext_str == 'VO' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['VO']:
                 self._is_vo = True
                 return True
-            if ext_str == 'WL' and first_line_str in self.GOCAD_HEADERS['WL']:
+            if ext_str == 'WL' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['WL']:
                 self._is_wl = True
                 return True
-            if ext_str == 'SG' and first_line_str in self.GOCAD_HEADERS['SG']:
+            if ext_str == 'SG' and first_line_str in GocadFileDataStrMap.GOCAD_HEADERS['SG']:
                 self._is_sg = True
                 return True
 
