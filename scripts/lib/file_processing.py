@@ -27,32 +27,6 @@ LOGGER.addHandler(LOCAL_HANDLER)
 #LOGGER.setLevel(logging.DEBUG)
 
 
-def find(src_dir, dest_dir, fileext_list, find_and_process, config_build_obj):
-    ''' Searches for 3rd party model files in all the subdirectories
-
-    :param src_dir: directory in which to begin the search
-    :param dest_dir: directory to store output
-    :param fileext_list: list of supported file extensions
-    :param find_and_process: calls this when found something, fn(src_dir, dest_dir, ext_list)
-    :param config_build_obj: ConfigBuilder object
-    '''
-    LOGGER.debug("find(%s, %s, %s)", src_dir, dest_dir, repr(fileext_list))
-    model_dict_list = []
-    geoext_list = []
-    walk_obj = os.walk(src_dir)
-    for root, subfolders, files in walk_obj:
-        done = False
-        for file in files:
-            name_str, fileext_str = os.path.splitext(file)
-            for target_fileext_str in fileext_list:
-                if fileext_str.lstrip('.').upper() == target_fileext_str:
-                    find_and_process(root, dest_dir, fileext_list)
-                    done = True
-                    break
-            if done:
-                break
-
-
 def read_json_file(file_name):
     ''' Reads a JSON file and returns the contents
 
