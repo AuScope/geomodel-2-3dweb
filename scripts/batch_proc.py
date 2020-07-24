@@ -93,7 +93,7 @@ if __name__ == "__main__":
             os.mkdir(outDir)
 
             # Run model conversion
-            execList = ["./gocad2webasset.py", "-x", "-r", "-f", outDir, srcDir, inConvFile]
+            execList = ["./conv_webasset.py", "-x", "-r", "-f", outDir, srcDir, inConvFile]
             print("Executing: ", execList)
             cmdProc = subprocess.run(execList)
             print("Returned: ", cmdProc)

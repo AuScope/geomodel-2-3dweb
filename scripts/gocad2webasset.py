@@ -1,18 +1,8 @@
-#!/usr/bin/env python3
-"""
-This converts GOCAD to COLLADA and GLTF
-It accepts many types of GOCAD files (TS, GP, VS, PL, VO) and support colours
-and 'ZPOSITIVE' flag etc.
-"""
-
 import sys
 import os
-import glob
-import argparse
 import logging
 import gzip
 import shutil
-from types import SimpleNamespace
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
@@ -20,22 +10,13 @@ from lib.exports.netcdf_kit import NetCDFKit
 from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
 from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
 from lib.imports.gocad.helpers import split_gocad_objs
-from lib.file_processing import read_json_file
 from lib.file_processing import is_only_small
 import lib.exports.collada2gltf as collada2gltf
 from lib.config_builder import ConfigBuilder
 
-CONVERT_COLLADA = True
-''' Runs the collada2gltf program after creating COLLADA files
-'''
-
 GROUP_LIMIT = 8
 ''' If there are more than GROUP_LIMIT number of GOCAD objects in a group file
     then use one COLLADA file else put use separate COLLADA files for each object
-'''
-
-NONDEF_COORDS = False
-''' Will tolerate non default coordinates
 '''
 
 VOL_SLICER = True
@@ -47,30 +28,33 @@ DEBUG_LVL = logging.CRITICAL
 ''' Initialise debug level to minimal debugging
 '''
 
-# Set up debugging
-LOGGER = logging.getLogger("gocad2webasset")
 
-# Create console handler
-LOCAL_HANDLER = logging.StreamHandler(sys.stdout)
+class Gocad2WebAsset:
+    """ Converts some GOCAD files to COLLADA, then GLTFs, others are converted to GZIP or NetCDF
 
-# Create formatter
-LOCAL_FORMATTER = logging.Formatter('%(asctime)s -- %(name)s -- %(levelname)s - %(message)s')
+        TS -> COLLADA -> GLTF
+        PL -> COLLADA -> GLTF
+        VO -> GZIP
+        SG -> GZIP (only if there are no faults)
+        VS -> COLLADA -> GLTF (small number of points)
+        VS -> NETCDF (larger number of points)
+        WL -> GLTF
 
-# Add formatter to ch
-LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
+        NB: GP object files are split up and each sub object converted
 
-# Add handler to LOGGER
-LOGGER.addHandler(LOCAL_HANDLER)
-
-#LOGGER.setLevel(logging.DEBUG)
-
-
-
-class Gocad2Collada:
-    """ Converts GOCAD files to COLLADA, then GLTFs
+        This creates the classes to parse the GOCAD object file, and the classes to output the web asset files
     """
 
-    def __init__(self, debug_lvl, params_obj, model_url_path, coord_offset, ct_file_dict):
+    def __init__(self, debug_lvl, params_obj, model_url_path, coord_offset, ct_file_dict, nondef_coords):
+        """ Constructor for 'Gocad2Collada' class
+
+        :param debug_lvl: debug level e.g. 'logging.DEBUG'
+        :param params_obj: model parameter object
+        :param model_url_path: model URL path
+        :param coord_offset: (X,Y,Z) floats; objects are generated with constant offset to their 3d coords
+        :param ct_file_dict: colour table file dictionary
+        :param nondef_coords: if True then will not stop if encounters non-default GOCAD coordinates
+        """
 
         # Create logging console handler
         handler = logging.StreamHandler(sys.stdout)
@@ -87,6 +71,9 @@ class Gocad2Collada:
         # Add handler to LOGGER and set level
         self.logger.addHandler(handler)
         self.logger.setLevel(debug_lvl)
+
+        # If true will not stop if a file has non default coordinates
+        self.nondef_coords = nondef_coords
 
         # Coordinate Offsets are stored here, key is filename, value is (x,y,z)
         self.coord_offset = coord_offset
@@ -112,10 +99,25 @@ class Gocad2Collada:
         self.file_datastr_map = GocadFileDataStrMap()
 
 
+    def get_supported_exts(self):
+        ''' Returns a list of file extensions which can be converted
+
+        :returns: a list of file extensions which can be converted
+        '''
+        return GocadImporter.SUPPORTED_EXTS
+
 
     def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir):
         ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
             else converts to a NetCDF file.
+
+        :param whole_file_lines: list of strings taken from file's lines
+        :param dest_dir: destination directory
+        :param file_name: source file name with path but without extension
+        :param base_xyz: [x,y,z] offset for writing out coordinates
+        :param file_name_str: source file name with path and extension
+        :param src_dir: source directory
+
         '''
         file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
@@ -125,7 +127,7 @@ class Gocad2Collada:
                 o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
                 out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
             gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                                      nondefault_coords=NONDEF_COORDS,
+                                      nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
             # Check that conversion worked
@@ -161,6 +163,15 @@ class Gocad2Collada:
 
 
     def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
+        """ Process file that contains a 3D volume
+
+        :param whole_file_lines: list of strings taken from file's lines
+        :param dest_dir: destination directory
+        :param file_name: source file name with path but without extension
+        :param base_xyz: [x,y,z] offset for writing out coordinates
+        :param file_name_str: source file name with path and extension
+        :param src_dir: source directory
+        """
         file_lines_list = split_gocad_objs(whole_file_lines)
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
@@ -169,7 +180,7 @@ class Gocad2Collada:
                                                                os.path.basename(file_name)),
                                                   mask_idx)
             gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                                      nondefault_coords=NONDEF_COORDS,
+                                      nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
             # Check that conversion worked
@@ -189,6 +200,17 @@ class Gocad2Collada:
 
 
     def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
+        """ Process other kinds of file, e.g. faults
+
+        :param whole_file_lines: list of strings taken from file's lines
+        :param dest_dir: destination directory
+        :param file_name: source file name with path but without extension
+        :param base_xyz: [x,y,z] offset for writing out coordinates
+        :param file_name_str: source file name with path and extension
+        :param src_dir: source directory
+        :param ext_str: file extent string
+        :param out_filename: output filename
+        """
         file_lines_list = split_gocad_objs(whole_file_lines)
         self.coll_kit_obj.start_collada()
         popup_dict = {}
@@ -196,7 +218,7 @@ class Gocad2Collada:
         has_result = False
         for file_lines in file_lines_list:
             gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                                      nondefault_coords=NONDEF_COORDS)
+                                      nondefault_coords=self.nondef_coords)
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
             if not is_ok:
                 self.logger.warning("WARNING - could not process %s", filename_str)
@@ -232,13 +254,13 @@ class Gocad2Collada:
         ''' Process GOCAD group file
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name
+        :param file_name: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param file_name_str: 
+        :param file_name_str: source file name with path and extension
         :param src_dir: source directory
         '''
         gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
-                                    DEBUG_LVL, NONDEF_COORDS, self.ct_file_dict)
+                                    DEBUG_LVL, self.nondef_coords, self.ct_file_dict)
 
         # If there are too many entries in the GP file, then use one COLLADA file only
         has_result = False
@@ -376,225 +398,3 @@ class Gocad2Collada:
                                             popup_dict, out_filename,
                                             self.model_url_path, file_ext='.PNG',
                                             position=geom_obj.vol_origin)
-
-
-
-def find(converter_obj, src_dir, dest_dir, fileext_list, config_build_obj):
-    ''' Searches for 3rd party model files in all the subdirectories
-
-    :param converter_obj: file converter object
-    :param src_dir: directory in which to begin the search
-    :param dest_dir: directory to store output
-    :param fileext_list: list of supported file extensions
-    :param config_build_obj: ConfigBuilder object
-    '''
-    LOGGER.debug("find(%s, %s, %s)", src_dir, dest_dir, repr(fileext_list))
-    model_dict_list = []
-    geoext_list = []
-    walk_obj = os.walk(src_dir)
-    for root, subfolders, files in walk_obj:
-        done = False
-        for file in files:
-            name_str, fileext_str = os.path.splitext(file)
-            for target_fileext_str in fileext_list:
-                if fileext_str.lstrip('.').upper() == target_fileext_str:
-                    find_and_process(converter_obj, root, dest_dir, fileext_list)
-                    done = True
-                    break
-            if done:
-                break
-
-
-def find_and_process(converter_obj, src_dir, dest_dir, ext_list):
-    ''' Searches for files in local directory and processes them
-
-    :param src_dir: source directory where there are 3rd party model files
-    :param dest_dir: destination directory where output is written to
-    :param ext_list: list of supported file extensions
-    '''
-    LOGGER.debug("find_and_process(%s, %s)", src_dir, dest_dir)
-    for ext_str in ext_list:
-        wildcard_str = os.path.join(src_dir, "*."+ext_str.lower())
-        file_list = glob.glob(wildcard_str)
-        for filename_str in file_list:
-            converter_obj.process(filename_str, dest_dir)
-
-    # Convert all files from COLLADA to GLTF v2
-    if CONVERT_COLLADA:
-        collada2gltf.convert_dir(dest_dir)
-
-
-def check_input_params(param_dict, param_file):
-    """ Checks that the input parameter file has all the mandatory fields and
-        that there are no duplicate labels
-
-        :param param_dict: parameter file as a dict
-        :param param_file: filename of parameter file (string)
-    """
-    # Check for 'ModelProperties'
-    if 'ModelProperties' not in param_dict:
-        LOGGER.error("Cannot find 'ModelProperties' key in JSON file: %s", param_file)
-        sys.exit(1)
-
-    # Check for 'GroupStructure'
-    if 'GroupStructure' not in param_dict:
-        LOGGER.error("Cannot find 'GroupStructure' key in JSON file: %s", param_file)
-        sys.exit(1)
-
-    # Check for duplicate group names
-    group_names = param_dict['GroupStructure'].keys()
-    if len(group_names) > len(set(group_names)):
-        LOGGER.error("Cannot process JSON file: %s - found duplicate group names", param_file)
-        sys.exit(1)
-
-    # Check for duplicate labels
-    for part_list in param_dict['GroupStructure'].values():
-        display_name_set = set()
-        filename_set = set()
-        for part in part_list:
-            if part["FileNameKey"] in filename_set:
-                LOGGER.error("Cannot process JSON file {0}: duplicate FileNameKey {1}".format(param_file, part["FileNameKey"]))
-                sys.exit(1)
-            filename_set.add(part["FileNameKey"])
-            if "display_name" in part["Insert"] and \
-                                 part["Insert"]["display_name"] in display_name_set:
-                LOGGER.error("Cannot process JSON file {0}: duplicate display_name {1}".format(param_file, part["Insert"]["display_name"]))
-                sys.exit(1)
-            display_name_set.add(part["Insert"]["display_name"])
-
-
-def initialise_params(param_file):
-    ''' Reads the input parameter file and returns a dict version of input params
-
-    :param param_file: file name of input parameter file
-    '''
-    params_obj = SimpleNamespace()
-    param_dict = read_json_file(param_file)
-    check_input_params(param_dict, param_file)
-
-    # Mandatory parameters
-    for field_name in ['crs', 'name', 'init_cam_dist', 'modelUrlPath']:
-        if field_name not in param_dict['ModelProperties']:
-            LOGGER.error('Field "{0}" not in "ModelProperties" in JSON input param file {1}'.format(field_name, param_file))
-            sys.exit(1)
-        setattr(params_obj, field_name, param_dict['ModelProperties'][field_name])
-    model_url_path = param_dict['ModelProperties']['modelUrlPath']
-
-    # Optional parameter
-    if 'proj4_defn' in param_dict['ModelProperties']:
-        setattr(params_obj, 'proj4_defn', param_dict['ModelProperties']['proj4_defn'])
-
-    # Optional Coordinate Offsets
-    coord_offset = {}
-    if 'CoordOffsets' in param_dict:
-        for coord_offset_obj in param_dict['CoordOffsets']:
-            coord_offset[coord_offset_obj['filename']] = tuple(coord_offset_obj['offset'])
-
-    # Optional colour table files for VOXET file
-    ct_file_dict = {}
-    if 'VoxetColourTables' in param_dict:
-        for ct_obj in param_dict['VoxetColourTables']:
-            colour_table = ct_obj['colour_table']
-            filename = ct_obj['filename']
-            transp = ct_obj.get('render_transparent',[])
-            ct_file_dict[filename] = (colour_table, transp)
-
-    # Optional WMS services
-    setattr(params_obj, 'wms_services', [])
-    if 'WMSServices' in param_dict:
-        for wms_svc in param_dict['WMSServices']:
-            params_obj.wms_services.append(wms_svc)
-
-    # Optional labels for sidebars
-    setattr(params_obj, 'grp_struct_dict', {})
-    if 'GroupStructure' in param_dict:
-        for group_name, command_list in param_dict['GroupStructure'].items():
-            for command in command_list:
-                params_obj.grp_struct_dict[command["FileNameKey"]] = (group_name,
-                                                                      command["Insert"])
-    return params_obj, model_url_path, coord_offset, ct_file_dict
-
-
-
-# MAIN PART OF PROGRAMME
-if __name__ == "__main__":
-
-    # Parse the arguments
-    PARSER = argparse.ArgumentParser(description='Convert GOCAD files into geological model files')
-    PARSER.add_argument('src', help='GOCAD source directory or source file',
-                        metavar='GOCAD source dir/file')
-    PARSER.add_argument('param_file', help='Input parameters in JSON format',
-                        metavar='JSON input param file')
-    PARSER.add_argument('-o', '--output_config', action='store', help='Output JSON config file',
-                        default='output_config.json')
-    PARSER.add_argument('-r', '--recursive', action='store_true',
-                        help='Recursively search directories for files')
-    PARSER.add_argument('-d', '--debug', action='store_true',
-                        help='Print debug statements during execution')
-    PARSER.add_argument('-x', '--nondefault_coord', action='store_true',
-                        help='Tolerate non-default GOCAD coordinate system')
-    PARSER.add_argument('-f', '--output_folder', action='store',
-                        help='Output folder for graphics files')
-    PARSER.add_argument('-g', '--no_gltf', action='store_true',
-                        help='Create COLLADA files, but do not convert to GLTF')
-    ARGS = PARSER.parse_args()
-
-    # If just want to create COLLADA files without converting them to GLTF
-    if ARGS.no_gltf:
-        CONVERT_COLLADA = False
-
-    # Initialise output directory, default is source directory
-    DEST_DIR = os.path.dirname(ARGS.src)
-    if ARGS.output_folder is not None:
-        if not os.path.isdir(ARGS.output_folder):
-            print("Output folder", repr(ARGS.output_folder), "is not a directory", )
-            sys.exit(1)
-        DEST_DIR = ARGS.output_folder
-
-    # Set debug level
-    if ARGS.debug:
-        DEBUG_LVL = logging.DEBUG
-    else:
-        DEBUG_LVL = logging.INFO
-
-    # Will tolerate non default coords
-    if ARGS.nondefault_coord:
-        NONDEF_COORDS = True
-
-    # Read parameters & initialise converter
-    params_obj, model_url_path, coord_offset, ct_file_dict = initialise_params(ARGS.param_file)
-    converter_obj = Gocad2Collada(DEBUG_LVL, params_obj, model_url_path, coord_offset, ct_file_dict)
-
-    # Process a directory of files
-    if os.path.isdir(ARGS.src):
-
-        # Recursively search subdirectories
-        if ARGS.recursive:
-            find(converter_obj, ARGS.src, DEST_DIR, GocadImporter.SUPPORTED_EXTS,
-                 converter_obj.config_build_obj)
-
-        # Only search local directory
-        else:
-            find_and_process(converter, ARGS.src, DEST_DIR, GocadImporter.SUPPORTED_EXTS)
-
-    # Process a single file
-    elif os.path.isfile(ARGS.src):
-        converter_obj.process(ARGS.src, DEST_DIR)
-
-        # Convert all files from COLLADA to GLTF v2
-        if not converter_obj.config_build_obj.has_output():
-            print("Could not convert file", ARGS.src)
-            sys.exit(1)
-        if CONVERT_COLLADA:
-            FILE_NAME, FILE_EXT = os.path.splitext(ARGS.src)
-            collada2gltf.convert_file(os.path.join(DEST_DIR,
-                                      os.path.basename(FILE_NAME) + ".dae"))
-
-    else:
-        print(ARGS.src, "does not exist")
-        sys.exit(1)
-
-    # Finally, create the config file
-    if converter_obj.config_build_obj.has_output():
-        converter_obj.config_build_obj.create_json_config(ARGS.output_config, DEST_DIR,
-                                         converter_obj.params)

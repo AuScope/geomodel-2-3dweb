@@ -29,11 +29,11 @@ export COLLADA2GLTF_BIN=/home/fred/github/COLLADA2GLTF/build/
 
 ### To convert some GOCAD files to GLTF or COLLADA (*.ts, *.pl, small *.vs, *.wl) NetCDF4 (large *.vs), GZIP (*.vo, *.sg). *.gp files can also be converted.
 
-Run [gocad2webasset.py](scripts/gocad2webasset.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.   
+Run [conv_webasset.py](scripts/conv_webasset.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](scripts/input/README.md) explains the format of the conversion parameter file.
 
 e.g.
 ```
-./gocad2webasset.py gocad.ts config.json
+./conv_webasset.py gocad.ts config.json
 
 ```
 
