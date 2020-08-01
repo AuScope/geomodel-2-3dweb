@@ -1,11 +1,11 @@
-lib
-===
+scripts
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   config_builder
-   db
-   exports
-   file_processing
-   imports
+   batch_proc
+   conv_webasset
+   gocad2webasset
+   index
+   make_boreholes

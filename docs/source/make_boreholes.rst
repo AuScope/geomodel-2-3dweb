@@ -1,5 +1,5 @@
-make_boreholes module
-=====================
+make\_boreholes module
+======================
 
 .. automodule:: make_boreholes
     :members:
