@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # lib documentation build configuration file, created by
-# sphinx-quickstart on Sat Aug  1 11:26:26 2020.
+# sphinx-quickstart on Sat Aug  1 11:50:47 2020.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts',
 sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir, 'scripts', 'lib', 'db')))
 
 print(sys.path)
+
 
 # -- General configuration ------------------------------------------------
 
@@ -67,7 +68,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'Geomodels -> 3d Web'
 copyright = 'AuScope 2020'
-author = 'vincent Fazio'
+author = 'Vincent Fazio'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -88,7 +89,7 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'batch_proc.rst', 'make_boreholes.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
