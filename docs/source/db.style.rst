@@ -1,19 +1,19 @@
-db.style package
-================
+db\.style package
+=================
 
 Submodules
 ----------
 
-db.style.false_colour module
-----------------------------
+db\.style\.false\_colour module
+-------------------------------
 
 .. automodule:: db.style.false_colour
     :members:
     :undoc-members:
     :show-inheritance:
 
-db.style.style module
----------------------
+db\.style\.style module
+-----------------------
 
 .. automodule:: db.style.style
     :members:

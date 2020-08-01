@@ -1,11 +1,11 @@
-db.metadata package
-===================
+db\.metadata package
+====================
 
 Submodules
 ----------
 
-db.metadata.metadata module
----------------------------
+db\.metadata\.metadata module
+-----------------------------
 
 .. automodule:: db.metadata.metadata
     :members:

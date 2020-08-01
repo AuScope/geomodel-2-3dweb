@@ -13,8 +13,8 @@ Subpackages
 Submodules
 ----------
 
-db.db_tables module
--------------------
+db\.db\_tables module
+---------------------
 
 .. automodule:: db.db_tables
     :members:

@@ -1,19 +1,19 @@
-db.geometry package
-===================
+db\.geometry package
+====================
 
 Submodules
 ----------
 
-db.geometry.model_geometries module
------------------------------------
+db\.geometry\.model\_geometries module
+--------------------------------------
 
 .. automodule:: db.geometry.model_geometries
     :members:
     :undoc-members:
     :show-inheritance:
 
-db.geometry.types module
-------------------------
+db\.geometry\.types module
+--------------------------
 
 .. automodule:: db.geometry.types
     :members:

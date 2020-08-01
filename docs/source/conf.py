@@ -35,11 +35,23 @@ print(sys.path)
 #
 # needs_sphinx = '1.0'
 
+autoclass_content = "both"  # include both class docstring and __init__
+
+autodoc_default_flags = [
+        # Make sure that any autodoc declarations show the right members
+        "members",
+        "inherited-members",
+        "private-members",
+        "show-inheritance",
+]
+autosummary_generate = True  # Make _autosummary files and include them
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,8 +72,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'AuScope 3D Geological Models'
-copyright = '2019, AuScope'
-author = 'AuScope'
+copyright = 'Auscope, 2020'
+author = 'Vincent Fazio'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -130,7 +142,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
