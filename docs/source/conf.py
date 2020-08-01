@@ -159,8 +159,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'lib.tex', 'lib Documentation',
-     'Author', 'manual'),
+    (master_doc, 'lib.tex', 'Geomodels -> 3D Web Documentation',
+     'vincent Fazio', 'manual'),
 ]
 
 
@@ -169,7 +169,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'lib', 'lib Documentation',
+    (master_doc, 'geomodel_2_3d_web', 'Geomodels -> 3D Web Documentation',
      [author], 1)
 ]
 
@@ -180,9 +180,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'lib', 'lib Documentation',
-     author, 'lib', 'One line description of project.',
-     'Miscellaneous'),
+    (master_doc, 'geomodel_2_3d_web', 'Geomodels -> 3D Web Documentation',
+     author, 'geomodel_2_3d_web', 'Convert 3D geological models to web assets',
+     'Geospatial'),
 ]
 
 
