@@ -36,8 +36,8 @@ class METADATA():
         self.label_list = []
         ''' Dict of objects for adding labels when displaying objects
             Format: [ { 'name': 'name of object',
-                        'position': (x,y,z),
-                        'metadata': {dict of metadata in key,val} }, ...  ]
+            'position': (x,y,z),
+            'metadata': {dict of metadata in key,val} }, ...  ]
         '''
 
         self.src_filename = ''

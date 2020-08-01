@@ -52,7 +52,7 @@ def check_vertex(num, vrtx_arr):
     ''' If vertex exists in vertex array then returns True else False
 
     :param num: vertex number to search for
-    :param vrtx_arr vertex array
+    :param vrtx_arr: vertex array
     '''
     for vrtx in vrtx_arr:
         if vrtx.n == num:

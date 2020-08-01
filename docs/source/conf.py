@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# lib documentation build configuration file, created by
+# Geomodels_2_3dWeb documentation build configuration file, created by
 # sphinx-quickstart on Sat Aug  1 11:50:47 2020.
 #
 # This file is execfile()d with the current directory set to its

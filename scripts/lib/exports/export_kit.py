@@ -1,5 +1,5 @@
 """
-Parent Class for *_kit classes
+Parent class for all '_kit' classes
 """
 import logging
 import sys

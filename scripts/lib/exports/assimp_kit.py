@@ -50,6 +50,7 @@ class AssimpKit(ExportKit):
     def add_geom(self, geom_obj, style_obj, meta_obj):
         ''' Add a geometry to the scene. It only does triangular meshes for the moment.
         Will be expanded to include other types.
+
         :param geom_obj: ModelGeometries object
         :param style_obj: STYLE object
         :param meta_obj: METADATA object
@@ -88,9 +89,9 @@ class AssimpKit(ExportKit):
 
 
     def end_scene(self, out_filename):
-        ''' Called after geometries have all been added to scene and a file or blob
-        should be created
-        :param out_filename: filename and path of output file, without file extension
+        ''' Called after geometries have all been added to scene and a file or blob should be created
+
+        :param out_filename: filename and path of output file, without file extension \
                              if an empty string, then a blob is returned and a file is not created
         :returns: True if file was written out, else returns the GLTF as an assimp blob object
         '''
@@ -125,10 +126,10 @@ class AssimpKit(ExportKit):
 
         :param base_vrtx: base vertex, position of the object within the model [x,y,z]
         :param borehole_name: name of borehole
-        :param colour_info_dict: dict of colour info; key - depth, float, val {'colour':(R,B,G,A),
+        :param colour_info_dict: dict of colour info; key - depth, float, val {'colour':(R,B,G,A), \
                                             'classText': mineral name }, where R,G,B,A are floats
         :param height_reso: height resolution for colour info dict
-        :param out_filename: optional destination directory+file (without extension),
+        :param out_filename: optional destination directory+file (without extension), \
                              where file is written
         '''
         self.logger.debug("write_borehole(%s, %s, %s, colour_info_dict = %s)",
@@ -181,6 +182,7 @@ class AssimpKit(ExportKit):
 
     def make_empty_node(self, node_name):
         ''' Makes an empty node with a supplied name
+
         :param node_name: name of node to be created
         :returns: pyassimp 'Node' object
         '''
@@ -293,6 +295,7 @@ class AssimpKit(ExportKit):
 
     def make_two_sided(self):
         ''' Makes a two-sided 'MaterialProperty' object
+
         :param two_sided: boolean value of two sided property
         :returns: A 'MaterialProperty' object with two-sided set to 1
         '''
@@ -310,9 +313,10 @@ class AssimpKit(ExportKit):
 
     def make_material(self, diffuse_colour, two_sided=False):
         ''' Makes a material object with a certain diffuse colour
+
         :param diffuse_colour: A tuple of floating point values (R,G,B,A)
         :param two_sided: Boolean, optional, default False, make a double-sided material
-        :returns pyassimp 'Material' object
+        :returns: pyassimp 'Material' object
         '''
         mat = structs.Material()
         mat.mNumProperties = 1

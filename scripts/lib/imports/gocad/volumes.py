@@ -144,7 +144,8 @@ def read_volume_binary_files(self):
 
 
 def calc_vo_xyz(self, x_idx, y_idx, z_idx, mult):
-    # Calculate the XYZ coords and their maxs & mins
+    ''' Calculate the XYZ coords and their maxs & mins
+    ''' 
     x_coord = self.axis_o[0]+ \
       (float(x_idx)*self.axis_u[0]*mult[0] + \
       float(y_idx)*self.axis_u[1]*mult[1] + \
@@ -162,7 +163,8 @@ def calc_vo_xyz(self, x_idx, y_idx, z_idx, mult):
 
 
 def calc_sg_xyz(self, x_idx, y_idx, z_idx, fp_arr):
-    # SGRID has coordinates in points file
+    ''' SGRID has coordinates in points file
+    ''' 
     x_coord, y_coord, z_coord = fp_arr[x_idx][y_idx][z_idx]
     self.geom_obj.calc_minmax(x_coord, y_coord, z_coord)
     return x_coord, y_coord, z_coord
@@ -171,6 +173,7 @@ def calc_sg_xyz(self, x_idx, y_idx, z_idx, fp_arr):
 def read_region_flags_file(self, flags_array_len, flags_file,
                              flags_bit_sz, flags_offset):
     ''' Reads the flags file and looks for regions for a VOXET or SGRID file.
+
     :param flags_array_len: length of flags array
     :param flags_file: filename of flags file
     :param flags_bit_sz: mumber of bits in each element of flags array

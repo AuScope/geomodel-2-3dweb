@@ -19,6 +19,7 @@ class GocadFileDataStrMap(FileDataStructMap):
 
     def is_points(self, filename_str):
         ''' Routine to recognise a points file
+
         :param filename_str: filename (including path) of GOCAD object file
         :return: True if this file contains a points data structure
         '''
@@ -27,6 +28,7 @@ class GocadFileDataStrMap(FileDataStructMap):
 
     def is_volume(self, filename_str):
         ''' Routine to recognise a volume file
+
         :param filename_str: filename (including path) of GOCAD object file
         :return: True if this file contains a volume data structure
         '''
@@ -35,6 +37,7 @@ class GocadFileDataStrMap(FileDataStructMap):
 
     def is_borehole(self, filename_str):
         ''' Routine to recognise a borehole file
+
         :param filename_str: filename (including path) of GOCAD object file
         :return: True if this file contains a borehole data structure
         '''
@@ -43,6 +46,7 @@ class GocadFileDataStrMap(FileDataStructMap):
 
     def is_flat_shape(self, filename_str):
         ''' Routine to recognise a flat shape file e.g. triangles, planes in 3d
+
         :param filename_str: filename (including path) of GOCAD object file
         :return: True if this file contains a flat shape data structure
         '''
@@ -51,6 +55,7 @@ class GocadFileDataStrMap(FileDataStructMap):
 
     def is_mixture(self, filename_str):
         ''' Routine to recognise a file with a mixture of data structures
+
         :param filename_str: filename (including path) of GOCAD object file
         :return: True if this file contains a mixture of data structures
         '''

@@ -130,26 +130,26 @@ class ConfigBuilder():
                    file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}):
         ''' Adds more config information to popup dictionary
 
-        :param gs_dict: group structure dictionary (group struct dict format:
-            { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
-        :param label_str: string to use as a display name for this part of the
-            model, if none available in group struct dict
-        :param popup_dict: information to display in popup window
-            ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } where 'attr_name' is one of: 'name', 'title', 'href')
+        :param gs_dict: group structure dictionary (group struct dict format: \
+        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )
+        :param label_str: string to use as a display name for this part of the \
+        model, if none available in group struct dict
+        :param popup_dict: information to display in popup window \
+        ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } where 'attr_name' is one of: 'name', 'title', 'href')
         :param file_name:  file and path (without extension) of model part source file
         :param file_ext: optional file extension of 'file_name', defaults to '.gltf'
         :param position: optional [x,y,z] position of model part
-        :param styling: optional dict of styling parameters e.g.
-                        { "labels": [
-                            {
-                                "display_name": "MARKER_TOPMOROAKVELKERRI_GRP",
-                                "position": [
-                                    425500.0,
-                                    8028000.0,
-                                    228.699997
-                                ]
-                            },
-                          ]
+        :param styling: optional dict of styling parameters e.g. \
+                        { "labels": [  \
+                            { \
+                                "display_name": "MARKER_TOPMOROAKVELKERRI_GRP", \
+                                "position": [ \
+                                    425500.0, \
+                                    8028000.0, \
+                                    228.699997 \
+                                ] \
+                            }, \
+                          ] \
                         }
         :returns: a dict of model configuration info, which includes the popup dict
         '''

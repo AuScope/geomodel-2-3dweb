@@ -803,8 +803,9 @@ class GocadImporter():
 
     def __init_style(self, style_obj, local_prop_idx_list=None, prop_idx=None):
         ''' Extract style data from GocadImporter and place in style object
+
         :param style_obj: style object which will hold data taken from GocadImporter object
-        :param local_prop_idx_list: optional, if set, then will place multiple local
+        :param local_prop_idx_list: optional, if set, then will place multiple local \
                property data values in object
         :param prop_idx: optional, if set, then will place property data in object
         '''
@@ -820,8 +821,9 @@ class GocadImporter():
 
     def __init_metadata(self, meta_obj, local_prop_idx_list=None, prop_idx=None):
         ''' Extract metadata from GocadImporter and place in metadata object
+
         :param meta_obj: metadata object which will hold data from GocadImporter object
-        :param local_prop_idx_list: optional, if set, then will place multiple
+        :param local_prop_idx_list: optional, if set, then will place multiple \
                                     local property data values in object
         :param prop_idx: optional, if set, then will place property data in object
         '''
@@ -845,8 +847,9 @@ class GocadImporter():
 
     def __init_geometry(self, geom_obj, local_prop_idx_list=None, prop_idx=None):
         ''' Convert GocadImporter to MODEL_GEOMETRY version
+
         :param geom_obj: MODEL_GEOMETRY object where GocadImporter data is placed
-        :param local_prop_idx_list: optional, if set, then will place multiple
+        :param local_prop_idx_list: optional, if set, then will place multiple \
                                     local property data values in object
         :param prop_idx: optional, if set, then will place property data in object
         '''
@@ -929,8 +932,8 @@ class GocadImporter():
 
         :param fileExt: the file extension
         :param firstLineStr: first line in the file
-        :returns: returns True if it could determine the type of file
-            Will return False when given the header of a GOCAD group file, since
+        :returns: returns True if it could determine the type of file \
+            Will return False when given the header of a GOCAD group file, since \
             cannot create a vessel object from the group file itself, only from the group members
         '''
         self.logger.debug("setType(%s,%s)", file_ext, first_line_str)

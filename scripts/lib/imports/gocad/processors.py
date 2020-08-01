@@ -11,11 +11,11 @@ from lib.imports.gocad.props import PROPS
 
 
 def to_xyz_min_curve(dia1, dia2):
-    ''' Convert measured depth, inclination, azimuth to x,y,z
-        via minimum curvature method
-    :param dia1: tuple (measured depth, inclination, azimuth)
-                measured depth, metres, float
-                inclination, degrees, float, 0 = vertical, 90 = horizontal
+    ''' Convert measured depth, inclination, azimuth to x,y,z via minimum curvature method
+
+    :param dia1: tuple (measured depth, inclination, azimuth) \
+                measured depth, metres, float \
+                inclination, degrees, float, 0 = vertical, 90 = horizontal \
                 azimuth, degrees, float, measured from North
     :param dia2: tuple (measured depth, inclination, azimuth)
     '''
@@ -39,8 +39,9 @@ def to_xyz_min_curve(dia1, dia2):
 
 def to_dia(sdia):
     ''' Converts a 4-tuple to 3-tuple of floats
+
     :param sdia: 4-tuple ('STATION', d, i, a)
-    :returns True/False, three float tuple
+    :returns: True/False, three float tuple
     '''
     try:
         stat, d_str, i_str, a_str = sdia
@@ -54,8 +55,9 @@ def to_dia(sdia):
 
 def process_coord_hdr(self, line_gen):
     ''' Process fields within coordinate header.
+
     :param line_gen: line generator
-    :returns: two booleans, the first is True iff reached end of sequence,
+    :returns: two booleans, the first is True iff reached end of sequence, \
               the second is True iff there is an unrecoverable error
     '''
     while True:
@@ -98,6 +100,7 @@ def process_coord_hdr(self, line_gen):
 
 def process_header(self, line_gen):
     ''' Process fields in the GOCAD header
+
     :param line_gen: line generator
     :returns: a boolean, is True iff we are at last line
     '''
@@ -138,9 +141,10 @@ def process_header(self, line_gen):
 
 def process_ascii_well_path(self, line_gen, field):
     ''' Process ascii well path header
+
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
-    :returns: a boolean, is True iff we are at last line; well_path, list of 
+    :returns: a boolean, is True iff we are at last line; well_path, list of \
              coordinates of well path; marker_list, list of markers
     '''
     self.logger.debug("START ascii well path, field = %s %s", repr(field[0]), repr(field[1]))
@@ -285,6 +289,7 @@ def process_ascii_well_path(self, line_gen, field):
 
 def process_well_info(self, field, line_gen):
     ''' Process the information after a well marker or well zone is defined
+
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line and info dict
@@ -313,6 +318,7 @@ def process_well_info(self, field, line_gen):
 
 def process_well_curve(self, line_gen, field):
     ''' Process well curve
+
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line
@@ -360,6 +366,7 @@ def process_well_binary_file(self, file_name):
 
 def process_prop_class_hdr(self, line_gen, field):
     ''' Process the property class header
+
     :param line_gen: line generator
     :param field: array of field strings from first line of prop class header
     :returns: a boolean, is True iff we are at last line
@@ -416,6 +423,7 @@ def process_prop_class_hdr(self, line_gen, field):
 
 def process_vol_data(self, line_gen, field, field_raw, src_dir):
     ''' Process all the voxet and sgrid data fields
+
         :param line_gen: line generator
         :param field: array of field strings
         :param field: array of field strings, not space separated

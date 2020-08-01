@@ -22,7 +22,7 @@ class Query(Base):
         This can be used as an index to a row of the table.
 
         The "query" table points to the "info" tables. These point to information at various
-        levels of the model:
+        levels of the model: \
             segments, parts, model, and independent user notes.
 
         At the moment only a simple json string is stored in each of the "info" tables.
@@ -130,6 +130,7 @@ class KeyValuePairs(Base):
 #
 class QueryDB():
     ''' A simple database class to manage the creation, writing and reading of the query database
+
     '''
     def __init__(self, create=False, db_name='query_data.db'):
         self.error = ''
@@ -248,8 +249,8 @@ class QueryDB():
 
         :param label: model part label
         :param model_name: name of model
-        :returns: a tuple, format is (True, label str, model_name, seg_info_dict, part_info_dict,
-                      model_info_dict, user_info_dict) if successful
+        :returns: a tuple, format is (True, label str, model_name, seg_info_dict, part_info_dict, \
+                      model_info_dict, user_info_dict) if successful \
                 else (False, exception string)
         """
         try:

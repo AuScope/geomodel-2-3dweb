@@ -214,7 +214,7 @@ class ModelGeometries:
             pass
 
     def get_extent(self):
-        ''' :returns: estimate of the geographic extent of the model, using max and min
+        ''' :returns: estimate of the geographic extent of the model, using max and min \
             coordinate values format is [min_x, max_x, min_y, max_y]
         '''
         return [self.min_x, self.max_x, self.min_y, self.max_y]
@@ -282,9 +282,9 @@ class ModelGeometries:
 
     def add_loose_3d_data(self, is_xyz, data_dict):
         ''' Adds an instance of XYZ data
-        :param is_xyz: True iff xyz data (float, float, float)
+        :param is_xyz: True iff xyz data (float, float, float) \
                        else ijk (int, int, int) data
-        :param data_dict: dictionary of (X,Y,Z) => data, or (I,J,K) => data
+        :param data_dict: dictionary of (X,Y,Z) => data, or (I,J,K) => data \
                           values to be added
         '''
         if data_dict:
@@ -299,9 +299,9 @@ class ModelGeometries:
 
     def get_loose_3d_data(self, is_xyz, idx=0):
         ''' Retrieves data from xyz data dictionary
-        :param is_xyz: True iff xyz data (float, float, float)
+        :param is_xyz: True iff xyz data (float, float, float) \
                        else ijk (int, int, int) data
-        :param idx: index for when there are multiple values for each point in space,
+        :param idx: index for when there are multiple values for each point in space, \
                     omit for volumes
         :returns: dictionary of (X,Y,Z) => data value or (I,J,K) => data value
         '''

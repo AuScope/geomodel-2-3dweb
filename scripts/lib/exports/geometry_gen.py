@@ -10,18 +10,18 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
 
     :param pos: x,y,z position of collar of borehole, tuple of 3 floats
     :param borehole_name: borehole's name
-    :param colour_info_dict: dict of: key = height, float;
-                                      value = { 'colour': (R,G,B,A) floats,
-                                                'classText': mineral name,
+    :param colour_info_dict: dict of: key = height, float; \
+                                      value = { 'colour': (R,G,B,A) floats, \
+                                                'classText': mineral name, \
                                                 'className': measurement class }
     :param ht_reso: height resolution, float
-    :returns vert_list: list of floats, (x,y,z) vertices;
-        indices - list of integers, index pointers to which vertices are joined as triangles;
-        colour_idx - integer index pointing to material object array;
-        depth - depth of borehole segment, float;
-        colour_info - colour information dict: { 'colour': (R,G,B,A) floats,
-                                                 'classText': mineral name, 
-                                                 'className' : meas class } ;
+    :returns vert_list: list of floats, (x,y,z) vertices; \
+        indices - list of integers, index pointers to which vertices are joined as triangles; \
+        colour_idx - integer index pointing to material object array; \
+        depth - depth of borehole segment, float; \
+        colour_info - colour information dict: { 'colour': (R,G,B,A) floats, \
+                                                 'classText': mineral name, \
+                                                 'className' : meas class } \
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
     bh_width = 10 # Width of stick
@@ -79,8 +79,8 @@ def line_gen(seg_arr, vrtx_arr, line_width, z_expand):
     :param vrtx_arr: vertex array, an array of VRTX objects
     :param line_width: line width, float
     :param z_expand: if true will expand width in z-direction, else x-direction
-    :returns point_cnt, vert_floats, indices: point_cnt - count of iterations;
-        vert_floats - list of (x,y,z) vertices, floats;
+    :returns point_cnt, vert_floats, indices: point_cnt - count of iterations; \
+        vert_floats - list of (x,y,z) vertices, floats; \
         indices - integer index pointers to which vertices are joined as triangles
     '''
     # Draw lines as a series of triangles
@@ -106,7 +106,7 @@ def cube_gen(x_val, y_val, z_val, geom_obj, pt_size):
     :param x,y,z: x,y,z index coordinates of cube, integers
     :param geom_obj: MODEL_GEOMETRY object, holds the volume geometry details
     :param pt_size: size of cube, three float tuple
-    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats;
+    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats; \
         indices - integer index pointers to which vertices are joined as triangles
     '''
     uvw = (geom_obj.vol_origin[0]+ float(x_val)/geom_obj.vol_sz[0]*abs(geom_obj.vol_axis_u[0]),
@@ -132,7 +132,7 @@ def pyramid_gen(vrtx, point_sz):
 
     :param vrtx: VRTX object, position of pyramid
     :param pt_size: size of pyramid, float
-    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats;
+    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats; \
         indices - integer index pointers to which vertices are joined as triangles
     '''
 
