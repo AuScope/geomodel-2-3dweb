@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.metadata package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="up" title="db package" href="db.html"/>
+        <link rel="next" title="db.style package" href="db.style.html"/>
+        <link rel="prev" title="db.geometry package" href="db.geometry.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="db.html">db package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="db.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="db.geometry.html">db.geometry package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">db.metadata package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.metadata.metadata">db.metadata.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.metadata">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="db.style.html">db.style package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db.db_tables">db.db_tables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="db.html">db package</a> &raquo;</li>
+        
+      <li>db.metadata package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/db.metadata.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="db-metadata-package">
+<h1>db.metadata package<a class="headerlink" href="#db-metadata-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-db.metadata.metadata">
+<span id="db-metadata-metadata-module"></span><h2>db.metadata.metadata module<a class="headerlink" href="#module-db.metadata.metadata" title="Permalink to this headline">¶</a></h2>
+<p>Contains the METADATA and MapFeat classes</p>
+<dl class="class">
+<dt id="db.metadata.metadata.METADATA">
+<em class="property">class </em><code class="descclassname">db.metadata.metadata.</code><code class="descname">METADATA</code><a class="reference internal" href="_modules/db/metadata/metadata.html#METADATA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.metadata.metadata.METADATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Storage for metadata attributes extracted from GOCAD that can be assigned directly
+to GeoSciML</p>
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA._property_name">
+<code class="descname">_property_name</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA._property_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Taken from ‘PROPERTY_CLASS_HEADER’ e.g. PROPERTY_CLASS_HEADER c1 {</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.metadata.metadata.METADATA.add_property_name">
+<code class="descname">add_property_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/metadata/metadata.html#METADATA.add_property_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.metadata.metadata.METADATA.add_property_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a property name
+:name: property name, string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.geoevent_numeric_age_range">
+<code class="descname">geoevent_numeric_age_range</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.geoevent_numeric_age_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copied from GOCAD “STRATIGRAPHIC_POSITION” (2nd val) to GeoSciML v4 GeologicEvent
+gsmlb:numericAgeRange</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.geofeat_name">
+<code class="descname">geofeat_name</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.geofeat_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copied from GOCAD “STRATIGRAPHIC_POSITION” (1st val) or from GOCAD “GEOLOGICAL_FEATURE”
+to GeoSciML v4 GeologicFeature::GeologicUnit gml:name or
+GeologicFeature::GeologicStructure::ShearDisplacementStructure gml:name or
+GeologicFeature::GeologicStructure::Contact gml:name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.metadata.metadata.METADATA.get_property_name">
+<code class="descname">get_property_name</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/metadata/metadata.html#METADATA.get_property_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.metadata.metadata.METADATA.get_property_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve property name
+:idx: index used when point in space has multiple properties, omit for volumes
+:returns: property name, string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.is_index_data">
+<code class="descname">is_index_data</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.is_index_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the volume data just point to a rock/colour table, or is it measurement data?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.label_list">
+<code class="descname">label_list</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.label_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dict of objects for adding labels when displaying objects
+Format: [ { ‘name’: ‘name of object’,
+‘position’: (x,y,z),
+‘metadata’: {dict of metadata in key,val} }, …  ]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.mapped_feat">
+<code class="descname">mapped_feat</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.mapped_feat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copied from GOCAD “GEOLOGICAL_TYPE” which can have values: top, intraformational,
+fault, unconformity, intrusive, topography, boundary, and ghost
+‘fault’ maps to “GeologicFeature::GeologicStructure::ShearDisplacementStructure”
+‘intrusive’ - many kinds of igneous formations, maps to ‘GeologicFeature::GeologicUnit’
+‘unconformity’ - (gaps in the geologic record within a stratigraphic unit) and
+‘intraformational’ and ‘boundary’ map to ‘GeologicFeature::GeologicStructure::Contact’
+‘top’, ‘topography’ maybe map to ‘MappedFeature’ fields</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.name">
+<code class="descname">name</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Taken from GOCAD object name ??</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.rock_label_table">
+<code class="descname">rock_label_table</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.rock_label_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table specifying names of rocks, key is an integer, value is the label</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.METADATA.src_filename">
+<code class="descname">src_filename</code><em class="property"> = None</em><a class="headerlink" href="#db.metadata.metadata.METADATA.src_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Volume data source file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.metadata.metadata.MapFeat">
+<em class="property">class </em><code class="descclassname">db.metadata.metadata.</code><code class="descname">MapFeat</code><a class="reference internal" href="_modules/db/metadata/metadata.html#MapFeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.metadata.metadata.MapFeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>Collection of values used to denote different kinds of ‘MappedFeature’ in GeoSciML</p>
+<dl class="attribute">
+<dt id="db.metadata.metadata.MapFeat.CONTACT">
+<code class="descname">CONTACT</code><em class="property"> = 4</em><a class="headerlink" href="#db.metadata.metadata.MapFeat.CONTACT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.MapFeat.GEOLOGICAL_UNIT">
+<code class="descname">GEOLOGICAL_UNIT</code><em class="property"> = 3</em><a class="headerlink" href="#db.metadata.metadata.MapFeat.GEOLOGICAL_UNIT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.MapFeat.SHEAR_DISP_STRUCT">
+<code class="descname">SHEAR_DISP_STRUCT</code><em class="property"> = 2</em><a class="headerlink" href="#db.metadata.metadata.MapFeat.SHEAR_DISP_STRUCT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.metadata.metadata.MapFeat.UNKNOWN">
+<code class="descname">UNKNOWN</code><em class="property"> = 1</em><a class="headerlink" href="#db.metadata.metadata.MapFeat.UNKNOWN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-db.metadata">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-db.metadata" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="db.style.html" class="btn btn-neutral float-right" title="db.style package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="db.geometry.html" class="btn btn-neutral" title="db.geometry package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

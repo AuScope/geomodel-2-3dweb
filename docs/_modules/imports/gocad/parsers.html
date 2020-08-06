@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad.parsers &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>imports.gocad.parsers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for imports.gocad.parsers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions that process fields in a single line of a GOCAD file</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="parse_property_header"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_property_header">[docs]</a><span class="k">def</span> <span class="nf">parse_property_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_obj</span><span class="p">,</span> <span class="n">line_str</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Parses the PROPERTY header, extracting the colour table info</span>
+<span class="sd">        and storing it in PROPS object</span>
+
+<span class="sd">    :params prop_obj: a PROPS object to store the data</span>
+<span class="sd">    :params line_str: current line</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># pylint: disable=W0612</span>
+    <span class="n">name_str</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> <span class="n">line_str</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">name_str</span> <span class="o">=</span> <span class="n">name_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">name_str</span> <span class="o">==</span> <span class="s1">&#39;*COLORMAP*SIZE&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;colourmap-size </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name_str</span> <span class="o">==</span> <span class="s1">&#39;*COLORMAP*NBCOLORS&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;numcolours </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name_str</span> <span class="o">==</span> <span class="s1">&#39;HIGH_CLIP&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;highclip </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name_str</span> <span class="o">==</span> <span class="s1">&#39;LOW_CLIP&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;lowclip </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+    <span class="c1"># Read in the name of the colour map for this property</span>
+    <span class="k">elif</span> <span class="n">name_str</span> <span class="o">==</span> <span class="s1">&#39;COLORMAP&#39;</span><span class="p">:</span>
+        <span class="n">prop_obj</span><span class="o">.</span><span class="n">colourmap_name</span> <span class="o">=</span> <span class="n">value_str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.colourmap_name = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">colourmap_name</span><span class="p">)</span>
+    <span class="c1"># Read in the colour map for this property, format is: idx1 R1 G1 B1 idx2 R2 G2 B2 ...</span>
+    <span class="k">elif</span> <span class="n">name_str</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;*COLORMAP*&#39;</span><span class="o">+</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">colourmap_name</span> <span class="o">+</span> <span class="s1">&#39;*COLORS&#39;</span><span class="p">,</span> \
+                      <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">colourmap_name</span> <span class="o">+</span> <span class="s1">&#39;*ROCK_COLORS&#39;</span><span class="p">,</span> \
+                      <span class="s1">&#39;COLORMAP**COLORS&#39;</span><span class="p">):</span>
+        <span class="n">lut_arr</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lut_arr</span><span class="p">),</span> <span class="mi">4</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">prop_obj</span><span class="o">.</span><span class="n">colour_map</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">lut_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lut_arr</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]),</span>
+                                                          <span class="nb">float</span><span class="p">(</span><span class="n">lut_arr</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">2</span><span class="p">]),</span>
+                                                          <span class="nb">float</span><span class="p">(</span><span class="n">lut_arr</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">3</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.colour_map = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">colour_map</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_props"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_props">[docs]</a><span class="k">def</span> <span class="nf">parse_props</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">coord_tup</span><span class="p">,</span> <span class="n">is_patom</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; This parses a line of properties associated with a PVTRX or PATOM line</span>
+
+<span class="sd">    :param field: array of strings representing line with properties</span>
+<span class="sd">    :param coord_tup: (X,Y,Z) float tuple of the coordinates</span>
+<span class="sd">    :param is_patom: optional, True if this is from a PATOM, default False</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">is_patom</span><span class="p">:</span>
+        <span class="c1"># For PATOM, properties start at the 4th column</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For PVRTX, properties start at the 6th column</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="c1"># Loop over each property in line</span>
+    <span class="k">for</span> <span class="n">prop_obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="c1"># Property has one float</span>
+        <span class="k">if</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">fp_str</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span>
+            <span class="c1"># Skip GOCAD control nodes e.g. &#39;CNXY&#39;, &#39;CNXYZ&#39;</span>
+            <span class="k">if</span> <span class="n">fp_str</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CN&#39;</span><span class="p">:</span>
+                <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">fp_str</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span>
+            <span class="n">converted</span><span class="p">,</span> <span class="n">fltp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">fp_str</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">converted</span><span class="p">:</span>
+                <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_xyz</span><span class="p">(</span><span class="n">coord_tup</span><span class="p">,</span> <span class="n">fltp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.data_xyz[</span><span class="si">%s</span><span class="s2">] = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">coord_tup</span><span class="p">),</span> <span class="n">fltp</span><span class="p">)</span>
+            <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Property has 3 floats i.e. XYZ</span>
+        <span class="k">elif</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">fp_str_x</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span>
+            <span class="c1"># Skip GOCAD control nodes e.g. &#39;CNXY&#39;, &#39;CNXYZ&#39;</span>
+            <span class="k">if</span> <span class="n">fp_str_x</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;CN&#39;</span><span class="p">:</span>
+                <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">fp_str_x</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span>
+            <span class="n">fp_str_y</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">fp_str_z</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">col_idx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">converted_x</span><span class="p">,</span> <span class="n">fp_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">fp_str_x</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+            <span class="n">converted_y</span><span class="p">,</span> <span class="n">fp_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">fp_str_y</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+            <span class="n">converted_z</span><span class="p">,</span> <span class="n">fp_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">fp_str_z</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">converted_z</span> <span class="ow">and</span> <span class="n">converted_y</span> <span class="ow">and</span> <span class="n">converted_x</span><span class="p">:</span>
+                <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_xyz</span><span class="p">(</span><span class="n">coord_tup</span><span class="p">,</span> <span class="p">(</span><span class="n">fp_x</span><span class="p">,</span> <span class="n">fp_y</span><span class="p">,</span> <span class="n">fp_z</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.data_xyz[</span><span class="si">%s</span><span class="s2">] = (</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">)&quot;</span><span class="p">,</span>
+                                  <span class="nb">repr</span><span class="p">(</span><span class="n">coord_tup</span><span class="p">),</span> <span class="n">fp_x</span><span class="p">,</span> <span class="n">fp_y</span><span class="p">,</span> <span class="n">fp_z</span><span class="p">)</span>
+            <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process property size of != 3 and !=1: </span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                              <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">prop_obj</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_float"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_float">[docs]</a><span class="k">def</span> <span class="nf">parse_float</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp_str</span><span class="p">,</span> <span class="n">null_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Converts a string to float, handles infinite values</span>
+
+<span class="sd">    :param fp_str: string to convert to a float</span>
+<span class="sd">    :param null_val: value representing &#39;no data&#39;</span>
+<span class="sd">    :returns: a boolean and a float</span>
+<span class="sd">        If could not convert then return (False, None)</span>
+<span class="sd">        else if &#39;null_val&#39; is defined return (False, null_val)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Handle GOCAD&#39;s C++ floating point infinity for Windows and Linux</span>
+    <span class="k">if</span> <span class="n">fp_str</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;1.#INF&quot;</span><span class="p">,</span> <span class="s2">&quot;INF&quot;</span><span class="p">]:</span>
+        <span class="n">fltp</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+    <span class="k">elif</span> <span class="n">fp_str</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;-1.#INF&quot;</span><span class="p">,</span> <span class="s2">&quot;-INF&quot;</span><span class="p">]:</span>
+        <span class="n">fltp</span> <span class="o">=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fltp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fp_str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">null_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fltp</span> <span class="o">==</span> <span class="n">null_val</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">null_val</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fltp</span></div>
+
+
+<div class="viewcode-block" id="parse_int"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_int">[docs]</a><span class="k">def</span> <span class="nf">parse_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">int_str</span><span class="p">,</span> <span class="n">null_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Converts a string to an int</span>
+
+<span class="sd">    :param int_str: string to convert to int</span>
+<span class="sd">    :param null_val: value representing &#39;no data&#39;</span>
+<span class="sd">    :returns: a boolean and an integer</span>
+<span class="sd">        If could not convert then return (False, None)</span>
+<span class="sd">        else if &#39;null_val&#39; is defined return (False, null_val)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">int_str</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">null_val</span>
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">num</span></div>
+
+
+<div class="viewcode-block" id="parse_xyz"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_xyz">[docs]</a><span class="k">def</span> <span class="nf">parse_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">,</span> <span class="n">y_str</span><span class="p">,</span> <span class="n">z_str</span><span class="p">,</span> <span class="n">do_minmax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Helpful function to read XYZ cooordinates</span>
+
+<span class="sd">    :param is_float: if true parse x y z as floats else try integers</span>
+<span class="sd">    :param x_str, y_str, z_str: X,Y,Z coordinates in string form</span>
+<span class="sd">    :param do_minmax: calculate min/max of the X,Y,Z coords</span>
+<span class="sd">    :param convert: convert from kms to metres if necessary</span>
+<span class="sd">    :returns: returns tuple of four parameters: success - true if could convert</span>
+<span class="sd">        the strings to floats/ints</span>
+<span class="sd">        x,y,z - floating point values, converted to metres if units are kms</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">x_val</span> <span class="o">=</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">z_val</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">is_float</span><span class="p">:</span>
+        <span class="n">converted1</span><span class="p">,</span> <span class="n">x_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">x_str</span><span class="p">)</span>
+        <span class="n">converted2</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">y_str</span><span class="p">)</span>
+        <span class="n">converted3</span><span class="p">,</span> <span class="n">z_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">z_str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">converted1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">converted2</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">converted3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">x_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x_str</span><span class="p">)</span>
+            <span class="n">y_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">y_str</span><span class="p">)</span>
+            <span class="n">z_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">z_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="c1"># Convert to metres if units are kms</span>
+    <span class="k">if</span> <span class="n">convert</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">x_val</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_val</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_mult</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">z_val</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xyz_mult</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Calculate and store minimum and maximum XYZ</span>
+    <span class="k">if</span> <span class="n">do_minmax</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">calc_minmax</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">)</span>
+        <span class="n">x_val</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_val</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">z_val</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span></div>
+
+
+
+<div class="viewcode-block" id="parse_colour"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_colour">[docs]</a><span class="k">def</span> <span class="nf">parse_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour_str</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Parse a colour string into RGBA tuple.</span>
+
+<span class="sd">    :param colour_str: colour can either be spaced RGBA/RGB floats, or &#39;#&#39; + 6 digit hex string</span>
+<span class="sd">    :returns: a tuple with 4 floats, (R,G,B,A)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">rgba_tup</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">colour_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;#&#39;</span><span class="p">:</span>
+            <span class="n">rgbsplit_arr</span> <span class="o">=</span> <span class="n">colour_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">rgba_tup</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">rgba_tup</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">rgbsplit_arr</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Could not parse colour </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colour_str</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rgba_tup</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">colour_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">))</span><span class="o">/</span><span class="mf">255.0</span><span class="p">,</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">colour_str</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">16</span><span class="p">))</span><span class="o">/</span><span class="mf">255.0</span><span class="p">,</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">colour_str</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">],</span> <span class="mi">16</span><span class="p">))</span><span class="o">/</span><span class="mf">255.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+        <span class="n">rgba_tup</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rgba_tup</span></div>
+
+
+<div class="viewcode-block" id="parse_axis_unit"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.parse_axis_unit">[docs]</a><span class="k">def</span> <span class="nf">parse_axis_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Processes the AXIS_UNIT keyword</span>
+<span class="sd">    :param field: array of field strings</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="n">unit_str</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unit_str</span> <span class="o">==</span> <span class="s1">&#39;KM&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xyz_mult</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1000.0</span>
+        <span class="c1"># Warn if not metres or kilometres or unitless etc.</span>
+        <span class="k">elif</span> <span class="n">unit_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;UNITLESS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;NONE&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;WARNING - nonstandard units in &#39;AXIS_UNIT&#39; </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                <span class="n">field</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xyz_unit</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit_str</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

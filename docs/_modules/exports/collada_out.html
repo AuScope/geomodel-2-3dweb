@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.collada_out &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.collada_out</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.collada_out</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the ColladaOut class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">collada</span> <span class="k">as</span> <span class="nn">Collada</span>
+<span class="kn">from</span> <span class="nn">lib.exports.geometry_gen</span> <span class="kn">import</span> <span class="n">colour_borehole_gen</span><span class="p">,</span> <span class="n">line_gen</span><span class="p">,</span> <span class="n">pyramid_gen</span><span class="p">,</span> <span class="n">cube_gen</span>
+
+<div class="viewcode-block" id="ColladaOut"><a class="viewcode-back" href="../../exports.html#exports.collada_out.ColladaOut">[docs]</a><span class="k">class</span> <span class="nc">ColladaOut</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Class to output specific geometries as pycollada objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level, using python&#39;s &#39;logger&#39; class</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Set up logging, use an attribute of class name so it is only called once</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ColladaOut</span><span class="p">,</span> <span class="s1">&#39;logger&#39;</span><span class="p">):</span>
+            <span class="n">ColladaOut</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="c1"># Create console handler</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+            <span class="c1"># Create formatter</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add formatter to ch</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+            <span class="c1"># Add handler to logger and set level</span>
+            <span class="n">ColladaOut</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="n">ColladaOut</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">debug_level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">ColladaOut</span><span class="o">.</span><span class="n">logger</span>
+
+
+<div class="viewcode-block" id="ColladaOut.make_cube"><a class="viewcode-back" href="../../exports.html#exports.collada_out.ColladaOut.make_cube">[docs]</a>    <span class="k">def</span> <span class="nf">make_cube</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">pt_size</span><span class="p">,</span>
+                  <span class="n">geometry_name</span><span class="p">,</span> <span class="n">file_cnt</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a cube using pycollada objects</span>
+
+<span class="sd">        :param mesh: pycollada &#39;Collada&#39; object</span>
+<span class="sd">        :param colour_num: index value for colour table</span>
+<span class="sd">        :param x,y,z: integer xyz coords in volume</span>
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object</span>
+<span class="sd">        :param pt_size: size of cube, float</span>
+<span class="sd">        :param geometry_name: generic label for all cubes</span>
+<span class="sd">        :param file_cnt: file counter</span>
+<span class="sd">        :param point_cnt: cube counter within this file</span>
+<span class="sd">        :param geomnode_list: pycollada &#39;GeometryNode&#39; list</span>
+<span class="sd">        :returns: the geometry label of this cube</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#self.logger.debug(&quot;collada_cube(mesh=%s, colour_num=%s, x,y,z=%s, v_obj=%s,</span>
+        <span class="c1"># pt_size=%s, geometry_name=%s, file_cnt=%s, point_cnt=%s)&quot;,</span>
+        <span class="c1"># repr(mesh), repr(colour_num), repr((x,y,z)), repr(v_obj), repr(pt_size),</span>
+        <span class="c1"># repr(geometry_name), repr(file_cnt), repr(point_cnt))</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">cube_gen</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">pt_size</span><span class="p">)</span>
+        <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+        <span class="n">vert_src</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">FloatSource</span><span class="p">(</span><span class="s2">&quot;cubeverts-array-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                              <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vert_floats</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">))</span>
+        <span class="n">geom_label</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">-</span><span class="si">{2:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">,</span> <span class="n">file_cnt</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;geometry</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                         <span class="n">geom_label</span><span class="p">,</span> <span class="p">[</span><span class="n">vert_src</span><span class="p">])</span>
+        <span class="n">input_list</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">InputList</span><span class="p">()</span>
+        <span class="n">input_list</span><span class="o">.</span><span class="n">addInput</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;VERTEX&#39;</span><span class="p">,</span> <span class="s2">&quot;#cubeverts-array-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">))</span>
+
+        <span class="n">material_label</span> <span class="o">=</span> <span class="s2">&quot;materialref-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_num</span><span class="p">)</span>
+        <span class="c1"># Triangles seem to be more efficient than polygons</span>
+        <span class="n">triset</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">createTriangleSet</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="n">input_list</span><span class="p">,</span> <span class="n">material_label</span><span class="p">)</span>
+        <span class="n">geom</span><span class="o">.</span><span class="n">primitives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triset</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="n">matnode</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">MaterialNode</span><span class="p">(</span><span class="n">material_label</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="n">colour_num</span><span class="p">],</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">geomnode_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">GeometryNode</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="p">[</span><span class="n">matnode</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">geom_label</span></div>
+
+
+<div class="viewcode-block" id="ColladaOut.make_pyramid"><a class="viewcode-back" href="../../exports.html#exports.collada_out.ColladaOut.make_pyramid">[docs]</a>    <span class="k">def</span> <span class="nf">make_pyramid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">,</span> <span class="n">vrtx</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">,</span>
+                     <span class="n">point_sz</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a pyramid using pycollada objects</span>
+
+<span class="sd">        :param mesh: pycollada &#39;Collada&#39; object</span>
+<span class="sd">        :param geometry_name: generic label for all pyramids</span>
+<span class="sd">        :param geomnode_list: list of pycollada &#39;GeometryNode&#39; objects</span>
+<span class="sd">        :param vrtx: VTRX object</span>
+<span class="sd">        :param point_cnt: pyramid counter within this file</span>
+<span class="sd">        :param point_sz: size of pyramid</span>
+<span class="sd">        :param colour_num: integer index into mesh materials, determines colour of pyramid</span>
+<span class="sd">        :returns: the pyramid&#39;s geometry label</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get pyramid geometry</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">pyramid_gen</span><span class="p">(</span><span class="n">vrtx</span><span class="p">,</span> <span class="n">point_sz</span><span class="p">)</span>
+        <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+
+        <span class="n">input_list</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">InputList</span><span class="p">()</span>
+        <span class="n">input_list</span><span class="o">.</span><span class="n">addInput</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;VERTEX&#39;</span><span class="p">,</span> <span class="s2">&quot;#pointverts-array-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">))</span>
+        <span class="n">vert_src_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">FloatSource</span><span class="p">(</span><span class="s2">&quot;pointverts-array-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                                    <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vert_floats</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">))]</span>
+        <span class="n">geom_label</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">-</span><span class="si">{1:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;geometry</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                         <span class="n">geom_label</span><span class="p">,</span> <span class="n">vert_src_list</span><span class="p">)</span>
+        <span class="n">triset_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom</span><span class="o">.</span><span class="n">createTriangleSet</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="n">input_list</span><span class="p">,</span>
+                                              <span class="s2">&quot;materialref-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_num</span><span class="p">))]</span>
+        <span class="n">geom</span><span class="o">.</span><span class="n">primitives</span> <span class="o">=</span> <span class="n">triset_list</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="n">matnode_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">MaterialNode</span><span class="p">(</span><span class="s2">&quot;materialref-</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_num</span><span class="p">),</span>
+                                                   <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="n">colour_num</span><span class="p">],</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[])]</span>
+        <span class="n">geomnode_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">GeometryNode</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">matnode_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">geom_label</span></div>
+
+
+<div class="viewcode-block" id="ColladaOut.make_line"><a class="viewcode-back" href="../../exports.html#exports.collada_out.ColladaOut.make_line">[docs]</a>    <span class="k">def</span> <span class="nf">make_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">,</span> <span class="n">seg_arr</span><span class="p">,</span> <span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">obj_cnt</span><span class="p">,</span> <span class="n">line_width</span><span class="p">,</span> <span class="n">z_expand</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a line using pycollada objects</span>
+
+<span class="sd">            :param mesh: pycollada &#39;Collada&#39; object</span>
+<span class="sd">            :param geometry_name: generic label for all cubes</span>
+<span class="sd">            :param geomnode_list: list of pycollada &#39;GeometryNode&#39; objects</span>
+<span class="sd">            :param seg_arr: array of SEG objects, defines line segments</span>
+<span class="sd">            :param vrtx_arr: array of VRTX objects, all points along line</span>
+<span class="sd">            :param obj_cnt: object counter within this file (an object may contain many lines)</span>
+<span class="sd">            :param line_width: line width, float</span>
+<span class="sd">            :param z_expand: is true if line width is drawn in z-direction else x-direction</span>
+<span class="sd">            :returns: the line&#39;s geometry label</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">matnode</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">MaterialNode</span><span class="p">(</span><span class="s2">&quot;materialref-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                             <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">geom_label_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span> <span class="ow">in</span> <span class="n">line_gen</span><span class="p">(</span><span class="n">seg_arr</span><span class="p">,</span> <span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">line_width</span><span class="p">,</span> <span class="n">z_expand</span><span class="p">):</span>
+
+            <span class="n">vert_src</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">FloatSource</span><span class="p">(</span>
+                <span class="s2">&quot;lineverts-array-</span><span class="si">{0:010d}</span><span class="s2">-</span><span class="si">{1:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">,</span> <span class="n">obj_cnt</span><span class="p">),</span>
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vert_floats</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">))</span>
+            <span class="n">geom_label</span> <span class="o">=</span> <span class="s2">&quot;line-</span><span class="si">{0}</span><span class="s2">-</span><span class="si">{1:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">)</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span>
+                                             <span class="s2">&quot;geometry</span><span class="si">{0:010d}</span><span class="s2">-</span><span class="si">{1:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">,</span> <span class="n">obj_cnt</span><span class="p">),</span>
+                                             <span class="n">geom_label</span><span class="p">,</span> <span class="p">[</span><span class="n">vert_src</span><span class="p">])</span>
+
+            <span class="n">input_list</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">InputList</span><span class="p">()</span>
+            <span class="n">input_list</span><span class="o">.</span><span class="n">addInput</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;VERTEX&#39;</span><span class="p">,</span>
+                                <span class="s2">&quot;#lineverts-array-</span><span class="si">{0:010d}</span><span class="s2">-</span><span class="si">{1:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">,</span> <span class="n">obj_cnt</span><span class="p">))</span>
+
+            <span class="n">triset</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">createTriangleSet</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span>
+                                            <span class="n">input_list</span><span class="p">,</span> <span class="s2">&quot;materialref-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">obj_cnt</span><span class="p">))</span>
+            <span class="n">geom</span><span class="o">.</span><span class="n">primitives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triset</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+            <span class="n">geomnode_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">GeometryNode</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="p">[</span><span class="n">matnode</span><span class="p">]))</span>
+
+            <span class="n">geom_label_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom_label</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">geom_label_list</span></div>
+
+
+<div class="viewcode-block" id="ColladaOut.make_colour_borehole_marker"><a class="viewcode-back" href="../../exports.html#exports.collada_out.ColladaOut.make_colour_borehole_marker">[docs]</a>    <span class="k">def</span> <span class="nf">make_colour_borehole_marker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">borehole_label</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">,</span>
+                                    <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">ht_resol</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a borehole marker stick with triangular cross section using pycollada objects</span>
+
+<span class="sd">        :param mesh: pycollada &#39;Collada&#39; object</span>
+<span class="sd">        :param pos: x,y,z position of collar of borehole</span>
+<span class="sd">        :param borehole_label: geometry label for this borehole stick</span>
+<span class="sd">        :param geomnode_list: list of pycollada &#39;GeometryNode&#39; objects</span>
+<span class="sd">        :param colour_info_dict: dict of: key = height, float; value = { &#39;colour&#39;: (R,G,B,A),</span>
+<span class="sd">                                                                         &#39;classText&#39;: label }</span>
+<span class="sd">        :param ht_reso: height resolution</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cb_gen</span> <span class="o">=</span> <span class="n">colour_borehole_gen</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;borehole-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">borehole_label</span><span class="p">),</span>
+                                     <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">ht_resol</span><span class="p">)</span>
+        <span class="c1"># pylint:disable=W0612</span>
+        <span class="k">for</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">colour_idx</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">colour_info</span><span class="p">,</span> <span class="n">mesh_name</span> <span class="ow">in</span> <span class="n">cb_gen</span><span class="p">:</span>
+            <span class="n">vert_src</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">FloatSource</span><span class="p">(</span><span class="s2">&quot;pointverts-array-0&quot;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vert_list</span><span class="p">),</span>
+                                                  <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">))</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">&quot;geometry_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)),</span>
+                                             <span class="n">mesh_name</span><span class="p">,</span> <span class="p">[</span><span class="n">vert_src</span><span class="p">])</span>
+            <span class="n">input_list</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">InputList</span><span class="p">()</span>
+            <span class="n">input_list</span><span class="o">.</span><span class="n">addInput</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;VERTEX&#39;</span><span class="p">,</span> <span class="s2">&quot;#pointverts-array-0&quot;</span><span class="p">)</span>
+
+            <span class="n">triset</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">createTriangleSet</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="n">input_list</span><span class="p">,</span>
+                                            <span class="s2">&quot;materialref-</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)))</span>
+            <span class="n">geom</span><span class="o">.</span><span class="n">primitives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triset</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+
+            <span class="n">matnode</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">MaterialNode</span><span class="p">(</span><span class="s2">&quot;materialref-</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)),</span>
+                                                 <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="p">[</span><span class="n">colour_idx</span><span class="p">],</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[])</span>
+            <span class="n">geomnode_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">GeometryNode</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="p">[</span><span class="n">matnode</span><span class="p">]))</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.metadata.metadata &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>db.metadata.metadata</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for db.metadata.metadata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the METADATA and MapFeat classes</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<div class="viewcode-block" id="MapFeat"><a class="viewcode-back" href="../../../db.metadata.html#db.metadata.metadata.MapFeat">[docs]</a><span class="k">class</span> <span class="nc">MapFeat</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collection of values used to denote different kinds of &#39;MappedFeature&#39; in GeoSciML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SHEAR_DISP_STRUCT</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">GEOLOGICAL_UNIT</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">CONTACT</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="METADATA"><a class="viewcode-back" href="../../../db.metadata.html#db.metadata.metadata.METADATA">[docs]</a><span class="k">class</span> <span class="nc">METADATA</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Storage for metadata attributes extracted from GOCAD that can be assigned directly</span>
+<span class="sd">        to GeoSciML</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; Taken from GOCAD object name ??</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_property_name</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Taken from &#39;PROPERTY_CLASS_HEADER&#39; e.g. PROPERTY_CLASS_HEADER c1 {</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_index_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; Does the volume data just point to a rock/colour table, or is it measurement data?</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_table</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Table specifying names of rocks, key is an integer, value is the label</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Dict of objects for adding labels when displaying objects</span>
+<span class="sd">            Format: [ { &#39;name&#39;: &#39;name of object&#39;,</span>
+<span class="sd">            &#39;position&#39;: (x,y,z),</span>
+<span class="sd">            &#39;metadata&#39;: {dict of metadata in key,val} }, ...  ]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">src_filename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; Volume data source file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">geofeat_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; Copied from GOCAD &quot;STRATIGRAPHIC_POSITION&quot; (1st val) or from GOCAD &quot;GEOLOGICAL_FEATURE&quot;</span>
+<span class="sd">            to GeoSciML v4 GeologicFeature::GeologicUnit gml:name or</span>
+<span class="sd">            GeologicFeature::GeologicStructure::ShearDisplacementStructure gml:name or</span>
+<span class="sd">            GeologicFeature::GeologicStructure::Contact gml:name</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">geoevent_numeric_age_range</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Copied from GOCAD &quot;STRATIGRAPHIC_POSITION&quot; (2nd val) to GeoSciML v4 GeologicEvent</span>
+<span class="sd">            gsmlb:numericAgeRange</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapped_feat</span> <span class="o">=</span> <span class="n">MapFeat</span><span class="o">.</span><span class="n">UNKNOWN</span>
+        <span class="sd">&#39;&#39;&#39; Copied from GOCAD &quot;GEOLOGICAL_TYPE&quot; which can have values: top, intraformational,</span>
+<span class="sd">           fault, unconformity, intrusive, topography, boundary, and ghost</span>
+<span class="sd">           &#39;fault&#39; maps to &quot;GeologicFeature::GeologicStructure::ShearDisplacementStructure&quot;</span>
+<span class="sd">           &#39;intrusive&#39; - many kinds of igneous formations, maps to &#39;GeologicFeature::GeologicUnit&#39;</span>
+<span class="sd">           &#39;unconformity&#39; - (gaps in the geologic record within a stratigraphic unit) and</span>
+<span class="sd">           &#39;intraformational&#39; and &#39;boundary&#39; map to &#39;GeologicFeature::GeologicStructure::Contact&#39;</span>
+<span class="sd">           &#39;top&#39;, &#39;topography&#39; maybe map to &#39;MappedFeature&#39; fields</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; A basic print friendly representation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;METADATA():&#39;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;__&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)):</span>
+                <span class="n">ret_str</span> <span class="o">+=</span> <span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">))[:</span><span class="mi">200</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret_str</span>
+
+<div class="viewcode-block" id="METADATA.add_property_name"><a class="viewcode-back" href="../../../db.metadata.html#db.metadata.metadata.METADATA.add_property_name">[docs]</a>    <span class="k">def</span> <span class="nf">add_property_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a property name</span>
+<span class="sd">        :name: property name, string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_property_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="METADATA.get_property_name"><a class="viewcode-back" href="../../../db.metadata.html#db.metadata.metadata.METADATA.get_property_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_property_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retrieve property name</span>
+<span class="sd">        :idx: index used when point in space has multiple properties, omit for volumes</span>
+<span class="sd">        :returns: property name, string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_property_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_property_name</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

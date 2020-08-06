@@ -1,0 +1,1757 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="up" title="imports package" href="imports.html"/>
+        <link rel="prev" title="imports package" href="imports.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="imports.html">imports package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="imports.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">imports.gocad package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.gocad_filestr_types">imports.gocad.gocad_filestr_types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.gocad_importer">imports.gocad.gocad_importer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.helpers">imports.gocad.helpers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.parsers">imports.gocad.parsers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.processors">imports.gocad.processors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.props">imports.gocad.props module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad.volumes">imports.gocad.volumes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-imports.gocad">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="imports.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="imports.html#module-imports.data_str_types">imports.data_str_types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="imports.html#module-imports">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="imports.html">imports package</a> &raquo;</li>
+        
+      <li>imports.gocad package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/imports.gocad.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="imports-gocad-package">
+<h1>imports.gocad package<a class="headerlink" href="#imports-gocad-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-imports.gocad.gocad_filestr_types">
+<span id="imports-gocad-gocad-filestr-types-module"></span><h2>imports.gocad.gocad_filestr_types module<a class="headerlink" href="#module-imports.gocad.gocad_filestr_types" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap">
+<em class="property">class </em><code class="descclassname">imports.gocad.gocad_filestr_types.</code><code class="descname">GocadFileDataStrMap</code><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lib.imports.data_str_types.FileDataStructMap</span></code></p>
+<dl class="attribute">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.GOCAD_HEADERS">
+<code class="descname">GOCAD_HEADERS</code><em class="property"> = {'GP': ['GOCAD HETEROGENEOUSGROUP 1', 'GOCAD HOMOGENEOUSGROUP 1'], 'PL': ['GOCAD PLINE 1'], 'SG': ['GOCAD SGRID 1'], 'TS': ['GOCAD TSURF 1'], 'VO': ['GOCAD VOXET 1'], 'VS': ['GOCAD VSET 1'], 'WL': ['GOCAD WELL 1']}</em><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.GOCAD_HEADERS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant assigns possible headers to each filename extension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap._GocadFileDataStrMap__get_ext">
+<code class="descname">_GocadFileDataStrMap__get_ext</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap._GocadFileDataStrMap__get_ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_borehole">
+<code class="descname">is_borehole</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap.is_borehole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_borehole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to recognise a borehole file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_str</strong> – filename (including path) of GOCAD object file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this file contains a borehole data structure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_flat_shape">
+<code class="descname">is_flat_shape</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap.is_flat_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_flat_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to recognise a flat shape file e.g. triangles, planes in 3d</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_str</strong> – filename (including path) of GOCAD object file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this file contains a flat shape data structure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_mixture">
+<code class="descname">is_mixture</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap.is_mixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_mixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to recognise a file with a mixture of data structures</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_str</strong> – filename (including path) of GOCAD object file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this file contains a mixture of data structures</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_points">
+<code class="descname">is_points</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap.is_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to recognise a points file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_str</strong> – filename (including path) of GOCAD object file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this file contains a points data structure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_volume">
+<code class="descname">is_volume</code><span class="sig-paren">(</span><em>filename_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_filestr_types.html#GocadFileDataStrMap.is_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_filestr_types.GocadFileDataStrMap.is_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Routine to recognise a volume file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_str</strong> – filename (including path) of GOCAD object file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if this file contains a volume data structure</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.gocad_importer">
+<span id="imports-gocad-gocad-importer-module"></span><h2>imports.gocad.gocad_importer module<a class="headerlink" href="#module-imports.gocad.gocad_importer" title="Permalink to this headline">¶</a></h2>
+<p>This contains the GocadImporter class, which is the main class used for parsing
+GOCAD object files. It also contains other functions for parsing GOCAD group files.</p>
+<dl class="class">
+<dt id="imports.gocad.gocad_importer.GocadImporter">
+<em class="property">class </em><code class="descclassname">imports.gocad.gocad_importer.</code><code class="descname">GocadImporter</code><span class="sig-paren">(</span><em>debug_level</em>, <em>base_xyz=(0.0</em>, <em>0.0</em>, <em>0.0)</em>, <em>group_name=''</em>, <em>nondefault_coords=False</em>, <em>stop_on_exc=True</em>, <em>ct_file_dict={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_importer.html#GocadImporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class used to read GOCAD files and store their details</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>debug_level</strong> – debug level taken from ‘logging’ module e.g. logging.DEBUG</li>
+<li><strong>base_xyz</strong> – optional (x,y,z) floating point tuple, base_xyz is added to all coordinates
+before they are output, default is (0.0, 0.0, 0.0)</li>
+<li><strong>group_name</strong> – optional string, name of group if this gocad file is within a group,
+default is “”</li>
+<li><strong>nondefault_coords</strong> – optional flag, supports non-default coordinates, default is False</li>
+<li><strong>ct_file_dict</strong> – a dictionary of files which contain a tuple: (filename of CSV colour table,
+list of values to be rendered transparent) key is GOCAD filename</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.COORD_OFFSETS">
+<code class="descname">COORD_OFFSETS</code><em class="property"> = {'FROM_SHAPE': (535100.0, 0.0, 0.0)}</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.COORD_OFFSETS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinate offsets, when file contains a coordinate system  that is not “DEFAULT”
+The named coordinate system and (X,Y,Z) offset will apply</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.SKIP_FLAGS_FILE">
+<code class="descname">SKIP_FLAGS_FILE</code><em class="property"> = True</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.SKIP_FLAGS_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Don’t read flags file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.SUPPORTED_EXTS">
+<code class="descname">SUPPORTED_EXTS</code><em class="property"> = ['TS', 'VS', 'PL', 'GP', 'VO', 'WL', 'SG']</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.SUPPORTED_EXTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of file extensions to search for</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.WELL_LINE_WIDTH">
+<code class="descname">WELL_LINE_WIDTH</code><em class="property"> = 10</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.WELL_LINE_WIDTH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line width for drawing wells</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_geometry">
+<code class="descname">_GocadImporter__init_geometry</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>local_prop_idx_list=None</em>, <em>prop_idx=None</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert GocadImporter to MODEL_GEOMETRY version</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object where GocadImporter data is placed</li>
+<li><strong>local_prop_idx_list</strong> – optional, if set, then will place multiple                                     local property data values in object</li>
+<li><strong>prop_idx</strong> – optional, if set, then will place property data in object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_metadata">
+<code class="descname">_GocadImporter__init_metadata</code><span class="sig-paren">(</span><em>meta_obj</em>, <em>local_prop_idx_list=None</em>, <em>prop_idx=None</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract metadata from GocadImporter and place in metadata object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>meta_obj</strong> – metadata object which will hold data from GocadImporter object</li>
+<li><strong>local_prop_idx_list</strong> – optional, if set, then will place multiple                                     local property data values in object</li>
+<li><strong>prop_idx</strong> – optional, if set, then will place property data in object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_style">
+<code class="descname">_GocadImporter__init_style</code><span class="sig-paren">(</span><em>style_obj</em>, <em>local_prop_idx_list=None</em>, <em>prop_idx=None</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._GocadImporter__init_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract style data from GocadImporter and place in style object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>style_obj</strong> – style object which will hold data taken from GocadImporter object</li>
+<li><strong>local_prop_idx_list</strong> – optional, if set, then will place multiple local                property data values in object</li>
+<li><strong>prop_idx</strong> – optional, if set, then will place property data in object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter._GocadImporter__make_vertex_dict">
+<code class="descname">_GocadImporter__make_vertex_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._GocadImporter__make_vertex_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a dictionary to associate vertex insertion order with vertex sequence number
+Ordinarily the vertex sequence number is the same as the insertion order in the vertex
+array, but some GOCAD files have missing vertices etc.
+The first element starts at ‘1’</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter._GocadImporter__set_type">
+<code class="descname">_GocadImporter__set_type</code><span class="sig-paren">(</span><em>file_ext</em>, <em>first_line_str</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._GocadImporter__set_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the type of GOCAD file: TSURF, VOXEL, PLINE etc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fileExt</strong> – the file extension</li>
+<li><strong>firstLineStr</strong> – first line in the file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns True if it could determine the type of file             Will return False when given the header of a GOCAD group file, since             cannot create a vessel object from the group file itself, only from the group members</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._atom_arr">
+<code class="descname">_atom_arr</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._atom_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘ATOM’ used to store atom data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_pl">
+<code class="descname">_is_pl</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_pl" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD PLINE file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_sg">
+<code class="descname">_is_sg</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_sg" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD SGRID file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_ts">
+<code class="descname">_is_ts</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD TSURF file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_vo">
+<code class="descname">_is_vo</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_vo" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD VOXET file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_vs">
+<code class="descname">_is_vs</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_vs" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD VSET file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._is_wl">
+<code class="descname">_is_wl</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._is_wl" title="Permalink to this definition">¶</a></dt>
+<dd><p>True iff it is a GOCAD WELL file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._seg_arr">
+<code class="descname">_seg_arr</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._seg_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘SEG’ used to store line segment data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._trgl_arr">
+<code class="descname">_trgl_arr</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._trgl_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘TRGL’ used store triangle face data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter._vrtx_arr">
+<code class="descname">_vrtx_arr</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter._vrtx_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘VRTX’ used to store vertex data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_max">
+<code class="descname">axis_max</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>3 dimensional maximum point of voxet volume</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_min">
+<code class="descname">axis_min</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>3 dimensional minimum point of voxet volume</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_o">
+<code class="descname">axis_o</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Volume’s origin (X,Y,Z)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_u">
+<code class="descname">axis_u</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>U-axis volume vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_v">
+<code class="descname">axis_v</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_v" title="Permalink to this definition">¶</a></dt>
+<dd><p>V-axis volume vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.axis_w">
+<code class="descname">axis_w</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.axis_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>W-axis volume vector</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.calc_sg_xyz">
+<code class="descname">calc_sg_xyz</code><span class="sig-paren">(</span><em>x_idx</em>, <em>y_idx</em>, <em>z_idx</em>, <em>fp_arr</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.calc_sg_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGRID has coordinates in points file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.calc_vo_xyz">
+<code class="descname">calc_vo_xyz</code><span class="sig-paren">(</span><em>x_idx</em>, <em>y_idx</em>, <em>z_idx</em>, <em>mult</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.calc_vo_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the XYZ coords and their maxs &amp; mins</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.coord_sys_name">
+<code class="descname">coord_sys_name</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.coord_sys_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the GOCAD coordinate system</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.ct_file_dict">
+<code class="descname">ct_file_dict</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.ct_file_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of files which contain colour tables
+key is GOCAD filename, val is CSV file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_array_length">
+<code class="descname">flags_array_length</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_array_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of flags file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_bit_length">
+<code class="descname">flags_bit_length</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_bit_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of bit in use in flags file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_bit_size">
+<code class="descname">flags_bit_size</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_bit_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size (number of bytes) of each element in flags file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_file">
+<code class="descname">flags_file</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of flags file associated with voxel file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_offset">
+<code class="descname">flags_offset</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset within the flags file  where data starts</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.flags_prop">
+<code class="descname">flags_prop</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.flags_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>PROPS object used for the voxet flags file which has region data in
+it and for SGRID files</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.gsm_list">
+<code class="descname">gsm_list</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.gsm_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of (ModelGeometries, STYLE, METADATA)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.handle_exc">
+<code class="descname">handle_exc</code><span class="sig-paren">(</span><em>exc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_importer.html#GocadImporter.handle_exc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.handle_exc" title="Permalink to this definition">¶</a></dt>
+<dd><p>If stop_on_exc is set or debug is on, print details of exception and stop</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>exc</strong> – exception</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.header_name">
+<code class="descname">header_name</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.header_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contents of the name field in the header</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.invert_zaxis">
+<code class="descname">invert_zaxis</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.invert_zaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set to true if z-axis inversion is turned on in this GOCAD file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.local_props">
+<code class="descname">local_props</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.local_props" title="Permalink to this definition">¶</a></dt>
+<dd><p>OrderedDict of PROPS objects for attached PVRTX and PATOM properties</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.meta_obj">
+<code class="descname">meta_obj</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.meta_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seed copies of ModelGeometries, STYLE, METADATA for data gathering purposes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.np_filename">
+<code class="descname">np_filename</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.np_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filename of GOCAD file without path or extension</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_axis_unit">
+<code class="descname">parse_axis_unit</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_axis_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the AXIS_UNIT keyword
+:param field: array of field strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_colour">
+<code class="descname">parse_colour</code><span class="sig-paren">(</span><em>colour_str</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a colour string into RGBA tuple.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>colour_str</strong> – colour can either be spaced RGBA/RGB floats, or ‘#’ + 6 digit hex string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple with 4 floats, (R,G,B,A)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_float">
+<code class="descname">parse_float</code><span class="sig-paren">(</span><em>fp_str</em>, <em>null_val=None</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string to float, handles infinite values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fp_str</strong> – string to convert to a float</li>
+<li><strong>null_val</strong> – value representing ‘no data’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean and a float
+If could not convert then return (False, None)
+else if ‘null_val’ is defined return (False, null_val)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_int">
+<code class="descname">parse_int</code><span class="sig-paren">(</span><em>int_str</em>, <em>null_val=None</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string to an int</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>int_str</strong> – string to convert to int</li>
+<li><strong>null_val</strong> – value representing ‘no data’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean and an integer
+If could not convert then return (False, None)
+else if ‘null_val’ is defined return (False, null_val)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_property_header">
+<code class="descname">parse_property_header</code><span class="sig-paren">(</span><em>prop_obj</em>, <em>line_str</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_property_header" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Parses the PROPERTY header, extracting the colour table info</dt>
+<dd>and storing it in PROPS object</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params prop_obj:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">a PROPS object to store the data</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params line_str:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">current line</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_props">
+<code class="descname">parse_props</code><span class="sig-paren">(</span><em>field</em>, <em>coord_tup</em>, <em>is_patom=False</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_props" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parses a line of properties associated with a PVTRX or PATOM line</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> – array of strings representing line with properties</li>
+<li><strong>coord_tup</strong> – (X,Y,Z) float tuple of the coordinates</li>
+<li><strong>is_patom</strong> – optional, True if this is from a PATOM, default False</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.parse_xyz">
+<code class="descname">parse_xyz</code><span class="sig-paren">(</span><em>is_float</em>, <em>x_str</em>, <em>y_str</em>, <em>z_str</em>, <em>do_minmax=False</em>, <em>convert=True</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.parse_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helpful function to read XYZ cooordinates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>is_float</strong> – if true parse x y z as floats else try integers</li>
+<li><strong>y_str</strong><strong>, </strong><strong>z_str</strong> (<em>x_str</em><em>,</em>) – X,Y,Z coordinates in string form</li>
+<li><strong>do_minmax</strong> – calculate min/max of the X,Y,Z coords</li>
+<li><strong>convert</strong> – convert from kms to metres if necessary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns tuple of four parameters: success - true if could convert
+the strings to floats/ints
+x,y,z - floating point values, converted to metres if units are kms</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.points_file">
+<code class="descname">points_file</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.points_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Points file (SGRID)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.points_offset">
+<code class="descname">points_offset</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.points_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset within points file (SGRID)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_ascii_well_path">
+<code class="descname">process_ascii_well_path</code><span class="sig-paren">(</span><em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_ascii_well_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process ascii well path header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line; well_path, list of              coordinates of well path; marker_list, list of markers</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_coord_hdr">
+<code class="descname">process_coord_hdr</code><span class="sig-paren">(</span><em>line_gen</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_coord_hdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process fields within coordinate header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line_gen</strong> – line generator</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">two booleans, the first is True iff reached end of sequence,               the second is True iff there is an unrecoverable error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_gocad">
+<code class="descname">process_gocad</code><span class="sig-paren">(</span><em>src_dir</em>, <em>filename_str</em>, <em>file_lines</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_importer.html#GocadImporter.process_gocad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_gocad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts details from gocad file. This should be called before other functions!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename_str</strong> – filename of gocad file</li>
+<li><strong>file_lines</strong> – array of strings of lines from gocad file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if could process file, and a list of (geometry, style, metadata) objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_header">
+<code class="descname">process_header</code><span class="sig-paren">(</span><em>line_gen</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process fields in the GOCAD header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line_gen</strong> – line generator</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a boolean, is True iff we are at last line</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_prop_class_hdr">
+<code class="descname">process_prop_class_hdr</code><span class="sig-paren">(</span><em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_prop_class_hdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the property class header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_vol_data">
+<code class="descname">process_vol_data</code><span class="sig-paren">(</span><em>line_gen</em>, <em>field</em>, <em>field_raw</em>, <em>src_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_vol_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all the voxet and sgrid data fields</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings</li>
+<li><strong>field</strong> – array of field strings, not space separated</li>
+<li><strong>src_dir</strong> – source directory of voxet file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_well_binary_file">
+<code class="descname">process_well_binary_file</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_well_binary_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_well_curve">
+<code class="descname">process_well_curve</code><span class="sig-paren">(</span><em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_well_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process well curve</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.process_well_info">
+<code class="descname">process_well_info</code><span class="sig-paren">(</span><em>field</em>, <em>line_gen</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.process_well_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the information after a well marker or well zone is defined</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line and info dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.prop_dict">
+<code class="descname">prop_dict</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.prop_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary of PROPS objects, stores GOCAD “PROPERTY” objects from VOXET files
+Dictionary index is the PROPERTY number e.g. ‘1’, ‘2’, ‘3’ …</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.read_region_flags_file">
+<code class="descname">read_region_flags_file</code><span class="sig-paren">(</span><em>flags_array_len</em>, <em>flags_file</em>, <em>flags_bit_sz</em>, <em>flags_offset</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.read_region_flags_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the flags file and looks for regions for a VOXET or SGRID file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>flags_array_len</strong> – length of flags array</li>
+<li><strong>flags_file</strong> – filename of flags file</li>
+<li><strong>flags_bit_sz</strong> – mumber of bits in each element of flags array</li>
+<li><strong>flags_offset</strong> – pointer to start of flags data within flags file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.gocad_importer.GocadImporter.read_volume_binary_files">
+<code class="descname">read_volume_binary_files</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.read_volume_binary_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open up and read binary volume file, could be from VOXET or SGRID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">False upon error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.region_colour_dict">
+<code class="descname">region_colour_dict</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.region_colour_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Region colour dict, key is region name, value is RGB (float, float, float)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.region_dict">
+<code class="descname">region_dict</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.region_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Labels and bit numbers for each region in a flags file,
+key is number (as string), value is label</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.rock_label_idx">
+<code class="descname">rock_label_idx</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.rock_label_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Some voxet files have floats that are indexes to rock types</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.sgrid_cell_align">
+<code class="descname">sgrid_cell_align</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.sgrid_cell_align" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is SGRID aligned to cells or points ?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.stop_on_exc">
+<code class="descname">stop_on_exc</code><em class="property"> = True</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.stop_on_exc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop upon exception, regardless of debug level</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.uses_default_coords">
+<code class="descname">uses_default_coords</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.uses_default_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses default coordinates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.vol_sz">
+<code class="descname">vol_sz</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.vol_sz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of voxet volume</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.xyz_mult">
+<code class="descname">xyz_mult</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.xyz_mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to convert to metres if the units are in kilometres</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.gocad_importer.GocadImporter.xyz_unit">
+<code class="descname">xyz_unit</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.gocad_importer.GocadImporter.xyz_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Units of XYZ axes</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.gocad_importer.extract_from_grp">
+<code class="descclassname">imports.gocad.gocad_importer.</code><code class="descname">extract_from_grp</code><span class="sig-paren">(</span><em>src_dir</em>, <em>filename_str</em>, <em>file_lines</em>, <em>base_xyz</em>, <em>debug_lvl</em>, <em>nondef_coords</em>, <em>ct_file_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_importer.html#extract_from_grp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_importer.extract_from_grp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts GOCAD files from a GOCAD group file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>src_dir</strong> – source directory for GOCAD file</li>
+<li><strong>filename_str</strong> – filename of GOCAD file</li>
+<li><strong>file_lines</strong> – lines extracted from GOCAD group file</li>
+<li><strong>base_xyz</strong> – base coordinates as (x,y,z) tuple added to all 3d coordinates</li>
+<li><strong>debug_lvl</strong> – debug level for debug output e.g. logging.DEBUG</li>
+<li><strong>nondefault_coords</strong> – optional flag, supports non-default coordinates, default is False</li>
+<li><strong>ct_file_dict</strong> – a dictionary of files which contain a tuple: (filename of CSV colour table,
+list of values to be rendered transparent) key is GOCAD filename</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a list of (ModelGeometries, STYLE, METADATA) objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.gocad_importer.is_group_header">
+<code class="descclassname">imports.gocad.gocad_importer.</code><code class="descname">is_group_header</code><span class="sig-paren">(</span><em>line_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/gocad_importer.html#is_group_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.gocad_importer.is_group_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true iff line string is a GOCAD group header
+:param line_str: line string
+:returns: true iif line string is a GOCAD group header</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.helpers">
+<span id="imports-gocad-helpers-module"></span><h2>imports.gocad.helpers module<a class="headerlink" href="#module-imports.gocad.helpers" title="Permalink to this headline">¶</a></h2>
+<p>A collection GOCAD helper functions</p>
+<dl class="function">
+<dt id="imports.gocad.helpers.check_vertex">
+<code class="descclassname">imports.gocad.helpers.</code><code class="descname">check_vertex</code><span class="sig-paren">(</span><em>num</em>, <em>vrtx_arr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/helpers.html#check_vertex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.helpers.check_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>If vertex exists in vertex array then returns True else False</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>num</strong> – vertex number to search for</li>
+<li><strong>vrtx_arr</strong> – vertex array</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.helpers.make_line_gen">
+<code class="descclassname">imports.gocad.helpers.</code><code class="descname">make_line_gen</code><span class="sig-paren">(</span><em>file_lines</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/helpers.html#make_line_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.helpers.make_line_gen" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>This is a Python generator function that processes lines of the GOCAD object file</dt>
+<dd>and returns each line in various forms, from quite unprocessed to fully processed</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename_str</strong> – filename of gocad file</li>
+<li><strong>file_lines</strong> – array of strings of lines from gocad file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array of field strings in upper case with double quotes removed from strings,
+array of field string in original case without double quotes removed,
+line of GOCAD file in upper case,
+boolean, True iff it is the last line of the file</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.helpers.split_gocad_objs">
+<code class="descclassname">imports.gocad.helpers.</code><code class="descname">split_gocad_objs</code><span class="sig-paren">(</span><em>filename_lines</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/helpers.html#split_gocad_objs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.helpers.split_gocad_objs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Separates joined GOCAD entries within a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename_lines</strong> – lines from concatenated GOCAD file</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.parsers">
+<span id="imports-gocad-parsers-module"></span><h2>imports.gocad.parsers module<a class="headerlink" href="#module-imports.gocad.parsers" title="Permalink to this headline">¶</a></h2>
+<p>Functions that process fields in a single line of a GOCAD file</p>
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_axis_unit">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_axis_unit</code><span class="sig-paren">(</span><em>self</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_axis_unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_axis_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the AXIS_UNIT keyword
+:param field: array of field strings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_colour">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_colour</code><span class="sig-paren">(</span><em>self</em>, <em>colour_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a colour string into RGBA tuple.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>colour_str</strong> – colour can either be spaced RGBA/RGB floats, or ‘#’ + 6 digit hex string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple with 4 floats, (R,G,B,A)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_float">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_float</code><span class="sig-paren">(</span><em>self</em>, <em>fp_str</em>, <em>null_val=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_float"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string to float, handles infinite values</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fp_str</strong> – string to convert to a float</li>
+<li><strong>null_val</strong> – value representing ‘no data’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean and a float
+If could not convert then return (False, None)
+else if ‘null_val’ is defined return (False, null_val)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_int">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_int</code><span class="sig-paren">(</span><em>self</em>, <em>int_str</em>, <em>null_val=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_int"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string to an int</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>int_str</strong> – string to convert to int</li>
+<li><strong>null_val</strong> – value representing ‘no data’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean and an integer
+If could not convert then return (False, None)
+else if ‘null_val’ is defined return (False, null_val)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_property_header">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_property_header</code><span class="sig-paren">(</span><em>self</em>, <em>prop_obj</em>, <em>line_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_property_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_property_header" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Parses the PROPERTY header, extracting the colour table info</dt>
+<dd>and storing it in PROPS object</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params prop_obj:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">a PROPS object to store the data</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params line_str:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">current line</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_props">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_props</code><span class="sig-paren">(</span><em>self</em>, <em>field</em>, <em>coord_tup</em>, <em>is_patom=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_props"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_props" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parses a line of properties associated with a PVTRX or PATOM line</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field</strong> – array of strings representing line with properties</li>
+<li><strong>coord_tup</strong> – (X,Y,Z) float tuple of the coordinates</li>
+<li><strong>is_patom</strong> – optional, True if this is from a PATOM, default False</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.parsers.parse_xyz">
+<code class="descclassname">imports.gocad.parsers.</code><code class="descname">parse_xyz</code><span class="sig-paren">(</span><em>self</em>, <em>is_float</em>, <em>x_str</em>, <em>y_str</em>, <em>z_str</em>, <em>do_minmax=False</em>, <em>convert=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/parsers.html#parse_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.parsers.parse_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helpful function to read XYZ cooordinates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>is_float</strong> – if true parse x y z as floats else try integers</li>
+<li><strong>y_str</strong><strong>, </strong><strong>z_str</strong> (<em>x_str</em><em>,</em>) – X,Y,Z coordinates in string form</li>
+<li><strong>do_minmax</strong> – calculate min/max of the X,Y,Z coords</li>
+<li><strong>convert</strong> – convert from kms to metres if necessary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns tuple of four parameters: success - true if could convert
+the strings to floats/ints
+x,y,z - floating point values, converted to metres if units are kms</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.processors">
+<span id="imports-gocad-processors-module"></span><h2>imports.gocad.processors module<a class="headerlink" href="#module-imports.gocad.processors" title="Permalink to this headline">¶</a></h2>
+<p>Functions to process multiple lines used for specialist purposes</p>
+<dl class="function">
+<dt id="imports.gocad.processors.process_ascii_well_path">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_ascii_well_path</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_ascii_well_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_ascii_well_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process ascii well path header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line; well_path, list of              coordinates of well path; marker_list, list of markers</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_coord_hdr">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_coord_hdr</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_coord_hdr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_coord_hdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process fields within coordinate header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line_gen</strong> – line generator</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">two booleans, the first is True iff reached end of sequence,               the second is True iff there is an unrecoverable error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_header">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_header</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process fields in the GOCAD header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line_gen</strong> – line generator</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a boolean, is True iff we are at last line</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_prop_class_hdr">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_prop_class_hdr</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_prop_class_hdr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_prop_class_hdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the property class header</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_vol_data">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_vol_data</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em>, <em>field</em>, <em>field_raw</em>, <em>src_dir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_vol_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_vol_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all the voxet and sgrid data fields</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings</li>
+<li><strong>field</strong> – array of field strings, not space separated</li>
+<li><strong>src_dir</strong> – source directory of voxet file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_well_binary_file">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_well_binary_file</code><span class="sig-paren">(</span><em>self</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_well_binary_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_well_binary_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_well_curve">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_well_curve</code><span class="sig-paren">(</span><em>self</em>, <em>line_gen</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_well_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_well_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process well curve</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.process_well_info">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">process_well_info</code><span class="sig-paren">(</span><em>self</em>, <em>field</em>, <em>line_gen</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#process_well_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.process_well_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the information after a well marker or well zone is defined</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line_gen</strong> – line generator</li>
+<li><strong>field</strong> – array of field strings from first line of prop class header</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a boolean, is True iff we are at last line and info dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.to_dia">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">to_dia</code><span class="sig-paren">(</span><em>sdia</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#to_dia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.to_dia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a 4-tuple to 3-tuple of floats</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sdia</strong> – 4-tuple (‘STATION’, d, i, a)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True/False, three float tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.processors.to_xyz_min_curve">
+<code class="descclassname">imports.gocad.processors.</code><code class="descname">to_xyz_min_curve</code><span class="sig-paren">(</span><em>dia1</em>, <em>dia2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/processors.html#to_xyz_min_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.processors.to_xyz_min_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert measured depth, inclination, azimuth to x,y,z via minimum curvature method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dia1</strong> – tuple (measured depth, inclination, azimuth)                 measured depth, metres, float                 inclination, degrees, float, 0 = vertical, 90 = horizontal                 azimuth, degrees, float, measured from North</li>
+<li><strong>dia2</strong> – tuple (measured depth, inclination, azimuth)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.props">
+<span id="imports-gocad-props-module"></span><h2>imports.gocad.props module<a class="headerlink" href="#module-imports.gocad.props" title="Permalink to this headline">¶</a></h2>
+<p>Contains the PROPS class</p>
+<dl class="class">
+<dt id="imports.gocad.props.PROPS">
+<em class="property">class </em><code class="descclassname">imports.gocad.props.</code><code class="descname">PROPS</code><span class="sig-paren">(</span><em>class_name</em>, <em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class holds generic 3d data and properties
+e.g. information extracted from 3d binary files (e.g. from GOCAD ‘PROP_FILE’)
+information attached to a set of XYZ points (e.g. from GOCAD ‘PATOM’, ‘PVRTX’)</p>
+<dl class="method">
+<dt id="imports.gocad.props.PROPS._PROPS__calc_minmax">
+<code class="descname">_PROPS__calc_minmax</code><span class="sig-paren">(</span><em>fltp</em><span class="sig-paren">)</span><a class="headerlink" href="#imports.gocad.props.PROPS._PROPS__calc_minmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates minimum &amp; maximum of floating point value and stores
+result locally in ‘data_stats’
+fp - floating point value (numpy or python float)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.append_to_ijk">
+<code class="descname">append_to_ijk</code><span class="sig-paren">(</span><em>ijk</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.append_to_ijk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.append_to_ijk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a value to xyz dict
+ijk - (I,J,K) tuple array indexes (ints)
+val - value to be assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.append_to_xyz">
+<code class="descname">append_to_xyz</code><span class="sig-paren">(</span><em>xyz</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.append_to_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.append_to_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a value to xyz dict
+xyz - (X,Y,Z) tuple array indexes (floats)
+val - value to be assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.assign_to_3d">
+<code class="descname">assign_to_3d</code><span class="sig-paren">(</span><em>x_val</em>, <em>y_val</em>, <em>z_val</em>, <em>fltp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.assign_to_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.assign_to_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns a value to 3d array
+x,y,z - XYZ integer array indexes
+fltp - floating point value to be assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.assign_to_ijk">
+<code class="descname">assign_to_ijk</code><span class="sig-paren">(</span><em>ijk</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.assign_to_ijk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.assign_to_ijk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns a value to ijk dict
+ijk - (I,J,K) tuple array indexes (ints)
+val - value to be assigned (float or tuple)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.assign_to_xyz">
+<code class="descname">assign_to_xyz</code><span class="sig-paren">(</span><em>xyz</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.assign_to_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.assign_to_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns a value to xyz dict
+xyz - (X,Y,Z) tuple array indexes (floats)
+val - value to be assigned (float or tuple)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.class_name">
+<code class="descname">class_name</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.class_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property class names</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.colour_map">
+<code class="descname">colour_map</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.colour_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>If colour map was specified, then it is stored here, integer is the key,
+value is (R,G,B,A) where R, G, B, A are floats</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.colourmap_name">
+<code class="descname">colourmap_name</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.colourmap_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of colour map</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_3d">
+<code class="descname">data_3d</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property data collected from binary file, value is float, stored as a 3d numpy array.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_ijk">
+<code class="descname">data_ijk</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_ijk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property data attached to XYZ points (index is IJK int indexes)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_stats">
+<code class="descname">data_stats</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property data statistics: min &amp; max</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_sz">
+<code class="descname">data_sz</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_sz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of bytes in number in binary file, usually 1, 2 or 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_type">
+<code class="descname">data_type</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of data in binary file e.g. ‘h’ = short 2-byte int, ‘f’ = float, ‘b’ - byte, ‘rgba’ - 4-byte RGBA</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.data_xyz">
+<code class="descname">data_xyz</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.data_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property data attached to XYZ points (index is XYZ coordinate)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.file_name">
+<code class="descname">file_name</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of binary file associated with GOCAD file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.get_str_data_type">
+<code class="descname">get_str_data_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.get_str_data_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.get_str_data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string form of the data type of the volume data
+e.g. “INT_16”, “FLOAT_32”, “UINT_8”, “RGBA”</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.is_index_data">
+<code class="descname">is_index_data</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.is_index_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses ‘data_3d’ to hold index to colour table or rock label table</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.make_numpy_dtype">
+<code class="descname">make_numpy_dtype</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.make_numpy_dtype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.make_numpy_dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string that can be passed to ‘numpy’ to read a binary file
+It takes the ‘data_type’ of ‘f’, ‘b’, h’ &amp; ‘rgba’</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.no_data_marker">
+<code class="descname">no_data_marker</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.no_data_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value representing ‘no data’ values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.offset">
+<code class="descname">offset</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset within binary file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="imports.gocad.props.PROPS.read_colour_table_csv">
+<code class="descname">read_colour_table_csv</code><span class="sig-paren">(</span><em>csv_file</em>, <em>transp_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/props.html#PROPS.read_colour_table_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.props.PROPS.read_colour_table_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an RGB colour table from CSV file for use in VOXET colours
+CSV Format: col#1: integer index, col#2: R-value, col#3: G-value, col#4: B-value
+csv_file - filename of  CSV file to read, without path
+Sets the ‘colour_map’ and ‘rock_label_table’ class attibutes
+‘colour_map’ is a dict, key is integer, value is (R,G,B,A) tuple of floats
+‘rock_label_table’ is a dict, key is integer, value is string</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.rock_label_table">
+<code class="descname">rock_label_table</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.rock_label_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table specifying names of rocks , key is an integer, value is the label</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="imports.gocad.props.PROPS.signed_int">
+<code class="descname">signed_int</code><em class="property"> = None</em><a class="headerlink" href="#imports.gocad.props.PROPS.signed_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is True iff binary data is a signed integer else False</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad.volumes">
+<span id="imports-gocad-volumes-module"></span><h2>imports.gocad.volumes module<a class="headerlink" href="#module-imports.gocad.volumes" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="imports.gocad.volumes.calc_sg_xyz">
+<code class="descclassname">imports.gocad.volumes.</code><code class="descname">calc_sg_xyz</code><span class="sig-paren">(</span><em>self</em>, <em>x_idx</em>, <em>y_idx</em>, <em>z_idx</em>, <em>fp_arr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/volumes.html#calc_sg_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.volumes.calc_sg_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGRID has coordinates in points file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.volumes.calc_vo_xyz">
+<code class="descclassname">imports.gocad.volumes.</code><code class="descname">calc_vo_xyz</code><span class="sig-paren">(</span><em>self</em>, <em>x_idx</em>, <em>y_idx</em>, <em>z_idx</em>, <em>mult</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/volumes.html#calc_vo_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.volumes.calc_vo_xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the XYZ coords and their maxs &amp; mins</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.volumes.read_region_flags_file">
+<code class="descclassname">imports.gocad.volumes.</code><code class="descname">read_region_flags_file</code><span class="sig-paren">(</span><em>self</em>, <em>flags_array_len</em>, <em>flags_file</em>, <em>flags_bit_sz</em>, <em>flags_offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/volumes.html#read_region_flags_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.volumes.read_region_flags_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the flags file and looks for regions for a VOXET or SGRID file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>flags_array_len</strong> – length of flags array</li>
+<li><strong>flags_file</strong> – filename of flags file</li>
+<li><strong>flags_bit_sz</strong> – mumber of bits in each element of flags array</li>
+<li><strong>flags_offset</strong> – pointer to start of flags data within flags file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="imports.gocad.volumes.read_volume_binary_files">
+<code class="descclassname">imports.gocad.volumes.</code><code class="descname">read_volume_binary_files</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/imports/gocad/volumes.html#read_volume_binary_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#imports.gocad.volumes.read_volume_binary_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open up and read binary volume file, could be from VOXET or SGRID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">False upon error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-imports.gocad">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-imports.gocad" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="imports.html" class="btn btn-neutral" title="imports package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

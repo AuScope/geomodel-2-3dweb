@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>config_builder module &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="next" title="db package" href="db.html"/>
+        <link rel="prev" title="Welcome to lib’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>config_builder module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/config_builder.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-config_builder">
+<span id="config-builder-module"></span><h1>config_builder module<a class="headerlink" href="#module-config_builder" title="Permalink to this headline">¶</a></h1>
+<p>This class is used to build a config file</p>
+<dl class="class">
+<dt id="config_builder.ConfigBuilder">
+<em class="property">class </em><code class="descclassname">config_builder.</code><code class="descname">ConfigBuilder</code><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A list of geographical extents [ [min_x, max_x, min_y, max_y], … ]
+NB: An extent is a list of coords defining boundaries of model</p>
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.add_config">
+<code class="descname">add_config</code><span class="sig-paren">(</span><em>gs_dict, label_str, popup_dict, file_name, model_name, file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.add_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.add_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds more config information to popup dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gs_dict</strong> – group structure dictionary (group struct dict format:         { filename: ( group_name, { insert_key1: val, insert_key2: val } } )</li>
+<li><strong>label_str</strong> – string to use as a display name for this part of the         model, if none available in group struct dict</li>
+<li><strong>popup_dict</strong> – information to display in popup window         ( popup dict format: { object_name: { ‘attr_name’: attr_val, … } } where ‘attr_name’ is one of: ‘name’, ‘title’, ‘href’)</li>
+<li><strong>file_name</strong> – file and path (without extension) of model part source file</li>
+<li><strong>file_ext</strong> – optional file extension of ‘file_name’, defaults to ‘.gltf’</li>
+<li><strong>position</strong> – optional [x,y,z] position of model part</li>
+<li><strong>styling</strong> – optional dict of styling parameters e.g.                         { “labels”: [                              {                                 “display_name”: “MARKER_TOPMOROAKVELKERRI_GRP”,                                 “position”: [                                     425500.0,                                     8028000.0,                                     228.699997                                 ]                             },                           ]                         }</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dict of model configuration info, which includes the popup dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.add_config_list">
+<code class="descname">add_config_list</code><span class="sig-paren">(</span><em>config_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.add_config_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.add_config_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add model config dict to internal list
+:param config_list: list of model config dicts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.add_ext">
+<code class="descname">add_ext</code><span class="sig-paren">(</span><em>ext</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.add_ext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.add_ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an extent to this instance’s internal extent list
+:param ext: single extent [min_x, max_x, min_y, max_y]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.add_inserts">
+<code class="descname">add_inserts</code><span class="sig-paren">(</span><em>gs_dict</em>, <em>model_part_key</em>, <em>modelconf_dict</em>, <em>alt_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.add_inserts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.add_inserts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the ‘display_name’ and other inserts from the group structure dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gs_dict</strong> – group structure dictionary (group struct dict format:         { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))</li>
+<li><strong>model_part_key</strong> – model part key in ‘gs_dict’</li>
+<li><strong>modelconf_dict</strong> – dictionary of model information</li>
+<li><strong>alt_name</strong> – alternative ‘display_name’ when not supplied in ‘gs_dict’</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.add_vol_config">
+<code class="descname">add_vol_config</code><span class="sig-paren">(</span><em>gs_dict</em>, <em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.add_vol_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.add_vol_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary containing volume configuration data
+:param gs_dict: group structure dictionary (group struct dict format:         { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))
+:param geom_obj: ModelGeometries object
+:param style_obj: STYLE object
+:param meta_obj: METADATA object
+:returns: a dict of volume config data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.create_json_config">
+<code class="descname">create_json_config</code><span class="sig-paren">(</span><em>output_filename</em>, <em>dest_dir</em>, <em>params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.create_json_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.create_json_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a JSON file of GLTF objects to display in 3D</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>output_filename</strong> – name of file containing created config file</li>
+<li><strong>dest_dir</strong> – destination directory for output file</li>
+<li><strong>params</strong> – model input parameters, SimpleNamespace() object,
+keys are: ‘name’ ‘crs’ ‘init_cam_dist’ and optional ‘proj4_defn’</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="config_builder.ConfigBuilder.extent_list">
+<code class="descname">extent_list</code><em class="property"> = None</em><a class="headerlink" href="#config_builder.ConfigBuilder.extent_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.has_output">
+<code class="descname">has_output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.has_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.has_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff there are model config dicts that can be written
+out to a config file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="config_builder.ConfigBuilder.reduce_extents">
+<code class="descname">reduce_extents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/config_builder.html#ConfigBuilder.reduce_extents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#config_builder.ConfigBuilder.reduce_extents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces the internal list of extents to just one extent
+:returns: single extent [min_x, max_x, min_y, max_y]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="db.html" class="btn btn-neutral float-right" title="db package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to lib’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

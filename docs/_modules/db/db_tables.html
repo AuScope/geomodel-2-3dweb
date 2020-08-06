@@ -1,0 +1,562 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.db_tables &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>db.db_tables</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for db.db_tables</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Uses &#39;sqlalchemy&#39; library to create a simple &#39;sqlite&#39; db to hold query results for models</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="kn">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Boolean</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">sessionmaker</span><span class="p">,</span> <span class="n">relationship</span><span class="p">,</span> <span class="n">scoped_session</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.schema</span> <span class="kn">import</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">PrimaryKeyConstraint</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="kn">import</span> <span class="n">DatabaseError</span>
+
+<span class="n">QUERY_DB_FILE</span> <span class="o">=</span> <span class="s1">&#39;query_data.db&#39;</span>
+
+<span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
+
+<span class="c1"># pylint: disable=R0903</span>
+<div class="viewcode-block" id="Query"><a class="viewcode-back" href="../../db.html#db.db_tables.Query">[docs]</a><span class="k">class</span> <span class="nc">Query</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **Query table**</span>
+
+<span class="sd">        Basic idea is to have a &quot;query&quot; table that points to the various parts of the model.</span>
+<span class="sd">        A website query will provide the name of the model and a label from within the model.</span>
+<span class="sd">        This can be used as an index to a row of the table.</span>
+
+<span class="sd">        The &quot;query&quot; table points to the &quot;info&quot; tables. These point to information at various</span>
+<span class="sd">        levels of the model: \</span>
+<span class="sd">            segments, parts, model, and independent user notes.</span>
+
+<span class="sd">        At the moment only a simple json string is stored in each of the &quot;info&quot; tables.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span>
+
+    <span class="n">model_name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">segment_info_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">&quot;segment_info.id&quot;</span><span class="p">))</span>
+    <span class="n">part_info_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">&quot;part_info.id&quot;</span><span class="p">))</span>
+    <span class="n">model_info_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">&quot;model_info.id&quot;</span><span class="p">))</span>
+    <span class="n">user_info_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s2">&quot;user_info.id&quot;</span><span class="p">))</span>
+
+    <span class="n">segment_info</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;SegmentInfo&#39;</span><span class="p">)</span>
+    <span class="n">part_info</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;PartInfo&#39;</span><span class="p">)</span>
+    <span class="n">model_info</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;ModelInfo&#39;</span><span class="p">)</span>
+    <span class="n">user_info</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="s1">&#39;UserInfo&#39;</span><span class="p">)</span>
+
+    <span class="n">__table_args__</span> <span class="o">=</span> <span class="p">(</span><span class="n">PrimaryKeyConstraint</span><span class="p">(</span><span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;_query_uc&#39;</span><span class="p">),)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;Query:&quot;</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    model_name=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    label=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    segment_info=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_info</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    part_info=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">part_info</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    model_info=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_info</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">    user_info=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="SegmentInfo"><a class="viewcode-back" href="../../db.html#db.db_tables.SegmentInfo">[docs]</a><span class="k">class</span> <span class="nc">SegmentInfo</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **Segment_Info table**</span>
+
+<span class="sd">        Any information derived from a segment within a 3d model part,</span>
+<span class="sd">        e.g. a single triangle on a fault surface made of lots of triangles</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;segment_info&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">json</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{1}</span><span class="s2">: json=</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="PartInfo"><a class="viewcode-back" href="../../db.html#db.db_tables.PartInfo">[docs]</a><span class="k">class</span> <span class="nc">PartInfo</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **Part_Info table**</span>
+
+<span class="sd">        Any information derived from a model part</span>
+<span class="sd">        e.g. fault surface, borehole</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;part_info&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">json</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{1}</span><span class="s2">: json=</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelInfo"><a class="viewcode-back" href="../../db.html#db.db_tables.ModelInfo">[docs]</a><span class="k">class</span> <span class="nc">ModelInfo</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **Model_Info table**</span>
+
+<span class="sd">        Any information that comes from the model as a whole,</span>
+<span class="sd">        e.g. CRS of the model</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;model_info&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">json</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{1}</span><span class="s2">: json=</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UserInfo"><a class="viewcode-back" href="../../db.html#db.db_tables.UserInfo">[docs]</a><span class="k">class</span> <span class="nc">UserInfo</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **User_Info table**</span>
+
+<span class="sd">        Any user notes that must be kept separate from the model data update process</span>
+<span class="sd">        e.g. links to external databases</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;user_info&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">json</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{1}</span><span class="s2">: json=</span><span class="si">{0}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="KeyValuePairs"><a class="viewcode-back" href="../../db.html#db.db_tables.KeyValuePairs">[docs]</a><span class="k">class</span> <span class="nc">KeyValuePairs</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; **KeyValuePairs table**</span>
+
+<span class="sd">        Stores key value pairs</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;keyvaluepairs&quot;</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">is_url</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">)</span></div>
+
+<span class="c1">#</span>
+<div class="viewcode-block" id="QueryDB"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB">[docs]</a><span class="k">class</span> <span class="nc">QueryDB</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; A simple database class to manage the creation, writing and reading of the query database</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="s1">&#39;query_data.db&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_name</span> <span class="o">=</span> <span class="s1">&#39;sqlite:///&#39;</span> <span class="o">+</span> <span class="n">db_name</span>
+            <span class="n">eng</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">db_name</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="n">eng</span>
+            <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
+                <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">drop_all</span><span class="p">()</span>
+                <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+            <span class="c1"># &#39;scoped_session()&#39; makes a thread-safe cache of session objects</span>
+            <span class="c1">#  NOTE: Would like to ventually make scope_session() more global</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_obj</span> <span class="o">=</span> <span class="n">scoped_session</span><span class="p">(</span><span class="n">sessionmaker</span><span class="p">(</span><span class="n">eng</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_obj</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QueryDB.get_error"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.get_error">[docs]</a>    <span class="k">def</span> <span class="nf">get_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :returns: the current error message</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span></div>
+
+<div class="viewcode-block" id="QueryDB.add_segment"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.add_segment">[docs]</a>    <span class="k">def</span> <span class="nf">add_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a segment object to database</span>
+
+<span class="sd">        :param json_str: segment object as a JSON string</span>
+<span class="sd">        :returns: a tuple (True, seginfo_obj) if successful</span>
+<span class="sd">                          (False, exception string) if operation failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">seginfo_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">SegmentInfo</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">seginfo_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">seginfo_obj</span> <span class="o">=</span> <span class="n">SegmentInfo</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">seginfo_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">seginfo_obj</span></div>
+
+<div class="viewcode-block" id="QueryDB.add_part"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a part object to database</span>
+
+<span class="sd">        :param json_str: part object as a JSON string</span>
+<span class="sd">        :returns: a tuple (True, partinfo_obj) if successful</span>
+<span class="sd">                          (False, exception string) if operation failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">part_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">PartInfo</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">part_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">part_obj</span> <span class="o">=</span> <span class="n">PartInfo</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">part_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">part_obj</span></div>
+
+<div class="viewcode-block" id="QueryDB.add_model"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.add_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a model object to database</span>
+
+<span class="sd">        :param json_str: model object as a JSON string</span>
+<span class="sd">        :returns: a tuple (True, model_obj) if successful</span>
+<span class="sd">                          (False, exception string) if operation failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ModelInfo</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">model_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">model_obj</span> <span class="o">=</span> <span class="n">ModelInfo</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">model_obj</span></div>
+
+<div class="viewcode-block" id="QueryDB.add_user"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.add_user">[docs]</a>    <span class="k">def</span> <span class="nf">add_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a user info object to database</span>
+
+<span class="sd">        :param json_str: user info object as a JSON string</span>
+<span class="sd">        :returns: a tuple (True, userinfo_obj) if successful</span>
+<span class="sd">                          (False, exception string) if operation failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">userinfo_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">UserInfo</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">userinfo_obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">userinfo_obj</span> <span class="o">=</span> <span class="n">UserInfo</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">json_str</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">userinfo_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">userinfo_obj</span></div>
+
+<div class="viewcode-block" id="QueryDB.add_query"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.add_query">[docs]</a>    <span class="k">def</span> <span class="nf">add_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a query object to database</span>
+
+<span class="sd">        :param json_str: query object as a JSON string</span>
+<span class="sd">        :returns: a tuple (True, query_obj) if successful</span>
+<span class="sd">                          (False, exception string) if operation failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query_obj</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">segment_info</span><span class="o">=</span><span class="n">segment</span><span class="p">,</span>
+                              <span class="n">part_info</span><span class="o">=</span><span class="n">part</span><span class="p">,</span> <span class="n">model_info</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">user_info</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">query_obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="QueryDB.query"><a class="viewcode-back" href="../../db.html#db.db_tables.QueryDB.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use this to query the database</span>
+
+<span class="sd">        :param label: model part label</span>
+<span class="sd">        :param model_name: name of model</span>
+<span class="sd">        :returns: a tuple, format is (True, label str, model_name, seg_info_dict, part_info_dict, \</span>
+<span class="sd">                      model_info_dict, user_info_dict) if successful \</span>
+<span class="sd">                else (False, exception string)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Query</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span> \
+                                          <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filter_str</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Query</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span> \
+                                              <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">filter_str</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">DatabaseError</span> <span class="k">as</span> <span class="n">db_exc</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">db_exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">segment_info</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                      <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">part_info</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                      <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">model_info</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                      <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">user_info</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session_obj</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing query db&quot;</span><span class="p">)</span>
+    <span class="c1"># Basic unit testing</span>
+    <span class="n">QUERY_DB</span> <span class="o">=</span> <span class="n">QueryDB</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="s1">&#39;:memory:&#39;</span><span class="p">)</span>
+    <span class="n">MSG</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">get_error</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">MSG</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">MSG</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">MSG</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_segment</span><span class="p">(</span><span class="s1">&#39;seg&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">S2</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_segment</span><span class="p">(</span><span class="s1">&#39;seg&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+
+    <span class="c1"># Test for no duplicates</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">SegmentInfo</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">Q</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="n">OK</span><span class="p">,</span> <span class="n">S3</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_segment</span><span class="p">(</span><span class="s1">&#39;seg3&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="s1">&#39;part&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_model</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">U</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_user</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">MSG</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_query</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">MSG</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_query</span><span class="p">(</span><span class="s1">&#39;label2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name2&#39;</span><span class="p">,</span> <span class="n">S3</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">MSG</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">add_query</span><span class="p">(</span><span class="s1">&#39;label_3_i&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name3&#39;</span><span class="p">,</span> <span class="n">S3</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">OK</span>
+
+    <span class="c1"># Have added three &#39;Query&#39; objs? two &#39;Segment_Info&#39; objs ? etc.</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Query</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">SegmentInfo</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">PartInfo</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ModelInfo</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">ses</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">UserInfo</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="c1"># LoOK for a &#39;Query&#39; with all info tables</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">Q1</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;label2&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">OK</span> <span class="ow">and</span> <span class="n">Q1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Q1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;label2&#39;</span> <span class="ow">and</span> <span class="n">Q1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;model_name2&#39;</span> \
+           <span class="ow">and</span> <span class="n">Q1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;seg3&#39;</span><span class="p">)</span>
+
+    <span class="c1"># LoOK for &#39;Query&#39; containing Nones</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">Q2</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;label_3_i&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name3&#39;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">OK</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;label_3_i&#39;</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;model_name3&#39;</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># LoOK for &#39;Query&#39; with trailling number in label</span>
+    <span class="n">OK</span><span class="p">,</span> <span class="n">Q2</span> <span class="o">=</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;label_3_i_44&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name3&#39;</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">OK</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;label_3_i&#39;</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;model_name3&#39;</span> <span class="ow">and</span> <span class="n">Q2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Non existing &#39;Query&#39;</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;label1_6&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name5&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="n">QUERY_DB</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;_label6&#39;</span><span class="p">,</span> <span class="s1">&#39;model_name5&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PASSED QUERY DB TESTS&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

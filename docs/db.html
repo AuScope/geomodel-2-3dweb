@@ -1,0 +1,702 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="next" title="db.geometry package" href="db.geometry.html"/>
+        <link rel="prev" title="config_builder module" href="config_builder.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">db package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db.geometry.html">db.geometry package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="db.metadata.html">db.metadata package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="db.style.html">db.style package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-db.db_tables">db.db_tables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-db">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>db package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/db.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="db-package">
+<h1>db package<a class="headerlink" href="#db-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="db.geometry.html">db.geometry package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db.geometry.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.geometry.html#module-db.geometry.model_geometries">db.geometry.model_geometries module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.geometry.html#module-db.geometry.types">db.geometry.types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.geometry.html#module-db.geometry">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="db.metadata.html">db.metadata package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db.metadata.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.metadata.html#module-db.metadata.metadata">db.metadata.metadata module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.metadata.html#module-db.metadata">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="db.style.html">db.style package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db.style.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.style.html#module-db.style.false_colour">db.style.false_colour module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.style.html#module-db.style.style">db.style.style module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.style.html#module-db.style">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-db.db_tables">
+<span id="db-db-tables-module"></span><h2>db.db_tables module<a class="headerlink" href="#module-db.db_tables" title="Permalink to this headline">¶</a></h2>
+<p>Uses ‘sqlalchemy’ library to create a simple ‘sqlite’ db to hold query results for models</p>
+<dl class="class">
+<dt id="db.db_tables.KeyValuePairs">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">KeyValuePairs</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#KeyValuePairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.KeyValuePairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>KeyValuePairs table</strong></p>
+<p>Stores key value pairs</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.KeyValuePairs._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044f68&gt;, 'is_url': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc79a5700f8&gt;, 'key': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044fc0&gt;, 'value': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc79a5700a0&gt;}</em><a class="headerlink" href="#db.db_tables.KeyValuePairs._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs.id">
+<code class="descname">id</code><a class="headerlink" href="#db.db_tables.KeyValuePairs.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs.is_url">
+<code class="descname">is_url</code><a class="headerlink" href="#db.db_tables.KeyValuePairs.is_url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs.key">
+<code class="descname">key</code><a class="headerlink" href="#db.db_tables.KeyValuePairs.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.KeyValuePairs.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.KeyValuePairs.value">
+<code class="descname">value</code><a class="headerlink" href="#db.db_tables.KeyValuePairs.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.ModelInfo">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">ModelInfo</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#ModelInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.ModelInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>Model_Info table</strong></p>
+<p>Any information that comes from the model as a whole,
+e.g. CRS of the model</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.ModelInfo._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.ModelInfo._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.ModelInfo._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044bf8&gt;, 'json': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044ca8&gt;}</em><a class="headerlink" href="#db.db_tables.ModelInfo._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.ModelInfo.id">
+<code class="descname">id</code><a class="headerlink" href="#db.db_tables.ModelInfo.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.ModelInfo.json">
+<code class="descname">json</code><a class="headerlink" href="#db.db_tables.ModelInfo.json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.ModelInfo.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.ModelInfo.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.PartInfo">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">PartInfo</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#PartInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.PartInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>Part_Info table</strong></p>
+<p>Any information derived from a model part
+e.g. fault surface, borehole</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.PartInfo._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.PartInfo._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.PartInfo._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044a40&gt;, 'json': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044af0&gt;}</em><a class="headerlink" href="#db.db_tables.PartInfo._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.PartInfo.id">
+<code class="descname">id</code><a class="headerlink" href="#db.db_tables.PartInfo.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.PartInfo.json">
+<code class="descname">json</code><a class="headerlink" href="#db.db_tables.PartInfo.json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.PartInfo.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.PartInfo.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.Query">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">Query</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#Query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.Query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>Query table</strong></p>
+<p>Basic idea is to have a “query” table that points to the various parts of the model.
+A website query will provide the name of the model and a label from within the model.
+This can be used as an index to a row of the table.</p>
+<p>The “query” table points to the “info” tables. These point to information at various
+levels of the model:             segments, parts, model, and independent user notes.</p>
+<p>At the moment only a simple json string is stored in each of the “info” tables.</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.Query._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.Query._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'label': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044620&gt;, 'model_info': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044410&gt;, 'model_info_id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044728&gt;, 'model_name': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a70445c8&gt;, 'part_info': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044360&gt;, 'part_info_id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a70446d0&gt;, 'segment_info': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044308&gt;, 'segment_info_id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044678&gt;, 'user_info': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a70444c0&gt;, 'user_info_id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044780&gt;}</em><a class="headerlink" href="#db.db_tables.Query._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.label">
+<code class="descname">label</code><a class="headerlink" href="#db.db_tables.Query.label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.Query.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.model_info">
+<code class="descname">model_info</code><a class="headerlink" href="#db.db_tables.Query.model_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.model_info_id">
+<code class="descname">model_info_id</code><a class="headerlink" href="#db.db_tables.Query.model_info_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.model_name">
+<code class="descname">model_name</code><a class="headerlink" href="#db.db_tables.Query.model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.part_info">
+<code class="descname">part_info</code><a class="headerlink" href="#db.db_tables.Query.part_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.part_info_id">
+<code class="descname">part_info_id</code><a class="headerlink" href="#db.db_tables.Query.part_info_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.segment_info">
+<code class="descname">segment_info</code><a class="headerlink" href="#db.db_tables.Query.segment_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.segment_info_id">
+<code class="descname">segment_info_id</code><a class="headerlink" href="#db.db_tables.Query.segment_info_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.user_info">
+<code class="descname">user_info</code><a class="headerlink" href="#db.db_tables.Query.user_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.Query.user_info_id">
+<code class="descname">user_info_id</code><a class="headerlink" href="#db.db_tables.Query.user_info_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.QueryDB">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">QueryDB</code><span class="sig-paren">(</span><em>create=False</em>, <em>db_name='query_data.db'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A simple database class to manage the creation, writing and reading of the query database</p>
+<dl class="method">
+<dt id="db.db_tables.QueryDB.add_model">
+<code class="descname">add_model</code><span class="sig-paren">(</span><em>json_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.add_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.add_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a model object to database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_str</strong> – model object as a JSON string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple (True, model_obj) if successful
+(False, exception string) if operation failed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.add_part">
+<code class="descname">add_part</code><span class="sig-paren">(</span><em>json_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.add_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a part object to database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_str</strong> – part object as a JSON string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple (True, partinfo_obj) if successful
+(False, exception string) if operation failed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.add_query">
+<code class="descname">add_query</code><span class="sig-paren">(</span><em>label</em>, <em>model_name</em>, <em>segment</em>, <em>part</em>, <em>model</em>, <em>user</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.add_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.add_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a query object to database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_str</strong> – query object as a JSON string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple (True, query_obj) if successful
+(False, exception string) if operation failed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.add_segment">
+<code class="descname">add_segment</code><span class="sig-paren">(</span><em>json_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.add_segment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.add_segment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a segment object to database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_str</strong> – segment object as a JSON string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple (True, seginfo_obj) if successful
+(False, exception string) if operation failed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.add_user">
+<code class="descname">add_user</code><span class="sig-paren">(</span><em>json_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.add_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.add_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a user info object to database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>json_str</strong> – user info object as a JSON string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple (True, userinfo_obj) if successful
+(False, exception string) if operation failed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.get_error">
+<code class="descname">get_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.get_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.get_error" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the current error message</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.db_tables.QueryDB.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>label</em>, <em>model_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#QueryDB.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.QueryDB.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use this to query the database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>label</strong> – model part label</li>
+<li><strong>model_name</strong> – name of model</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple, format is (True, label str, model_name, seg_info_dict, part_info_dict,                       model_info_dict, user_info_dict) if successful                 else (False, exception string)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.SegmentInfo">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">SegmentInfo</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#SegmentInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.SegmentInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>Segment_Info table</strong></p>
+<p>Any information derived from a segment within a 3d model part,
+e.g. a single triangle on a fault surface made of lots of triangles</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.SegmentInfo._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.SegmentInfo._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.SegmentInfo._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044888&gt;, 'json': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044938&gt;}</em><a class="headerlink" href="#db.db_tables.SegmentInfo._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.SegmentInfo.id">
+<code class="descname">id</code><a class="headerlink" href="#db.db_tables.SegmentInfo.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.SegmentInfo.json">
+<code class="descname">json</code><a class="headerlink" href="#db.db_tables.SegmentInfo.json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.SegmentInfo.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.SegmentInfo.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.db_tables.UserInfo">
+<em class="property">class </em><code class="descclassname">db.db_tables.</code><code class="descname">UserInfo</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/db_tables.html#UserInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.db_tables.UserInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<p><strong>User_Info table</strong></p>
+<p>Any user notes that must be kept separate from the model data update process
+e.g. links to external databases</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+<dl class="attribute">
+<dt id="db.db_tables.UserInfo._decl_class_registry">
+<code class="descname">_decl_class_registry</code><em class="property"> = &lt;WeakValueDictionary&gt;</em><a class="headerlink" href="#db.db_tables.UserInfo._decl_class_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.UserInfo._sa_class_manager">
+<code class="descname">_sa_class_manager</code><em class="property"> = {'id': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044db0&gt;, 'json': &lt;sqlalchemy.orm.attributes.InstrumentedAttribute object at 0x7fc7a7044e60&gt;}</em><a class="headerlink" href="#db.db_tables.UserInfo._sa_class_manager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.UserInfo.id">
+<code class="descname">id</code><a class="headerlink" href="#db.db_tables.UserInfo.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.UserInfo.json">
+<code class="descname">json</code><a class="headerlink" href="#db.db_tables.UserInfo.json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.db_tables.UserInfo.metadata">
+<code class="descname">metadata</code><em class="property"> = MetaData(bind=None)</em><a class="headerlink" href="#db.db_tables.UserInfo.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-db">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-db" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="db.geometry.html" class="btn btn-neutral float-right" title="db.geometry package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="config_builder.html" class="btn btn-neutral" title="config_builder module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,834 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.collada_kit &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.collada_kit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.collada_kit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the ColladaKit class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">collada</span> <span class="k">as</span> <span class="nn">Collada</span>
+
+<span class="kn">from</span> <span class="nn">lib.exports.collada_out</span> <span class="kn">import</span> <span class="n">ColladaOut</span>
+<span class="c1"># from lib.exports.obj_out import ObjKit</span>
+<span class="kn">from</span> <span class="nn">lib.exports.bh_utils</span> <span class="kn">import</span> <span class="n">make_borehole_label</span>
+<span class="kn">from</span> <span class="nn">lib.exports.export_kit</span> <span class="kn">import</span> <span class="n">ExportKit</span>
+<span class="kn">from</span> <span class="nn">lib.db.style.false_colour</span> <span class="kn">import</span> <span class="n">calculate_false_colour_num</span><span class="p">,</span> <span class="n">make_false_colour_tup</span>
+
+<div class="viewcode-block" id="ColladaKit"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit">[docs]</a><span class="k">class</span> <span class="nc">ColladaKit</span><span class="p">(</span><span class="n">ExportKit</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Class used to output COLLADA files, given geometry, style and metadata data structures</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">EMISSION</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="sd">&#39;&#39;&#39; Emission parameter for pycollada material effect &#39;&#39;&#39;</span>
+
+    <span class="n">AMBIENT</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="sd">&#39;&#39;&#39; Ambient parameter for pycollada material effect &#39;&#39;&#39;</span>
+
+    <span class="n">SPECULAR</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="sd">&#39;&#39;&#39; Specular parameter for pycollada material effect &#39;&#39;&#39;</span>
+
+    <span class="n">SHININESS</span> <span class="o">=</span> <span class="mf">50.0</span>
+    <span class="sd">&#39;&#39;&#39; Shininess parameter for pycollada material effect &#39;&#39;&#39;</span>
+
+    <span class="n">SHADING</span> <span class="o">=</span> <span class="s2">&quot;phong&quot;</span>
+    <span class="sd">&#39;&#39;&#39; Shading parameter for pycollada material effect &#39;&#39;&#39;</span>
+
+    <span class="n">MAX_COLOURS</span> <span class="o">=</span> <span class="mf">256.0</span>
+    <span class="sd">&#39;&#39;&#39; Maximum number of colours displayed in one COLLADA file &#39;&#39;&#39;</span>
+
+    <span class="n">POINT_SIZE</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="sd">&#39;&#39;&#39; Size of object used to represent point data &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level taken from python&#39;s &#39;logging&#39; module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Call parent class</span>
+        <span class="n">ExportKit</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">)</span>
+
+        <span class="c1"># Pycollada objects used to create a single COLLADA file using multiple input files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span> <span class="o">=</span> <span class="n">ColladaOut</span><span class="p">(</span><span class="n">debug_level</span><span class="p">)</span>
+        <span class="c1">#self.objoout_obj = ObjKit(debug_level)</span>
+
+
+<div class="viewcode-block" id="ColladaKit.start_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.start_collada">[docs]</a>    <span class="k">def</span> <span class="nf">start_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initiate creation of a COLLADA file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;start_collada()&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">Collada</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.add_geom_to_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.add_geom_to_collada">[docs]</a>    <span class="k">def</span> <span class="nf">add_geom_to_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a vessel object to the pycollada mesh object</span>
+<span class="sd">            NB: Does not accept GOCAD vertex or volume files as they usually have</span>
+<span class="sd">            (too) many node objects</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object</span>
+<span class="sd">        :param style_obj: STYLE object containing colour info</span>
+<span class="sd">        :param meta_obj: METADATA object</span>
+<span class="sd">        :returns: a popup info dict or exits if you try to add a GOCAD VS (vertex)</span>
+<span class="sd">            or VO (volume) file</span>
+<span class="sd">            popup info dict format: { object_name: { &#39;attr_name&#39;: attr_val, ... } }</span>
+<span class="sd">            and a node label string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;add_geom_to_collada()&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Cannot do volumes using this function</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_volume</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process volume file from here, internal error&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">node_label</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="c1"># Triangles</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_trgl</span><span class="p">():</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Effect</span><span class="p">(</span><span class="s2">&quot;effect-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span> <span class="p">[],</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">SHADING</span><span class="p">,</span> <span class="n">emission</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">EMISSION</span><span class="p">,</span>
+                                             <span class="n">ambient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AMBIENT</span><span class="p">,</span>
+                                             <span class="n">diffuse</span><span class="o">=</span><span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">(),</span>
+                                             <span class="n">specular</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SPECULAR</span><span class="p">,</span>
+                                             <span class="n">shininess</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SHININESS</span><span class="p">,</span>
+                                             <span class="n">double_sided</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="s2">&quot;material-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                            <span class="s2">&quot;mymaterial-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                            <span class="n">effect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">matnode</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">MaterialNode</span><span class="p">(</span><span class="s2">&quot;materialref-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                                 <span class="n">mat</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="p">[])</span>
+            <span class="c1"># Make floats array for inclusion in COLLADA file</span>
+            <span class="n">vert_floats</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">:</span>
+                <span class="n">vert_floats</span> <span class="o">+=</span> <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+            <span class="n">vert_src</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">FloatSource</span><span class="p">(</span><span class="s2">&quot;triverts-array-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                                  <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vert_floats</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">))</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="s2">&quot;geometry-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                             <span class="n">geometry_name</span><span class="p">,</span> <span class="p">[</span><span class="n">vert_src</span><span class="p">])</span>
+            <span class="n">input_list</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">InputList</span><span class="p">()</span>
+            <span class="n">input_list</span><span class="o">.</span><span class="n">addInput</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;VERTEX&#39;</span><span class="p">,</span> <span class="s2">&quot;#triverts-array-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">))</span>
+
+            <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">tri</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">trgl_arr</span><span class="p">:</span>
+                <span class="n">indices</span> <span class="o">+=</span> <span class="p">[</span><span class="n">tri</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tri</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tri</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">triset</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">createTriangleSet</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="n">input_list</span><span class="p">,</span>
+                                            <span class="s2">&quot;materialref-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">))</span>
+
+            <span class="n">geom</span><span class="o">.</span><span class="n">primitives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">triset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">geometries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">GeometryNode</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="p">[</span><span class="n">matnode</span><span class="p">]))</span>
+
+            <span class="n">popup_dict</span><span class="p">[</span><span class="n">geometry_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+            <span class="n">node_label</span> <span class="o">=</span> <span class="n">geometry_name</span>
+
+        <span class="c1"># Lines</span>
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_line</span><span class="p">():</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Effect</span><span class="p">(</span><span class="s2">&quot;effect-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span> <span class="p">[],</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">SHADING</span><span class="p">,</span>
+                                             <span class="n">emission</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">EMISSION</span><span class="p">,</span>
+                                             <span class="n">ambient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AMBIENT</span><span class="p">,</span>
+                                             <span class="n">diffuse</span><span class="o">=</span><span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">(),</span>
+                                             <span class="n">specular</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SPECULAR</span><span class="p">,</span>
+                                             <span class="n">shininess</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SHININESS</span><span class="p">,</span>
+                                             <span class="n">double_sided</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="s2">&quot;material-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span>
+                                            <span class="s2">&quot;mymaterial-</span><span class="si">{0:05d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">),</span> <span class="n">effect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+
+            <span class="n">geom_label_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_line</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">seg_arr</span><span class="p">,</span>
+                                                         <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">,</span>
+                                                         <span class="n">geom_obj</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span> <span class="ow">not</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_vert_line</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">geom_label</span> <span class="ow">in</span> <span class="n">geom_label_list</span><span class="p">:</span>
+                <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+                <span class="n">node_label</span> <span class="o">=</span> <span class="n">geom_label</span>
+
+        <span class="c1"># Points</span>
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">prop_dict</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_loose_3d_data</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">colour_num</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># If there are many colours, make MAX_COLORS materials</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">has_single_colour</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_false_colour_materials</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+                <span class="n">max_v</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">()</span>
+                <span class="n">min_v</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">()</span>
+
+            <span class="c1"># If there is only one colour</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_colour_material</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">(),</span> <span class="n">colour_num</span><span class="p">)</span>
+                <span class="n">min_v</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">max_v</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="c1"># Draw vertices as pyramids</span>
+            <span class="k">for</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">:</span>
+                <span class="c1"># Lookup the colour table</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">has_single_colour</span><span class="p">()</span> <span class="ow">and</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="p">:</span>
+                    <span class="n">colour_num</span> <span class="o">=</span> <span class="n">calculate_false_colour_num</span><span class="p">(</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">],</span> <span class="n">max_v</span><span class="p">,</span> <span class="n">min_v</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+                <span class="n">geom_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_pyramid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span><span class="p">,</span> <span class="n">vrtx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">POINT_SIZE</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">)</span>
+
+                <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span>
+                                          <span class="s1">&#39;val&#39;</span><span class="p">:</span> <span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">],</span>
+                                          <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">geometry_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)}</span>
+                <span class="n">node_label</span> <span class="o">=</span> <span class="n">geom_label</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">popup_dict</span><span class="p">,</span> <span class="n">node_label</span></div>
+
+
+
+<div class="viewcode-block" id="ColladaKit.end_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.end_collada">[docs]</a>    <span class="k">def</span> <span class="nf">end_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">,</span> <span class="n">node_label</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Close out a COLLADA, writing the mesh object to file</span>
+
+<span class="sd">        :param out_filename: path &amp; filename of COLLADA file to output, without extension</span>
+<span class="sd">        :param node_label: label for the COLLADA &quot;Node&quot; object</span>
+<span class="sd">                           (used by the website to recognise model parts)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;end_collada(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">,</span> <span class="n">node_label</span><span class="p">)</span>
+
+        <span class="n">node</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">node_label</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geomnode_list</span><span class="p">)</span>
+        <span class="n">myscene</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="s2">&quot;myscene&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">node</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">scenes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myscene</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">myscene</span>
+        <span class="n">dest_path</span> <span class="o">=</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="s1">&#39;.dae&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;end_collada() Writing COLLADA file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dest_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.write_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.write_collada">[docs]</a>    <span class="k">def</span> <span class="nf">write_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a COLLADA file</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object that geometry and text</span>
+<span class="sd">        :param style_obj: STYLE object containing colour info</span>
+<span class="sd">        :param meta_obj: METADATA object, used for labelling</span>
+<span class="sd">        :param out_filename: path &amp; filename of COLLADA file to output, without extension</span>
+<span class="sd">        :returns: a dictionary of popup info objects</span>
+<span class="sd">            popup info dict format: { object_name: { &#39;attr_name&#39;: attr_val, ... } }</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_collada(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_collada() geom_obj=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">))</span>
+        <span class="n">p_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="n">p_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_point_collada</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_volume</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot use write_collada for volumes?&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_collada</span><span class="p">()</span>
+            <span class="n">p_dict</span><span class="p">,</span> <span class="n">node_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_geom_to_collada</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_collada</span><span class="p">(</span><span class="n">out_filename</span><span class="p">,</span> <span class="n">node_label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p_dict</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.write_point_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.write_point_collada">[docs]</a>    <span class="k">def</span> <span class="nf">write_point_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a COLLADA file from a point geometry file</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text</span>
+<span class="sd">        :param style_obj: STYLE object containing colour info</span>
+<span class="sd">        :param meta_obj: METADATA object, used for labelling</span>
+<span class="sd">        :param out_filename: path &amp; filename of COLLADA file to output, without extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_point_collada(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_point_collada() geom_obj=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot use write_point_collada for line, triangle or volume&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">Collada</span><span class="p">()</span>
+        <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">colour_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># If there are many colours, make MAX_COLORS materials</span>
+        <span class="n">prop_dict</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_loose_3d_data</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">has_single_colour</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_false_colour_materials</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+            <span class="n">max_v</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">()</span>
+            <span class="n">min_v</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">()</span>
+
+        <span class="c1"># If there is only one colour</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_colour_material</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">(),</span> <span class="n">colour_num</span><span class="p">)</span>
+
+        <span class="c1"># Draw vertices as pyramids</span>
+        <span class="n">geom_label</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">):</span>
+            <span class="c1"># If there&#39;s a colour table calculate colour, but if no data at that point</span>
+            <span class="c1"># then skip this vertex</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">has_single_colour</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">colour_num</span> <span class="o">=</span> <span class="n">calculate_false_colour_num</span><span class="p">(</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">],</span> <span class="n">max_v</span><span class="p">,</span> <span class="n">min_v</span><span class="p">,</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+
+            <span class="c1"># Create coloured pyramid</span>
+            <span class="n">geom_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_pyramid</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">,</span> <span class="n">vrtx</span><span class="p">,</span>
+                                                       <span class="n">point_cnt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POINT_SIZE</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">)</span>
+
+            <span class="c1"># Create popup info</span>
+            <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span>
+                                      <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">geometry_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="p">:</span>
+                <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">][</span><span class="s1">&#39;val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">]</span>
+
+        <span class="c1"># Create a node using the geometry list</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">geom_label</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="n">geomnode_list</span><span class="p">)</span>
+        <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="c1"># Add nodes to scene, add scene to mesh</span>
+        <span class="n">myscene</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="s2">&quot;myscene&quot;</span><span class="p">,</span> <span class="n">node_list</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">scenes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myscene</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">myscene</span>
+
+        <span class="c1"># Write mesh to file</span>
+        <span class="n">dest_path</span> <span class="o">=</span> <span class="n">out_filename</span><span class="o">+</span><span class="s1">&#39;.dae&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;write_point_collada() Writing COLLADA file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dest_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="n">popup_dict</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.compute_neighbours"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.compute_neighbours">[docs]</a>    <span class="k">def</span> <span class="nf">compute_neighbours</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz_list</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Counts the number of neighbours of each point in a 3d array</span>
+
+<span class="sd">        :params xyz_listr: list of (X,Y,Z) coordinates</span>
+<span class="sd">        :returns: dictionary: key is (X,Y,Z), value is number of neighbours</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="n">xyz_list</span><span class="p">:</span>
+            <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="n">xyz_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">xyz</span> <span class="o">!=</span> <span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_to</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_to</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span> \
+                                                         <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_to</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+                        <span class="n">cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">xyz</span><span class="p">]</span> <span class="o">=</span> <span class="n">cnt</span>
+        <span class="c1">#self.logger.debug(&quot;compute_neighbours(%s) returns %s&quot;, repr(xyz_list), repr(ret))</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.next_to"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.next_to">[docs]</a>    <span class="k">def</span> <span class="nf">next_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True iff a equals b or if a is exactly &#39;step&#39; units away from b</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">a_val</span> <span class="o">==</span> <span class="n">b_val</span> <span class="ow">or</span> <span class="n">a_val</span> <span class="o">==</span> <span class="n">b_val</span> <span class="o">+</span> <span class="n">step</span> <span class="ow">or</span> <span class="n">a_val</span> <span class="o">==</span> <span class="n">b_val</span> <span class="o">-</span> <span class="n">step</span></div>
+
+<div class="viewcode-block" id="ColladaKit.calc_step_sz"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.calc_step_sz">[docs]</a>    <span class="k">def</span> <span class="nf">calc_step_sz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; With many voxets being so large, we have to increase sample size so we don&#39;t</span>
+<span class="sd">            create too much data, to be improved later on.</span>
+
+<span class="sd">        :params geom_obj: MODEL_GEOMETRY object</span>
+<span class="sd">        :params limit: the higher this number the more cubes will be used to</span>
+<span class="sd">                       represent the voxet data</span>
+<span class="sd">        :returns: step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">n_elems3</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">n_elems3</span><span class="o">/</span><span class="p">(</span><span class="n">step</span><span class="o">*</span><span class="n">step</span><span class="o">*</span><span class="n">step</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pt_size</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">step</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">),</span>
+                   <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">step</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">),</span>
+                   <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_w</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">step</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">step</span><span class="p">,</span> <span class="n">pt_size</span></div>
+
+
+
+<div class="viewcode-block" id="ColladaKit.write_vol_collada"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.write_vol_collada">[docs]</a>    <span class="k">def</span> <span class="nf">write_vol_collada</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a COLLADA file from a vo file</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object that geometry and text</span>
+<span class="sd">        :param style_obj: STYLE object containing colour info</span>
+<span class="sd">        :param meta_obj: METADATA object, used for labelling</span>
+<span class="sd">        :param out_filename: path &amp; filename of COLLADA file to output, without extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_vol_collada(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_vol_collada() geom_obj=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_volume</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot use write_vo_collada for non-volume file, internal error&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">popup_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># There are two kinds of voxel object</span>
+        <span class="c1"># One has index values that refer to rock types or colours, the other</span>
+        <span class="c1"># has values that refer to physical measurements</span>
+        <span class="k">if</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">is_index_data</span><span class="p">:</span>
+            <span class="c1"># Calculate size of each voxet cube</span>
+            <span class="n">step</span><span class="p">,</span> <span class="n">pt_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_step_sz</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="mi">50000</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;step = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+            <span class="c1"># Take the index data found in the voxel file and group it together</span>
+            <span class="n">bucket</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">]</span> <span class="o">!=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_no_data_marker</span><span class="p">():</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">])</span>
+                            <span class="n">bucket</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Computed buckets&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Computing neighbours</span>
+            <span class="n">num_neighbours</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">data_val</span><span class="p">,</span> <span class="n">coord_list</span> <span class="ow">in</span> <span class="n">bucket</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">num_neighbours</span><span class="p">[</span><span class="n">data_val</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_neighbours</span><span class="p">(</span><span class="n">coord_list</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Computed neighbours&quot;</span><span class="p">)</span>
+
+            <span class="c1"># For each index value (usually rock type)</span>
+            <span class="k">for</span> <span class="n">file_cnt</span><span class="p">,</span> <span class="p">(</span><span class="n">data_val</span><span class="p">,</span> <span class="n">coord_list</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bucket</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Writing coords </span><span class="si">%s</span><span class="s2"> for key </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">coord_list</span><span class="p">[:</span><span class="mi">6</span><span class="p">]),</span>
+                                  <span class="nb">repr</span><span class="p">(</span><span class="n">data_val</span><span class="p">))</span>
+                <span class="n">mesh</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">Collada</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_mapped_colour_materials</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">colour_map</span><span class="p">)</span>
+                <span class="n">point_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">colour_num</span> <span class="o">=</span> <span class="n">data_val</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">())</span>
+                <span class="n">data_val_label</span> <span class="o">=</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_rock_label_table</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">colour_num</span><span class="p">,</span>
+                                                                      <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">())</span>
+                <span class="n">geom_label_stub</span> <span class="o">=</span> <span class="n">geometry_name</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">+</span><span class="n">data_val_label</span>
+                <span class="k">for</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="n">coord_list</span><span class="p">:</span>
+                    <span class="c1"># self.logger.debug(&quot;%d %d %d data_val = %s num_neighbours = %d&quot;,</span>
+                    <span class="c1"># x_val,y_val,z_val, repr(data_val),</span>
+                    <span class="c1"># num_neighbours[data_val][(x_val,y_val,z_val)])</span>
+                    <span class="c1"># If surrounded by other cubes, you can&#39;t see it, so omit</span>
+                    <span class="k">if</span> <span class="n">num_neighbours</span><span class="p">[</span><span class="n">data_val</span><span class="p">][(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="mi">26</span><span class="p">:</span>
+                        <span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">geom_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_cube</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span>
+                                                                <span class="n">z_val</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">pt_size</span><span class="p">,</span>
+                                                                <span class="n">geom_label_stub</span><span class="p">,</span> <span class="n">file_cnt</span><span class="p">,</span>
+                                                                <span class="n">point_cnt</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">)</span>
+                        <span class="n">node</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="s2">&quot;node</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                                  <span class="n">children</span><span class="o">=</span><span class="n">geomnode_list</span><span class="p">)</span>
+                        <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="n">point_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># Use a key with a regular expression to save writing thousands of properties</span>
+                <span class="c1"># to config file</span>
+                <span class="n">popup_dict</span><span class="p">[</span><span class="s2">&quot;^&quot;</span> <span class="o">+</span> <span class="n">geom_label_stub</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                     <span class="s1">&#39;property name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span>
+                                                     <span class="s1">&#39;property value&#39;</span><span class="p">:</span> <span class="n">data_val_label</span><span class="p">}</span>
+
+                <span class="n">myscene</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="s2">&quot;myscene&quot;</span><span class="p">,</span> <span class="n">node_list</span><span class="p">)</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">scenes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myscene</span><span class="p">)</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">myscene</span>
+
+                <span class="c1"># If there are unique labels, then use these, else use the filename</span>
+                <span class="k">if</span> <span class="n">data_val_label</span> <span class="o">!=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">():</span>
+                    <span class="n">popup_dict_key</span> <span class="o">=</span> <span class="n">data_val_label</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">popup_dict_key</span> <span class="o">=</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_cnt</span><span class="p">)</span>
+
+                <span class="c1"># Write out COLLADA file</span>
+                <span class="n">out_filepath</span> <span class="o">=</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">file_cnt</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;write_vol_collada() Writing COLLADA file: </span><span class="si">%s</span><span class="s2">.dae&quot;</span><span class="p">,</span> <span class="n">out_filepath</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mesh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_filepath</span><span class="o">+</span><span class="s1">&#39;.dae&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">.dae: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out_filepath</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">popup_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">popup_dict_key</span><span class="p">,</span> <span class="n">popup_dict</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">))</span>
+                    <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># The physical measurements kind uses a false colourmap, and written as one big file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">Collada</span><span class="p">()</span>
+            <span class="c1"># Limit to 256 colours</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_false_colour_materials</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+            <span class="n">point_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Calculate size of each voxet cube</span>
+            <span class="n">step</span><span class="p">,</span> <span class="n">pt_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_step_sz</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="mi">100000</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;step = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">step</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">]</span> <span class="o">!=</span>  \
+                                 <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_no_data_marker</span><span class="p">()</span> <span class="ow">and</span> \
+                                 <span class="p">(</span><span class="n">z_val</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y_val</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x_val</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> \
+                                 <span class="n">z_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> \
+                                 <span class="n">y_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">x_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                            <span class="n">colour_num</span> <span class="o">=</span> <span class="n">calculate_false_colour_num</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">],</span>
+                                                                    <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">(),</span>
+                                                                    <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">(),</span>
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+                            <span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">geom_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_cube</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">colour_num</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span>
+                                                                    <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span>
+                                                                    <span class="n">pt_size</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">,</span>
+                                                                    <span class="mi">1</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">geomnode_list</span><span class="p">)</span>
+                            <span class="n">node</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="s2">&quot;node</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">point_cnt</span><span class="p">),</span>
+                                                      <span class="n">children</span><span class="o">=</span><span class="n">geomnode_list</span><span class="p">)</span>
+                            <span class="n">val_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">])</span>
+                            <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                      <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span>
+                                                      <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">val_str</span><span class="p">}</span>
+                            <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                            <span class="n">point_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">]</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_no_data_marker</span><span class="p">():</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> no data&quot;</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">)</span>
+
+            <span class="n">myscene</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="s2">&quot;myscene&quot;</span><span class="p">,</span> <span class="n">node_list</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">scenes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myscene</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">myscene</span>
+
+            <span class="n">dest_path</span> <span class="o">=</span> <span class="n">out_filename</span><span class="o">+</span><span class="s1">&#39;.dae&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;write_vol_collada() Writing COLLADA file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mesh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">dest_path</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">popup_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span> <span class="n">popup_dict</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">popup_list</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.write_borehole"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.write_borehole">[docs]</a>    <span class="k">def</span> <span class="nf">write_borehole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_vrtx</span><span class="p">,</span> <span class="n">borehole_name</span><span class="p">,</span> <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">height_reso</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a COLLADA file of a borehole stick</span>
+
+<span class="sd">        :param base_vrtx: base vertex, position of the object within the model [x,y,z]</span>
+<span class="sd">        :param borehole_name: name of borehole</span>
+<span class="sd">        :param colour_info_dict: dict of colour info; key - depth, float,</span>
+<span class="sd">                                val - { &#39;colour&#39; : (R,B,G,A), &#39;classText&#39; : mineral name }</span>
+<span class="sd">                                where R,G,B,A are floats</span>
+<span class="sd">        :param height_reso: height resolution for colour info dict</span>
+<span class="sd">        :param out_filename: path &amp; filename of COLLADA file to output, without extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_borehole(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, colour_info_dict = </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">base_vrtx</span><span class="p">),</span>
+                          <span class="nb">repr</span><span class="p">(</span><span class="n">borehole_name</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colour_info_dict</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">out_filename</span><span class="p">))</span>
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">Collada</span><span class="p">()</span>
+        <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">depth</span><span class="p">,</span> <span class="n">colour_info</span> <span class="ow">in</span> <span class="n">colour_info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Effect</span><span class="p">(</span><span class="s2">&quot;effect_</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)),</span> <span class="p">[],</span> <span class="s2">&quot;phong&quot;</span><span class="p">,</span>
+                                             <span class="n">emission</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ambient</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                             <span class="n">diffuse</span><span class="o">=</span><span class="n">colour_info</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">],</span>
+                                             <span class="n">specular</span><span class="o">=</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">shininess</span><span class="o">=</span><span class="mf">50.0</span><span class="p">)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="s2">&quot;material_</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)),</span>
+                                            <span class="s2">&quot;mymaterial_</span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)),</span> <span class="n">effect</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+
+        <span class="n">geomnode_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">borehole_label</span> <span class="o">=</span> <span class="n">make_borehole_label</span><span class="p">(</span><span class="n">borehole_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collout_obj</span><span class="o">.</span><span class="n">make_colour_borehole_marker</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">base_vrtx</span><span class="p">,</span> <span class="n">borehole_label</span><span class="p">,</span>
+                                                     <span class="n">geomnode_list</span><span class="p">,</span>
+                                                     <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">height_reso</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">borehole_label</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="n">geomnode_list</span><span class="p">)</span>
+        <span class="n">node_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="n">myscene</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="s2">&quot;myscene&quot;</span><span class="p">,</span> <span class="n">node_list</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">scenes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">myscene</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">myscene</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_filename</span><span class="o">+</span><span class="s1">&#39;.dae&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">.dae: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span></div>
+
+
+
+
+<div class="viewcode-block" id="ColladaKit.make_false_colour_materials"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.make_false_colour_materials">[docs]</a>    <span class="k">def</span> <span class="nf">make_false_colour_materials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">max_colours_flt</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a list of coloured materials to COLLADA object using a false colour map</span>
+
+<span class="sd">        :params mesh: pycollada &#39;collada&#39; object</span>
+<span class="sd">        :params max_colours_flt: number of colours to add, float</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">colour_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">max_colours_flt</span><span class="p">)):</span>
+            <span class="n">diffuse_colour</span> <span class="o">=</span> <span class="n">make_false_colour_tup</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">max_colours_flt</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Effect</span><span class="p">(</span><span class="s2">&quot;effect</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="p">[],</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHADING</span><span class="p">,</span>
+                                             <span class="n">emission</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">EMISSION</span><span class="p">,</span> <span class="n">ambient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AMBIENT</span><span class="p">,</span>
+                                             <span class="n">diffuse</span><span class="o">=</span><span class="n">diffuse_colour</span><span class="p">,</span> <span class="n">specular</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SPECULAR</span><span class="p">,</span>
+                                             <span class="n">shininess</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SHININESS</span><span class="p">)</span>
+            <span class="n">mat</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="s2">&quot;material</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span>
+                                            <span class="s2">&quot;mymaterial</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="n">effect</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.make_colour_material"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.make_colour_material">[docs]</a>    <span class="k">def</span> <span class="nf">make_colour_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">colour_tup</span><span class="p">,</span> <span class="n">colour_idx</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a colour material to COLLADA object</span>
+
+<span class="sd">        :params mesh: pycollada &#39;collada&#39; object</span>
+<span class="sd">        :params colour_tup: tuple of floats (R,G,B,A)</span>
+<span class="sd">        :params colour_idx: integer index, used to refer to the material</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;make_colour_material(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colour_tup</span><span class="p">),</span>
+                          <span class="nb">repr</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">))</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Effect</span><span class="p">(</span><span class="s2">&quot;effect</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="p">[],</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHADING</span><span class="p">,</span>
+                                         <span class="n">emission</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">EMISSION</span><span class="p">,</span> <span class="n">ambient</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AMBIENT</span><span class="p">,</span>
+                                         <span class="n">diffuse</span><span class="o">=</span><span class="n">colour_tup</span><span class="p">,</span> <span class="n">specular</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SPECULAR</span><span class="p">,</span>
+                                         <span class="n">shininess</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SHININESS</span><span class="p">)</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">Collada</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">Material</span><span class="p">(</span><span class="s2">&quot;material</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span>
+                                        <span class="s2">&quot;mymaterial</span><span class="si">{0:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="n">effect</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ColladaKit.make_mapped_colour_materials"><a class="viewcode-back" href="../../exports.html#exports.collada_kit.ColladaKit.make_mapped_colour_materials">[docs]</a>    <span class="k">def</span> <span class="nf">make_mapped_colour_materials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">colour_map</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a list of coloured materials to COLLADA object using supplied colour_map</span>
+
+<span class="sd">        :params mesh: COLLADA object</span>
+<span class="sd">        :params colour_map: dict of colours, key is integer, value is RGBA tuple of 4 floats</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">colour_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_colour_material</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">colour_map</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span><span class="p">)</span></div></div>
+
+
+
+<span class="c1">#  END OF ColladaKit CLASS</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

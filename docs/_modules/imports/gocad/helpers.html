@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad.helpers &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>imports.gocad.helpers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for imports.gocad.helpers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A collection GOCAD helper functions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">lib.imports.gocad.gocad_filestr_types</span> <span class="kn">import</span> <span class="n">GocadFileDataStrMap</span>
+
+<span class="c1"># Set up debugging</span>
+<span class="n">LOCAL_LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;helpers&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create console handler</span>
+<span class="n">LOCAL_HANDLER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+<span class="c1"># Create formatter</span>
+<span class="n">LOCAL_FORMATTER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add formatter to ch</span>
+<span class="n">LOCAL_HANDLER</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">LOCAL_FORMATTER</span><span class="p">)</span>
+
+<span class="c1"># Add handler to logger</span>
+<span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">LOCAL_HANDLER</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="split_gocad_objs"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.helpers.split_gocad_objs">[docs]</a><span class="k">def</span> <span class="nf">split_gocad_objs</span><span class="p">(</span><span class="n">filename_lines</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Separates joined GOCAD entries within a file</span>
+
+<span class="sd">    :param filename_lines: lines from concatenated GOCAD file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">gocad_headers</span> <span class="o">=</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span>
+    <span class="n">file_lines_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">part_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">filename_lines</span><span class="p">:</span>
+        <span class="n">line_str</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">in_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">marker</span> <span class="ow">in</span> <span class="n">gocad_headers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">line_str</span> <span class="o">==</span> <span class="n">marker</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">in_file</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">part_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">in_file</span><span class="p">:</span>
+            <span class="n">part_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line_str</span> <span class="o">==</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span>
+                <span class="n">in_file</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">part_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="n">file_lines_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_list</span><span class="p">)</span>
+                <span class="n">part_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">file_lines_list</span></div>
+
+<div class="viewcode-block" id="check_vertex"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.helpers.check_vertex">[docs]</a><span class="k">def</span> <span class="nf">check_vertex</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">vrtx_arr</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; If vertex exists in vertex array then returns True else False</span>
+
+<span class="sd">    :param num: vertex number to search for</span>
+<span class="sd">    :param vrtx_arr: vertex array</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="n">vrtx_arr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="n">num</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="make_line_gen"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.helpers.make_line_gen">[docs]</a><span class="k">def</span> <span class="nf">make_line_gen</span><span class="p">(</span><span class="n">file_lines</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; This is a Python generator function that processes lines of the GOCAD object file</span>
+<span class="sd">        and returns each line in various forms, from quite unprocessed to fully processed</span>
+
+<span class="sd">    :param filename_str: filename of gocad file</span>
+<span class="sd">    :param file_lines: array of strings of lines from gocad file</span>
+<span class="sd">    :returns: array of field strings in upper case with double quotes removed from strings,</span>
+<span class="sd">             array of field string in original case without double quotes removed,</span>
+<span class="sd">             line of GOCAD file in upper case,</span>
+<span class="sd">             boolean, True iff it is the last line of the file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file_lines</span><span class="p">:</span>
+        <span class="n">line_str</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="c1"># Look out for double-quoted strings</span>
+        <span class="k">while</span> <span class="n">line_str</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">before_tup</span> <span class="o">=</span> <span class="n">line_str</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">after_tup</span> <span class="o">=</span> <span class="n">before_tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">line_str</span> <span class="o">=</span> <span class="n">before_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">after_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> \
+                       <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">after_tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">splitstr_arr_raw</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">splitstr_arr</span> <span class="o">=</span> <span class="n">line_str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="c1"># Skip blank lines</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">splitstr_arr</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">yield</span> <span class="n">splitstr_arr</span><span class="p">,</span> <span class="n">splitstr_arr_raw</span><span class="p">,</span> <span class="n">line_str</span><span class="p">,</span> <span class="n">line</span> <span class="o">==</span> <span class="n">file_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">yield</span> <span class="p">[],</span> <span class="p">[],</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">True</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

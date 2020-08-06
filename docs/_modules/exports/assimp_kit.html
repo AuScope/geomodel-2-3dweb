@@ -1,0 +1,563 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.assimp_kit &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.assimp_kit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.assimp_kit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the AssimpKit class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="n">POINTER</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">c_byte</span>
+<span class="kn">from</span> <span class="nn">pyassimp</span> <span class="kn">import</span> <span class="n">structs</span><span class="p">,</span> <span class="n">export</span><span class="p">,</span> <span class="n">export_blob</span><span class="p">,</span> <span class="n">material</span>
+
+<span class="kn">from</span> <span class="nn">lib.exports.geometry_gen</span> <span class="kn">import</span> <span class="n">colour_borehole_gen</span><span class="p">,</span> <span class="n">tri_gen</span>
+<span class="kn">from</span> <span class="nn">lib.exports.export_kit</span> <span class="kn">import</span> <span class="n">ExportKit</span>
+
+<span class="c1"># import lib.exports.print_assimp as pa</span>
+
+
+<div class="viewcode-block" id="AssimpKit"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit">[docs]</a><span class="k">class</span> <span class="nc">AssimpKit</span><span class="p">(</span><span class="n">ExportKit</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Class used to export geometries to assimp lib</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">FILE_EXT</span> <span class="o">=</span> <span class="s1">&#39;.gltf&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Extension of file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">EXPORT_TYPE</span> <span class="o">=</span> <span class="s1">&#39;gltf2&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Export type for assimp API</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level taken from python&#39;s &#39;logging&#39; module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Call parent class</span>
+        <span class="n">ExportKit</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Assimp scene object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="AssimpKit.start_scene"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.start_scene">[docs]</a>    <span class="k">def</span> <span class="nf">start_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initiate scene creation, only one scene can be created at a time</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Scene</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mMetadata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mPrivate</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.add_geom"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.add_geom">[docs]</a>    <span class="k">def</span> <span class="nf">add_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Add a geometry to the scene. It only does triangular meshes for the moment.</span>
+<span class="sd">        Will be expanded to include other types.</span>
+
+<span class="sd">        :param geom_obj: ModelGeometries object</span>
+<span class="sd">        :param style_obj: STYLE object</span>
+<span class="sd">        :param meta_obj: METADATA object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_trgl</span><span class="p">():</span>
+
+            <span class="c1"># Set up a mesh</span>
+            <span class="n">mesh_p_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Mesh</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)()</span>
+            <span class="n">mesh_arr_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mesh_p_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Mesh</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mMeshes</span> <span class="o">=</span> <span class="n">mesh_arr_pp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mNumMeshes</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+            <span class="c1"># Put the mesh name in the mesh&#39;s parents, because GLTFLoader</span>
+            <span class="c1"># copies this into the mesh name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_nodes</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;root_node&#39;</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;ascii&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;_0&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+            <span class="c1"># Set up materials</span>
+            <span class="n">mat_p_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Material</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)()</span>
+            <span class="n">mat_arr_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mat_p_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Material</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mMaterials</span> <span class="o">=</span> <span class="n">mat_arr_pp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mNumMaterials</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="n">mesh_gen</span> <span class="o">=</span> <span class="n">tri_gen</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">trgl_arr</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">mesh_name</span> <span class="ow">in</span> <span class="n">mesh_gen</span><span class="p">:</span>
+                <span class="n">mesh_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_a_mesh</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">mesh_p_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">mesh_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_vertices_to_mesh</span><span class="p">(</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="n">vert_list</span><span class="p">)</span>
+                <span class="c1"># Make a double-sided material of a certain colour</span>
+                <span class="n">mat_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_material</span><span class="p">(</span><span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">mat_p_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">mat_obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;AssimpKit cannot convert point or line geometries&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.end_scene"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.end_scene">[docs]</a>    <span class="k">def</span> <span class="nf">end_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Called after geometries have all been added to scene and a file or blob should be created</span>
+
+<span class="sd">        :param out_filename: filename and path of output file, without file extension \</span>
+<span class="sd">                             if an empty string, then a blob is returned and a file is not created</span>
+<span class="sd">        :returns: True if file was written out, else returns the GLTF as an assimp blob object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#pa.print_scene(self.scn)</span>
+        <span class="c1">#sys.stdout.flush()</span>
+
+        <span class="c1"># Create a file</span>
+        <span class="k">if</span> <span class="n">out_filename</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Writing GLTF: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_EXT</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">export</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="p">,</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_EXT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXPORT_TYPE</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out_filename</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">FILE_EXT</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot; DONE.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Return a blob</span>
+        <span class="n">exp_blob</span> <span class="o">=</span> <span class="n">export_blob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXPORT_TYPE</span><span class="p">,</span> <span class="n">processing</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1">#pa.print_blob(exp_blob)</span>
+        <span class="k">return</span> <span class="n">exp_blob</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.write_borehole"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.write_borehole">[docs]</a>    <span class="k">def</span> <span class="nf">write_borehole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_vrtx</span><span class="p">,</span> <span class="n">borehole_name</span><span class="p">,</span> <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">height_reso</span><span class="p">,</span>
+                       <span class="n">out_filename</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a file or blob of a borehole stick</span>
+<span class="sd">            if &#39;out_filename&#39; is supplied then writes a file and returns True/False</span>
+<span class="sd">            else returns a pointer to a &#39;structs.ExportDataBlob&#39; object</span>
+
+<span class="sd">        :param base_vrtx: base vertex, position of the object within the model [x,y,z]</span>
+<span class="sd">        :param borehole_name: name of borehole</span>
+<span class="sd">        :param colour_info_dict: dict of colour info; key - depth, float, val {&#39;colour&#39;:(R,B,G,A), \</span>
+<span class="sd">                                            &#39;classText&#39;: mineral name }, where R,G,B,A are floats</span>
+<span class="sd">        :param height_reso: height resolution for colour info dict</span>
+<span class="sd">        :param out_filename: optional destination directory+file (without extension), \</span>
+<span class="sd">                             where file is written</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_borehole(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, colour_info_dict = </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span>
+                          <span class="nb">repr</span><span class="p">(</span><span class="n">base_vrtx</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">out_filename</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">borehole_name</span><span class="p">),</span>
+                          <span class="nb">repr</span><span class="p">(</span><span class="n">colour_info_dict</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_scene</span><span class="p">()</span>
+
+        <span class="n">bh_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colour_info_dict</span><span class="p">)</span>
+
+        <span class="c1"># Set up meshes</span>
+        <span class="n">mesh_p_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Mesh</span><span class="p">)</span> <span class="o">*</span> <span class="n">bh_size</span><span class="p">)()</span>
+        <span class="n">mesh_arr_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mesh_p_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Mesh</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mMeshes</span> <span class="o">=</span> <span class="n">mesh_arr_pp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mNumMeshes</span> <span class="o">=</span> <span class="n">bh_size</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">colour_borehole_gen</span><span class="p">(</span><span class="n">base_vrtx</span><span class="p">,</span> <span class="n">borehole_name</span><span class="p">,</span> <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">height_reso</span><span class="p">)</span>
+        <span class="c1"># Test to see if there is only one mesh</span>
+        <span class="c1"># pylint: disable=W0612</span>
+        <span class="o">*</span><span class="n">first</span><span class="p">,</span> <span class="n">mesh_name</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+        <span class="n">one_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="n">one_only</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Put the mesh name in the mesh&#39;s parents, because GLTFLoader</span>
+        <span class="c1"># copies this into the mesh name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_nodes</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;root_node&#39;</span><span class="p">,</span> <span class="n">mesh_name</span><span class="o">+</span><span class="sa">b</span><span class="s1">&#39;_0&#39;</span><span class="p">,</span> <span class="n">bh_size</span><span class="p">)</span>
+
+        <span class="c1"># Set up materials</span>
+        <span class="n">mat_p_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Material</span><span class="p">)</span> <span class="o">*</span> <span class="n">bh_size</span><span class="p">)()</span>
+        <span class="n">mat_arr_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mat_p_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Material</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mMaterials</span> <span class="o">=</span> <span class="n">mat_arr_pp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mNumMaterials</span> <span class="o">=</span> <span class="n">bh_size</span>
+
+        <span class="n">cb_gen</span> <span class="o">=</span> <span class="n">colour_borehole_gen</span><span class="p">(</span><span class="n">base_vrtx</span><span class="p">,</span> <span class="n">borehole_name</span><span class="p">,</span> <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">height_reso</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">colour_idx</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">colour_info</span><span class="p">,</span> <span class="n">mesh_name</span> <span class="ow">in</span> <span class="n">cb_gen</span><span class="p">:</span>
+            <span class="c1"># If there is only one mesh, then GLTFLoader does not append a &#39;_0&#39; to the name,</span>
+            <span class="c1"># so we must do so, to be consistent with the database</span>
+            <span class="k">if</span> <span class="n">one_only</span><span class="p">:</span>
+                <span class="n">mesh_name</span> <span class="o">+=</span> <span class="sa">b</span><span class="s1">&#39;_0&#39;</span>
+            <span class="n">mesh_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_a_mesh</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">colour_idx</span><span class="p">)</span>
+            <span class="n">mesh_p_arr</span><span class="p">[</span><span class="n">colour_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">mesh_obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_vertices_to_mesh</span><span class="p">(</span><span class="n">mesh_obj</span><span class="p">,</span> <span class="n">vert_list</span><span class="p">)</span>
+            <span class="n">mat_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_material</span><span class="p">(</span><span class="n">colour_info</span><span class="p">[</span><span class="s1">&#39;colour&#39;</span><span class="p">])</span>
+            <span class="n">mat_p_arr</span><span class="p">[</span><span class="n">colour_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">mat_obj</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_scene</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_empty_node"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_empty_node">[docs]</a>    <span class="k">def</span> <span class="nf">make_empty_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes an empty node with a supplied name</span>
+
+<span class="sd">        :param node_name: name of node to be created</span>
+<span class="sd">        :returns: pyassimp &#39;Node&#39; object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mName</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">node_name</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mName</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_name</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mTransformation</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Matrix4x4</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                                                 <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                                                 <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>
+                                                 <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mParent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mNumChildren</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mChildren</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mNumMeshes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mMeshes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">mMetadata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_nodes"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">make_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_node_name</span><span class="p">,</span> <span class="n">child_node_name</span><span class="p">,</span> <span class="n">num_meshes</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Make the scene&#39;s root node and a child node</span>
+
+<span class="sd">        :param root_node_name: bytes object, name of root node</span>
+<span class="sd">        :param child_node_name: bytes object, name of child of root node</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Make a root node</span>
+        <span class="n">parent_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_empty_node</span><span class="p">(</span><span class="n">root_node_name</span><span class="p">)</span>
+        <span class="n">parent_n</span><span class="o">.</span><span class="n">mNumChildren</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># Make a child node</span>
+        <span class="n">child_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_empty_node</span><span class="p">(</span><span class="n">child_node_name</span><span class="p">)</span>
+        <span class="n">child_n</span><span class="o">.</span><span class="n">mParent</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">parent_n</span><span class="p">)</span>
+
+        <span class="c1"># Integer index to meshes</span>
+        <span class="n">mesh_idx_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span> <span class="o">*</span> <span class="n">num_meshes</span><span class="p">)()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_meshes</span><span class="p">):</span>
+            <span class="n">mesh_idx_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">child_n</span><span class="o">.</span><span class="n">mMeshes</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">mesh_idx_arr</span><span class="p">),</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">))</span>
+        <span class="n">child_n</span><span class="o">.</span><span class="n">mNumMeshes</span> <span class="o">=</span> <span class="n">num_meshes</span>
+
+        <span class="n">ch_n_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">child_n</span><span class="p">)</span>
+        <span class="n">ch_n_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ch_n_p</span><span class="p">)</span>
+        <span class="n">parent_n</span><span class="o">.</span><span class="n">mChildren</span> <span class="o">=</span> <span class="n">ch_n_pp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scn</span><span class="o">.</span><span class="n">mRootNode</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">parent_n</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_a_mesh"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_a_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">make_a_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_name</span><span class="p">,</span> <span class="n">index_list</span><span class="p">,</span> <span class="n">material_index</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Creates a mesh object</span>
+
+<span class="sd">        :param mesh_name: name of mesh object, bytes object</span>
+<span class="sd">        :param index_list: list of integers, indexes into a vertex list</span>
+<span class="sd">        :param material_index: index into scene&#39;s array of materials</span>
+<span class="sd">        :returns: pyassimp &#39;Mesh&#39; object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">msh</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Mesh</span><span class="p">()</span>
+        <span class="n">num_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_list</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span>
+
+        <span class="n">f_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Face</span> <span class="o">*</span> <span class="n">num_faces</span><span class="p">)()</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mFaces</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">f_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Face</span><span class="p">))</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mNumFaces</span> <span class="o">=</span> <span class="n">num_faces</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mPrimitiveTypes</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># Triangle</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mName</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">)</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mName</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">mesh_name</span>
+        <span class="n">msh</span><span class="o">.</span><span class="n">mMaterialIndex</span> <span class="o">=</span> <span class="n">material_index</span>
+
+        <span class="k">for</span> <span class="n">f_idx</span><span class="p">,</span> <span class="n">i_idx</span>  <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_list</span><span class="p">),</span> <span class="mi">3</span><span class="p">)):</span>
+            <span class="n">i_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)()</span>
+            <span class="n">i_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">index_list</span><span class="p">[</span><span class="n">i_idx</span><span class="p">]</span>
+            <span class="n">i_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">index_list</span><span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">i_idx</span><span class="p">]</span>
+            <span class="n">i_arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">index_list</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="n">i_idx</span><span class="p">]</span>
+            <span class="n">i_arr_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">i_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">))</span>
+            <span class="n">f_arr</span><span class="p">[</span><span class="n">f_idx</span><span class="p">]</span><span class="o">.</span><span class="n">mIndices</span> <span class="o">=</span> <span class="n">i_arr_p</span>
+            <span class="n">f_arr</span><span class="p">[</span><span class="n">f_idx</span><span class="p">]</span><span class="o">.</span><span class="n">mNumIndices</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">return</span> <span class="n">msh</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.add_vertices_to_mesh"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.add_vertices_to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertices_to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">vertex_list</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds the vertices to a mesh</span>
+
+<span class="sd">        :param mesh: pyassimp &#39;Mesh&#39; object</span>
+<span class="sd">        :param vertex_list: list of floats, (x,y,z) coords of vertices</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">num_vertices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertex_list</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span>
+        <span class="n">v_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Vector3D</span> <span class="o">*</span> <span class="n">num_vertices</span><span class="p">)()</span>
+        <span class="n">v_arr_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">v_arr</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">Vector3D</span><span class="p">))</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">mVertices</span> <span class="o">=</span> <span class="n">v_arr_p</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">mNumVertices</span> <span class="o">=</span> <span class="n">num_vertices</span>
+        <span class="k">for</span> <span class="n">varr_idx</span><span class="p">,</span> <span class="n">v_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertex_list</span><span class="p">),</span> <span class="mi">3</span><span class="p">)):</span>
+            <span class="n">v_arr</span><span class="p">[</span><span class="n">varr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Vector3D</span><span class="p">(</span><span class="n">vertex_list</span><span class="p">[</span><span class="n">v_idx</span><span class="p">],</span> <span class="n">vertex_list</span><span class="p">[</span><span class="n">v_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">vertex_list</span><span class="p">[</span><span class="n">v_idx</span><span class="o">+</span><span class="mi">2</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_colour"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_colour">[docs]</a>    <span class="k">def</span> <span class="nf">make_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">r_val</span><span class="p">,</span> <span class="n">g_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">a_val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a pyassimp &#39;MaterialProperty&#39; object for colour</span>
+
+<span class="sd">        :param key: bytes object with name of key</span>
+<span class="sd">        :param r,g,b,a: floating point values of RGBA colours</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">mat_prop</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">MaterialProperty</span><span class="p">()</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mSemantic</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">aiTextureType_NONE</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mType</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mDataLength</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="n">rgba_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">rgba_type</span><span class="p">(</span><span class="n">r_val</span><span class="p">,</span> <span class="n">g_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">a_val</span><span class="p">)</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mData</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_char</span><span class="p">))</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mKey</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span> <span class="c1"># b&#39;$clr.diffuse&#39;</span>
+        <span class="k">return</span> <span class="n">mat_prop</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_two_sided"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_two_sided">[docs]</a>    <span class="k">def</span> <span class="nf">make_two_sided</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a two-sided &#39;MaterialProperty&#39; object</span>
+
+<span class="sd">        :param two_sided: boolean value of two sided property</span>
+<span class="sd">        :returns: A &#39;MaterialProperty&#39; object with two-sided set to 1</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;$mat.twosided&#39;</span>
+        <span class="n">mat_prop</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">MaterialProperty</span><span class="p">()</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mSemantic</span> <span class="o">=</span> <span class="n">material</span><span class="o">.</span><span class="n">aiTextureType_NONE</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mType</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># 5 = buffer</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mDataLength</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># booleans are 1 byte long</span>
+        <span class="n">ts_p</span> <span class="o">=</span> <span class="n">pointer</span><span class="p">(</span><span class="n">c_byte</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mData</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">ts_p</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_char</span><span class="p">))</span>
+        <span class="n">mat_prop</span><span class="o">.</span><span class="n">mKey</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mat_prop</span></div>
+
+
+<div class="viewcode-block" id="AssimpKit.make_material"><a class="viewcode-back" href="../../exports.html#exports.assimp_kit.AssimpKit.make_material">[docs]</a>    <span class="k">def</span> <span class="nf">make_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diffuse_colour</span><span class="p">,</span> <span class="n">two_sided</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Makes a material object with a certain diffuse colour</span>
+
+<span class="sd">        :param diffuse_colour: A tuple of floating point values (R,G,B,A)</span>
+<span class="sd">        :param two_sided: Boolean, optional, default False, make a double-sided material</span>
+<span class="sd">        :returns: pyassimp &#39;Material&#39; object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">structs</span><span class="o">.</span><span class="n">Material</span><span class="p">()</span>
+        <span class="n">mat</span><span class="o">.</span><span class="n">mNumProperties</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mat</span><span class="o">.</span><span class="n">mNumAllocated</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">col_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_colour</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;$clr.diffuse&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">diffuse_colour</span><span class="p">)</span>
+        <span class="n">col_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">col_p</span><span class="p">)</span>
+        <span class="c1"># Make a two-sided property</span>
+        <span class="k">if</span> <span class="n">two_sided</span><span class="p">:</span>
+            <span class="n">mat</span><span class="o">.</span><span class="n">mNumProperties</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">mat</span><span class="o">.</span><span class="n">mNumAllocated</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">two_s_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_two_sided</span><span class="p">()</span>
+            <span class="n">two_s_pp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">two_s_p</span><span class="p">)</span>
+            <span class="n">mat_prop_ppp</span> <span class="o">=</span> <span class="p">(</span><span class="n">POINTER</span><span class="p">(</span><span class="n">structs</span><span class="o">.</span><span class="n">MaterialProperty</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)()</span>
+            <span class="n">mat_prop_ppp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_pp</span>
+            <span class="n">mat_prop_ppp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">two_s_pp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mat_prop_ppp</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">col_pp</span><span class="p">)</span>
+        <span class="n">mat</span><span class="o">.</span><span class="n">mProperties</span> <span class="o">=</span> <span class="n">mat_prop_ppp</span>
+        <span class="k">return</span> <span class="n">mat</span></div></div>
+
+<span class="c1">#  END OF AssimpKit CLASS</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

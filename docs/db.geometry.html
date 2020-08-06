@@ -1,0 +1,862 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.geometry package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="up" title="db package" href="db.html"/>
+        <link rel="next" title="db.metadata package" href="db.metadata.html"/>
+        <link rel="prev" title="db package" href="db.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="db.html">db package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="db.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">db.geometry package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.geometry.model_geometries">db.geometry.model_geometries module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.geometry.types">db.geometry.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.geometry">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="db.metadata.html">db.metadata package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="db.style.html">db.style package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db.db_tables">db.db_tables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="db.html">db package</a> &raquo;</li>
+        
+      <li>db.geometry package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/db.geometry.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="db-geometry-package">
+<h1>db.geometry package<a class="headerlink" href="#db-geometry-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-db.geometry.model_geometries">
+<span id="db-geometry-model-geometries-module"></span><h2>db.geometry.model_geometries module<a class="headerlink" href="#module-db.geometry.model_geometries" title="Permalink to this headline">¶</a></h2>
+<p>Contains ModelGeometries class</p>
+<dl class="class">
+<dt id="db.geometry.model_geometries.ModelGeometries">
+<em class="property">class </em><code class="descclassname">db.geometry.model_geometries.</code><code class="descname">ModelGeometries</code><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class used to store abstract geometry of parts of a geological model and its data
+It should be independent as possible of any model’s input format
+Each class only stores data for 1 volume, but for many line segments and triangle faces
+All sequence numbers for _*_arr start at 1</p>
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._atom_arr">
+<code class="descname">_atom_arr</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._atom_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘ATOM’ used to store atom data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._ijk_data">
+<code class="descname">_ijk_data</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._ijk_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic property data associated with IJK volume indexes
+First point is (0,0,0)
+This is an array of a dictionary mapping (I,J,K) =&gt; [data1, data2, data3, … ]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._max_data">
+<code class="descname">_max_data</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._max_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of maximum values in ‘xyz_data’ or ‘vol_data’</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._min_data">
+<code class="descname">_min_data</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._min_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of minimum value in ‘xyz_data’ or ‘vol_data’</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._no_data_marker">
+<code class="descname">_no_data_marker</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._no_data_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of values indicating no data exists at a point in space</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._seg_arr">
+<code class="descname">_seg_arr</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._seg_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘SEG’ used to store line segment data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._trgl_arr">
+<code class="descname">_trgl_arr</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._trgl_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘TRGL’ used store triangle face data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._vrtx_arr">
+<code class="descname">_vrtx_arr</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._vrtx_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of named tuples ‘VRTX’ used to store vertex data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries._xyz_data">
+<code class="descname">_xyz_data</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries._xyz_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic property data associated with XYZ points
+This is an array of a dictionary mapping (X,Y,Z) =&gt; [data1, data2, data3, … ]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.add_loose_3d_data">
+<code class="descname">add_loose_3d_data</code><span class="sig-paren">(</span><em>is_xyz</em>, <em>data_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.add_loose_3d_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.add_loose_3d_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an instance of XYZ data
+:param is_xyz: True iff xyz data (float, float, float)                        else ijk (int, int, int) data
+:param data_dict: dictionary of (X,Y,Z) =&gt; data, or (I,J,K) =&gt; data                           values to be added</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.add_stats">
+<code class="descname">add_stats</code><span class="sig-paren">(</span><em>min_val</em>, <em>max_val</em>, <em>no_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.add_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.add_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds minimum, maximum and no data marker
+:param min_val: minimum value
+:param max_val: maximum value
+:param no_data: value used in a dataset when no data is recorded for a location</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.atom_arr">
+<code class="descname">atom_arr</code><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.atom_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array of ATOM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.calc_minmax">
+<code class="descname">calc_minmax</code><span class="sig-paren">(</span><em>x_coord</em>, <em>y_coord</em>, <em>z_coord</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.calc_minmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.calc_minmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and stores the max and min of all x,y,z coords</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>y_coord</strong><strong>, </strong><strong>z_coord</strong> (<em>x_coord</em><em>,</em>) – x,y,z coords (python or numpy float)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_extent">
+<code class="descname">get_extent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_extent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_extent" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">estimate of the geographic extent of the model, using max and min             coordinate values format is [min_x, max_x, min_y, max_y]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_loose_3d_data">
+<code class="descname">get_loose_3d_data</code><span class="sig-paren">(</span><em>is_xyz</em>, <em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_loose_3d_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_loose_3d_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves data from xyz data dictionary
+:param is_xyz: True iff xyz data (float, float, float)                        else ijk (int, int, int) data
+:param idx: index for when there are multiple values for each point in space,                     omit for volumes
+:returns: dictionary of (X,Y,Z) =&gt; data value or (I,J,K) =&gt; data value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_max_data">
+<code class="descname">get_max_data</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_max_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_max_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves maximum value of data point
+:param idx: index into property data, omit for volume data
+:returns: maximum data value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_min_data">
+<code class="descname">get_min_data</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_min_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_min_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves minimum value of data point
+:param idx: index into property data, omit for volume data
+:returns: minimum data value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_no_data_marker">
+<code class="descname">get_no_data_marker</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_no_data_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_no_data_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve no data marker
+:param idx: index into property data, omit for volume data
+:returns: no data marker</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_rotation">
+<code class="descname">get_rotation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">three unit vectors of the volume’s XYZ axes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.get_vol_side_lengths">
+<code class="descname">get_vol_side_lengths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.get_vol_side_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.get_vol_side_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_line">
+<code class="descname">is_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.is_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff this contails line data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_point">
+<code class="descname">is_point</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.is_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff this contains point data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_single_layer_vo">
+<code class="descname">is_single_layer_vo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.is_single_layer_vo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_single_layer_vo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if this is extracted from a GOCAD VOXEL that only has a single layer
+and should be converted into a PNG instead of a GLTF</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_trgl">
+<code class="descname">is_trgl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.is_trgl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_trgl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff this contains triangle data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_vert_line">
+<code class="descname">is_vert_line</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_vert_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is true for wells that are represented by vertical lines</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.model_geometries.ModelGeometries.is_volume">
+<code class="descname">is_volume</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#ModelGeometries.is_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.is_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff this contains volume data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.line_width">
+<code class="descname">line_width</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.line_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this contains lines, desired line width</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.max_x">
+<code class="descname">max_x</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.max_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum X coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.max_y">
+<code class="descname">max_y</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.max_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum Y coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.max_z">
+<code class="descname">max_z</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.max_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum Z coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.min_x">
+<code class="descname">min_x</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.min_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum X coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.min_y">
+<code class="descname">min_y</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.min_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum Y coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.min_z">
+<code class="descname">min_z</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.min_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum Z coordinate, used to calculate extent</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.seg_arr">
+<code class="descname">seg_arr</code><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.seg_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array of SEG objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.trgl_arr">
+<code class="descname">trgl_arr</code><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.trgl_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array of TRGL objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_axis_u">
+<code class="descname">vol_axis_u</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_axis_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full length U-axis volume vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_axis_v">
+<code class="descname">vol_axis_v</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_axis_v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full length V-axis volume vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_axis_w">
+<code class="descname">vol_axis_w</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_axis_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full length W-axis volume vector</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_data">
+<code class="descname">vol_data</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>3d numpy array of volume data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_data_type">
+<code class="descname">vol_data_type</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of data in ‘vol_data’/’_xyz_data’ e.g. ‘FLOAT_32’ ‘INT_16’, ‘RGBA’
+NB: If &gt;8 bits, always stored in big-endian fashion</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_origin">
+<code class="descname">vol_origin</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Origin of volume’s XYZ axes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vol_sz">
+<code class="descname">vol_sz</code><em class="property"> = None</em><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vol_sz" title="Permalink to this definition">¶</a></dt>
+<dd><p>3 dimensional size of voxel volume</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.model_geometries.ModelGeometries.vrtx_arr">
+<code class="descname">vrtx_arr</code><a class="headerlink" href="#db.geometry.model_geometries.ModelGeometries.vrtx_arr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array of VRTX objects</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="db.geometry.model_geometries.unit_vector">
+<code class="descclassname">db.geometry.model_geometries.</code><code class="descname">unit_vector</code><span class="sig-paren">(</span><em>vector</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/geometry/model_geometries.html#unit_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.geometry.model_geometries.unit_vector" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the unit vector of the vector.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-db.geometry.types">
+<span id="db-geometry-types-module"></span><h2>db.geometry.types module<a class="headerlink" href="#module-db.geometry.types" title="Permalink to this headline">¶</a></h2>
+<p>Contains named tuples of basic types, independent of any geological model file format</p>
+<dl class="class">
+<dt id="db.geometry.types.ATOM">
+<em class="property">class </em><code class="descclassname">db.geometry.types.</code><code class="descname">ATOM</code><span class="sig-paren">(</span><em>n</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.ATOM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>Immutable named tuple which stores atom data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">N:</th><td class="field-body">sequence number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">V:</th><td class="field-body">vertex it refers to</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="db.geometry.types.ATOM._asdict">
+<code class="descname">_asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.ATOM._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new OrderedDict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.ATOM._fields">
+<code class="descname">_fields</code><em class="property"> = ('n', 'v')</em><a class="headerlink" href="#db.geometry.types.ATOM._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="db.geometry.types.ATOM._make">
+<em class="property">classmethod </em><code class="descname">_make</code><span class="sig-paren">(</span><em>iterable</em>, <em>new=&lt;built-in method __new__ of type object at 0x9d43a0&gt;</em>, <em>len=&lt;built-in function len&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.ATOM._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new ATOM object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.ATOM._replace">
+<code class="descname">_replace</code><span class="sig-paren">(</span><em>_self</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.ATOM._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new ATOM object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.ATOM._source">
+<code class="descname">_source</code><em class="property"> = &quot;from builtins import property as _property, tuple as _tuple\nfrom operator import itemgetter as _itemgetter\nfrom collections import OrderedDict\n\nclass ATOM(tuple):\n    'ATOM(n, v)'\n\n    __slots__ = ()\n\n    _fields = ('n', 'v')\n\n    def __new__(_cls, n, v):\n        'Create new instance of ATOM(n, v)'\n        return _tuple.__new__(_cls, (n, v))\n\n    &#64;classmethod\n    def _make(cls, iterable, new=tuple.__new__, len=len):\n        'Make a new ATOM object from a sequence or iterable'\n        result = new(cls, iterable)\n        if len(result) != 2:\n            raise TypeError('Expected 2 arguments, got %d' % len(result))\n        return result\n\n    def _replace(_self, **kwds):\n        'Return a new ATOM object replacing specified fields with new values'\n        result = _self._make(map(kwds.pop, ('n', 'v'), _self))\n        if kwds:\n            raise ValueError('Got unexpected field names: %r' % list(kwds))\n        return result\n\n    def __repr__(self):\n        'Return a nicely formatted representation string'\n        return self.__class__.__name__ + '(n=%r, v=%r)' % self\n\n    def _asdict(self):\n        'Return a new OrderedDict which maps field names to their values.'\n        return OrderedDict(zip(self._fields, self))\n\n    def __getnewargs__(self):\n        'Return self as a plain tuple.  Used by copy and pickle.'\n        return tuple(self)\n\n    n = _property(_itemgetter(0), doc='Alias for field number 0')\n\n    v = _property(_itemgetter(1), doc='Alias for field number 1')\n\n&quot;</em><a class="headerlink" href="#db.geometry.types.ATOM._source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.ATOM.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span> &#x2192; integer -- return number of occurrences of value<a class="headerlink" href="#db.geometry.types.ATOM.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.ATOM.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; integer -- return first index of value.<a class="headerlink" href="#db.geometry.types.ATOM.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.ATOM.n">
+<code class="descname">n</code><a class="headerlink" href="#db.geometry.types.ATOM.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.ATOM.v">
+<code class="descname">v</code><a class="headerlink" href="#db.geometry.types.ATOM.v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.geometry.types.SEG">
+<em class="property">class </em><code class="descclassname">db.geometry.types.</code><code class="descname">SEG</code><span class="sig-paren">(</span><em>ab</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.SEG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>Immutable named tuple which stores segment data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Ab:</th><td class="field-body">segment vertices</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="db.geometry.types.SEG._asdict">
+<code class="descname">_asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.SEG._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new OrderedDict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.SEG._fields">
+<code class="descname">_fields</code><em class="property"> = ('ab',)</em><a class="headerlink" href="#db.geometry.types.SEG._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="db.geometry.types.SEG._make">
+<em class="property">classmethod </em><code class="descname">_make</code><span class="sig-paren">(</span><em>iterable</em>, <em>new=&lt;built-in method __new__ of type object at 0x9d43a0&gt;</em>, <em>len=&lt;built-in function len&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.SEG._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new SEG object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.SEG._replace">
+<code class="descname">_replace</code><span class="sig-paren">(</span><em>_self</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.SEG._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new SEG object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.SEG._source">
+<code class="descname">_source</code><em class="property"> = &quot;from builtins import property as _property, tuple as _tuple\nfrom operator import itemgetter as _itemgetter\nfrom collections import OrderedDict\n\nclass SEG(tuple):\n    'SEG(ab,)'\n\n    __slots__ = ()\n\n    _fields = ('ab',)\n\n    def __new__(_cls, ab,):\n        'Create new instance of SEG(ab,)'\n        return _tuple.__new__(_cls, (ab,))\n\n    &#64;classmethod\n    def _make(cls, iterable, new=tuple.__new__, len=len):\n        'Make a new SEG object from a sequence or iterable'\n        result = new(cls, iterable)\n        if len(result) != 1:\n            raise TypeError('Expected 1 arguments, got %d' % len(result))\n        return result\n\n    def _replace(_self, **kwds):\n        'Return a new SEG object replacing specified fields with new values'\n        result = _self._make(map(kwds.pop, ('ab',), _self))\n        if kwds:\n            raise ValueError('Got unexpected field names: %r' % list(kwds))\n        return result\n\n    def __repr__(self):\n        'Return a nicely formatted representation string'\n        return self.__class__.__name__ + '(ab=%r)' % self\n\n    def _asdict(self):\n        'Return a new OrderedDict which maps field names to their values.'\n        return OrderedDict(zip(self._fields, self))\n\n    def __getnewargs__(self):\n        'Return self as a plain tuple.  Used by copy and pickle.'\n        return tuple(self)\n\n    ab = _property(_itemgetter(0), doc='Alias for field number 0')\n\n&quot;</em><a class="headerlink" href="#db.geometry.types.SEG._source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.SEG.ab">
+<code class="descname">ab</code><a class="headerlink" href="#db.geometry.types.SEG.ab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.SEG.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span> &#x2192; integer -- return number of occurrences of value<a class="headerlink" href="#db.geometry.types.SEG.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.SEG.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; integer -- return first index of value.<a class="headerlink" href="#db.geometry.types.SEG.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.geometry.types.TRGL">
+<em class="property">class </em><code class="descclassname">db.geometry.types.</code><code class="descname">TRGL</code><span class="sig-paren">(</span><em>n</em>, <em>abc</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.TRGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>Immutable named tuple which stores triangle data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">N:</th><td class="field-body">sequence number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Abc:</th><td class="field-body">triangle vertices</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="db.geometry.types.TRGL._asdict">
+<code class="descname">_asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.TRGL._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new OrderedDict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.TRGL._fields">
+<code class="descname">_fields</code><em class="property"> = ('n', 'abc')</em><a class="headerlink" href="#db.geometry.types.TRGL._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="db.geometry.types.TRGL._make">
+<em class="property">classmethod </em><code class="descname">_make</code><span class="sig-paren">(</span><em>iterable</em>, <em>new=&lt;built-in method __new__ of type object at 0x9d43a0&gt;</em>, <em>len=&lt;built-in function len&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.TRGL._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new TRGL object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.TRGL._replace">
+<code class="descname">_replace</code><span class="sig-paren">(</span><em>_self</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.TRGL._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new TRGL object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.TRGL._source">
+<code class="descname">_source</code><em class="property"> = &quot;from builtins import property as _property, tuple as _tuple\nfrom operator import itemgetter as _itemgetter\nfrom collections import OrderedDict\n\nclass TRGL(tuple):\n    'TRGL(n, abc)'\n\n    __slots__ = ()\n\n    _fields = ('n', 'abc')\n\n    def __new__(_cls, n, abc):\n        'Create new instance of TRGL(n, abc)'\n        return _tuple.__new__(_cls, (n, abc))\n\n    &#64;classmethod\n    def _make(cls, iterable, new=tuple.__new__, len=len):\n        'Make a new TRGL object from a sequence or iterable'\n        result = new(cls, iterable)\n        if len(result) != 2:\n            raise TypeError('Expected 2 arguments, got %d' % len(result))\n        return result\n\n    def _replace(_self, **kwds):\n        'Return a new TRGL object replacing specified fields with new values'\n        result = _self._make(map(kwds.pop, ('n', 'abc'), _self))\n        if kwds:\n            raise ValueError('Got unexpected field names: %r' % list(kwds))\n        return result\n\n    def __repr__(self):\n        'Return a nicely formatted representation string'\n        return self.__class__.__name__ + '(n=%r, abc=%r)' % self\n\n    def _asdict(self):\n        'Return a new OrderedDict which maps field names to their values.'\n        return OrderedDict(zip(self._fields, self))\n\n    def __getnewargs__(self):\n        'Return self as a plain tuple.  Used by copy and pickle.'\n        return tuple(self)\n\n    n = _property(_itemgetter(0), doc='Alias for field number 0')\n\n    abc = _property(_itemgetter(1), doc='Alias for field number 1')\n\n&quot;</em><a class="headerlink" href="#db.geometry.types.TRGL._source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.TRGL.abc">
+<code class="descname">abc</code><a class="headerlink" href="#db.geometry.types.TRGL.abc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.TRGL.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span> &#x2192; integer -- return number of occurrences of value<a class="headerlink" href="#db.geometry.types.TRGL.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.TRGL.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; integer -- return first index of value.<a class="headerlink" href="#db.geometry.types.TRGL.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.TRGL.n">
+<code class="descname">n</code><a class="headerlink" href="#db.geometry.types.TRGL.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="db.geometry.types.VRTX">
+<em class="property">class </em><code class="descclassname">db.geometry.types.</code><code class="descname">VRTX</code><span class="sig-paren">(</span><em>n</em>, <em>xyz</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.VRTX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>Immutable named tuple which stores vertex data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">N:</th><td class="field-body">sequence number</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Xyz:</th><td class="field-body">coordinates</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="db.geometry.types.VRTX._asdict">
+<code class="descname">_asdict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.VRTX._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new OrderedDict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.VRTX._fields">
+<code class="descname">_fields</code><em class="property"> = ('n', 'xyz')</em><a class="headerlink" href="#db.geometry.types.VRTX._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="db.geometry.types.VRTX._make">
+<em class="property">classmethod </em><code class="descname">_make</code><span class="sig-paren">(</span><em>iterable</em>, <em>new=&lt;built-in method __new__ of type object at 0x9d43a0&gt;</em>, <em>len=&lt;built-in function len&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.VRTX._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new VRTX object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.VRTX._replace">
+<code class="descname">_replace</code><span class="sig-paren">(</span><em>_self</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#db.geometry.types.VRTX._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new VRTX object replacing specified fields with new values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.VRTX._source">
+<code class="descname">_source</code><em class="property"> = &quot;from builtins import property as _property, tuple as _tuple\nfrom operator import itemgetter as _itemgetter\nfrom collections import OrderedDict\n\nclass VRTX(tuple):\n    'VRTX(n, xyz)'\n\n    __slots__ = ()\n\n    _fields = ('n', 'xyz')\n\n    def __new__(_cls, n, xyz):\n        'Create new instance of VRTX(n, xyz)'\n        return _tuple.__new__(_cls, (n, xyz))\n\n    &#64;classmethod\n    def _make(cls, iterable, new=tuple.__new__, len=len):\n        'Make a new VRTX object from a sequence or iterable'\n        result = new(cls, iterable)\n        if len(result) != 2:\n            raise TypeError('Expected 2 arguments, got %d' % len(result))\n        return result\n\n    def _replace(_self, **kwds):\n        'Return a new VRTX object replacing specified fields with new values'\n        result = _self._make(map(kwds.pop, ('n', 'xyz'), _self))\n        if kwds:\n            raise ValueError('Got unexpected field names: %r' % list(kwds))\n        return result\n\n    def __repr__(self):\n        'Return a nicely formatted representation string'\n        return self.__class__.__name__ + '(n=%r, xyz=%r)' % self\n\n    def _asdict(self):\n        'Return a new OrderedDict which maps field names to their values.'\n        return OrderedDict(zip(self._fields, self))\n\n    def __getnewargs__(self):\n        'Return self as a plain tuple.  Used by copy and pickle.'\n        return tuple(self)\n\n    n = _property(_itemgetter(0), doc='Alias for field number 0')\n\n    xyz = _property(_itemgetter(1), doc='Alias for field number 1')\n\n&quot;</em><a class="headerlink" href="#db.geometry.types.VRTX._source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.VRTX.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span> &#x2192; integer -- return number of occurrences of value<a class="headerlink" href="#db.geometry.types.VRTX.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="db.geometry.types.VRTX.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>value</em><span class="optional">[</span>, <em>start</em><span class="optional">[</span>, <em>stop</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span> &#x2192; integer -- return first index of value.<a class="headerlink" href="#db.geometry.types.VRTX.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.VRTX.n">
+<code class="descname">n</code><a class="headerlink" href="#db.geometry.types.VRTX.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.geometry.types.VRTX.xyz">
+<code class="descname">xyz</code><a class="headerlink" href="#db.geometry.types.VRTX.xyz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-db.geometry">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-db.geometry" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="db.metadata.html" class="btn btn-neutral float-right" title="db.metadata package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="db.html" class="btn btn-neutral" title="db package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,448 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>config_builder &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>config_builder</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for config_builder</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; This class is used to build a config file</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="c1"># Set up debugging</span>
+<span class="n">LOCAL_LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Create console handler</span>
+<span class="n">LOCAL_HANDLER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+<span class="c1"># Create formatter</span>
+<span class="n">LOCAL_FORMATTER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add formatter to ch</span>
+<span class="n">LOCAL_HANDLER</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">LOCAL_FORMATTER</span><span class="p">)</span>
+
+<span class="c1"># Add handler to logger</span>
+<span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">LOCAL_HANDLER</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ConfigBuilder"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder">[docs]</a><span class="k">class</span> <span class="nc">ConfigBuilder</span><span class="p">():</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        A list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]</span>
+<span class="sd">        NB: An extent is a list of coords defining boundaries of model</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="ConfigBuilder.add_config_list"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.add_config_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_config_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_list</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Add model config dict to internal list</span>
+<span class="sd">            :param config_list: list of model config dicts</span>
+<span class="sd">        &#39;&#39;&#39;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_list</span> <span class="o">+=</span> <span class="n">config_list</span> </div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.has_output"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.has_output">[docs]</a>    <span class="k">def</span> <span class="nf">has_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">            Returns True iff there are model config dicts that can be written</span>
+<span class="sd">            out to a config file</span>
+<span class="sd">        &#39;&#39;&#39;</span> 
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.add_ext"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.add_ext">[docs]</a>    <span class="k">def</span> <span class="nf">add_ext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds an extent to this instance&#39;s internal extent list</span>
+<span class="sd">            :param ext: single extent [min_x, max_x, min_y, max_y]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.reduce_extents"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.reduce_extents">[docs]</a>    <span class="k">def</span> <span class="nf">reduce_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Reduces the internal list of extents to just one extent</span>
+<span class="sd">            :returns: single extent [min_x, max_x, min_y, max_y]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;reduce_extents()&quot;</span><span class="p">)</span>
+
+        <span class="n">out_extent</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">extent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extent</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">out_extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">out_extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">out_extent</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">out_extent</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">out_extent</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">out_extent</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">out_extent</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
+                <span class="n">out_extent</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">out_extent</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.create_json_config"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.create_json_config">[docs]</a>    <span class="k">def</span> <span class="nf">create_json_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Creates a JSON file of GLTF objects to display in 3D</span>
+
+<span class="sd">        :param output_filename: name of file containing created config file</span>
+<span class="sd">        :param dest_dir: destination directory for output file</span>
+<span class="sd">        :param params: model input parameters, SimpleNamespace() object,</span>
+<span class="sd">                      keys are: &#39;name&#39; &#39;crs&#39; &#39;init_cam_dist&#39; and optional &#39;proj4_defn&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;create_json_config(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">)</span>
+
+        <span class="c1"># Sort by display name before saving to file, sort by display name, then model URL</span>
+        <span class="n">sorted_model_dict_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_list</span><span class="p">,</span>
+                                    <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;model_url&#39;</span><span class="p">]))</span>
+        <span class="n">config_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;extent&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_extents</span><span class="p">(),</span>
+                                      <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="s2">&quot;init_cam_dist&quot;</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">init_cam_dist</span>
+                                     <span class="p">},</span>
+                       <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;GeologicalModel&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+                      <span class="p">}</span>
+        <span class="c1"># Are there any sidebar group labels that we can use?</span>
+        <span class="c1"># If not, then put them in &quot;Not Grouped&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s1">&#39;grp_struct_dict&#39;</span><span class="p">):</span>
+            <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">sorted_model_dict_list</span><span class="p">:</span>
+                <span class="n">model_file</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_url&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">model_file</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">grp_struct_dict</span><span class="p">:</span>
+                    <span class="n">group_name</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">grp_struct_dict</span><span class="p">[</span><span class="n">model_file</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;groups&quot;</span><span class="p">][</span><span class="n">group_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;groups&quot;</span><span class="p">][</span><span class="s2">&quot;Not Grouped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c1"># Are there WMS layers?</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s1">&#39;wms_services&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">wms_services</span><span class="p">:</span>
+                    <span class="n">config_dict</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">][</span><span class="s1">&#39;WMS Layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span> <span class="o">**</span><span class="n">layer</span><span class="p">,</span>
+                                                                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;WMSLayer&quot;</span><span class="p">,</span>
+                                                                <span class="s2">&quot;displayed&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                                                <span class="s2">&quot;include&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="c1"># Is there a proj4 definition?</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s1">&#39;proj4_defn&#39;</span><span class="p">):</span>
+            <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;proj4_defn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">proj4_defn</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">output_filename</span><span class="p">)),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_p</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">file_p</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot open file </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">output_filename</span><span class="p">,</span> <span class="n">os_exc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.add_config"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.add_config">[docs]</a>    <span class="k">def</span> <span class="nf">add_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gs_dict</span><span class="p">,</span> <span class="n">label_str</span><span class="p">,</span> <span class="n">popup_dict</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span>
+                   <span class="n">file_ext</span><span class="o">=</span><span class="s1">&#39;.gltf&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">styling</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&#39;&#39;&#39; Adds more config information to popup dictionary</span>
+
+<span class="sd">        :param gs_dict: group structure dictionary (group struct dict format: \</span>
+<span class="sd">        { filename: ( group_name, { insert_key1: val, insert_key2: val } } )</span>
+<span class="sd">        :param label_str: string to use as a display name for this part of the \</span>
+<span class="sd">        model, if none available in group struct dict</span>
+<span class="sd">        :param popup_dict: information to display in popup window \</span>
+<span class="sd">        ( popup dict format: { object_name: { &#39;attr_name&#39;: attr_val, ... } } where &#39;attr_name&#39; is one of: &#39;name&#39;, &#39;title&#39;, &#39;href&#39;)</span>
+<span class="sd">        :param file_name:  file and path (without extension) of model part source file</span>
+<span class="sd">        :param file_ext: optional file extension of &#39;file_name&#39;, defaults to &#39;.gltf&#39;</span>
+<span class="sd">        :param position: optional [x,y,z] position of model part</span>
+<span class="sd">        :param styling: optional dict of styling parameters e.g. \</span>
+<span class="sd">                        { &quot;labels&quot;: [  \</span>
+<span class="sd">                            { \</span>
+<span class="sd">                                &quot;display_name&quot;: &quot;MARKER_TOPMOROAKVELKERRI_GRP&quot;, \</span>
+<span class="sd">                                &quot;position&quot;: [ \</span>
+<span class="sd">                                    425500.0, \</span>
+<span class="sd">                                    8028000.0, \</span>
+<span class="sd">                                    228.699997 \</span>
+<span class="sd">                                ] \</span>
+<span class="sd">                            }, \</span>
+<span class="sd">                          ] \</span>
+<span class="sd">                        }</span>
+<span class="sd">        :returns: a dict of model configuration info, which includes the popup dict</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;add_config2popup(</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">label_str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">)</span>
+        <span class="n">np_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">modelconf_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;styling&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">styling</span>
+        <span class="n">model_url</span> <span class="o">=</span> <span class="n">np_filename</span> <span class="o">+</span> <span class="n">file_ext</span>
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;model_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_url</span>
+        <span class="k">if</span> <span class="n">file_ext</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;.PNG&quot;</span><span class="p">:</span>
+            <span class="c1"># PNG files do not have any coordinates, so they must be supplied</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ImagePlane&#39;</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;GLTFObject&#39;</span>
+            <span class="c1"># Add in URLs to export model part to DXF</span>
+            <span class="k">for</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">p_dict</span> <span class="ow">in</span> <span class="n">popup_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">p_dict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">,[])</span>
+                <span class="n">p_dict</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Export DXF&#39;</span><span class="p">,</span> <span class="s1">&#39;URL&#39;</span><span class="p">:</span> <span class="s1">&#39;http://geomodels.auscope.org/&#39;</span><span class="o">+</span><span class="n">model_name</span><span class="o">+</span><span class="s1">&#39;?service=EXPORT&amp;filename=&#39;</span><span class="o">+</span><span class="n">model_url</span><span class="o">+</span><span class="s1">&#39;&amp;format=DXF&#39;</span><span class="p">})</span>
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;popups&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">popup_dict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_inserts</span><span class="p">(</span><span class="n">gs_dict</span><span class="p">,</span> <span class="n">model_url</span><span class="p">,</span> <span class="n">modelconf_dict</span><span class="p">,</span> <span class="n">label_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span>
+
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;include&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;displayed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modelconf_dict</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.add_inserts"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.add_inserts">[docs]</a>    <span class="k">def</span> <span class="nf">add_inserts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gs_dict</span><span class="p">,</span> <span class="n">model_part_key</span><span class="p">,</span> <span class="n">modelconf_dict</span><span class="p">,</span> <span class="n">alt_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sets the &#39;display_name&#39; and other inserts from the group structure dictionary</span>
+
+<span class="sd">        :param gs_dict: group structure dictionary (group struct dict format: \</span>
+<span class="sd">        { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))</span>
+<span class="sd">        :param model_part_key: model part key in &#39;gs_dict&#39;</span>
+<span class="sd">        :param modelconf_dict: dictionary of model information</span>
+<span class="sd">        :param alt_name: alternative &#39;display_name&#39; when not supplied in &#39;gs_dict&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Include inserts from group struct dict</span>
+        <span class="k">if</span> <span class="n">model_part_key</span> <span class="ow">in</span> <span class="n">gs_dict</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">gs_dict</span><span class="p">[</span><span class="n">model_part_key</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ins_k</span><span class="p">,</span> <span class="n">ins_v</span> <span class="ow">in</span> <span class="n">gs_dict</span><span class="p">[</span><span class="n">model_part_key</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">modelconf_dict</span><span class="p">[</span><span class="n">ins_k</span><span class="p">]</span> <span class="o">=</span> <span class="n">ins_v</span>
+
+        <span class="c1"># If display name not in group structure dict, use alt name string</span>
+        <span class="k">if</span> <span class="s1">&#39;display_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">modelconf_dict</span><span class="p">:</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;display_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt_name</span></div>
+
+
+<div class="viewcode-block" id="ConfigBuilder.add_vol_config"><a class="viewcode-back" href="../config_builder.html#config_builder.ConfigBuilder.add_vol_config">[docs]</a>    <span class="k">def</span> <span class="nf">add_vol_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gs_dict</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Create a dictionary containing volume configuration data</span>
+<span class="sd">        :param gs_dict: group structure dictionary (group struct dict format: \</span>
+<span class="sd">        { filename: ( group_name, { insert_key1: val, insert_key2: val } } ))</span>
+<span class="sd">        :param geom_obj: ModelGeometries object</span>
+<span class="sd">        :param style_obj: STYLE object</span>
+<span class="sd">        :param meta_obj: METADATA object</span>
+<span class="sd">        :returns: a dict of volume config data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">model_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">src_filename</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.gz&#39;</span>
+        <span class="n">modelconf_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;model_url&#39;</span><span class="p">:</span> <span class="n">model_url</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;3DVolume&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;include&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;displayed&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_inserts</span><span class="p">(</span><span class="n">gs_dict</span><span class="p">,</span> <span class="n">model_url</span><span class="p">,</span> <span class="n">modelconf_dict</span><span class="p">,</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;volumeData&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dataType&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data_type</span><span class="p">,</span>
+                                        <span class="s1">&#39;dataDims&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">,</span>
+                                        <span class="s1">&#39;origin&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">,</span>
+                                        <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_vol_side_lengths</span><span class="p">(),</span>
+                                        <span class="s1">&#39;maxVal&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">(),</span>
+                                        <span class="s1">&#39;minVal&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">(),</span>
+                                        <span class="s1">&#39;rotation&#39;</span><span class="p">:</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_rotation</span><span class="p">()}</span>
+        <span class="k">if</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_colour_table</span><span class="p">():</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;volumeData&#39;</span><span class="p">][</span><span class="s1">&#39;colourLookup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_colour_table</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_label_table</span><span class="p">():</span>
+            <span class="n">modelconf_dict</span><span class="p">[</span><span class="s1">&#39;volumeData&#39;</span><span class="p">][</span><span class="s1">&#39;labelLookup&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_label_table</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modelconf_dict</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

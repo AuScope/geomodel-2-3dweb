@@ -1,0 +1,1616 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="next" title="file_processing module" href="file_processing.html"/>
+        <link rel="prev" title="db.style package" href="db.style.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">db package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">exports package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.assimp_kit">exports.assimp_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.bh_utils">exports.bh_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.collada2gltf">exports.collada2gltf module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.collada_kit">exports.collada_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.collada_out">exports.collada_out module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.export_kit">exports.export_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.geometry_gen">exports.geometry_gen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.netcdf_kit">exports.netcdf_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.obj_out">exports.obj_out module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.png_kit">exports.png_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports.print_assimp">exports.print_assimp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-exports">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>exports package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/exports.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="exports-package">
+<h1>exports package<a class="headerlink" href="#exports-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-exports.assimp_kit">
+<span id="exports-assimp-kit-module"></span><h2>exports.assimp_kit module<a class="headerlink" href="#module-exports.assimp_kit" title="Permalink to this headline">¶</a></h2>
+<p>Contains the AssimpKit class</p>
+<dl class="class">
+<dt id="exports.assimp_kit.AssimpKit">
+<em class="property">class </em><code class="descclassname">exports.assimp_kit.</code><code class="descname">AssimpKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lib.exports.export_kit.ExportKit</span></code></p>
+<p>Class used to export geometries to assimp lib</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level taken from python’s ‘logging’ module</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="exports.assimp_kit.AssimpKit.EXPORT_TYPE">
+<code class="descname">EXPORT_TYPE</code><em class="property"> = 'gltf2'</em><a class="headerlink" href="#exports.assimp_kit.AssimpKit.EXPORT_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export type for assimp API</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.assimp_kit.AssimpKit.FILE_EXT">
+<code class="descname">FILE_EXT</code><em class="property"> = '.gltf'</em><a class="headerlink" href="#exports.assimp_kit.AssimpKit.FILE_EXT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extension of file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.add_geom">
+<code class="descname">add_geom</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.add_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.add_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a geometry to the scene. It only does triangular meshes for the moment.
+Will be expanded to include other types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – ModelGeometries object</li>
+<li><strong>style_obj</strong> – STYLE object</li>
+<li><strong>meta_obj</strong> – METADATA object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.add_vertices_to_mesh">
+<code class="descname">add_vertices_to_mesh</code><span class="sig-paren">(</span><em>mesh</em>, <em>vertex_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.add_vertices_to_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.add_vertices_to_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the vertices to a mesh</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mesh</strong> – pyassimp ‘Mesh’ object</li>
+<li><strong>vertex_list</strong> – list of floats, (x,y,z) coords of vertices</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.end_scene">
+<code class="descname">end_scene</code><span class="sig-paren">(</span><em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.end_scene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.end_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after geometries have all been added to scene and a file or blob should be created</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>out_filename</strong> – filename and path of output file, without file extension                              if an empty string, then a blob is returned and a file is not created</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if file was written out, else returns the GLTF as an assimp blob object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.end_write">
+<code class="descname">end_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.assimp_kit.AssimpKit.end_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out the accumulated GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_a_mesh">
+<code class="descname">make_a_mesh</code><span class="sig-paren">(</span><em>mesh_name</em>, <em>index_list</em>, <em>material_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_a_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_a_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a mesh object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mesh_name</strong> – name of mesh object, bytes object</li>
+<li><strong>index_list</strong> – list of integers, indexes into a vertex list</li>
+<li><strong>material_index</strong> – index into scene’s array of materials</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pyassimp ‘Mesh’ object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_colour">
+<code class="descname">make_colour</code><span class="sig-paren">(</span><em>key</em>, <em>r_val</em>, <em>g_val</em>, <em>b_val</em>, <em>a_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a pyassimp ‘MaterialProperty’ object for colour</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – bytes object with name of key</li>
+<li><strong>r</strong><strong>,</strong><strong>g</strong><strong>,</strong><strong>b</strong><strong>,</strong><strong>a</strong> – floating point values of RGBA colours</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_empty_node">
+<code class="descname">make_empty_node</code><span class="sig-paren">(</span><em>node_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_empty_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_empty_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes an empty node with a supplied name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node_name</strong> – name of node to be created</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pyassimp ‘Node’ object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_material">
+<code class="descname">make_material</code><span class="sig-paren">(</span><em>diffuse_colour</em>, <em>two_sided=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_material" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a material object with a certain diffuse colour</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>diffuse_colour</strong> – A tuple of floating point values (R,G,B,A)</li>
+<li><strong>two_sided</strong> – Boolean, optional, default False, make a double-sided material</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pyassimp ‘Material’ object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_nodes">
+<code class="descname">make_nodes</code><span class="sig-paren">(</span><em>root_node_name</em>, <em>child_node_name</em>, <em>num_meshes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the scene’s root node and a child node</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>root_node_name</strong> – bytes object, name of root node</li>
+<li><strong>child_node_name</strong> – bytes object, name of child of root node</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.make_two_sided">
+<code class="descname">make_two_sided</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.make_two_sided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.make_two_sided" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a two-sided ‘MaterialProperty’ object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>two_sided</strong> – boolean value of two sided property</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A ‘MaterialProperty’ object with two-sided set to 1</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.assimp_kit.AssimpKit.scn">
+<code class="descname">scn</code><em class="property"> = None</em><a class="headerlink" href="#exports.assimp_kit.AssimpKit.scn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assimp scene object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.start_scene">
+<code class="descname">start_scene</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.start_scene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.start_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiate scene creation, only one scene can be created at a time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.start_write">
+<code class="descname">start_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.assimp_kit.AssimpKit.start_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to start the process write out multiple GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.assimp_kit.AssimpKit.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out a single GSM object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename file to output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.assimp_kit.AssimpKit.write_borehole">
+<code class="descname">write_borehole</code><span class="sig-paren">(</span><em>base_vrtx</em>, <em>borehole_name</em>, <em>colour_info_dict</em>, <em>height_reso</em>, <em>out_filename=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/assimp_kit.html#AssimpKit.write_borehole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.assimp_kit.AssimpKit.write_borehole" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Write out a file or blob of a borehole stick</dt>
+<dd>if ‘out_filename’ is supplied then writes a file and returns True/False
+else returns a pointer to a ‘structs.ExportDataBlob’ object</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>base_vrtx</strong> – base vertex, position of the object within the model [x,y,z]</li>
+<li><strong>borehole_name</strong> – name of borehole</li>
+<li><strong>colour_info_dict</strong> – dict of colour info; key - depth, float, val {‘colour’:(R,B,G,A),                                             ‘classText’: mineral name }, where R,G,B,A are floats</li>
+<li><strong>height_reso</strong> – height resolution for colour info dict</li>
+<li><strong>out_filename</strong> – optional destination directory+file (without extension),                              where file is written</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.bh_utils">
+<span id="exports-bh-utils-module"></span><h2>exports.bh_utils module<a class="headerlink" href="#module-exports.bh_utils" title="Permalink to this headline">¶</a></h2>
+<p>A collection of Python functions used to create clean, consistent borehole labels and filenames</p>
+<dl class="function">
+<dt id="exports.bh_utils.clean">
+<code class="descclassname">exports.bh_utils.</code><code class="descname">clean</code><span class="sig-paren">(</span><em>borehole_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/bh_utils.html#clean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.bh_utils.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a clean version of the borehole name or id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>borehole_name</strong> – borehole identifier or name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.bh_utils.make_borehole_filename">
+<code class="descclassname">exports.bh_utils.</code><code class="descname">make_borehole_filename</code><span class="sig-paren">(</span><em>borehole_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/bh_utils.html#make_borehole_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.bh_utils.make_borehole_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string, formatted borehole file name with no filename extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>borehole_name</strong> – borehole identifier used to make file name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.bh_utils.make_borehole_label">
+<code class="descclassname">exports.bh_utils.</code><code class="descname">make_borehole_label</code><span class="sig-paren">(</span><em>borehole_name</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/bh_utils.html#make_borehole_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.bh_utils.make_borehole_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a consistent and space-free label for borehole sections
+:param borehole_name: name of borehole
+:param depth: depth of section
+:returns: byte string label</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.collada2gltf">
+<span id="exports-collada2gltf-module"></span><h2>exports.collada2gltf module<a class="headerlink" href="#module-exports.collada2gltf" title="Permalink to this headline">¶</a></h2>
+<p>Converts files from collada to GLTF v2
+by calling ‘COLLADA2GLTF-bin’ which is assumed to be available locally
+See <a class="reference external" href="https://github.com/KhronosGroup/COLLADA2GLTF/">https://github.com/KhronosGroup/COLLADA2GLTF/</a> for more information</p>
+<dl class="data">
+<dt id="exports.collada2gltf.REMOVE_COLLADA">
+<code class="descclassname">exports.collada2gltf.</code><code class="descname">REMOVE_COLLADA</code><em class="property"> = True</em><a class="headerlink" href="#exports.collada2gltf.REMOVE_COLLADA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes COLLADA file after conversion</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.collada2gltf.convert_dir">
+<code class="descclassname">exports.collada2gltf.</code><code class="descname">convert_dir</code><span class="sig-paren">(</span><em>src_dir</em>, <em>file_mask='*.dae'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada2gltf.html#convert_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada2gltf.convert_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a directory of files from COLLADA to GLTF</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_dir</strong> – directory of COLLADA files to be converted</li>
+<li><strong>file_mask</strong> – optional file mask of files</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.collada2gltf.convert_file">
+<code class="descclassname">exports.collada2gltf.</code><code class="descname">convert_file</code><span class="sig-paren">(</span><em>daefile_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada2gltf.html#convert_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada2gltf.convert_file" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Converts a COLLADA file to GLTF</dt>
+<dd>will convert &lt;file&gt;_0 &lt;file&gt;_1 etc. if &lt;file&gt; does not exist</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>daefile_str</strong> – filename to be converted</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.collada2gltf.convert_one_file">
+<code class="descclassname">exports.collada2gltf.</code><code class="descname">convert_one_file</code><span class="sig-paren">(</span><em>daefile_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada2gltf.html#convert_one_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada2gltf.convert_one_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a COLLADA file to GLTF</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>daefile_str</strong> – filename to be converted</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.collada_kit">
+<span id="exports-collada-kit-module"></span><h2>exports.collada_kit module<a class="headerlink" href="#module-exports.collada_kit" title="Permalink to this headline">¶</a></h2>
+<p>Contains the ColladaKit class</p>
+<dl class="class">
+<dt id="exports.collada_kit.ColladaKit">
+<em class="property">class </em><code class="descclassname">exports.collada_kit.</code><code class="descname">ColladaKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lib.exports.export_kit.ExportKit</span></code></p>
+<p>Class used to output COLLADA files, given geometry, style and metadata data structures</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level taken from python’s ‘logging’ module</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.AMBIENT">
+<code class="descname">AMBIENT</code><em class="property"> = (0, 0, 0, 1)</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.AMBIENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ambient parameter for pycollada material effect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.EMISSION">
+<code class="descname">EMISSION</code><em class="property"> = (0, 0, 0, 1)</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.EMISSION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emission parameter for pycollada material effect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.MAX_COLOURS">
+<code class="descname">MAX_COLOURS</code><em class="property"> = 256.0</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.MAX_COLOURS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of colours displayed in one COLLADA file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.POINT_SIZE">
+<code class="descname">POINT_SIZE</code><em class="property"> = 300</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.POINT_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of object used to represent point data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.SHADING">
+<code class="descname">SHADING</code><em class="property"> = 'phong'</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.SHADING" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shading parameter for pycollada material effect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.SHININESS">
+<code class="descname">SHININESS</code><em class="property"> = 50.0</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.SHININESS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shininess parameter for pycollada material effect</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="exports.collada_kit.ColladaKit.SPECULAR">
+<code class="descname">SPECULAR</code><em class="property"> = (0.7, 0.7, 0.7, 1)</em><a class="headerlink" href="#exports.collada_kit.ColladaKit.SPECULAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specular parameter for pycollada material effect</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.add_geom">
+<code class="descname">add_geom</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.collada_kit.ColladaKit.add_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to add GSM objects to be written out in future</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.add_geom_to_collada">
+<code class="descname">add_geom_to_collada</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.add_geom_to_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.add_geom_to_collada" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Adds a vessel object to the pycollada mesh object</dt>
+<dd>NB: Does not accept GOCAD vertex or volume files as they usually have
+(too) many node objects</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a popup info dict or exits if you try to add a GOCAD VS (vertex)
+or VO (volume) file
+popup info dict format: { object_name: { ‘attr_name’: attr_val, … } }
+and a node label string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.calc_step_sz">
+<code class="descname">calc_step_sz</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>limit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.calc_step_sz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.calc_step_sz" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>With many voxets being so large, we have to increase sample size so we don’t</dt>
+<dd>create too much data, to be improved later on.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params geom_obj:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">MODEL_GEOMETRY object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Params limit:</th><td class="field-body">the higher this number the more cubes will be used to
+represent the voxet data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">step size as an integer, point (sample) size as list of 3 integers [X,Y,Z]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.compute_neighbours">
+<code class="descname">compute_neighbours</code><span class="sig-paren">(</span><em>xyz_list</em>, <em>step</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.compute_neighbours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.compute_neighbours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts the number of neighbours of each point in a 3d array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params xyz_listr:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">list of (X,Y,Z) coordinates</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dictionary: key is (X,Y,Z), value is number of neighbours</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.end_collada">
+<code class="descname">end_collada</code><span class="sig-paren">(</span><em>out_filename</em>, <em>node_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.end_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.end_collada" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close out a COLLADA, writing the mesh object to file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out_filename</strong> – path &amp; filename of COLLADA file to output, without extension</li>
+<li><strong>node_label</strong> – label for the COLLADA “Node” object
+(used by the website to recognise model parts)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.end_write">
+<code class="descname">end_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.collada_kit.ColladaKit.end_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out the accumulated GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.make_colour_material">
+<code class="descname">make_colour_material</code><span class="sig-paren">(</span><em>mesh</em>, <em>colour_tup</em>, <em>colour_idx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.make_colour_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.make_colour_material" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a colour material to COLLADA object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Params mesh:</th><td class="field-body">pycollada ‘collada’ object</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params colour_tup:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">tuple of floats (R,G,B,A)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Params colour_idx:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">integer index, used to refer to the material</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.make_false_colour_materials">
+<code class="descname">make_false_colour_materials</code><span class="sig-paren">(</span><em>mesh</em>, <em>max_colours_flt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.make_false_colour_materials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.make_false_colour_materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a list of coloured materials to COLLADA object using a false colour map</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Params mesh:</th><td class="field-body">pycollada ‘collada’ object</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params max_colours_flt:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">number of colours to add, float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.make_mapped_colour_materials">
+<code class="descname">make_mapped_colour_materials</code><span class="sig-paren">(</span><em>mesh</em>, <em>colour_map</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.make_mapped_colour_materials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.make_mapped_colour_materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a list of coloured materials to COLLADA object using supplied colour_map</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Params mesh:</th><td class="field-body">COLLADA object</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Params colour_map:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">dict of colours, key is integer, value is RGBA tuple of 4 floats</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.next_to">
+<code class="descname">next_to</code><span class="sig-paren">(</span><em>a_val</em>, <em>b_val</em>, <em>step</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.next_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.next_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True iff a equals b or if a is exactly ‘step’ units away from b</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.start_collada">
+<code class="descname">start_collada</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.start_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.start_collada" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initiate creation of a COLLADA file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.start_write">
+<code class="descname">start_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.collada_kit.ColladaKit.start_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to start the process write out multiple GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.collada_kit.ColladaKit.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out a single GSM object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename file to output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.write_borehole">
+<code class="descname">write_borehole</code><span class="sig-paren">(</span><em>base_vrtx</em>, <em>borehole_name</em>, <em>colour_info_dict</em>, <em>height_reso</em>, <em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.write_borehole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.write_borehole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a COLLADA file of a borehole stick</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>base_vrtx</strong> – base vertex, position of the object within the model [x,y,z]</li>
+<li><strong>borehole_name</strong> – name of borehole</li>
+<li><strong>colour_info_dict</strong> – dict of colour info; key - depth, float,
+val - { ‘colour’ : (R,B,G,A), ‘classText’ : mineral name }
+where R,G,B,A are floats</li>
+<li><strong>height_reso</strong> – height resolution for colour info dict</li>
+<li><strong>out_filename</strong> – path &amp; filename of COLLADA file to output, without extension</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.write_collada">
+<code class="descname">write_collada</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.write_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.write_collada" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a COLLADA file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename of COLLADA file to output, without extension</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a dictionary of popup info objects
+popup info dict format: { object_name: { ‘attr_name’: attr_val, … } }</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.write_point_collada">
+<code class="descname">write_point_collada</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.write_point_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.write_point_collada" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a COLLADA file from a point geometry file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename of COLLADA file to output, without extension</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_kit.ColladaKit.write_vol_collada">
+<code class="descname">write_vol_collada</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_kit.html#ColladaKit.write_vol_collada"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_kit.ColladaKit.write_vol_collada" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a COLLADA file from a vo file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename of COLLADA file to output, without extension</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.collada_out">
+<span id="exports-collada-out-module"></span><h2>exports.collada_out module<a class="headerlink" href="#module-exports.collada_out" title="Permalink to this headline">¶</a></h2>
+<p>Contains the ColladaOut class</p>
+<dl class="class">
+<dt id="exports.collada_out.ColladaOut">
+<em class="property">class </em><code class="descclassname">exports.collada_out.</code><code class="descname">ColladaOut</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_out.html#ColladaOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_out.ColladaOut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to output specific geometries as pycollada objects</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level, using python’s ‘logger’ class</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="exports.collada_out.ColladaOut.make_colour_borehole_marker">
+<code class="descname">make_colour_borehole_marker</code><span class="sig-paren">(</span><em>mesh</em>, <em>pos</em>, <em>borehole_label</em>, <em>geomnode_list</em>, <em>colour_info_dict</em>, <em>ht_resol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_out.html#ColladaOut.make_colour_borehole_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_out.ColladaOut.make_colour_borehole_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a borehole marker stick with triangular cross section using pycollada objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mesh</strong> – pycollada ‘Collada’ object</li>
+<li><strong>pos</strong> – x,y,z position of collar of borehole</li>
+<li><strong>borehole_label</strong> – geometry label for this borehole stick</li>
+<li><strong>geomnode_list</strong> – list of pycollada ‘GeometryNode’ objects</li>
+<li><strong>colour_info_dict</strong> – dict of: key = height, float; value = { ‘colour’: (R,G,B,A),
+‘classText’: label }</li>
+<li><strong>ht_reso</strong> – height resolution</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_out.ColladaOut.make_cube">
+<code class="descname">make_cube</code><span class="sig-paren">(</span><em>mesh</em>, <em>colour_num</em>, <em>x_val</em>, <em>y_val</em>, <em>z_val</em>, <em>geom_obj</em>, <em>pt_size</em>, <em>geometry_name</em>, <em>file_cnt</em>, <em>point_cnt</em>, <em>geomnode_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_out.html#ColladaOut.make_cube"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_out.ColladaOut.make_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a cube using pycollada objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mesh</strong> – pycollada ‘Collada’ object</li>
+<li><strong>colour_num</strong> – index value for colour table</li>
+<li><strong>x</strong><strong>,</strong><strong>y</strong><strong>,</strong><strong>z</strong> – integer xyz coords in volume</li>
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object</li>
+<li><strong>pt_size</strong> – size of cube, float</li>
+<li><strong>geometry_name</strong> – generic label for all cubes</li>
+<li><strong>file_cnt</strong> – file counter</li>
+<li><strong>point_cnt</strong> – cube counter within this file</li>
+<li><strong>geomnode_list</strong> – pycollada ‘GeometryNode’ list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the geometry label of this cube</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_out.ColladaOut.make_line">
+<code class="descname">make_line</code><span class="sig-paren">(</span><em>mesh</em>, <em>geometry_name</em>, <em>geomnode_list</em>, <em>seg_arr</em>, <em>vrtx_arr</em>, <em>obj_cnt</em>, <em>line_width</em>, <em>z_expand</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_out.html#ColladaOut.make_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_out.ColladaOut.make_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a line using pycollada objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mesh</strong> – pycollada ‘Collada’ object</li>
+<li><strong>geometry_name</strong> – generic label for all cubes</li>
+<li><strong>geomnode_list</strong> – list of pycollada ‘GeometryNode’ objects</li>
+<li><strong>seg_arr</strong> – array of SEG objects, defines line segments</li>
+<li><strong>vrtx_arr</strong> – array of VRTX objects, all points along line</li>
+<li><strong>obj_cnt</strong> – object counter within this file (an object may contain many lines)</li>
+<li><strong>line_width</strong> – line width, float</li>
+<li><strong>z_expand</strong> – is true if line width is drawn in z-direction else x-direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the line’s geometry label</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.collada_out.ColladaOut.make_pyramid">
+<code class="descname">make_pyramid</code><span class="sig-paren">(</span><em>mesh</em>, <em>geometry_name</em>, <em>geomnode_list</em>, <em>vrtx</em>, <em>point_cnt</em>, <em>point_sz</em>, <em>colour_num</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/collada_out.html#ColladaOut.make_pyramid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.collada_out.ColladaOut.make_pyramid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a pyramid using pycollada objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mesh</strong> – pycollada ‘Collada’ object</li>
+<li><strong>geometry_name</strong> – generic label for all pyramids</li>
+<li><strong>geomnode_list</strong> – list of pycollada ‘GeometryNode’ objects</li>
+<li><strong>vrtx</strong> – VTRX object</li>
+<li><strong>point_cnt</strong> – pyramid counter within this file</li>
+<li><strong>point_sz</strong> – size of pyramid</li>
+<li><strong>colour_num</strong> – integer index into mesh materials, determines colour of pyramid</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the pyramid’s geometry label</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.export_kit">
+<span id="exports-export-kit-module"></span><h2>exports.export_kit module<a class="headerlink" href="#module-exports.export_kit" title="Permalink to this headline">¶</a></h2>
+<p>Parent class for all ‘_kit’ classes</p>
+<dl class="class">
+<dt id="exports.export_kit.ExportKit">
+<em class="property">class </em><code class="descclassname">exports.export_kit.</code><code class="descname">ExportKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/export_kit.html#ExportKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.export_kit.ExportKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Initialise class
+:param debug_level: debug level taken from python’s ‘logging’ module</p>
+<dl class="method">
+<dt id="exports.export_kit.ExportKit.add_geom">
+<code class="descname">add_geom</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/export_kit.html#ExportKit.add_geom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.export_kit.ExportKit.add_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to add GSM objects to be written out in future</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.export_kit.ExportKit.end_write">
+<code class="descname">end_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/export_kit.html#ExportKit.end_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.export_kit.ExportKit.end_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out the accumulated GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.export_kit.ExportKit.start_write">
+<code class="descname">start_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/export_kit.html#ExportKit.start_write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.export_kit.ExportKit.start_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to start the process write out multiple GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.export_kit.ExportKit.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/export_kit.html#ExportKit.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.export_kit.ExportKit.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out a single GSM object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename file to output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.geometry_gen">
+<span id="exports-geometry-gen-module"></span><h2>exports.geometry_gen module<a class="headerlink" href="#module-exports.geometry_gen" title="Permalink to this headline">¶</a></h2>
+<p>A collection of Python generator functions used to create geometries,
+including: borehole sticks, lines, cubes and pyramids</p>
+<dl class="function">
+<dt id="exports.geometry_gen.colour_borehole_gen">
+<code class="descclassname">exports.geometry_gen.</code><code class="descname">colour_borehole_gen</code><span class="sig-paren">(</span><em>pos</em>, <em>borehole_name</em>, <em>colour_info_dict</em>, <em>ht_resol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/geometry_gen.html#colour_borehole_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.geometry_gen.colour_borehole_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator which is used to make a borehole marker stick with triangular cross section</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos</strong> – x,y,z position of collar of borehole, tuple of 3 floats</li>
+<li><strong>borehole_name</strong> – borehole’s name</li>
+<li><strong>colour_info_dict</strong> – dict of: key = height, float;                                       value = { ‘colour’: (R,G,B,A) floats,                                                 ‘classText’: mineral name,                                                 ‘className’: measurement class }</li>
+<li><strong>ht_reso</strong> – height resolution, float</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns vert_list:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">list of floats, (x,y,z) vertices;         indices - list of integers, index pointers to which vertices are joined as triangles;         colour_idx - integer index pointing to material object array;         depth - depth of borehole segment, float;         colour_info - colour information dict: { ‘colour’: (R,G,B,A) floats,                                                  ‘classText’: mineral name,                                                  ‘className’ : meas class }         mesh_name - used to label meshes during mesh generation (bytes object)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.geometry_gen.cube_gen">
+<code class="descclassname">exports.geometry_gen.</code><code class="descname">cube_gen</code><span class="sig-paren">(</span><em>x_val</em>, <em>y_val</em>, <em>z_val</em>, <em>geom_obj</em>, <em>pt_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/geometry_gen.html#cube_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.geometry_gen.cube_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single iteration generator which is used to create a cube</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong><strong>,</strong><strong>y</strong><strong>,</strong><strong>z</strong> – x,y,z index coordinates of cube, integers</li>
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object, holds the volume geometry details</li>
+<li><strong>pt_size</strong> – size of cube, three float tuple</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns vert_floats, indices:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">vert_floats - list of (x,y,z) vertices, floats;         indices - integer index pointers to which vertices are joined as triangles</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.geometry_gen.line_gen">
+<code class="descclassname">exports.geometry_gen.</code><code class="descname">line_gen</code><span class="sig-paren">(</span><em>seg_arr</em>, <em>vrtx_arr</em>, <em>line_width</em>, <em>z_expand</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/geometry_gen.html#line_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.geometry_gen.line_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator which is used to make lines</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>seg_arr</strong> – line segment array, an array of SEG objects</li>
+<li><strong>vrtx_arr</strong> – vertex array, an array of VRTX objects</li>
+<li><strong>line_width</strong> – line width, float</li>
+<li><strong>z_expand</strong> – if true will expand width in z-direction, else x-direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns point_cnt, vert_floats, indices:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">point_cnt - count of iterations;         vert_floats - list of (x,y,z) vertices, floats;         indices - integer index pointers to which vertices are joined as triangles</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.geometry_gen.pyramid_gen">
+<code class="descclassname">exports.geometry_gen.</code><code class="descname">pyramid_gen</code><span class="sig-paren">(</span><em>vrtx</em>, <em>point_sz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/geometry_gen.html#pyramid_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.geometry_gen.pyramid_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single iteration generator which is used to create a pyramid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vrtx</strong> – VRTX object, position of pyramid</li>
+<li><strong>pt_size</strong> – size of pyramid, float</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns vert_floats, indices:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">vert_floats - list of (x,y,z) vertices, floats;         indices - integer index pointers to which vertices are joined as triangles</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.geometry_gen.tri_gen">
+<code class="descclassname">exports.geometry_gen.</code><code class="descname">tri_gen</code><span class="sig-paren">(</span><em>trgl_arr</em>, <em>vrtx_arr</em>, <em>mesh_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/geometry_gen.html#tri_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.geometry_gen.tri_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generator which is used to make a triangular mesh</p>
+<p>:param trgl_arr triangle array, an array of TRGL objects
+:param vrtx_arr: vertex array, an array of VRTX objects</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.netcdf_kit">
+<span id="exports-netcdf-kit-module"></span><h2>exports.netcdf_kit module<a class="headerlink" href="#module-exports.netcdf_kit" title="Permalink to this headline">¶</a></h2>
+<p>Contains the NetCDFKit class</p>
+<dl class="class">
+<dt id="exports.netcdf_kit.NetCDFKit">
+<em class="property">class </em><code class="descclassname">exports.netcdf_kit.</code><code class="descname">NetCDFKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/netcdf_kit.html#NetCDFKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lib.exports.export_kit.ExportKit</span></code></p>
+<p>Class used to output NetCDF4 files, given geometry, style and metadata data structures</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level taken from python’s ‘logging’ module</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="exports.netcdf_kit.NetCDFKit.add_geom">
+<code class="descname">add_geom</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit.add_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to add GSM objects to be written out in future</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.netcdf_kit.NetCDFKit.end_write">
+<code class="descname">end_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit.end_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out the accumulated GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.netcdf_kit.NetCDFKit.start_write">
+<code class="descname">start_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit.start_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to start the process write out multiple GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.netcdf_kit.NetCDFKit.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out a single GSM object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename file to output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.netcdf_kit.NetCDFKit.write_points">
+<code class="descname">write_points</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>out_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/netcdf_kit.html#NetCDFKit.write_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.netcdf_kit.NetCDFKit.write_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a NetCDF file from a point geometry file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename of NetCDF file to output, without extension</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.obj_out">
+<span id="exports-obj-out-module"></span><h2>exports.obj_out module<a class="headerlink" href="#module-exports.obj_out" title="Permalink to this headline">¶</a></h2>
+<p>Contains ObjOut class</p>
+<dl class="class">
+<dt id="exports.obj_out.ObjKit">
+<em class="property">class </em><code class="descclassname">exports.obj_out.</code><code class="descname">ObjKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/obj_out.html#ObjKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.obj_out.ObjKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class to output geometries to Wavefront OBJ format</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level, using python’s ‘logging’ module</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="exports.obj_out.ObjKit.MAX_COLOURS">
+<code class="descname">MAX_COLOURS</code><em class="property"> = 256.0</em><a class="headerlink" href="#exports.obj_out.ObjKit.MAX_COLOURS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="exports.obj_out.ObjKit.write_obj">
+<code class="descname">write_obj</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>file_name</em>, <em>src_file_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/obj_out.html#ObjKit.write_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.obj_out.ObjKit.write_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out an OBJ file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>style_obj</strong> – STYLE object</li>
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object</li>
+<li><strong>fileName</strong> – filename of OBJ file, without extension</li>
+<li><strong>src_file_str</strong> – filename of gocad file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>NOTES:</dt>
+<dd>OBJ is very simple, and has shortcomings:
+1. Does not include annotations (only comments and a group name)
+2. Lines and points do not have a colour</dd>
+</dl>
+<p>I am only using it here because GOCAD VOXEL files are too big for COLLADA format</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.obj_out.ObjKit.write_voxel_obj">
+<code class="descname">write_voxel_obj</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>out_fp</em>, <em>file_name</em>, <em>src_file_str</em>, <em>step_sz</em>, <em>use_full_cubes=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/obj_out.html#ObjKit.write_voxel_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.obj_out.ObjKit.write_voxel_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out voxel data to Wavefront OBJ and MTL files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out_fp</strong> – open file handle of OBJ file</li>
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object</li>
+<li><strong>fileName</strong> – filename of OBJ file without the ‘OBJ’ extension</li>
+<li><strong>src_file_str</strong> – filename of gocad file</li>
+<li><strong>step_sz</strong> – when stepping through the voxel block this is the step size</li>
+<li><strong>use_full_cubes</strong> – (optional, default to false) will write out full cubes to
+file if true, else will remove non-visible faces</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.png_kit">
+<span id="exports-png-kit-module"></span><h2>exports.png_kit module<a class="headerlink" href="#module-exports.png_kit" title="Permalink to this headline">¶</a></h2>
+<p>Contains PngKit class</p>
+<dl class="class">
+<dt id="exports.png_kit.PngKit">
+<em class="property">class </em><code class="descclassname">exports.png_kit.</code><code class="descname">PngKit</code><span class="sig-paren">(</span><em>debug_level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/png_kit.html#PngKit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.png_kit.PngKit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">lib.exports.export_kit.ExportKit</span></code></p>
+<p>Class used to output PNG files, given geometry, style and metadata data structures</p>
+<p>Initialise class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>debug_level</strong> – debug level taken from python’s ‘logging’ module</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="exports.png_kit.PngKit.add_geom">
+<code class="descname">add_geom</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.png_kit.PngKit.add_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to add GSM objects to be written out in future</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.png_kit.PngKit.end_write">
+<code class="descname">end_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.png_kit.PngKit.end_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out the accumulated GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.png_kit.PngKit.start_write">
+<code class="descname">start_write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exports.png_kit.PngKit.start_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to start the process write out multiple GSM objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.png_kit.PngKit.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#exports.png_kit.PngKit.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic routine to write out a single GSM object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that hold geometry and text</li>
+<li><strong>style_obj</strong> – STYLE object containing colour info</li>
+<li><strong>meta_obj</strong> – METADATA object, used for labelling</li>
+<li><strong>out_filename</strong> – path &amp; filename file to output</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="exports.png_kit.PngKit.write_single_voxel_png">
+<code class="descname">write_single_voxel_png</code><span class="sig-paren">(</span><em>geom_obj</em>, <em>style_obj</em>, <em>meta_obj</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/png_kit.html#PngKit.write_single_voxel_png"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.png_kit.PngKit.write_single_voxel_png" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out a PNG file of the top layer of the voxel data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geom_obj</strong> – MODEL_GEOMETRY object that holds voxel data</li>
+<li><strong>style_obj</strong> – SYTLE object, contains colour map</li>
+<li><strong>meta_obj</strong> – FILENAME object, contains object information</li>
+<li><strong>file_name</strong> – filename of PNG file, without extension</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports.print_assimp">
+<span id="exports-print-assimp-module"></span><h2>exports.print_assimp module<a class="headerlink" href="#module-exports.print_assimp" title="Permalink to this headline">¶</a></h2>
+<p>Functions used to print out “assimp” (<a class="reference external" href="https://github.com/assimp/assimp">https://github.com/assimp/assimp</a>) data structures,
+used for debugging purposes</p>
+<dl class="function">
+<dt id="exports.print_assimp.print_blob">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_blob</code><span class="sig-paren">(</span><em>blob</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_blob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a binary blob object
+:param blob: binary blob object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_colours">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_colours</code><span class="sig-paren">(</span><em>col_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_colours"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_colours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out the RGBA colours in a colour list
+:param col_list: list of eight colours</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_faces">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_faces</code><span class="sig-paren">(</span><em>face</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out an assimp face object
+:param face: assimp face object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_materials">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_materials</code><span class="sig-paren">(</span><em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_materials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out an assimp materials object
+:param mat: assimp materials object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_matrix4x4">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_matrix4x4</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_matrix4x4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_matrix4x4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out a 4x4 matrix
+:param matrix: matrix object with attributes a1,a2,a3,a4, b1,b2 …</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_mesh">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_mesh</code><span class="sig-paren">(</span><em>mesh</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out an assimp mesh object
+:param mesh: assimp mesh object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_node">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_node</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out an assimp node object
+:param node: assimp node object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_properties">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_properties</code><span class="sig-paren">(</span><em>prop</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out assimp properties
+:param prop: assimp properties object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_scene">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_scene</code><span class="sig-paren">(</span><em>scene</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_scene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out the entire scene contained in the assimp data structure
+:param scene: assimp scene object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_texture">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_texture</code><span class="sig-paren">(</span><em>texture</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_texture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_texture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out an assimp texture object
+:param texture: texture object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_uvcomponents">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_uvcomponents</code><span class="sig-paren">(</span><em>comp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_uvcomponents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_uvcomponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out a list of eight assimp UV component objects
+:param comp: UV component object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="exports.print_assimp.print_vertices">
+<code class="descclassname">exports.print_assimp.</code><code class="descname">print_vertices</code><span class="sig-paren">(</span><em>vert</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exports/print_assimp.html#print_vertices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exports.print_assimp.print_vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out the XYZ coords of a vertex object</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-exports">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-exports" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="file_processing.html" class="btn btn-neutral float-right" title="file_processing module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="db.style.html" class="btn btn-neutral" title="db.style package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

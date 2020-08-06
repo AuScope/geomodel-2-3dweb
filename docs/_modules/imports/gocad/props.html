@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad.props &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>imports.gocad.props</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for imports.gocad.props</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the PROPS class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+
+
+<div class="viewcode-block" id="PROPS"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS">[docs]</a><span class="k">class</span> <span class="nc">PROPS</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39; This class holds generic 3d data and properties</span>
+<span class="sd">        e.g. information extracted from 3d binary files (e.g. from GOCAD &#39;PROP_FILE&#39;)</span>
+<span class="sd">        information attached to a set of XYZ points (e.g. from GOCAD &#39;PATOM&#39;, &#39;PVRTX&#39;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+
+        <span class="c1"># Set up logging, use an attribute of class name so it is only called once</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">PROPS</span><span class="p">,</span> <span class="s1">&#39;logger&#39;</span><span class="p">):</span>
+            <span class="n">PROPS</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="c1"># Create console handler</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+            <span class="c1"># Create formatter</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add formatter to ch</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+            <span class="c1"># Add handler to logger and set level</span>
+            <span class="n">PROPS</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="n">PROPS</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">debug_level</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">PROPS</span><span class="o">.</span><span class="n">logger</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Name of binary file associated with GOCAD file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Number of bytes in number in binary file, usually 1, 2 or 4</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;f&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Type of data in binary file e.g. &#39;h&#39; = short 2-byte int, &#39;f&#39; = float, &#39;b&#39; - byte, &#39;rgba&#39; - 4-byte RGBA</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">signed_int</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; Is True iff binary data is a signed integer else False</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="sd">&#39;&#39;&#39; Property data collected from binary file, value is float, stored as a 3d numpy array.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_xyz</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39; Property data attached to XYZ points (index is XYZ coordinate)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_ijk</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39; Property data attached to XYZ points (index is IJK int indexes)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;min&#39;</span><span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">}</span>
+        <span class="sd">&#39;&#39;&#39; Property data statistics: min &amp; max</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colour_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; If colour map was specified, then it is stored here, integer is the key,</span>
+<span class="sd">            value is (R,G,B,A) where R, G, B, A are floats</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colourmap_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Name of colour map</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_name</span> <span class="o">=</span> <span class="n">class_name</span>
+        <span class="sd">&#39;&#39;&#39; Property class names</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_data_marker</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Value representing &#39;no data&#39; values</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_index_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; Uses &#39;data_3d&#39; to hold index to colour table or rock label table</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_table</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Table specifying names of rocks , key is an integer, value is the label</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Offset within binary file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; A print friendly representation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">PROPS START</span><span class="se">\n</span><span class="s2">  self = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  file_name = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  data_sz = </span><span class="si">{:d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_sz</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s2">&quot;  data_type = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  signed_int = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signed_int</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  data_3d = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  data_xyz = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  data_stats = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  colour_map = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour_map</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  colourmap_name = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colourmap_name</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s2">&quot;  class_name = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_name</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s2">&quot;  no_data_marker = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  is_index_data = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_index_data</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  rock_label_table = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rock_label_table</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s2">&quot;  str_data_type = </span><span class="si">{:}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_str_data_type</span><span class="p">()))</span> <span class="o">+</span> \
+               <span class="s2">&quot;PROPS END</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+
+
+<div class="viewcode-block" id="PROPS.get_str_data_type"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.get_str_data_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_str_data_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns a string form of the data type of the volume data</span>
+<span class="sd">            e.g. &quot;INT_16&quot;, &quot;FLOAT_32&quot;, &quot;UINT_8&quot;, &quot;RGBA&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;FLOAT_32&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signed_int</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;INT_16&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;UINT_16&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signed_int</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;INT_8&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;UINT_8&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;rgba&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;RGBA&quot;</span> 
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PROPS.make_numpy_dtype"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.make_numpy_dtype">[docs]</a>    <span class="k">def</span> <span class="nf">make_numpy_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns a string that can be passed to &#39;numpy&#39; to read a binary file</span>
+<span class="sd">            It takes the &#39;data_type&#39; of &#39;f&#39;, &#39;b&#39;, h&#39; &amp; &#39;rgba&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Prepare &#39;numpy&#39; binary float integer signed/unsigned data types</span>
+        <span class="c1"># Using &#39;&gt;&#39; to tell &#39;numpy&#39; that it is big-endian</span>
+        <span class="c1"># Using upper case to tell &#39;numpy&#39; that it is unsigned integer</span>
+        <span class="c1"># &#39;numpy&#39; recognises &#39;h&#39; as a 2-byte integer and &#39;b&#39; as byte</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">signed_int</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+            <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+
+        <span class="c1"># R,G,B,A 4-byte array of colour</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">==</span> <span class="s1">&#39;rgba&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">)])</span>
+
+        <span class="c1"># Floating point i.e. data_type = &#39;f&#39;</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_sz</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="PROPS.read_colour_table_csv"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.read_colour_table_csv">[docs]</a>    <span class="k">def</span> <span class="nf">read_colour_table_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_file</span><span class="p">,</span> <span class="n">transp_list</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Reads an RGB colour table from CSV file for use in VOXET colours</span>
+<span class="sd">            CSV Format: col#1: integer index, col#2: R-value, col#3: G-value, col#4: B-value</span>
+<span class="sd">            csv_file - filename of  CSV file to read, without path</span>
+<span class="sd">            Sets the &#39;colour_map&#39; and &#39;rock_label_table&#39; class attibutes</span>
+<span class="sd">            &#39;colour_map&#39; is a dict, key is integer, value is (R,G,B,A) tuple of floats</span>
+<span class="sd">            &#39;rock_label_table&#39; is a dict, key is integer, value is string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">col_tab</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">lab_tab</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">csv_file</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot find CSV file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">csv_file</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">csv_filehandle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csv_filehandle</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_reader</span><span class="p">:</span>
+                <span class="n">a_val</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">in</span> <span class="n">transp_list</span><span class="p">:</span>
+                    <span class="n">a_val</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">col_tab</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span> <span class="n">a_val</span><span class="p">)</span>
+                <span class="n">lab_tab</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot read CSV file </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">csv_file</span><span class="p">,</span> <span class="n">os_exc</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colour_map</span> <span class="o">=</span> <span class="n">col_tab</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_table</span> <span class="o">=</span> <span class="n">lab_tab</span></div>
+
+
+<div class="viewcode-block" id="PROPS.assign_to_3d"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.assign_to_3d">[docs]</a>    <span class="k">def</span> <span class="nf">assign_to_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">fltp</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Assigns a value to 3d array</span>
+<span class="sd">            x,y,z - XYZ integer array indexes</span>
+<span class="sd">            fltp - floating point value to be assigned</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">fltp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__calc_minmax</span><span class="p">(</span><span class="n">fltp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PROPS.assign_to_xyz"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.assign_to_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">assign_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Assigns a value to xyz dict</span>
+<span class="sd">            xyz - (X,Y,Z) tuple array indexes (floats)</span>
+<span class="sd">            val - value to be assigned (float or tuple)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">[</span><span class="n">xyz</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__calc_minmax</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PROPS.assign_to_ijk"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.assign_to_ijk">[docs]</a>    <span class="k">def</span> <span class="nf">assign_to_ijk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ijk</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Assigns a value to ijk dict</span>
+<span class="sd">            ijk - (I,J,K) tuple array indexes (ints)</span>
+<span class="sd">            val - value to be assigned (float or tuple)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_ijk</span><span class="p">[</span><span class="n">ijk</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__calc_minmax</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PROPS.append_to_xyz"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.append_to_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">append_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Appends a value to xyz dict</span>
+<span class="sd">            xyz - (X,Y,Z) tuple array indexes (floats)</span>
+<span class="sd">            val - value to be assigned</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">xyz</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Internal error: adding float index to int array </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">xyz</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">[</span><span class="n">xyz</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PROPS.append_to_ijk"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.props.PROPS.append_to_ijk">[docs]</a>    <span class="k">def</span> <span class="nf">append_to_ijk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ijk</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Appends a value to xyz dict</span>
+<span class="sd">            ijk - (I,J,K) tuple array indexes (ints)</span>
+<span class="sd">            val - value to be assigned</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span> <span class="o">=</span> <span class="n">ijk</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Internal error: adding float index to int array </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ijk</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_ijk</span><span class="p">[</span><span class="n">ijk</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__calc_minmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fltp</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Calculates minimum &amp; maximum of floating point value and stores</span>
+<span class="sd">            result locally in &#39;data_stats&#39;</span>
+<span class="sd">            fp - floating point value (numpy or python float)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fltp</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]:</span>
+                <span class="c1"># Convert to python float</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fltp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fltp</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]:</span>
+                <span class="c1"># Convert to python float</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fltp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

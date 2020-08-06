@@ -1,0 +1,537 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.geometry.model_geometries &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>db.geometry.model_geometries</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for db.geometry.model_geometries</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains ModelGeometries class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="unit_vector"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.unit_vector">[docs]</a><span class="k">def</span> <span class="nf">unit_vector</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; :returns: the unit vector of the vector.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">vector</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ModelGeometries"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries">[docs]</a><span class="k">class</span> <span class="nc">ModelGeometries</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39; Class used to store abstract geometry of parts of a geological model and its data</span>
+<span class="sd">        It should be independent as possible of any model&#39;s input format</span>
+<span class="sd">        Each class only stores data for 1 volume, but for many line segments and triangle faces</span>
+<span class="sd">        All sequence numbers for _*_arr start at 1</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;VRTX&#39; used to store vertex data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;ATOM&#39; used to store atom data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;TRGL&#39; used store triangle face data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;SEG&#39; used to store line segment data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span> <span class="o">=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Maximum X coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Minimum X coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span> <span class="o">=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Maximum Y coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Minimum Y coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_z</span> <span class="o">=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Maximum Z coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_z</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span>
+        <span class="sd">&#39;&#39;&#39; Minimum Z coordinate, used to calculate extent</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_origin</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Origin of volume&#39;s XYZ axes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_u</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Full length U-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_v</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Full length V-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_w</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; Full length W-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; 3 dimensional size of voxel volume</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; 3d numpy array of volume data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_data_type</span> <span class="o">=</span> <span class="s2">&quot;FLOAT_32&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Type of data in &#39;vol_data&#39;/&#39;_xyz_data&#39; e.g. &#39;FLOAT_32&#39; &#39;INT_16&#39;, &#39;RGBA&#39;</span>
+<span class="sd">            NB: If &gt;8 bits, always stored in big-endian fashion</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xyz_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Generic property data associated with XYZ points</span>
+<span class="sd">            This is an array of a dictionary mapping (X,Y,Z) =&gt; [data1, data2, data3, ... ]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ijk_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Generic property data associated with IJK volume indexes</span>
+<span class="sd">            First point is (0,0,0)</span>
+<span class="sd">            This is an array of a dictionary mapping (I,J,K) =&gt; [data1, data2, data3, ... ]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of maximum values in &#39;xyz_data&#39; or &#39;vol_data&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of minimum value in &#39;xyz_data&#39; or &#39;vol_data&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_data_marker</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of values indicating no data exists at a point in space</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_vert_line</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; Is true for wells that are represented by vertical lines</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="mi">1000</span>
+        <span class="sd">&#39;&#39;&#39; If this contains lines, desired line width</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Print friendly representation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;__&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)):</span>
+                <span class="n">ret_str</span> <span class="o">+=</span> <span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">))[:</span><span class="mi">500</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret_str</span>
+
+
+    <span class="c1"># Properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vrtx_arr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns array of VRTX objects</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atom_arr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns array of ATOM objects</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trgl_arr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns array of TRGL objects</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seg_arr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns array of SEG objects</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span>
+
+
+<div class="viewcode-block" id="ModelGeometries.is_trgl"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.is_trgl">[docs]</a>    <span class="k">def</span> <span class="nf">is_trgl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True iff this contains triangle data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.is_line"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.is_line">[docs]</a>    <span class="k">def</span> <span class="nf">is_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True iff this contails line data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.is_point"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.is_point">[docs]</a>    <span class="k">def</span> <span class="nf">is_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True iff this contains point data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> \
+               <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.is_volume"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.is_volume">[docs]</a>    <span class="k">def</span> <span class="nf">is_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True iff this contains volume data</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.is_single_layer_vo"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.is_single_layer_vo">[docs]</a>    <span class="k">def</span> <span class="nf">is_single_layer_vo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns True if this is extracted from a GOCAD VOXEL that only has a single layer</span>
+<span class="sd">            and should be converted into a PNG instead of a GLTF</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_volume</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.calc_minmax"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.calc_minmax">[docs]</a>    <span class="k">def</span> <span class="nf">calc_minmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Calculates and stores the max and min of all x,y,z coords</span>
+
+<span class="sd">        :param x_coord, y_coord, z_coord: x,y,z coords (python or numpy float)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">x_coord</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span><span class="p">:</span>
+                <span class="c1"># Convert to python float</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x_coord</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">x_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y_coord</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y_coord</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">z_coord</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_z</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_z</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">z_coord</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_z</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_z</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z_coord</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ModelGeometries.get_extent"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_extent">[docs]</a>    <span class="k">def</span> <span class="nf">get_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; :returns: estimate of the geographic extent of the model, using max and min \</span>
+<span class="sd">            coordinate values format is [min_x, max_x, min_y, max_y]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_vol_side_lengths"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_vol_side_lengths">[docs]</a>    <span class="k">def</span> <span class="nf">get_vol_side_lengths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; :returns: the lengths of the sides of a volume in [X, Y, Z] form, where X,Y,Z are floats</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">max_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_z</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_rotation"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">get_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; :returns: three unit vectors of the volume&#39;s XYZ axes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">u_vec</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_u</span><span class="p">)</span>
+        <span class="n">v_vec</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_v</span><span class="p">)</span>
+        <span class="n">w_vec</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_axis_w</span><span class="p">)</span>
+        <span class="c1"># Make sure it returns python floats</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">u_vec</span><span class="p">]),</span>
+               <span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">v_vec</span><span class="p">]),</span>
+               <span class="nb">tuple</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">w_vec</span><span class="p">])]</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_max_data"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_max_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_max_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retrieves maximum value of data point</span>
+<span class="sd">        :param idx: index into property data, omit for volume data</span>
+<span class="sd">        :returns: maximum data value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_min_data"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_min_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_min_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retrieves minimum value of data point</span>
+<span class="sd">        :param idx: index into property data, omit for volume data</span>
+<span class="sd">        :returns: minimum data value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_no_data_marker"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_no_data_marker">[docs]</a>    <span class="k">def</span> <span class="nf">get_no_data_marker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retrieve no data marker</span>
+<span class="sd">        :param idx: index into property data, omit for volume data</span>
+<span class="sd">        :returns: no data marker</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_data_marker</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_data_marker</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.add_stats"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.add_stats">[docs]</a>    <span class="k">def</span> <span class="nf">add_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">no_data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds minimum, maximum and no data marker</span>
+<span class="sd">        :param min_val: minimum value</span>
+<span class="sd">        :param max_val: maximum value</span>
+<span class="sd">        :param no_data: value used in a dataset when no data is recorded for a location</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_data_marker</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">no_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.add_loose_3d_data"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.add_loose_3d_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_loose_3d_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_xyz</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds an instance of XYZ data</span>
+<span class="sd">        :param is_xyz: True iff xyz data (float, float, float) \</span>
+<span class="sd">                       else ijk (int, int, int) data</span>
+<span class="sd">        :param data_dict: dictionary of (X,Y,Z) =&gt; data, or (I,J,K) =&gt; data \</span>
+<span class="sd">                          values to be added</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">data_dict</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(((</span><span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> \
+                   <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span> \
+                   <span class="ow">and</span> <span class="n">is_xyz</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_xyz</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">is_xyz</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_xyz_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ijk_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelGeometries.get_loose_3d_data"><a class="viewcode-back" href="../../../db.geometry.html#db.geometry.model_geometries.ModelGeometries.get_loose_3d_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_loose_3d_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_xyz</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retrieves data from xyz data dictionary</span>
+<span class="sd">        :param is_xyz: True iff xyz data (float, float, float) \</span>
+<span class="sd">                       else ijk (int, int, int) data</span>
+<span class="sd">        :param idx: index for when there are multiple values for each point in space, \</span>
+<span class="sd">                    omit for volumes</span>
+<span class="sd">        :returns: dictionary of (X,Y,Z) =&gt; data value or (I,J,K) =&gt; data value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">is_xyz</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xyz_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xyz_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ijk_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">idx</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ijk_data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{}</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

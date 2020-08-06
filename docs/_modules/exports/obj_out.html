@@ -1,0 +1,440 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.obj_out &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.obj_out</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.obj_out</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains ObjOut class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">lib.db.style.false_colour</span> <span class="kn">import</span> <span class="n">make_false_colour_tup</span>
+
+<div class="viewcode-block" id="ObjKit"><a class="viewcode-back" href="../../exports.html#exports.obj_out.ObjKit">[docs]</a><span class="k">class</span> <span class="nc">ObjKit</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Class to output geometries to Wavefront OBJ format</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Limit to 256 colours</span>
+    <span class="n">MAX_COLOURS</span> <span class="o">=</span> <span class="mf">256.0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level, using python&#39;s &#39;logging&#39; module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Set up logging, use an attribute of class name so it is only called once</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ObjKit</span><span class="p">,</span> <span class="s1">&#39;logger&#39;</span><span class="p">):</span>
+            <span class="n">ObjKit</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="c1"># Create console handler</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+            <span class="c1"># Create formatter</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add formatter to ch</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+            <span class="c1"># Add handler to logger and set level</span>
+            <span class="n">ObjKit</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="n">ObjKit</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">debug_level</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">ObjKit</span><span class="o">.</span><span class="n">logger</span>
+
+
+<div class="viewcode-block" id="ObjKit.write_voxel_obj"><a class="viewcode-back" href="../../exports.html#exports.obj_out.ObjKit.write_voxel_obj">[docs]</a>    <span class="k">def</span> <span class="nf">write_voxel_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">out_fp</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">src_file_str</span><span class="p">,</span> <span class="n">step_sz</span><span class="p">,</span>
+                        <span class="n">use_full_cubes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Writes out voxel data to Wavefront OBJ and MTL files</span>
+
+<span class="sd">        :param out_fp: open file handle of OBJ file</span>
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object</span>
+<span class="sd">        :param fileName: filename of OBJ file without the &#39;OBJ&#39; extension</span>
+<span class="sd">        :param src_file_str: filename of gocad file</span>
+<span class="sd">        :param step_sz: when stepping through the voxel block this is the step size</span>
+<span class="sd">        :param use_full_cubes: (optional, default to false) will write out full cubes to</span>
+<span class="sd">                                 file if true, else will remove non-visible faces</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_voxel_obj(</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">src_file_str</span><span class="p">)</span>
+        <span class="n">mtl_fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.MTL&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">colour_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)):</span>
+            <span class="n">diffuse_colour</span> <span class="o">=</span> <span class="n">make_false_colour_tup</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COLOURS</span><span class="p">)</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Wavefront MTL file converted from  &#39;</span><span class="si">{0}</span><span class="s2">&#39;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_file_str</span><span class="p">))</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;newmtl colouring-</span><span class="si">{0:03d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_idx</span><span class="p">))</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Ka </span><span class="si">{0:.3f}</span><span class="s2"> </span><span class="si">{1:.3f}</span><span class="s2"> </span><span class="si">{2:.3f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Kd </span><span class="si">{0:.3f}</span><span class="s2"> </span><span class="si">{1:.3f}</span><span class="s2"> </span><span class="si">{2:.3f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">diffuse_colour</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Ks 0.000 0.000 0.000</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">mtl_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;d 1.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">mtl_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">ct_done</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mtllib &quot;</span><span class="o">+</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.MTL</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">vert_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">break_out</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">step_sz</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">step_sz</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">step_sz</span><span class="p">):</span>
+                    <span class="n">colour_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">255.0</span><span class="o">*</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">voxel_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">]</span> \
+                                           <span class="o">-</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">voxel_data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">])</span> \
+                                           <span class="o">/</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">voxel_data_stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">]</span> \
+                                           <span class="o">-</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">voxel_data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">]))</span>
+
+                    <span class="c1"># NB: Assumes AXIS_MIN = 0, and AXIS_MAX = 1</span>
+                    <span class="n">u_offset</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
+                               <span class="nb">float</span><span class="p">(</span><span class="n">x_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">v_offset</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                               <span class="nb">float</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">w_offset</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> \
+                               <span class="nb">float</span><span class="p">(</span><span class="n">z_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_w</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">uvw</span> <span class="o">=</span> <span class="p">(</span><span class="n">u_offset</span><span class="p">,</span> <span class="n">v_offset</span><span class="p">,</span> <span class="n">w_offset</span><span class="p">)</span>
+                    <span class="n">pt_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">step_sz</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_u</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+                               <span class="n">step_sz</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+                               <span class="n">step_sz</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_w</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">vert_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                 <span class="p">(</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                <span class="p">]</span>
+                    <span class="n">indice_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># Create a full cube for each voxel</span>
+                    <span class="k">if</span> <span class="n">use_full_cubes</span><span class="p">:</span>
+                        <span class="n">indice_list</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># WEST</span>
+                                       <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># SOUTH</span>
+                                       <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="c1"># BOTTOM</span>
+                                       <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="c1"># NORTH</span>
+                                       <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="c1"># TOP</span>
+                                       <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="c1"># EAST</span>
+                                      <span class="p">]</span>
+                    <span class="c1"># To save space, only create surfaces at the edges, assuming a block shape</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># BOTTOM FACE</span>
+                        <span class="k">if</span> <span class="n">z_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                        <span class="c1"># TOP FACE</span>
+                        <span class="k">if</span> <span class="n">z_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                        <span class="c1"># SOUTH FACE</span>
+                        <span class="k">if</span> <span class="n">y_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                        <span class="c1"># NORTH FACE</span>
+                        <span class="k">if</span> <span class="n">y_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+                        <span class="c1"># EAST FACE</span>
+                        <span class="k">if</span> <span class="n">x_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+                        <span class="c1"># WEST FACE</span>
+                        <span class="k">if</span> <span class="n">x_val</span> <span class="o">==</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">indice_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                    <span class="c1"># Only write if there are indices to write</span>
+                    <span class="k">if</span> <span class="n">indice_list</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">vert</span> <span class="ow">in</span> <span class="n">vert_list</span><span class="p">:</span>
+                            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;v </span><span class="si">{0:f}</span><span class="s2"> </span><span class="si">{1:f}</span><span class="s2"> </span><span class="si">{2:f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vert</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vert</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;g main-</span><span class="si">{0:010d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vert_idx</span><span class="p">))</span>
+                        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;usemtl colouring-</span><span class="si">{0:03d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">colour_num</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">indice_list</span><span class="p">:</span>
+                            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;f </span><span class="si">{0:d}</span><span class="s2"> </span><span class="si">{1:d}</span><span class="s2"> </span><span class="si">{2:d}</span><span class="s2"> </span><span class="si">{3:d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">vert_idx</span><span class="p">,</span>
+                                                                              <span class="n">ind</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vert_idx</span><span class="p">,</span>
+                                                                              <span class="n">ind</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">vert_idx</span><span class="p">,</span>
+                                                                              <span class="n">ind</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="n">vert_idx</span><span class="p">))</span>
+                        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">vert_idx</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">vert_list</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">vert_idx</span> <span class="o">&gt;</span> <span class="mi">99999999999</span><span class="p">:</span>
+                            <span class="n">break_out</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                <span class="k">if</span> <span class="n">break_out</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">break_out</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">ct_done</span></div>
+
+
+<div class="viewcode-block" id="ObjKit.write_obj"><a class="viewcode-back" href="../../exports.html#exports.obj_out.ObjKit.write_obj">[docs]</a>    <span class="k">def</span> <span class="nf">write_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">src_file_str</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Writes out an OBJ file</span>
+
+<span class="sd">        :param style_obj: STYLE object</span>
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object</span>
+<span class="sd">        :param fileName: filename of OBJ file, without extension</span>
+<span class="sd">        :param src_file_str: filename of gocad file</span>
+
+<span class="sd">        NOTES:</span>
+<span class="sd">            OBJ is very simple, and has shortcomings:</span>
+<span class="sd">            1. Does not include annotations (only comments and a group name)</span>
+<span class="sd">            2. Lines and points do not have a colour</span>
+
+<span class="sd">        I am only using it here because GOCAD VOXEL files are too big for COLLADA format</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_obj(</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">src_file_str</span><span class="p">)</span>
+
+        <span class="c1"># Output to OBJ file</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing OBJ file: &quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.OBJ&quot;</span><span class="p">)</span>
+        <span class="n">out_fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.OBJ&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Wavefront OBJ file converted from &#39;</span><span class="si">{0}</span><span class="s2">&#39;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_file_str</span><span class="p">))</span>
+        <span class="n">ct_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># This dictionary returns the insertion order of the vertex</span>
+        <span class="c1"># in the vrtx_arr given its sequence number</span>
+        <span class="n">vert_dict</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">make_vertex_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_trgl</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">())</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;mtllib &quot;</span><span class="o">+</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.MTL</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_trgl</span><span class="p">()</span> <span class="ow">or</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_line</span><span class="p">()</span> <span class="ow">or</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">vtx</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">:</span>
+                <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;v </span><span class="si">{0:f}</span><span class="s2"> </span><span class="si">{1:f}</span><span class="s2"> </span><span class="si">{2:f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;g main</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_trgl</span><span class="p">():</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;usemtl colouring</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fac</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">trgl_arr</span><span class="p">:</span>
+                <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;f </span><span class="si">{0:d}</span><span class="s2"> </span><span class="si">{1:d}</span><span class="s2"> </span><span class="si">{2:d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">fac</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                                                            <span class="n">vert_dict</span><span class="p">[</span><span class="n">fac</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                                                            <span class="n">vert_dict</span><span class="p">[</span><span class="n">fac</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">2</span><span class="p">]]))</span>
+
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_line</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">seg_arr</span><span class="p">:</span>
+                <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;l </span><span class="si">{0:d}</span><span class="s2"> </span><span class="si">{1:d}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">seg</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">vert_dict</span><span class="p">[</span><span class="n">seg</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
+
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">pnt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">)):</span>
+                <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">{0:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pnt</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_volume</span><span class="p">():</span>
+            <span class="n">ct_done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_voxel_obj</span><span class="p">(</span><span class="n">out_fp</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">src_file_str</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">out_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Create an MTL file for the colour</span>
+        <span class="n">rgba_tup</span> <span class="o">=</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_rgba_tup</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rgba_tup</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ct_done</span><span class="p">:</span>
+            <span class="n">out_fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.MTL&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# Wavefront MTL file converted from  &#39;</span><span class="si">{0}</span><span class="s2">&#39;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">src_file_str</span><span class="p">))</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;newmtl colouring</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Ka </span><span class="si">{0:.3f}</span><span class="s2"> </span><span class="si">{1:.3f}</span><span class="s2"> </span><span class="si">{2:.3f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rgba_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rgba_tup</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">rgba_tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Kd </span><span class="si">{0:.3f}</span><span class="s2"> </span><span class="si">{1:.3f}</span><span class="s2"> </span><span class="si">{2:.3f}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rgba_tup</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rgba_tup</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                               <span class="n">rgba_tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Ks 0.000 0.000 0.000</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;d 1.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">out_fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

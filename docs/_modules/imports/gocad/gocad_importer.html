@@ -1,0 +1,1199 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad.gocad_importer &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>imports.gocad.gocad_importer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for imports.gocad.gocad_importer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; This contains the GocadImporter class, which is the main class used for parsing</span>
+<span class="sd">    GOCAD object files. It also contains other functions for parsing GOCAD group files.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="kn">from</span> <span class="nn">lib.db.geometry.model_geometries</span> <span class="kn">import</span> <span class="n">ModelGeometries</span>
+<span class="kn">from</span> <span class="nn">lib.imports.gocad.props</span> <span class="kn">import</span> <span class="n">PROPS</span>
+<span class="kn">from</span> <span class="nn">lib.db.style.style</span> <span class="kn">import</span> <span class="n">STYLE</span>
+<span class="kn">from</span> <span class="nn">lib.db.geometry.types</span> <span class="kn">import</span> <span class="n">VRTX</span><span class="p">,</span> <span class="n">ATOM</span><span class="p">,</span> <span class="n">TRGL</span><span class="p">,</span> <span class="n">SEG</span>
+<span class="kn">from</span> <span class="nn">lib.db.metadata.metadata</span> <span class="kn">import</span> <span class="n">METADATA</span><span class="p">,</span> <span class="n">MapFeat</span>
+<span class="kn">from</span> <span class="nn">lib.imports.gocad.gocad_filestr_types</span> <span class="kn">import</span> <span class="n">GocadFileDataStrMap</span>
+
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="kn">import</span> <span class="n">make_line_gen</span><span class="p">,</span> <span class="n">check_vertex</span>
+
+<span class="c1"># Set up debugging</span>
+<span class="n">LOCAL_LOGGER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;gocad_importer&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create console handler</span>
+<span class="n">LOCAL_HANDLER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+<span class="c1"># Create formatter</span>
+<span class="n">LOCAL_FORMATTER</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add formatter to ch</span>
+<span class="n">LOCAL_HANDLER</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">LOCAL_FORMATTER</span><span class="p">)</span>
+
+<span class="c1"># Add handler to logger</span>
+<span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">LOCAL_HANDLER</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="extract_from_grp"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.extract_from_grp">[docs]</a><span class="k">def</span> <span class="nf">extract_from_grp</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">,</span> <span class="n">file_lines</span><span class="p">,</span> <span class="n">base_xyz</span><span class="p">,</span> <span class="n">debug_lvl</span><span class="p">,</span>
+                     <span class="n">nondef_coords</span><span class="p">,</span> <span class="n">ct_file_dict</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Extracts GOCAD files from a GOCAD group file</span>
+
+<span class="sd">    :param src_dir: source directory for GOCAD file</span>
+<span class="sd">    :param filename_str: filename of GOCAD file</span>
+<span class="sd">    :param file_lines: lines extracted from GOCAD group file</span>
+<span class="sd">    :param base_xyz: base coordinates as (x,y,z) tuple added to all 3d coordinates</span>
+<span class="sd">    :param debug_lvl: debug level for debug output e.g. logging.DEBUG</span>
+<span class="sd">    :param nondefault_coords: optional flag, supports non-default coordinates, default is False</span>
+<span class="sd">    :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,</span>
+<span class="sd">                        list of values to be rendered transparent) key is GOCAD filename </span>
+<span class="sd">    :returns: a list of (ModelGeometries, STYLE, METADATA) objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">debug_lvl</span><span class="p">)</span>
+    <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">src_dir</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">)</span>
+    <span class="n">main_gsm_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">first_line</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">in_member</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">in_gocad</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">gocad_lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">file_name</span><span class="p">,</span> <span class="n">file_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename_str</span><span class="p">)</span>
+    <span class="n">grp_gocad_obj</span> <span class="o">=</span> <span class="n">GocadImporter</span><span class="p">(</span><span class="n">debug_lvl</span><span class="p">,</span> <span class="n">base_xyz</span><span class="o">=</span><span class="n">base_xyz</span><span class="p">,</span>
+                              <span class="n">group_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+                              <span class="n">nondefault_coords</span><span class="o">=</span><span class="n">nondef_coords</span><span class="p">,</span> <span class="n">ct_file_dict</span><span class="o">=</span><span class="n">ct_file_dict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line_idx</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file_lines</span><span class="p">):</span>
+        <span class="n">line_str</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">line_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): line_str = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line_str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first_line</span><span class="p">:</span>
+            <span class="n">first_line</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Check that this isn&#39;t trying to parse a group file</span>
+            <span class="k">if</span> <span class="n">file_ext</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;.GP&#39;</span> <span class="ow">or</span> <span class="n">line_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;GP&#39;</span><span class="p">]:</span>
+                <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SORRY - not a GOCAD GP file </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">line_str</span><span class="p">))</span>
+                <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;    filename_str = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Only set &#39;in_gocad&#39; if enclosed object is not another group object</span>
+        <span class="k">if</span> <span class="n">line_str</span> <span class="o">==</span> <span class="s2">&quot;BEGIN_MEMBERS&quot;</span> <span class="ow">and</span> <span class="n">line_idx</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_lines</span><span class="p">)</span> \
+                               <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_group_header</span><span class="p">(</span><span class="n">file_lines</span><span class="p">[</span><span class="n">line_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">in_member</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): in_member = True&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">line_str</span> <span class="o">==</span> <span class="s2">&quot;END_MEMBERS&quot;</span><span class="p">:</span>
+            <span class="n">in_member</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): in_member = False&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">in_member</span> <span class="ow">and</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;GOCAD&quot;</span><span class="p">:</span>
+            <span class="n">in_gocad</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): in_gocad = True&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If at end of GOCAD object then process it</span>
+        <span class="k">elif</span> <span class="n">in_member</span> <span class="ow">and</span> <span class="n">line_str</span> <span class="o">==</span> <span class="s2">&quot;END&quot;</span><span class="p">:</span>
+            <span class="n">in_gocad</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): in_gocad = False, start processing&quot;</span><span class="p">)</span>
+            <span class="n">gocad_obj</span> <span class="o">=</span> <span class="n">GocadImporter</span><span class="p">(</span><span class="n">debug_lvl</span><span class="p">,</span> <span class="n">base_xyz</span><span class="o">=</span><span class="n">base_xyz</span><span class="p">,</span>
+                              <span class="n">group_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+                              <span class="n">nondefault_coords</span><span class="o">=</span><span class="n">nondef_coords</span><span class="p">,</span> <span class="n">ct_file_dict</span><span class="o">=</span><span class="n">ct_file_dict</span><span class="p">)</span>
+            <span class="c1"># Make a copy of style of group GOCAD object, so it inherits colour defns etc.</span>
+            <span class="c1"># from group obj</span>
+            <span class="n">gocad_obj</span><span class="o">.</span><span class="n">style_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grp_gocad_obj</span><span class="o">.</span><span class="n">style_obj</span><span class="p">)</span>
+            <span class="n">is_ok</span><span class="p">,</span> <span class="n">gsm_list</span> <span class="o">=</span> <span class="n">gocad_obj</span><span class="o">.</span><span class="n">process_gocad</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">,</span> <span class="n">gocad_lines</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_ok</span><span class="p">:</span>
+                <span class="n">main_gsm_list</span> <span class="o">+=</span> <span class="n">gsm_list</span>
+                <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;gsm_list = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">gsm_list</span><span class="p">))</span>
+            <span class="n">gocad_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># If found a group header, then process it to fetch its colour defns etc.</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">in_member</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">in_gocad</span> <span class="ow">and</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HEADER&quot;</span><span class="p">:</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing header in GRP file&quot;</span><span class="p">)</span>
+            <span class="n">line_gen</span> <span class="o">=</span> <span class="n">make_line_gen</span><span class="p">(</span><span class="n">file_lines</span><span class="p">[</span><span class="n">line_idx</span><span class="p">:])</span>
+            <span class="n">grp_gocad_obj</span><span class="o">.</span><span class="n">process_header</span><span class="p">(</span><span class="n">line_gen</span><span class="p">)</span>
+
+        <span class="c1"># If in a GOCAD file, then accumulate lines for processing</span>
+        <span class="k">if</span> <span class="n">in_member</span> <span class="ow">and</span> <span class="n">in_gocad</span><span class="p">:</span>
+            <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_from_grp(): Appending line&quot;</span><span class="p">)</span>
+            <span class="n">gocad_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="n">LOCAL_LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;extract_gocad() returning len(main_gsm_list)=</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">main_gsm_list</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">main_gsm_list</span></div>
+
+
+<div class="viewcode-block" id="is_group_header"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.is_group_header">[docs]</a><span class="k">def</span> <span class="nf">is_group_header</span><span class="p">(</span><span class="n">line_str</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Returns true iff line string is a GOCAD group header</span>
+<span class="sd">        :param line_str: line string</span>
+<span class="sd">        :returns: true iif line string is a GOCAD group header</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">line_str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\r</span><span class="s1"> &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;GP&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="GocadImporter"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.GocadImporter">[docs]</a><span class="k">class</span> <span class="nc">GocadImporter</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Class used to read GOCAD files and store their details</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">.parsers</span> <span class="kn">import</span> <span class="n">parse_property_header</span><span class="p">,</span> <span class="n">parse_props</span><span class="p">,</span> <span class="n">parse_float</span>
+    <span class="kn">from</span> <span class="nn">.parsers</span> <span class="kn">import</span> <span class="n">parse_int</span><span class="p">,</span> <span class="n">parse_xyz</span><span class="p">,</span> <span class="n">parse_colour</span><span class="p">,</span> <span class="n">parse_axis_unit</span>
+    <span class="kn">from</span> <span class="nn">.processors</span> <span class="kn">import</span> <span class="n">process_coord_hdr</span><span class="p">,</span> <span class="n">process_header</span><span class="p">,</span> <span class="n">process_ascii_well_path</span>
+    <span class="kn">from</span> <span class="nn">.processors</span> <span class="kn">import</span> <span class="n">process_well_info</span><span class="p">,</span> <span class="n">process_well_curve</span><span class="p">,</span> <span class="n">process_prop_class_hdr</span><span class="p">,</span> <span class="n">process_well_binary_file</span>
+    <span class="kn">from</span> <span class="nn">.processors</span> <span class="kn">import</span> <span class="n">process_vol_data</span>
+    <span class="kn">from</span> <span class="nn">.volumes</span> <span class="kn">import</span> <span class="n">read_volume_binary_files</span><span class="p">,</span> <span class="n">calc_vo_xyz</span><span class="p">,</span> <span class="n">calc_sg_xyz</span><span class="p">,</span> <span class="n">read_region_flags_file</span>
+
+    <span class="n">SUPPORTED_EXTS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;TS&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;VS&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;GP&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;VO&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;WL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SG&#39;</span>
+    <span class="p">]</span>
+    <span class="sd">&#39;&#39;&#39; List of file extensions to search for</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+    <span class="n">COORD_OFFSETS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;FROM_SHAPE&#39;</span> <span class="p">:(</span><span class="mf">535100.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)}</span>
+    <span class="sd">&#39;&#39;&#39; Coordinate offsets, when file contains a coordinate system  that is not &quot;DEFAULT&quot;</span>
+<span class="sd">        The named coordinate system and (X,Y,Z) offset will apply</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">stop_on_exc</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&#39;&#39;&#39; Stop upon exception, regardless of debug level</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">SKIP_FLAGS_FILE</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&#39;&#39;&#39; Don&#39;t read flags file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">WELL_LINE_WIDTH</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="sd">&#39;&#39;&#39; Line width for drawing wells</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">,</span> <span class="n">base_xyz</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                 <span class="n">nondefault_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stop_on_exc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ct_file_dict</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level taken from &#39;logging&#39; module e.g. logging.DEBUG</span>
+<span class="sd">        :param base_xyz: optional (x,y,z) floating point tuple, base_xyz is added to all coordinates</span>
+<span class="sd">            before they are output, default is (0.0, 0.0, 0.0)</span>
+<span class="sd">        :param group_name: optional string, name of group if this gocad file is within a group,</span>
+<span class="sd">                           default is &quot;&quot;</span>
+<span class="sd">        :param nondefault_coords: optional flag, supports non-default coordinates, default is False</span>
+<span class="sd">        :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,</span>
+<span class="sd">                            list of values to be rendered transparent) key is GOCAD filename </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># Set up logging, use an attribute of class name so it is only called once</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">GocadImporter</span><span class="p">,</span> <span class="s1">&#39;logger&#39;</span><span class="p">):</span>
+            <span class="n">GocadImporter</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="c1"># Create console handler</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+            <span class="c1"># Create formatter</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> -- </span><span class="si">%(name)s</span><span class="s1"> -- </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Add formatter to ch</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+
+            <span class="c1"># Add handler to logger and set level</span>
+            <span class="n">GocadImporter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+        <span class="n">GocadImporter</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">debug_level</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">GocadImporter</span><span class="o">.</span><span class="n">logger</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ct_file_dict</span> <span class="o">=</span> <span class="n">ct_file_dict</span>
+        <span class="sd">&#39;&#39;&#39; A dictionary of files which contain colour tables</span>
+<span class="sd">            key is GOCAD filename, val is CSV file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.ct_file_dict = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct_file_dict</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_on_exc</span> <span class="o">=</span> <span class="n">stop_on_exc</span>
+
+        <span class="c1"># Initialise input vars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_xyz</span> <span class="o">=</span> <span class="n">base_xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span> <span class="o">=</span> <span class="n">group_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nondefault_coords</span> <span class="o">=</span> <span class="n">nondefault_coords</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">header_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Contents of the name field in the header</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Dictionary of PROPS objects, stores GOCAD &quot;PROPERTY&quot; objects from VOXET files</span>
+<span class="sd">            Dictionary index is the PROPERTY number e.g. &#39;1&#39;, &#39;2&#39;, &#39;3&#39; ...</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_prop</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&#39;&#39;&#39; PROPS object used for the voxet flags file which has region data in</span>
+<span class="sd">            it and for SGRID files</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">invert_zaxis</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; Set to true if z-axis inversion is turned on in this GOCAD file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="sd">&#39;&#39;&#39; OrderedDict of PROPS objects for attached PVRTX and PATOM properties</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_ts</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD TSURF file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_vs</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD VSET file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_pl</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD PLINE file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD VOXET file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_wl</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD WELL file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&#39;&#39;&#39; True iff it is a GOCAD SGRID file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz_mult</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+        <span class="sd">&#39;&#39;&#39; Used to convert to metres if the units are in kilometres</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz_unit</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="sd">&#39;&#39;&#39; Units of XYZ axes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;VRTX&#39; used to store vertex data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;ATOM&#39; used to store atom data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;TRGL&#39; used store triangle face data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Array of named tuples &#39;SEG&#39; used to store line segment data</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; U-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; V-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; W-axis volume vector</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Volume&#39;s origin (X,Y,Z)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; 3 dimensional minimum point of voxet volume</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; 3 dimensional maximum point of voxet volume</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; Size of voxet volume</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_array_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Size of flags file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_bit_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Number of bit in use in flags file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_bit_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Size (number of bytes) of each element in flags file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Offset within the flags file  where data starts</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Name of flags file associated with voxel file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&#39;&#39;&#39; Offset within points file (SGRID)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Points file (SGRID)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Labels and bit numbers for each region in a flags file,</span>
+<span class="sd">            key is number (as string), value is label</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">region_colour_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Region colour dict, key is region name, value is RGB (float, float, float)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgrid_cell_align</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&#39;&#39;&#39; Is SGRID aligned to cells or points ?</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">np_filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Filename of GOCAD file without path or extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord_sys_name</span> <span class="o">=</span> <span class="s2">&quot;DEFAULT&quot;</span>
+        <span class="sd">&#39;&#39;&#39; Name of the GOCAD coordinate system</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">uses_default_coords</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&#39;&#39;&#39; Uses default coordinates</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_idx</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="sd">&#39;&#39;&#39; Some voxet files have floats that are indexes to rock types</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span> <span class="o">=</span> <span class="n">ModelGeometries</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">style_obj</span> <span class="o">=</span> <span class="n">STYLE</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span> <span class="o">=</span> <span class="n">METADATA</span><span class="p">()</span>
+        <span class="sd">&#39;&#39;&#39; Seed copies of ModelGeometries, STYLE, METADATA for data gathering purposes</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="sd">&#39;&#39;&#39; List of (ModelGeometries, STYLE, METADATA)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="GocadImporter.handle_exc"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.GocadImporter.handle_exc">[docs]</a>    <span class="k">def</span> <span class="nf">handle_exc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; If stop_on_exc is set or debug is on, print details of exception and stop</span>
+
+<span class="sd">        :param exc: exception</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()</span> <span class="o">==</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_on_exc</span><span class="p">:</span>
+            <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_on_exc</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG MODE: CAUGHT EXCEPTION:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;DEBUG MODE: CAUGHT EXCEPTION:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span><span class="p">)))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; A basic print friendly representation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;__&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)):</span>
+                <span class="n">ret_str</span> <span class="o">+=</span> <span class="n">field</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">))[:</span><span class="mi">200</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">ret_str</span>
+
+
+    <span class="k">def</span> <span class="nf">__make_vertex_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Make a dictionary to associate vertex insertion order with vertex sequence number</span>
+<span class="sd">            Ordinarily the vertex sequence number is the same as the insertion order in the vertex</span>
+<span class="sd">            array, but some GOCAD files have missing vertices etc.</span>
+<span class="sd">            The first element starts at &#39;1&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">vert_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Assign vertices to dict</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">vert_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+
+        <span class="c1"># Assign atoms to dict</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">vert</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">vert</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="n">atom</span><span class="o">.</span><span class="n">v</span><span class="p">:</span>
+                    <span class="n">vert_dict</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+                    <span class="k">break</span>
+        <span class="k">return</span> <span class="n">vert_dict</span>
+
+
+<div class="viewcode-block" id="GocadImporter.process_gocad"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.GocadImporter.process_gocad">[docs]</a>    <span class="k">def</span> <span class="nf">process_gocad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src_dir</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">,</span> <span class="n">file_lines</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extracts details from gocad file. This should be called before other functions!</span>
+
+<span class="sd">        :param filename_str: filename of gocad file</span>
+<span class="sd">        :param file_lines: array of strings of lines from gocad file</span>
+<span class="sd">        :returns: true if could process file, and a list of (geometry, style, metadata) objects</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;process_gocad(</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">src_dir</span><span class="p">,</span> <span class="n">filename_str</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_lines</span><span class="p">))</span>
+
+        <span class="n">ret_val</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">debug_lvl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()</span>
+
+        <span class="c1"># For keeping track of the ID of VRTX, ATOM, PVRTX, SEG etc.</span>
+        <span class="n">seq_no</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">seq_no_prev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">file_name</span><span class="p">,</span> <span class="n">file_ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">np_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="c1"># Check that we have a GOCAD file that we can process</span>
+        <span class="c1"># Nota bene: This will return if called for the header of a GOCAD group file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__set_type</span><span class="p">(</span><span class="n">file_ext</span><span class="p">,</span> <span class="n">file_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39; </span><span class="se">\n\r</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;process_gocad() Can&#39;t detect GOCAD file object type, return False&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[]</span>
+
+        <span class="n">line_gen</span> <span class="o">=</span> <span class="n">make_line_gen</span><span class="p">(</span><span class="n">file_lines</span><span class="p">)</span>
+        <span class="n">is_last</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Retry flag forces parsing of the field array without asking for the next line</span>
+        <span class="n">retry</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">is_last</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">retry</span><span class="p">:</span>
+                <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">line_str</span><span class="p">,</span> <span class="n">is_last</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">line_gen</span><span class="p">)</span>
+            <span class="n">retry</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">is_last</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;field = </span><span class="si">%s</span><span class="s2"> line_str = </span><span class="si">%s</span><span class="s2"> is_last = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                              <span class="nb">repr</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">line_str</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">is_last</span><span class="p">))</span>
+
+            <span class="c1"># Skip the subsets keywords</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SUBVSET&quot;</span><span class="p">,</span> <span class="s2">&quot;ILINE&quot;</span><span class="p">,</span> <span class="s2">&quot;TFACE&quot;</span><span class="p">,</span> <span class="s2">&quot;TVOLUME&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skip subset keywords&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Skip control nodes (used to denote fixed points in GOCAD)</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;CNP&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Skip control nodes&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Are we in the main header?</span>
+                <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HEADER&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing header&quot;</span><span class="p">)</span>
+                    <span class="n">is_last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_header</span><span class="p">(</span><span class="n">line_gen</span><span class="p">)</span>
+
+                <span class="c1"># Are we within coordinate system header?</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;GOCAD_ORIGINAL_COORDINATE_SYSTEM&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing coordinate system&quot;</span><span class="p">)</span>
+                    <span class="c1"># Process coordinate header fields</span>
+                    <span class="n">is_last</span><span class="p">,</span> <span class="n">is_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_coord_hdr</span><span class="p">(</span><span class="n">line_gen</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_error</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;process_gocad() return False&quot;</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[]</span>
+
+                <span class="c1"># Are we in the property class header?</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROPERTY_CLASS_HEADER&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing property class header&quot;</span><span class="p">)</span>
+                    <span class="n">is_last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_prop_class_hdr</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+                <span class="c1"># Property names, this is not the class names</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROPERTIES&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROPS</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">debug_lvl</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; properties list = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+                <span class="c1"># These are the property names for the point properties (e.g. PVRTX, PATOM)</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROPERTY_CLASSES&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROPS</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">debug_lvl</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; property classes = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+                <span class="c1"># This is the number of floats/ints for each property, usually it is &#39;1&#39;,</span>
+                <span class="c1"># but XYZ values are &#39;3&#39;</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ESIZES&quot;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">prop_obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">is_ok</span><span class="p">,</span> <span class="n">d_sz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">is_ok</span><span class="p">:</span>
+                            <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">=</span> <span class="n">d_sz</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; property_sizes = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+                <span class="c1"># Read values representing no data for this property at a coordinate point</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;NO_DATA_VALUES&quot;</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">prop_obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">converted</span><span class="p">,</span> <span class="n">fltp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">converted</span><span class="p">:</span>
+                                <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span> <span class="o">=</span> <span class="n">fltp</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.no_data_marker = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span>
+                                                  <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; property_nulls = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+                <span class="c1"># If a well object</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_wl</span><span class="p">:</span>
+                    <span class="c1"># All well files</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PATH_ZM_UNIT&quot;</span> <span class="ow">or</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;WREF&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing ASCII well path&quot;</span><span class="p">)</span>
+                        <span class="n">is_last</span><span class="p">,</span> <span class="n">well_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">label_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_ascii_well_path</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+                        <span class="c1"># Convert well path into a series of SEG types</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">well_path</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">VRTX</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">well_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">well_path</span><span class="p">)):</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SEG</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">VRTX</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">well_path</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+                             
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Well path: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">well_path</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Label list: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">label_list</span><span class="p">))</span>
+                        <span class="n">retry</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="c1"># Well files with well curve block</span>
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;WELL_CURVE&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing well curve&quot;</span><span class="p">)</span>
+                        <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">is_last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_well_curve</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;BINARY_DATA_FILE&quot;</span><span class="p">:</span>
+                        <span class="n">bin_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+                        <span class="n">flt_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_well_binary_file</span><span class="p">(</span><span class="n">bin_file</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;bin_flts=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">flt_arr</span><span class="p">[:</span><span class="mi">40</span><span class="p">]))</span>
+
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;WP_CATALOG_FILE&quot;</span><span class="p">:</span>
+                        <span class="n">bin_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+                        <span class="n">flt_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_well_binary_file</span><span class="p">(</span><span class="n">bin_file</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;wp_flts=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">flt_arr</span><span class="p">[:</span><span class="mi">40</span><span class="p">]))</span>
+
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;STATION&quot;</span><span class="p">:</span>
+                        <span class="sd">&quot;&quot;&quot; Format is:  STATION MD INC AZ</span>
+<span class="sd">                            MD = measured depth</span>
+<span class="sd">                            INC = inclination</span>
+<span class="sd">                            AZ = azimuth</span>
+<span class="sd">                        &quot;&quot;&quot;</span>
+                        <span class="n">well_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_station_well_path</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+                <span class="c1"># Atoms, with or without properties</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ATOM&quot;</span> <span class="ow">or</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;PATOM&#39;</span><span class="p">:</span>
+                    <span class="n">seq_no_prev</span> <span class="o">=</span> <span class="n">seq_no</span>
+                    <span class="n">is_ok_s</span><span class="p">,</span> <span class="n">seq_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">is_ok</span><span class="p">,</span> <span class="n">v_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_ok_s</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_ok</span><span class="p">:</span>
+                        <span class="n">seq_no</span> <span class="o">=</span> <span class="n">seq_no_prev</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">check_vertex</span><span class="p">(</span><span class="n">v_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ATOM</span><span class="p">(</span><span class="n">seq_no</span><span class="p">,</span> <span class="n">v_num</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ATOM refers to VERTEX that has not been defined yet&quot;</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;    seq_no = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">seq_no</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;    v_num = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">v_num</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;    line = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line_str</span><span class="p">)</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="c1"># Atoms with attached properties</span>
+                        <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PATOM&quot;</span><span class="p">:</span>
+                            <span class="n">vert_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_vertex_dict</span><span class="p">()</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parse_props</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">[</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">v_num</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">xyz</span><span class="p">,</span>
+                                             <span class="kc">True</span><span class="p">)</span>
+
+                <span class="c1"># Grab the vertices and properties, does not care if there are</span>
+                <span class="c1"># gaps in the sequence number</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PVRTX&quot;</span> <span class="ow">or</span>  <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;VRTX&quot;</span><span class="p">:</span>
+                    <span class="n">seq_no_prev</span> <span class="o">=</span> <span class="n">seq_no</span>
+                    <span class="n">is_ok_s</span><span class="p">,</span> <span class="n">seq_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">is_ok</span><span class="p">,</span> <span class="n">x_flt</span><span class="p">,</span> <span class="n">y_flt</span><span class="p">,</span> <span class="n">z_flt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_xyz</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                                                                <span class="n">field</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;ParseXYZ </span><span class="si">%s</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2"> from </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">is_ok</span><span class="p">),</span>
+                                      <span class="n">x_flt</span><span class="p">,</span> <span class="n">y_flt</span><span class="p">,</span> <span class="n">z_flt</span><span class="p">,</span>
+                                      <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_ok_s</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_ok</span><span class="p">:</span>
+                        <span class="n">seq_no</span> <span class="o">=</span> <span class="n">seq_no_prev</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Add vertex</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invert_zaxis</span><span class="p">:</span>
+                            <span class="n">z_flt</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">z_flt</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">VRTX</span><span class="p">(</span><span class="n">seq_no</span><span class="p">,</span> <span class="p">(</span><span class="n">x_flt</span><span class="p">,</span> <span class="n">y_flt</span><span class="p">,</span> <span class="n">z_flt</span><span class="p">)))</span>
+
+                        <span class="c1"># Vertices with attached properties</span>
+                        <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PVRTX&quot;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parse_props</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">(</span><span class="n">x_flt</span><span class="p">,</span> <span class="n">y_flt</span><span class="p">,</span> <span class="n">z_flt</span><span class="p">))</span>
+
+                <span class="c1"># Grab the triangular edges</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TRGL&quot;</span><span class="p">:</span>
+                    <span class="n">seq_no_prev</span> <span class="o">=</span> <span class="n">seq_no</span>
+                    <span class="n">is_ok_s</span><span class="p">,</span> <span class="n">seq_no</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">is_ok</span><span class="p">,</span> <span class="n">a_int</span><span class="p">,</span> <span class="n">b_int</span><span class="p">,</span> <span class="n">c_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_xyz</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                                                                <span class="n">field</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_ok_s</span><span class="p">:</span>
+                        <span class="n">seq_no</span> <span class="o">=</span> <span class="n">seq_no_prev</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TRGL</span><span class="p">(</span><span class="n">seq_no</span><span class="p">,</span> <span class="p">(</span><span class="n">a_int</span><span class="p">,</span> <span class="n">b_int</span><span class="p">,</span> <span class="n">c_int</span><span class="p">)))</span>
+
+                <span class="c1"># Grab the segments</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SEG&quot;</span><span class="p">:</span>
+                    <span class="n">is_ok_a</span><span class="p">,</span> <span class="n">a_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">is_ok_b</span><span class="p">,</span> <span class="n">b_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">is_ok_a</span> <span class="ow">and</span> <span class="n">is_ok_b</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SEG</span><span class="p">((</span><span class="n">a_int</span><span class="p">,</span> <span class="n">b_int</span><span class="p">)))</span>
+
+                <span class="c1"># Grab metadata - see &#39;metadata.py&#39; for more info</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;STRATIGRAPHIC_POSITION&quot;</span><span class="p">,</span> <span class="s2">&quot;GEOLOGICAL_FEATURE&quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">geofeat_name</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;STRATIGRAPHIC_POSITION&#39;</span><span class="p">:</span>
+                        <span class="n">is_ok</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">geoevent_numeric_age_range</span> <span class="o">=</span> \
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">mapped_feat</span> <span class="o">=</span> <span class="n">MapFeat</span><span class="o">.</span><span class="n">GEOLOGICAL_UNIT</span>
+
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;GEOLOGICAL_TYPE&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;FAULT&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">mapped_feat</span> <span class="o">=</span> <span class="n">MapFeat</span><span class="o">.</span><span class="n">SHEAR_DISP_STRUCT</span>
+                    <span class="k">elif</span>  <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;INTRUSIVE&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">mapped_feat</span> <span class="o">=</span> <span class="n">MapFeat</span><span class="o">.</span><span class="n">GEOLOGICAL_UNIT</span>
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;BOUNDARY&quot;</span><span class="p">,</span> <span class="s2">&quot;UNCONFORMITY&quot;</span><span class="p">,</span> <span class="s2">&quot;INTRAFORMATIONAL&quot;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="o">.</span><span class="n">mapped_feat</span> <span class="o">=</span> <span class="n">MapFeat</span><span class="o">.</span><span class="n">CONTACT</span>
+
+
+                <span class="c1"># What kind of property is this? Is it a measurement,</span>
+                <span class="c1"># or a reference to a rock colour table?</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROPERTY_SUBCLASS&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ROCK&quot;</span><span class="p">:</span>
+                        <span class="n">prop_idx</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">is_index_data</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].is_index_data = True&quot;</span><span class="p">,</span> <span class="n">prop_idx</span><span class="p">)</span>
+                        <span class="c1"># Sometimes there is an array of indexes and labels</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; len(field) = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                                <span class="n">rock_label</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                                <span class="n">is_ok</span><span class="p">,</span> <span class="n">int_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">idx</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">is_ok</span><span class="p">:</span>
+                                    <span class="n">rock_index</span> <span class="o">=</span> <span class="n">int_val</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_idx</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">prop_idx</span><span class="p">,</span> <span class="p">{})</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">rock_label_idx</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">][</span><span class="n">rock_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">rock_label</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.rock_label_idx[</span><span class="si">%s</span><span class="s2">] = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                                      <span class="n">prop_idx</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rock_label_idx</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]))</span>
+
+                <span class="c1"># Extract binary file name</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_FILE&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src_dir</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].file_name = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                      <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+
+                <span class="c1"># Size of each value in binary file (measured in bytes, usually 1,2,4)</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_ESIZE&quot;</span><span class="p">:</span>
+                    <span class="n">is_ok</span><span class="p">,</span> <span class="n">int_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">is_ok</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_sz</span> <span class="o">=</span> <span class="n">int_val</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].data_sz = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_sz</span><span class="p">)</span>
+
+                <span class="c1"># The type of non-float value in binary file: OCTET, SHORT, RGBA</span>
+                <span class="c1"># IF this is present, then it is assumed not to be floating point</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_STORAGE_TYPE&quot;</span><span class="p">:</span>
+                    <span class="c1"># Single byte integer</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;OCTET&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
+                    <span class="c1"># Short int, 2 bytes long</span>
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;SHORT&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;h&quot;</span>
+                    <span class="c1"># Colour data</span>
+                    <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;RGBA&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="s2">&quot;rgba&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unknown type </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].data_type = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                      <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+
+                <span class="c1"># If binary file contains integers, are they signed integers?</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_SIGNED&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">signed_int</span> <span class="o">=</span> <span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].signed_int = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                      <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                      <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">signed_int</span><span class="p">))</span>
+
+                <span class="c1"># Type of value in binary file: IBM, IEEE</span>
+                <span class="c1"># NB: We do not support IBM-style floats</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_ETYPE&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;IEEE&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process </span><span class="si">%s</span><span class="s2"> type floating points&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># Binary file format: RAW or SEGY</span>
+                <span class="c1"># NB: Cannot process SEGY formats</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_EFORMAT&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;RAW&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process </span><span class="si">%s</span><span class="s2"> format volume data&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># Offset in bytes within binary file</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_OFFSET&quot;</span><span class="p">:</span>
+                    <span class="n">is_ok</span><span class="p">,</span> <span class="n">int_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_int</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">is_ok</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">int_val</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].offset = </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
+                                          <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+
+                <span class="c1"># The number that is used to represent &#39;no data&#39; in binary file</span>
+                <span class="k">elif</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PROP_NO_DATA_VALUE&quot;</span><span class="p">:</span>
+                    <span class="n">converted</span><span class="p">,</span> <span class="n">fltp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">converted</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">no_data_marker</span> <span class="o">=</span> <span class="n">fltp</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;self.prop_dict[</span><span class="si">%s</span><span class="s2">].no_data_marker = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span>
+                                          <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+
+                <span class="c1"># Process VOXET data</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span> <span class="ow">and</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;AXIS&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;VOXET: found field[0] = </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">is_last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_vol_data</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">src_dir</span><span class="p">)</span>
+
+
+                <span class="c1"># Process SGRID data</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span> <span class="ow">and</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;AXIS&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;SGRID: field[0] = </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">is_last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_vol_data</span><span class="p">(</span><span class="n">line_gen</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">field_raw</span><span class="p">,</span> <span class="n">src_dir</span><span class="p">)</span>
+
+
+            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handle_exc</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+
+            <span class="c1"># END OF TEXT PROCESSING LOOP</span>
+
+
+        <span class="c1"># Read in any binary data files and flags files attached to voxel files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span><span class="p">:</span>
+            <span class="n">ret_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_volume_binary_files</span><span class="p">()</span>
+
+        <span class="c1"># Complete initalisation of geometry object</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">:</span>
+            <span class="n">geom_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="p">)</span>
+            <span class="n">style_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style_obj</span><span class="p">)</span>
+            <span class="n">meta_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="p">)</span>
+            <span class="n">prop_idx_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__init_metadata</span><span class="p">(</span><span class="n">meta_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="n">prop_idx_list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__init_geometry</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="n">prop_idx_list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__init_style</span><span class="p">(</span><span class="n">style_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="n">prop_idx_list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">prop_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">:</span>
+                <span class="n">geom_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="p">)</span>
+                <span class="n">style_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style_obj</span><span class="p">)</span>
+                <span class="n">meta_obj</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__init_metadata</span><span class="p">(</span><span class="n">meta_obj</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="n">prop_idx</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__init_geometry</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="n">prop_idx</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__init_style</span><span class="p">(</span><span class="n">style_obj</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="n">prop_idx</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__init_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__init_geometry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">style_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_obj</span><span class="p">))</span>
+
+
+
+        <span class="c1"># Complete initialisation of metadata object</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;process_gocad() returns </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ret_val</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ret_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsm_list</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__init_style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extract style data from GocadImporter and place in style object</span>
+
+<span class="sd">        :param style_obj: style object which will hold data taken from GocadImporter object</span>
+<span class="sd">        :param local_prop_idx_list: optional, if set, then will place multiple local \</span>
+<span class="sd">               property data values in object</span>
+<span class="sd">        :param prop_idx: optional, if set, then will place property data in object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">local_prop_idx</span> <span class="ow">in</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">[</span><span class="n">local_prop_idx</span><span class="p">]</span>
+                <span class="n">style_obj</span><span class="o">.</span><span class="n">add_tables</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">colour_map</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">rock_label_table</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prop_idx</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span>
+            <span class="n">style_obj</span><span class="o">.</span><span class="n">add_tables</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">colour_map</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">rock_label_table</span><span class="p">)</span>
+
+
+
+    <span class="k">def</span> <span class="nf">__init_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extract metadata from GocadImporter and place in metadata object</span>
+
+<span class="sd">        :param meta_obj: metadata object which will hold data from GocadImporter object</span>
+<span class="sd">        :param local_prop_idx_list: optional, if set, then will place multiple \</span>
+<span class="sd">                                    local property data values in object</span>
+<span class="sd">        :param prop_idx: optional, if set, then will place property data in object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">group_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span><span class="p">:</span>
+            <span class="n">group_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_name</span><span class="o">+</span><span class="s2">&quot;-&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">header_name</span><span class="p">:</span>
+            <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">group_name</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">header_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">group_name</span> <span class="o">+</span> <span class="s2">&quot;geometry&quot;</span>
+        <span class="k">if</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">local_prop_idx</span> <span class="ow">in</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+                <span class="n">meta_obj</span><span class="o">.</span><span class="n">add_property_name</span><span class="p">(</span><span class="n">local_prop_idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prop_idx</span><span class="p">:</span>
+            <span class="n">meta_obj</span><span class="o">.</span><span class="n">add_property_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">class_name</span><span class="p">)</span>
+            <span class="n">meta_obj</span><span class="o">.</span><span class="n">is_index_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">is_index_data</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">rock_label_table</span><span class="p">:</span>
+                <span class="n">meta_obj</span><span class="o">.</span><span class="n">rock_label_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">rock_label_table</span>
+            <span class="n">meta_obj</span><span class="o">.</span><span class="n">src_filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span><span class="o">.</span><span class="n">file_name</span>
+
+
+    <span class="k">def</span> <span class="nf">__init_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">local_prop_idx_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prop_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Convert GocadImporter to MODEL_GEOMETRY version</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object where GocadImporter data is placed</span>
+<span class="sd">        :param local_prop_idx_list: optional, if set, then will place multiple \</span>
+<span class="sd">                                    local property data values in object</span>
+<span class="sd">        :param prop_idx: optional, if set, then will place property data in object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Convert GOCAD&#39;s volume geometry spec (SGRID &amp; VOXET)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span><span class="p">:</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_z</span><span class="p">)</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_z</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">max_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">max_y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_y</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">max_z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">min_z</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span><span class="p">:</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span><span class="p">:</span>
+                <span class="n">min_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span><span class="p">)</span>
+                <span class="n">max_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span><span class="p">)</span>
+                <span class="n">mult_vec</span> <span class="o">=</span> <span class="n">max_vec</span> <span class="o">-</span> <span class="n">min_vec</span>
+
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_u</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">mult_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_v</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">mult_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_w</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">mult_vec</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="c1"># If it&#39;s a well, then set line to vertical with a narrow width</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_wl</span><span class="p">:</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_vert_line</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WELL_LINE_WIDTH</span>
+
+        <span class="c1"># Re-enumerate all geometries, because some GOCAD files have missing vertex numbers</span>
+        <span class="n">vert_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_vertex_dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">v_old</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vrtx_arr</span><span class="p">:</span>
+            <span class="n">vrtx</span> <span class="o">=</span> <span class="n">VRTX</span><span class="p">(</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">v_old</span><span class="o">.</span><span class="n">n</span><span class="p">],</span> <span class="n">v_old</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vrtx</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">t_old</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trgl_arr</span><span class="p">:</span>
+            <span class="n">tri</span> <span class="o">=</span> <span class="n">TRGL</span><span class="p">(</span><span class="n">t_old</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">t_old</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">vert_dict</span><span class="p">[</span><span class="n">t_old</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                                 <span class="n">vert_dict</span><span class="p">[</span><span class="n">t_old</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">2</span><span class="p">]]))</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">trgl_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tri</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">s_old</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seg_arr</span><span class="p">:</span>
+            <span class="n">sgm</span> <span class="o">=</span> <span class="n">SEG</span><span class="p">((</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">s_old</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">vert_dict</span><span class="p">[</span><span class="n">s_old</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">seg_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sgm</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a_old</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_arr</span><span class="p">:</span>
+            <span class="n">atm</span> <span class="o">=</span> <span class="n">ATOM</span><span class="p">(</span><span class="n">vert_dict</span><span class="p">[</span><span class="n">a_old</span><span class="o">.</span><span class="n">n</span><span class="p">],</span> <span class="n">vert_dict</span><span class="p">[</span><span class="n">a_old</span><span class="o">.</span><span class="n">v</span><span class="p">])</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">atom_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atm</span><span class="p">)</span>
+
+        <span class="c1"># Add PVTRX, PATOM data</span>
+        <span class="c1"># Multiple properties&#39; data points are stored in one geom_obj</span>
+        <span class="k">if</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">local_prop_idx</span> <span class="ow">in</span> <span class="n">local_prop_idx_list</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_props</span><span class="p">[</span><span class="n">local_prop_idx</span><span class="p">]</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">add_loose_3d_data</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">add_stats</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">],</span>
+                                   <span class="n">prop</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+
+        <span class="c1"># Add volume data (SGRID, VOXEL)</span>
+        <span class="c1"># Only one set of data per geom_obj</span>
+        <span class="k">if</span> <span class="n">prop_idx</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_idx</span><span class="p">]</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_3d</span>
+            <span class="c1"># Add 3d data indexed on XYZ coords</span>
+            <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">:</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">add_loose_3d_data</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_xyz</span><span class="p">)</span>
+            <span class="c1"># Add 3d data indexed on IJK indexes</span>
+            <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_ijk</span><span class="p">:</span>
+                <span class="n">geom_obj</span><span class="o">.</span><span class="n">add_loose_3d_data</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_ijk</span><span class="p">)</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data_type</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">get_str_data_type</span><span class="p">()</span>
+            <span class="n">geom_obj</span><span class="o">.</span><span class="n">add_stats</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">data_stats</span><span class="p">[</span><span class="s1">&#39;max&#39;</span><span class="p">],</span>
+                               <span class="n">prop</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__set_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">,</span> <span class="n">first_line_str</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sets the type of GOCAD file: TSURF, VOXEL, PLINE etc.</span>
+
+<span class="sd">        :param fileExt: the file extension</span>
+<span class="sd">        :param firstLineStr: first line in the file</span>
+<span class="sd">        :returns: returns True if it could determine the type of file \</span>
+<span class="sd">            Will return False when given the header of a GOCAD group file, since \</span>
+<span class="sd">            cannot create a vessel object from the group file itself, only from the group members</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;setType(</span><span class="si">%s</span><span class="s2">,</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">,</span> <span class="n">first_line_str</span><span class="p">)</span>
+        <span class="n">ext_str</span> <span class="o">=</span> <span class="n">file_ext</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="c1"># Look for other GOCAD file types within a group file</span>
+        <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;GP&#39;</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;GP&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                    <span class="n">ext_str</span> <span class="o">=</span> <span class="n">key</span>
+                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">ext_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;TS&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;TS&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_ts</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;VS&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;VS&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_vs</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;PL&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;PL&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_pl</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;VO&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;VO&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;WL&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;WL&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_wl</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">ext_str</span> <span class="o">==</span> <span class="s1">&#39;SG&#39;</span> <span class="ow">and</span> <span class="n">first_line_str</span> <span class="ow">in</span> <span class="n">GocadFileDataStrMap</span><span class="o">.</span><span class="n">GOCAD_HEADERS</span><span class="p">[</span><span class="s1">&#39;SG&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1">#  END OF GocadImporter CLASS</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

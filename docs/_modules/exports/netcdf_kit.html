@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.netcdf_kit &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.netcdf_kit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.netcdf_kit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the NetCDFKit class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span>
+
+
+<span class="kn">from</span> <span class="nn">lib.db.style.false_colour</span> <span class="kn">import</span> <span class="n">calculate_false_colour_num</span><span class="p">,</span> <span class="n">make_false_colour_tup</span>
+<span class="kn">from</span> <span class="nn">lib.exports.export_kit</span> <span class="kn">import</span> <span class="n">ExportKit</span>
+
+<div class="viewcode-block" id="NetCDFKit"><a class="viewcode-back" href="../../exports.html#exports.netcdf_kit.NetCDFKit">[docs]</a><span class="k">class</span> <span class="nc">NetCDFKit</span><span class="p">(</span><span class="n">ExportKit</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Class used to output NetCDF4 files, given geometry, style and metadata data structures</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level taken from python&#39;s &#39;logging&#39; module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Call parent class</span>
+        <span class="n">ExportKit</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NetCDFKit.write_points"><a class="viewcode-back" href="../../exports.html#exports.netcdf_kit.NetCDFKit.write_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Write out a NetCDF file from a point geometry file</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text</span>
+<span class="sd">        :param style_obj: STYLE object containing colour info</span>
+<span class="sd">        :param meta_obj: METADATA object, used for labelling</span>
+<span class="sd">        :param out_filename: path &amp; filename of NetCDF file to output, without extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;NetCDFKit.write_points(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;NetCDFKit.write_points() geom_obj=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">is_point</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot use NetCDFKit.write_points for line, triangle or volume&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">root_grp</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">out_filename</span><span class="o">+</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;NETCDF4&quot;</span><span class="p">)</span>
+        <span class="n">points_grp</span> <span class="o">=</span> <span class="n">root_grp</span><span class="o">.</span><span class="n">createGroup</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+        <span class="n">points_grp</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;points list&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Just does a single fp value for each XYZ, later expand to multiple values</span>
+        <span class="n">xyzd_dtype</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)])</span>
+        <span class="n">points_type</span> <span class="o">=</span> <span class="n">points_grp</span><span class="o">.</span><span class="n">createCompoundType</span><span class="p">(</span><span class="n">xyzd_dtype</span><span class="p">,</span> <span class="s2">&quot;xyzd_dtype&quot;</span><span class="p">)</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">)</span>
+        <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">points_list</span> <span class="o">=</span> <span class="n">points_grp</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;points_list&quot;</span><span class="p">,</span> <span class="n">points_type</span><span class="p">,</span> <span class="s2">&quot;points list&quot;</span><span class="p">,</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">points_type</span><span class="p">)</span>
+        <span class="n">node_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">prop_dict</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_loose_3d_data</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">geom_label</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">vrtx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vrtx_arr</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">point_cnt</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">point_cnt</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">point_cnt</span><span class="p">][</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">geom_label</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">-</span><span class="si">{1:010d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">geometry_name</span><span class="p">,</span> <span class="n">point_cnt</span><span class="p">)</span>
+
+            <span class="c1"># Create popup info</span>
+            <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">(),</span>
+                                      <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">geometry_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)}</span>
+            <span class="k">if</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span> <span class="ow">in</span> <span class="n">prop_dict</span><span class="p">:</span>
+                <span class="n">popup_dict</span><span class="p">[</span><span class="n">geom_label</span><span class="p">][</span><span class="s1">&#39;val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">point_cnt</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">prop_dict</span><span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+        <span class="c1"># Write points to file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;write_points() Writing NetCDF file: </span><span class="si">%s</span><span class="s2">.nc&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">)</span>
+        <span class="n">points_list</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">root_grp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">.nc: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="n">popup_dict</span></div></div>
+
+<span class="c1">#  END OF NetCDFKit CLASS</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

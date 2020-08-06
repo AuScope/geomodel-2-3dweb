@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>imports.gocad.volumes &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>imports.gocad.volumes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for imports.gocad.volumes</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="read_volume_binary_files"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.read_volume_binary_files">[docs]</a><span class="k">def</span> <span class="nf">read_volume_binary_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Open up and read binary volume file, could be from VOXET or SGRID</span>
+
+<span class="sd">        :returns: False upon error</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process voxel file, cube size is not defined, &quot;</span> \
+                          <span class="s2">&quot;missing &#39;AXIS_N&#39;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># pylint: disable=W0612</span>
+    <span class="k">for</span> <span class="n">file_idx</span><span class="p">,</span> <span class="n">prop_obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Sometimes filename needs a .vo on the end</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;@@&quot;</span> <span class="ow">and</span> \
+                                      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.vo&quot;</span><span class="p">):</span>
+            <span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span> <span class="o">+=</span> <span class="s2">&quot;.vo&quot;</span>
+
+        <span class="c1"># If there is a colour table in CSV file then read it</span>
+        <span class="n">bin_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bin_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_file_dict</span><span class="p">:</span>
+            <span class="n">csv_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">ct_file_dict</span><span class="p">[</span><span class="n">bin_file</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">prop_obj</span><span class="o">.</span><span class="n">read_colour_table_csv</span><span class="p">(</span><span class="n">csv_file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_file_dict</span><span class="p">[</span><span class="n">bin_file</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.colour_map = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">colour_map</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;prop_obj.rock_label_table = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">rock_label_table</span><span class="p">))</span>
+
+        <span class="c1"># Read and process binary file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Check file size first</span>
+            <span class="n">file_sz</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="n">num_voxels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;num_voxels = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">num_voxels</span><span class="p">))</span>
+            <span class="n">est_sz</span> <span class="o">=</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span><span class="o">*</span><span class="n">num_voxels</span><span class="o">+</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">offset</span>
+            <span class="k">if</span> <span class="n">file_sz</span> <span class="o">&lt;</span> <span class="n">est_sz</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SORRY - Cannot process VOXET/SGRID file - length (</span><span class="si">%d</span><span class="s2">)&quot;</span> \
+                                  <span class="s2">&quot; is less than estimated size (</span><span class="si">%d</span><span class="s2">): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                  <span class="n">file_sz</span><span class="p">,</span> <span class="n">est_sz</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="c1"># Initialise data array to zeros</span>
+            <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+            <span class="c1"># Prepare &#39;numpy&#39; dtype object for binary float, integer signed/unsigned data types</span>
+            <span class="n">d_typ</span> <span class="o">=</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">make_numpy_dtype</span><span class="p">()</span>
+
+            <span class="c1"># Read entire file, assumes file small enough to store in memory</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reading binary file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+            <span class="n">elem_offset</span> <span class="o">=</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">offset</span><span class="o">//</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">data_sz</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;elem_offset = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">elem_offset</span><span class="p">))</span>
+            <span class="n">fp_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d_typ</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">num_voxels</span><span class="o">+</span><span class="n">elem_offset</span><span class="p">)</span>
+            <span class="n">fp_idx</span> <span class="o">=</span> <span class="n">elem_offset</span>
+            <span class="c1"># If VOXET</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span><span class="p">:</span>
+                <span class="c1"># Calculate geometries of VOXET</span>
+                <span class="n">mult</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_max</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_min</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="c1"># Loop over points in volume</span>
+                <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+                            <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_vo_xyz</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">mult</span><span class="p">)</span>
+                            <span class="c1"># If numeric VOXET</span>
+                            <span class="k">if</span> <span class="n">prop_obj</span><span class="o">.</span><span class="n">data_type</span> <span class="o">!=</span> <span class="s1">&#39;rgba&#39;</span><span class="p">:</span>
+                                <span class="n">converted</span><span class="p">,</span> <span class="n">data_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_float</span><span class="p">(</span><span class="n">fp_arr</span><span class="p">[</span><span class="n">fp_idx</span><span class="p">],</span>
+                                                           <span class="n">prop_obj</span><span class="o">.</span><span class="n">no_data_marker</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">converted</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                                <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_3d</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">data_val</span><span class="p">)</span>
+                            <span class="c1"># If RGBA VOXET</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">data_val</span> <span class="o">=</span> <span class="n">fp_arr</span><span class="p">[</span><span class="n">fp_idx</span><span class="p">]</span>
+                                <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_xyz</span><span class="p">((</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span><span class="p">),</span> <span class="n">data_val</span><span class="p">)</span>
+                                <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_ijk</span><span class="p">((</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">),</span> <span class="n">data_val</span><span class="p">)</span>
+
+                            <span class="n">fp_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># If SGRID</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span><span class="p">:</span>
+                <span class="c1"># SGRID gets its coordinates from a points file</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgrid_cell_align</span><span class="p">:</span>
+                    <span class="n">pt_arr_sz</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pt_arr_sz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="n">points_offset</span> <span class="o">=</span> <span class="n">pt_arr_sz</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">points_offset</span><span class="o">//</span><span class="mi">12</span> <span class="c1"># 3 * 4-byte floats</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;f4&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;f4&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;f4&#39;</span><span class="p">)])</span>
+                <span class="n">pt_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">points_offset</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pt_arr = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">pt_arr</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pt_arr.shape = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">pt_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pt_arr</span> <span class="o">=</span> <span class="n">pt_arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot process SGRID file, incorrect array dimensions&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;pt_arr.shape = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">pt_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+                <span class="c1"># Loop over points in 3d SGRID</span>
+                <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                            <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_sg_xyz</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">pt_arr</span><span class="p">)</span>
+                            <span class="n">data_val</span> <span class="o">=</span> <span class="n">fp_arr</span><span class="p">[</span><span class="n">fp_idx</span><span class="p">]</span>
+                            <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_xyz</span><span class="p">((</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span><span class="p">),</span> <span class="n">data_val</span><span class="p">)</span>
+                            <span class="n">prop_obj</span><span class="o">.</span><span class="n">assign_to_ijk</span><span class="p">((</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">),</span> <span class="n">data_val</span><span class="p">)</span>
+                            <span class="n">fp_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                            <span class="c1"># self.logger.debug(&quot;fp[%d, %d, %d] = %s&quot;, x_val, y_val, z_val, repr(data_val))</span>
+                            <span class="c1"># self.logger.debug(&quot;x,y,z=[%f, %f, %f]&quot;, x_coord, y_coord, z_coord)</span>
+
+
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">io_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SORRY - Cannot process voxel file IOError </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                              <span class="n">prop_obj</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">io_exc</span><span class="p">),</span> <span class="n">io_exc</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done looping&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Process flags file if desired</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">SKIP_FLAGS_FILE</span><span class="p">:</span>
+        <span class="c1"># Read VOXET flags file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags_file</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_vo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_region_flags_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags_array_length</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">flags_file</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">flags_bit_size</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">flags_offset</span><span class="p">)</span>
+
+        <span class="c1"># SGRID also has a flags file, but uses different markers</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_flags_file</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_sg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_region_flags_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">region_flags_array_length</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">region_flags_file</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">region_flags_bit_size</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">region_flags_offset</span><span class="p">)</span>
+     
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;SKIP_FLAGS_FILE = True  =&gt; Skipping flags file </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">flags_file</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Return True&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="calc_vo_xyz"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.calc_vo_xyz">[docs]</a><span class="k">def</span> <span class="nf">calc_vo_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">z_idx</span><span class="p">,</span> <span class="n">mult</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Calculate the XYZ coords and their maxs &amp; mins</span>
+<span class="sd">    &#39;&#39;&#39;</span> 
+    <span class="n">x_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span> \
+      <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">y_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">z_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">y_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span> \
+      <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">y_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">z_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_v</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">z_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis_o</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span> \
+      <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">y_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+      <span class="nb">float</span><span class="p">(</span><span class="n">z_idx</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">axis_w</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">mult</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">calc_minmax</span><span class="p">(</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span></div>
+
+
+<div class="viewcode-block" id="calc_sg_xyz"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.calc_sg_xyz">[docs]</a><span class="k">def</span> <span class="nf">calc_sg_xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">z_idx</span><span class="p">,</span> <span class="n">fp_arr</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; SGRID has coordinates in points file</span>
+<span class="sd">    &#39;&#39;&#39;</span> 
+    <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span> <span class="o">=</span> <span class="n">fp_arr</span><span class="p">[</span><span class="n">x_idx</span><span class="p">][</span><span class="n">y_idx</span><span class="p">][</span><span class="n">z_idx</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">calc_minmax</span><span class="p">(</span><span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">z_coord</span></div>
+
+
+<div class="viewcode-block" id="read_region_flags_file"><a class="viewcode-back" href="../../../imports.gocad.html#imports.gocad.gocad_importer.read_region_flags_file">[docs]</a><span class="k">def</span> <span class="nf">read_region_flags_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags_array_len</span><span class="p">,</span> <span class="n">flags_file</span><span class="p">,</span>
+                             <span class="n">flags_bit_sz</span><span class="p">,</span> <span class="n">flags_offset</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Reads the flags file and looks for regions for a VOXET or SGRID file.</span>
+
+<span class="sd">    :param flags_array_len: length of flags array</span>
+<span class="sd">    :param flags_file: filename of flags file</span>
+<span class="sd">    :param flags_bit_sz: mumber of bits in each element of flags array</span>
+<span class="sd">    :param flags_offset: pointer to start of flags data within flags file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">flags_array_len</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;SORRY - Cannot process voxel flags file, inconsistent size&quot;</span> \
+                            <span class="s2">&quot; between data file and flag file&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;read_region_flags_file() return False&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># Check file does not exist, sometimes needs a &#39;.vo&#39; on the end</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">flags_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">flags_file</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;@@&quot;</span> <span class="ow">and</span> \
+                                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">flags_file</span><span class="o">+</span><span class="s2">&quot;.vo&quot;</span><span class="p">):</span>
+        <span class="n">flags_file</span> <span class="o">+=</span> <span class="s2">&quot;.vo&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Check file size first</span>
+        <span class="n">file_sz</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">flags_file</span><span class="p">)</span>
+        <span class="n">num_voxels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">est_sz</span> <span class="o">=</span> <span class="n">flags_bit_sz</span><span class="o">*</span><span class="n">num_voxels</span><span class="o">+</span><span class="n">flags_offset</span>
+        <span class="k">if</span> <span class="n">file_sz</span> <span class="o">&lt;</span> <span class="n">est_sz</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SORRY - Cannot process voxel flags file </span><span class="si">%s</span><span class="s2"> - length (</span><span class="si">%d</span><span class="s2">) &quot;</span> \
+                              <span class="s2">&quot;is less than calculated size (</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span>
+                              <span class="n">flags_file</span><span class="p">,</span> <span class="n">file_sz</span><span class="p">,</span> <span class="n">est_sz</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Initialise data array to zeros</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+        <span class="c1"># Prepare &#39;numpy&#39; dtype object for binary float, integer signed/unsigned data types</span>
+        <span class="n">d_typ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">((</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">flags_bit_sz</span><span class="p">)))</span>
+
+        <span class="c1"># Read entire file, assumes file small enough to store in memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reading binary flags file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">flags_file</span><span class="p">)</span>
+        <span class="n">f_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">flags_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d_typ</span><span class="p">)</span>
+        <span class="n">f_idx</span> <span class="o">=</span> <span class="n">flags_offset</span><span class="o">//</span><span class="n">flags_bit_sz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_prop</span> <span class="o">=</span> <span class="n">PROPS</span><span class="p">(</span><span class="n">flags_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">())</span>
+        <span class="c1"># self.debug(&#39;self.region_dict.keys() = %s&#39;, self.region_dict.keys())</span>
+        <span class="k">for</span> <span class="n">z_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="c1"># self.logger.debug(&quot;%d %d %d %d =&gt; %s&quot;, x, y, z, f_idx, repr(f_arr[f_idx]))</span>
+                    <span class="c1"># convert floating point number to a bit mask</span>
+                    <span class="n">bit_mask</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="c1"># NB: Single bytes are not returned as arrays</span>
+                    <span class="k">if</span> <span class="n">flags_bit_sz</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">bit_mask</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0:08b}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_arr</span><span class="p">[</span><span class="n">f_idx</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">flags_bit_sz</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                            <span class="n">bit_mask</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0:08b}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_arr</span><span class="p">[</span><span class="n">f_idx</span><span class="p">][</span><span class="n">bit</span><span class="p">])</span>
+                    <span class="c1"># self.logger.debug(&#39;bit_mask= %s&#39;, bit_mask)</span>
+                    <span class="c1"># self.logger.debug(&#39;self.region_dict = %s&#39;, repr(self.region_dict))</span>
+                    <span class="n">cnt</span> <span class="o">=</span> <span class="n">flags_bit_sz</span><span class="o">*</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span>
+                    <span class="c1"># Examine the bit mask one bit at a time, starting at the highest bit</span>
+                    <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="n">bit_mask</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_dict</span> <span class="ow">and</span> <span class="n">bit</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+                            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">region_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">cnt</span><span class="p">)]</span>
+                            <span class="c1"># self.logger.debug(&#39;cnt = %d bit = %d&#39;, cnt, bit)</span>
+                            <span class="c1"># self.logger.debug(&#39;key = %s&#39;, key)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">flags_prop</span><span class="o">.</span><span class="n">append_to_ijk</span><span class="p">((</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+                        <span class="n">cnt</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="n">f_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">io_exc</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;SORRY - Cannot process voxel flags file, IOError </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                          <span class="n">flags_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">io_exc</span><span class="p">),</span> <span class="n">io_exc</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;read_region_flags_file() return False&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

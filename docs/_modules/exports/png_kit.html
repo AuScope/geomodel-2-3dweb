@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.png_kit &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.png_kit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.png_kit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains PngKit class</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">PIL</span>
+
+<span class="kn">from</span> <span class="nn">lib.db.style.false_colour</span> <span class="kn">import</span> <span class="n">make_false_colour_tup</span>
+<span class="kn">from</span> <span class="nn">lib.exports.export_kit</span> <span class="kn">import</span> <span class="n">ExportKit</span>
+
+<div class="viewcode-block" id="PngKit"><a class="viewcode-back" href="../../exports.html#exports.png_kit.PngKit">[docs]</a><span class="k">class</span> <span class="nc">PngKit</span><span class="p">(</span><span class="n">ExportKit</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Class used to output PNG files, given geometry, style and metadata data structures</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise class</span>
+
+<span class="sd">        :param debug_level: debug level taken from python&#39;s &#39;logging&#39; module</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Call parent class</span>
+        <span class="n">ExportKit</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">debug_level</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PngKit.write_single_voxel_png"><a class="viewcode-back" href="../../exports.html#exports.png_kit.PngKit.write_single_voxel_png">[docs]</a>    <span class="k">def</span> <span class="nf">write_single_voxel_png</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">style_obj</span><span class="p">,</span> <span class="n">meta_obj</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Writes out a PNG file of the top layer of the voxel data</span>
+
+<span class="sd">        :param geom_obj: MODEL_GEOMETRY object that holds voxel data</span>
+<span class="sd">        :param style_obj: SYTLE object, contains colour map</span>
+<span class="sd">        :param meta_obj: FILENAME object, contains object information</span>
+<span class="sd">        :param file_name: filename of PNG file, without extension</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;write_single_voxel_png(</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="n">colour_arr</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+        <span class="n">z_val</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">pixel_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Volume data are RGBA, data is stored in geom_obj&#39;s xyz_data</span>
+        <span class="k">if</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data_type</span> <span class="o">==</span> <span class="s1">&#39;RGBA&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using in-situ RGBA data&quot;</span><span class="p">)</span>
+            <span class="c1"># Use False to get data using IJK int indexes</span>
+            <span class="n">xyz_data</span> <span class="o">=</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_loose_3d_data</span><span class="p">(</span><span class="n">is_xyz</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">pixel_colour</span> <span class="o">=</span> <span class="n">xyz_data</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                        <span class="n">pixel_colour</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">colour_arr</span><span class="o">.</span><span class="n">fromlist</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pixel_colour</span><span class="p">))</span>
+                    <span class="n">pixel_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Volume data are floats, stored in geom_obj&#39;s vol_data</span>
+        <span class="k">else</span><span class="p">:</span>  
+            <span class="n">colour_map</span> <span class="o">=</span> <span class="n">style_obj</span><span class="o">.</span><span class="n">get_colour_table</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;style_obj.get_colour_table() = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">colour_map</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;geom_obj.get_min_data() = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;geom_obj.get_max_data() = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">()))</span>
+            <span class="c1"># If colour table is provided within source file, use it</span>
+            <span class="k">if</span> <span class="n">colour_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using style colour map&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">])</span>
+                            <span class="p">(</span><span class="n">r_val</span><span class="p">,</span> <span class="n">g_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">a_val</span><span class="p">)</span> <span class="o">=</span> <span class="n">colour_map</span><span class="p">[</span><span class="n">val</span><span class="p">]</span>
+                            <span class="n">pixel_colour</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">r_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">g_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span>
+                                            <span class="nb">int</span><span class="p">(</span><span class="n">a_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">)]</span>
+                        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                            <span class="n">pixel_colour</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                        <span class="n">colour_arr</span><span class="o">.</span><span class="n">fromlist</span><span class="p">(</span><span class="n">pixel_colour</span><span class="p">)</span>
+                        <span class="n">pixel_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># Else use a false colour map</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Using false colour map&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">y_val</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># pylint:disable=W0612</span>
+                            <span class="p">(</span><span class="n">r_val</span><span class="p">,</span> <span class="n">g_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">a_val</span><span class="p">)</span> <span class="o">=</span> <span class="n">make_false_colour_tup</span><span class="p">(</span>
+                                <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_data</span><span class="p">[</span><span class="n">x_val</span><span class="p">][</span><span class="n">y_val</span><span class="p">][</span><span class="n">z_val</span><span class="p">],</span>
+                                <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_min_data</span><span class="p">(),</span>
+                                <span class="n">geom_obj</span><span class="o">.</span><span class="n">get_max_data</span><span class="p">())</span>
+                            <span class="n">pixel_colour</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">r_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">g_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">),</span>
+                                            <span class="nb">int</span><span class="p">(</span><span class="n">a_val</span><span class="o">*</span><span class="mf">255.0</span><span class="p">)]</span>
+                        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                            <span class="n">pixel_colour</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                        <span class="n">colour_arr</span><span class="o">.</span><span class="n">fromlist</span><span class="p">(</span><span class="n">pixel_colour</span><span class="p">)</span>
+                        <span class="n">pixel_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">frombytes</span><span class="p">(</span><span class="s1">&#39;RGBA&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                  <span class="n">colour_arr</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Writing PNG file: </span><span class="si">%s</span><span class="s2">.PNG&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;.PNG&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">os_exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;ERROR - Cannot write file </span><span class="si">%s</span><span class="s2">.PNG: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">os_exc</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="n">property_name</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">get_property_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">property_name</span><span class="p">:</span>
+            <span class="n">label_str</span> <span class="o">=</span> <span class="n">property_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label_str</span> <span class="o">=</span> <span class="n">meta_obj</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">popup_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">label_str</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">label_str</span><span class="p">}}</span>
+        <span class="k">return</span> <span class="n">popup_dict</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

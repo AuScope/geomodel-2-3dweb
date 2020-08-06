@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exports.geometry_gen &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>exports.geometry_gen</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for exports.geometry_gen</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">A collection of Python generator functions used to create geometries,</span>
+<span class="sd">including: borehole sticks, lines, cubes and pyramids</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">lib.exports.bh_utils</span> <span class="kn">import</span> <span class="n">make_borehole_label</span>
+
+<div class="viewcode-block" id="colour_borehole_gen"><a class="viewcode-back" href="../../exports.html#exports.geometry_gen.colour_borehole_gen">[docs]</a><span class="k">def</span> <span class="nf">colour_borehole_gen</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">borehole_name</span><span class="p">,</span> <span class="n">colour_info_dict</span><span class="p">,</span> <span class="n">ht_resol</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A generator which is used to make a borehole marker stick with triangular cross section</span>
+
+<span class="sd">    :param pos: x,y,z position of collar of borehole, tuple of 3 floats</span>
+<span class="sd">    :param borehole_name: borehole&#39;s name</span>
+<span class="sd">    :param colour_info_dict: dict of: key = height, float; \</span>
+<span class="sd">                                      value = { &#39;colour&#39;: (R,G,B,A) floats, \</span>
+<span class="sd">                                                &#39;classText&#39;: mineral name, \</span>
+<span class="sd">                                                &#39;className&#39;: measurement class }</span>
+<span class="sd">    :param ht_reso: height resolution, float</span>
+<span class="sd">    :returns vert_list: list of floats, (x,y,z) vertices; \</span>
+<span class="sd">        indices - list of integers, index pointers to which vertices are joined as triangles; \</span>
+<span class="sd">        colour_idx - integer index pointing to material object array; \</span>
+<span class="sd">        depth - depth of borehole segment, float; \</span>
+<span class="sd">        colour_info - colour information dict: { &#39;colour&#39;: (R,G,B,A) floats, \</span>
+<span class="sd">                                                 &#39;classText&#39;: mineral name, \</span>
+<span class="sd">                                                 &#39;className&#39; : meas class } \</span>
+<span class="sd">        mesh_name - used to label meshes during mesh generation (bytes object)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">bh_width</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Width of stick</span>
+
+    <span class="c1"># Convert bv to an equilateral triangle of floats</span>
+    <span class="n">angl_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
+    <span class="n">cos_flt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angl_rad</span><span class="p">)</span>
+    <span class="n">sin_flt</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angl_rad</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">colour_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">colour_info</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">colour_info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">ht_resol</span><span class="o">-</span><span class="n">depth</span>
+        <span class="n">pt_a_high</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">height</span><span class="p">]</span>
+        <span class="n">pt_b_high</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">sin_flt</span><span class="p">,</span> <span class="n">height</span><span class="p">]</span>
+        <span class="n">pt_c_high</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">sin_flt</span><span class="p">,</span> <span class="n">height</span><span class="p">]</span>
+        <span class="n">pt_a_low</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">height</span><span class="o">-</span><span class="n">ht_resol</span><span class="p">]</span>
+        <span class="n">pt_b_low</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">sin_flt</span><span class="p">,</span> <span class="n">height</span><span class="o">-</span><span class="n">ht_resol</span><span class="p">]</span>
+        <span class="n">pt_c_low</span> <span class="o">=</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">cos_flt</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">bh_width</span><span class="o">*</span><span class="n">sin_flt</span><span class="p">,</span> <span class="n">height</span><span class="o">-</span><span class="n">ht_resol</span><span class="p">]</span>
+
+        <span class="n">vert_list</span> <span class="o">=</span> <span class="n">pt_a_high</span> <span class="o">+</span> <span class="n">pt_b_high</span> <span class="o">+</span> <span class="n">pt_c_high</span> <span class="o">+</span> <span class="n">pt_a_low</span> <span class="o">+</span> <span class="n">pt_c_low</span> <span class="o">+</span> <span class="n">pt_b_low</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                   <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                   <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                   <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                   <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                   <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+                   <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">mesh_name</span> <span class="o">=</span> <span class="n">make_borehole_label</span><span class="p">(</span><span class="n">borehole_name</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="n">vert_list</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">colour_idx</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">colour_info</span><span class="p">,</span> <span class="n">mesh_name</span></div>
+
+<div class="viewcode-block" id="tri_gen"><a class="viewcode-back" href="../../exports.html#exports.geometry_gen.tri_gen">[docs]</a><span class="k">def</span> <span class="nf">tri_gen</span><span class="p">(</span><span class="n">trgl_arr</span><span class="p">,</span> <span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">mesh_name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A generator which is used to make a triangular mesh</span>
+
+<span class="sd">    :param trgl_arr triangle array, an array of TRGL objects</span>
+<span class="sd">    :param vrtx_arr: vertex array, an array of VRTX objects</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sorted_vrtx_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">sorted_trgl_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">trgl_arr</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">trgl_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">vrtx_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">vrtx_obj</span> <span class="ow">in</span> <span class="n">sorted_vrtx_list</span><span class="p">:</span>
+        <span class="n">vrtx_list</span> <span class="o">+=</span> <span class="n">vrtx_obj</span><span class="o">.</span><span class="n">xyz</span>
+    <span class="k">for</span> <span class="n">trgl_obj</span> <span class="ow">in</span> <span class="n">sorted_trgl_list</span><span class="p">:</span>
+        <span class="n">trgl_list</span> <span class="o">+=</span> <span class="p">[</span><span class="n">trgl_obj</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">trgl_obj</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">trgl_obj</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">yield</span> <span class="n">vrtx_list</span><span class="p">,</span> <span class="n">trgl_list</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">mesh_name</span><span class="p">,</span> <span class="s1">&#39;ascii&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="line_gen"><a class="viewcode-back" href="../../exports.html#exports.geometry_gen.line_gen">[docs]</a><span class="k">def</span> <span class="nf">line_gen</span><span class="p">(</span><span class="n">seg_arr</span><span class="p">,</span> <span class="n">vrtx_arr</span><span class="p">,</span> <span class="n">line_width</span><span class="p">,</span> <span class="n">z_expand</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A generator which is used to make lines</span>
+
+<span class="sd">    :param seg_arr: line segment array, an array of SEG objects</span>
+<span class="sd">    :param vrtx_arr: vertex array, an array of VRTX objects</span>
+<span class="sd">    :param line_width: line width, float</span>
+<span class="sd">    :param z_expand: if true will expand width in z-direction, else x-direction</span>
+<span class="sd">    :returns point_cnt, vert_floats, indices: point_cnt - count of iterations; \</span>
+<span class="sd">        vert_floats - list of (x,y,z) vertices, floats; \</span>
+<span class="sd">        indices - integer index pointers to which vertices are joined as triangles</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Draw lines as a series of triangles</span>
+    <span class="k">for</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">seg_arr</span><span class="p">):</span>
+        <span class="n">v_0</span> <span class="o">=</span> <span class="n">vrtx_arr</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">v_1</span> <span class="o">=</span> <span class="n">vrtx_arr</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">z_expand</span><span class="p">:</span>
+            <span class="n">z_width</span> <span class="o">=</span> <span class="n">line_width</span>
+            <span class="n">x_width</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_width</span> <span class="o">=</span> <span class="n">line_width</span>
+            <span class="n">z_width</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">vert_floats</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v_0</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">v_0</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">x_width</span><span class="p">,</span> <span class="n">v_0</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v_0</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">z_width</span><span class="p">]</span> <span class="o">+</span> \
+                      <span class="nb">list</span><span class="p">(</span><span class="n">v_1</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">v_1</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">x_width</span><span class="p">,</span> <span class="n">v_1</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v_1</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">z_width</span><span class="p">]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">yield</span> <span class="n">point_cnt</span><span class="p">,</span> <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span></div>
+
+
+<div class="viewcode-block" id="cube_gen"><a class="viewcode-back" href="../../exports.html#exports.geometry_gen.cube_gen">[docs]</a><span class="k">def</span> <span class="nf">cube_gen</span><span class="p">(</span><span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">z_val</span><span class="p">,</span> <span class="n">geom_obj</span><span class="p">,</span> <span class="n">pt_size</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A single iteration generator which is used to create a cube</span>
+
+<span class="sd">    :param x,y,z: x,y,z index coordinates of cube, integers</span>
+<span class="sd">    :param geom_obj: MODEL_GEOMETRY object, holds the volume geometry details</span>
+<span class="sd">    :param pt_size: size of cube, three float tuple</span>
+<span class="sd">    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats; \</span>
+<span class="sd">        indices - integer index pointers to which vertices are joined as triangles</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">uvw</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">x_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_u</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+           <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">y_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_v</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+           <span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_origin</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">z_val</span><span class="p">)</span><span class="o">/</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_sz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">geom_obj</span><span class="o">.</span><span class="n">vol_axis_w</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="n">vert_floats</span> <span class="o">=</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> \
+                <span class="o">+</span> <span class="p">[</span><span class="n">uvw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">uvw</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">pt_size</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+               <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">yield</span> <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span></div>
+
+
+<div class="viewcode-block" id="pyramid_gen"><a class="viewcode-back" href="../../exports.html#exports.geometry_gen.pyramid_gen">[docs]</a><span class="k">def</span> <span class="nf">pyramid_gen</span><span class="p">(</span><span class="n">vrtx</span><span class="p">,</span> <span class="n">point_sz</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A single iteration generator which is used to create a pyramid</span>
+
+<span class="sd">    :param vrtx: VRTX object, position of pyramid</span>
+<span class="sd">    :param pt_size: size of pyramid, float</span>
+<span class="sd">    :returns vert_floats, indices: vert_floats - list of (x,y,z) vertices, floats; \</span>
+<span class="sd">        indices - integer index pointers to which vertices are joined as triangles</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Vertices of the pyramid</span>
+    <span class="n">vert_floats</span> <span class="o">=</span> <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">point_sz</span><span class="o">*</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">+</span> \
+                  <span class="p">[</span><span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">point_sz</span><span class="p">,</span> <span class="n">vrtx</span><span class="o">.</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+
+    <span class="k">yield</span> <span class="n">vert_floats</span><span class="p">,</span> <span class="n">indices</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

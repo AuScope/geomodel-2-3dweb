@@ -1,0 +1,415 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.style package &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="index.html"/>
+        <link rel="up" title="db package" href="db.html"/>
+        <link rel="next" title="exports package" href="exports.html"/>
+        <link rel="prev" title="db.metadata package" href="db.metadata.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config_builder.html">config_builder module</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="db.html">db package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="db.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="db.geometry.html">db.geometry package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="db.metadata.html">db.metadata package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">db.style package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.style.false_colour">db.style.false_colour module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.style.style">db.style.style module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-db.style">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db.db_tables">db.db_tables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#module-db">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="db.html">db package</a> &raquo;</li>
+        
+      <li>db.style package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/db.style.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="db-style-package">
+<h1>db.style package<a class="headerlink" href="#db-style-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-db.style.false_colour">
+<span id="db-style-false-colour-module"></span><h2>db.style.false_colour module<a class="headerlink" href="#module-db.style.false_colour" title="Permalink to this headline">¶</a></h2>
+<p>A collection of Python functions for creating false colour representations of objects</p>
+<dl class="function">
+<dt id="db.style.false_colour.calculate_false_colour_num">
+<code class="descclassname">db.style.false_colour.</code><code class="descname">calculate_false_colour_num</code><span class="sig-paren">(</span><em>val_flt</em>, <em>max_flt</em>, <em>min_flt</em>, <em>max_colours_flt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/false_colour.html#calculate_false_colour_num"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.false_colour.calculate_false_colour_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a colour number via interpolation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>val_flt</strong> – value used to calculate colour number</li>
+<li><strong>min_flt</strong> – lower bound of value</li>
+<li><strong>max_flt</strong> – upper bound of value</li>
+<li><strong>max_colours_flt</strong> – maximum number of colours</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">integer colour number</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="db.style.false_colour.interpolate">
+<code class="descclassname">db.style.false_colour.</code><code class="descname">interpolate</code><span class="sig-paren">(</span><em>x_flt</em>, <em>xmin_flt</em>, <em>xmax_flt</em>, <em>ymin_flt</em>, <em>ymax_flt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/false_colour.html#interpolate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.false_colour.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given x, linearly interpolates a y-value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_flt</strong> – floating point number to be interpolated</li>
+<li><strong>xmin_flt</strong> – minimum value within x_flt’s range</li>
+<li><strong>xmax_flt</strong> – maximum value within x_flt’s range</li>
+<li><strong>ymin_flt</strong> – minimum possible value to output</li>
+<li><strong>ymax_flt</strong> – maximum possible value to output</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">interpolated y-value, float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="db.style.false_colour.make_false_colour_tup">
+<code class="descclassname">db.style.false_colour.</code><code class="descname">make_false_colour_tup</code><span class="sig-paren">(</span><em>i_flt</em>, <em>imin_flt</em>, <em>imax_flt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/false_colour.html#make_false_colour_tup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.false_colour.make_false_colour_tup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>This creates a false colour map, returns an RGBA tuple.</dt>
+<dd>Maps a floating point value that varies between a min and max value to an RGBA tuple</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>i_flt</strong> – floating point value to be mapped</li>
+<li><strong>imax_flt</strong> – maximum range of the floating point value</li>
+<li><strong>imin_flt</strong> – minimum range of the floating point value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns an RGBA float tuple (R,G,B,A)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-db.style.style">
+<span id="db-style-style-module"></span><h2>db.style.style module<a class="headerlink" href="#module-db.style.style" title="Permalink to this headline">¶</a></h2>
+<p>Contains the STYLE class</p>
+<dl class="class">
+<dt id="db.style.style.STYLE">
+<em class="property">class </em><code class="descclassname">db.style.style.</code><code class="descname">STYLE</code><a class="reference internal" href="_modules/db/style/style.html#STYLE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Container class for style (colour, shading etc.) of objects</p>
+<dl class="attribute">
+<dt id="db.style.style.STYLE.__colour_table">
+<code class="descname">__colour_table</code><em class="property"> = None</em><a class="headerlink" href="#db.style.style.STYLE.__colour_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>colour table dictionary, integer keys, (R,G,B,A) 4-float tuple values</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.style.style.STYLE.__is_single_colour">
+<code class="descname">__is_single_colour</code><em class="property"> = None</em><a class="headerlink" href="#db.style.style.STYLE.__is_single_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean, True if rgba_tup has been set, and colour table has not been set</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.style.style.STYLE.__label_table">
+<code class="descname">__label_table</code><em class="property"> = None</em><a class="headerlink" href="#db.style.style.STYLE.__label_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>label table dict, keys are integers, values are strings</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="db.style.style.STYLE.__rgba_tup">
+<code class="descname">__rgba_tup</code><em class="property"> = None</em><a class="headerlink" href="#db.style.style.STYLE.__rgba_tup" title="Permalink to this definition">¶</a></dt>
+<dd><p>If one colour is specified then it is stored here as an (R,G,B,A) 4 float tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.add_rgba_tup">
+<code class="descname">add_rgba_tup</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.add_rgba_tup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.add_rgba_tup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the single colour for objects of only one colour
+:param val: single colour, (R,G,B,A) 4-float tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.add_tables">
+<code class="descname">add_tables</code><span class="sig-paren">(</span><em>colour_table</em>, <em>label_table</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.add_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.add_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a colour table and a label table
+:param colour_table: new colour table value
+:param label_table: new colour table value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.get_colour_table">
+<code class="descname">get_colour_table</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.get_colour_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.get_colour_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the colour table
+:returns: dictionary, integer keys, (R,G,B,A) 4-float tuple values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.get_label_table">
+<code class="descname">get_label_table</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.get_label_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.get_label_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the label table
+:returns: dictionary, integer keys, string values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.get_rgba_tup">
+<code class="descname">get_rgba_tup</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.get_rgba_tup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.get_rgba_tup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the single colour for objects of only one colour
+:returns: colour (R,G,B,A) 4-float tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="db.style.style.STYLE.has_single_colour">
+<code class="descname">has_single_colour</code><span class="sig-paren">(</span><em>idx=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/db/style/style.html#STYLE.has_single_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#db.style.style.STYLE.has_single_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if this STYLE instance has only one colour, rather than a colour table
+:returns: boolean, True for single colour style, else false</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-db.style">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-db.style" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="exports.html" class="btn btn-neutral float-right" title="exports package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="db.metadata.html" class="btn btn-neutral" title="db.metadata package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

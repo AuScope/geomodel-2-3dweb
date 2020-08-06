@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>db.style.false_colour &mdash; Geomodels -&gt; 3d Web  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Geomodels -&gt; 3d Web  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Geomodels -> 3d Web
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../config_builder.html">config_builder module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../db.html">db package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exports.html">exports package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../file_processing.html">file_processing module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../imports.html">imports package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geomodels -> 3d Web</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>db.style.false_colour</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for db.style.false_colour</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd"> A collection of Python functions for creating false colour representations of objects</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="calculate_false_colour_num"><a class="viewcode-back" href="../../../db.style.html#db.style.false_colour.calculate_false_colour_num">[docs]</a><span class="k">def</span> <span class="nf">calculate_false_colour_num</span><span class="p">(</span><span class="n">val_flt</span><span class="p">,</span> <span class="n">max_flt</span><span class="p">,</span> <span class="n">min_flt</span><span class="p">,</span> <span class="n">max_colours_flt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Calculates a colour number via interpolation</span>
+
+<span class="sd">    :param val_flt: value used to calculate colour number</span>
+<span class="sd">    :param min_flt: lower bound of value</span>
+<span class="sd">    :param max_flt: upper bound of value</span>
+<span class="sd">    :param max_colours_flt: maximum number of colours</span>
+<span class="sd">    :returns: integer colour number</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Floating point arithmetic fails if the numbers are at limits</span>
+    <span class="k">if</span> <span class="n">max_flt</span> <span class="o">==</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">)</span> <span class="ow">or</span> <span class="n">min_flt</span> <span class="o">==</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">)</span> \
+                                          <span class="ow">or</span> <span class="n">val_flt</span> <span class="o">==</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">max</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="c1"># Ensure denominator is not too large</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">max_flt</span> <span class="o">-</span> <span class="n">min_flt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0000001</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">((</span><span class="n">max_colours_flt</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">val_flt</span> <span class="o">-</span> <span class="n">min_flt</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">max_flt</span> <span class="o">-</span> <span class="n">min_flt</span><span class="p">))</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="interpolate"><a class="viewcode-back" href="../../../db.style.html#db.style.false_colour.interpolate">[docs]</a><span class="k">def</span> <span class="nf">interpolate</span><span class="p">(</span><span class="n">x_flt</span><span class="p">,</span> <span class="n">xmin_flt</span><span class="p">,</span> <span class="n">xmax_flt</span><span class="p">,</span> <span class="n">ymin_flt</span><span class="p">,</span> <span class="n">ymax_flt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Given x, linearly interpolates a y-value</span>
+
+<span class="sd">    :param x_flt: floating point number to be interpolated</span>
+<span class="sd">    :param xmin_flt: minimum value within x_flt&#39;s range</span>
+<span class="sd">    :param xmax_flt: maximum value within x_flt&#39;s range</span>
+<span class="sd">    :param ymin_flt: minimum possible value to output</span>
+<span class="sd">    :param ymax_flt: maximum possible value to output</span>
+<span class="sd">    :returns: interpolated y-value, float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x_flt</span> <span class="o">-</span> <span class="n">xmin_flt</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">xmax_flt</span> <span class="o">-</span> <span class="n">xmin_flt</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ymax_flt</span> <span class="o">-</span> <span class="n">ymin_flt</span><span class="p">)</span> <span class="o">+</span> <span class="n">ymin_flt</span></div>
+
+
+<div class="viewcode-block" id="make_false_colour_tup"><a class="viewcode-back" href="../../../db.style.html#db.style.false_colour.make_false_colour_tup">[docs]</a><span class="k">def</span> <span class="nf">make_false_colour_tup</span><span class="p">(</span><span class="n">i_flt</span><span class="p">,</span> <span class="n">imin_flt</span><span class="p">,</span> <span class="n">imax_flt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; This creates a false colour map, returns an RGBA tuple.</span>
+<span class="sd">        Maps a floating point value that varies between a min and max value to an RGBA tuple</span>
+
+<span class="sd">    :param i_flt: floating point value to be mapped</span>
+<span class="sd">    :param imax_flt: maximum range of the floating point value</span>
+<span class="sd">    :param imin_flt: minimum range of the floating point value</span>
+<span class="sd">    :returns: returns an RGBA float tuple (R,G,B,A)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">i_flt</span> <span class="o">&lt;</span> <span class="n">imin_flt</span> <span class="ow">or</span> <span class="n">i_flt</span> <span class="o">&gt;</span> <span class="n">imax_flt</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">saturation</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">hue_flt</span> <span class="o">=</span> <span class="p">(</span><span class="n">imax_flt</span> <span class="o">-</span> <span class="n">i_flt</span><span class="p">)</span><span class="o">/</span> <span class="p">(</span><span class="n">imax_flt</span> <span class="o">-</span> <span class="n">imin_flt</span><span class="p">)</span>
+    <span class="n">vmin_flt</span> <span class="o">=</span> <span class="n">saturation</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">saturation</span><span class="p">)</span>
+    <span class="n">pix</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">hue_flt</span> <span class="o">&lt;</span> <span class="mf">0.25</span><span class="p">:</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">saturation</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">hue_flt</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">vmin_flt</span><span class="p">,</span> <span class="n">saturation</span><span class="p">)</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vmin_flt</span>
+
+    <span class="k">elif</span> <span class="n">hue_flt</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">hue_flt</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">saturation</span><span class="p">,</span> <span class="n">vmin_flt</span><span class="p">)</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">saturation</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vmin_flt</span>
+
+    <span class="k">elif</span> <span class="n">hue_flt</span> <span class="o">&lt;</span> <span class="mf">0.75</span><span class="p">:</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vmin_flt</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">saturation</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">hue_flt</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">vmin_flt</span><span class="p">,</span> <span class="n">saturation</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">vmin_flt</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">hue_flt</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">saturation</span><span class="p">,</span> <span class="n">vmin_flt</span><span class="p">)</span>
+        <span class="n">pix</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">saturation</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pix</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright AuScope 2020.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
