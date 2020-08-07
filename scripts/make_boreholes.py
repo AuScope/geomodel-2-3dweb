@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-# This code creates a set of COLLADA (.dae) or GLTF files and a sqlite database
-# which can be used to embed NVCL boreholes in a geological model
+This code creates a set of COLLADA (.dae) or GLTF files and a sqlite database
+which can be used to embed NVCL boreholes in a geological model
 """
 
 import sys
@@ -9,16 +9,16 @@ import os
 
 import json
 from json import JSONDecodeError
-from types import SimpleNamespace
 import logging
 import argparse
 
-from pyproj import Proj, transform
-
 from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
+from lib.exports.bh_utils import get_blob_boreholes, get_nvcl_data
 from lib.exports.assimp_kit import AssimpKit
 from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
+from lib.file_processing import get_json_input_param
+from lib.coords import convert_coords
 
 from nvcl_kit.reader import GSMLP_IDS, NVCLReader
 
@@ -49,81 +49,12 @@ if not LOGGER.hasHandlers():
 EXPORT_KIT = AssimpKit(LOG_LVL)
 
 
-MAX_BOREHOLES = 9999
-''' Maximum number of boreholes processed
-'''
-
-
-def get_json_input_param(input_file):
-    ''' Reads the parameters from input JSON file and stores them in global 'Param' object
-
-    :param input_file: filename of input parameter file
-    :return: dictionary object of input parameter file
-    '''
-    LOGGER.info("Opening: %s", input_file)
-    with open(input_file, "r") as file_p:
-        try:
-            param_dict = json.load(file_p)
-        except JSONDecodeError as exc:
-            LOGGER.error("Cannot read JSON file %s: %s", input_file, str(exc))
-            sys.exit(1)
-    if 'BoreholeData' not in param_dict:
-        LOGGER.error('Cannot find "BoreholeData" key in input file %s', input_file)
-        sys.exit(1)
-    if 'ModelProperties' not in param_dict:
-        LOGGER.error('Cannot find "ModelProperties" key in input file %s', input_file)
-        sys.exit(1)
-
-    param_obj = SimpleNamespace()
-    if 'modelUrlPath' not in param_dict['ModelProperties']:
-        LOGGER.error("'modelUrlPath' not in input file %s", input_file)
-        sys.exit(1)
-    param_obj.modelUrlPath = param_dict['ModelProperties']['modelUrlPath']
-    param_obj.MAX_BOREHOLES = MAX_BOREHOLES
-    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS',
-                       'WFS_VERSION', 'NVCL_URL']:
-        if field_name not in param_dict['BoreholeData']:
-            LOGGER.error("Cannot find '%s' key in input file %s", field_name, input_file)
-            sys.exit(1)
-        setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
-
-    if 'west' not in param_obj.BBOX or 'south' not in param_obj.BBOX or \
-       'east' not in param_obj.BBOX or 'north' not in param_obj.BBOX:
-        LOGGER.error("Cannot find 'west','south','east','north' in 'BBOX' in input file %s",
-                     input_file)
-        sys.exit(1)
-    return param_obj
-
-
-def convert_coords(input_crs, output_crs, x_y):
-    ''' Converts coordinate systems
-
-    :param input_crs: coordinate reference system of input coordinates
-    :param output_crs: coordinate reference system of output coordinates
-    :param x_y: input coordinates in [x,y] format
-    :returns: converted coordinates [x,y]
-    '''
-    p_in = Proj(__clean_crs(input_crs))
-    p_out = Proj(__clean_crs(output_crs))
-    return transform(p_in, p_out, x_y[0], x_y[1])
-
-def __clean_crs(crs):
-    ''' Removes namespace prefixes from a CRS:
-          e.g. 'urn:x-ogc:def:crs:EPSG:4326' becomes 'EPSG:4326'
-
-    :param crs: crs string to be cleaned
-    :returns: cleaned crs string
-    '''
-    pair = crs.split(':')[-2:]
-    return pair[0]+':'+pair[1]
-
-
 
 def get_bh_info_dict(borehole_dict, param_obj):
     ''' Returns a dict of borehole info for displaying in a popup box
         when user clicks on a borehole in the model
 
-    :param borehole_dict: dict of borehole information
+    :param borehole_dict: dict of borehole information \
         expected keys are: 'x', 'y', 'z', 'href' and GSMLP_IDS
     :param param_obj: object containing command line parameters
     :return: dict of borehole information
@@ -142,6 +73,7 @@ def get_bh_info_dict(borehole_dict, param_obj):
 
 def get_loadconfig_dict(borehole_dict, param_obj):
     ''' Creates a config dictionary, used to load a static GLTF file
+
     :param borehole_dict: dictionary of borehole data
     :param param_obj: object containing command line parameters
     :return: config dictionary
@@ -158,76 +90,15 @@ def get_loadconfig_dict(borehole_dict, param_obj):
     return j_dict
 
 
-def get_blob_boreholes(borehole_dict, param_obj):
-    ''' Retrieves borehole data and writes 3D model files to a blob
-
-    :param borehole_dict:
-    :param param_obj: input parameters
-    :returns: GLTF blob object
-    '''
-    LOGGER.debug("get_blob_boreholes(%s)", str(borehole_dict))
-    height_res = 10.0
-
-    reader = NVCLReader(param_obj)
-    if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-        bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
-        
-        # If there's data, then create the borehole
-        if bh_data_dict != {}:
-            blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
-                                                 bh_data_dict, height_res, '')
-            LOGGER.debug("Returning: blob_obj = %s", str(blob_obj))
-            return blob_obj
-
-        LOGGER.debug("No borehole data len=%d", len(log_ids))
-
-    return None
-
-
-def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
-    ''' Process the output of NVCL_kit's 'get_imagelog_data()'
-        :param reader: NVCL_Kit object
-        :param param_obj: NVCL_Kit constructor input
-        :param height_res: borehole data height resolution (float, metres)
-        :param x,y,z: x,y,z coordinates of borehole collar
-        :param nvcl_id: NVCL id of borehole
-        :returns: dictionary: key: depth (float)
-                              value: SimpleNamespace('classText', 'className', 'colour')
-                  Returns empty dict upon error or no data
-                  and 'base_xyz' - (x,y,z) converted coordinate tuple in borehole
-                  CRS
-    '''
-    x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                              [x, y])
-    base_xyz = (x_m, y_m, z)
-    # Look for NVCL mineral data
-    imagelog_list = reader.get_imagelog_data(nvcl_id)
-    LOGGER.debug('imagelog_list = %s', str(imagelog_list))
-    if not imagelog_list:
-        return {}, base_xyz
-    ret_dict = {}
-    for il in imagelog_list:
-        # For the moment, only process log type '1' and 'Grp1 uTSAS'
-        # Min1,2,3 = 1st, 2nd, 3rd most common mineral
-        # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
-        # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-        if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
-            bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
-            for depth in bh_data_dict:
-                ret_dict[depth] = bh_data_dict[depth].__dict__
-            break
-    return ret_dict, base_xyz
-
-
 def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
-    ''' Retrieves borehole data and writes 3D model files to a directory or a blob
-        If 'dest_dir' is supplied, then files are written
+    ''' Retrieves borehole data and writes 3D model files to a directory or a blob \
+        If 'dest_dir' is supplied, then files are written \
         If output_mode != 'GLTF' then 'dest_dir' must not be ''
 
     :param reader: NVCLReader object
     :param qdb: opened query database 'QueryDB' object
     :param param_obj: input parameters
-    :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob,
+    :param output_mode: optional flag, when set to 'GLTF' outputs GLTF to file/blob, \
                         else outputs COLLADA (.dae) to file
     :param dest_dir: optional directory where 3D model files are written
     :returns: config object list and optional GLTF blob object
