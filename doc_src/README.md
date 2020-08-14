@@ -6,7 +6,7 @@ The documentation is published in https://auscope.github.io/geomodel-2-3dweb/ bu
 "sphinx" (at least v1.6.7) is used to generate documentation for this project (http://www.sphinx-doc.org/en/master/index.html)
 
 
-From the 'doc-src' directory, to generate .rst files for each of the .py source files:
+From the 'doc_src' directory, to generate .rst files for each of the .py source files:
 
 `sphinx-apidoc -f -o source ../scripts/lib`
 
