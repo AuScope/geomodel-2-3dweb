@@ -24,6 +24,7 @@ from json import JSONDecodeError
 import urllib
 import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
+from owslib.util import ServiceException
 from diskcache import Cache, Timeout
 import pyassimp
 from types import SimpleNamespace
@@ -268,9 +269,12 @@ def get_cached_parameters():
                 continue
             # Create params and WFS service
             param_dict[model_name] = get_json_input_param(input_file)
-            wfs_dict[model_name] = MyWebFeatureService(param_dict[model_name].WFS_URL,
-                                                       version=param_dict[model_name].WFS_VERSION,
-                                                       xml=None, timeout=WFS_TIMEOUT)
+            try:
+                wfs_dict[model_name] = MyWebFeatureService(param_dict[model_name].WFS_URL,
+                                                           version=param_dict[model_name].WFS_VERSION,
+                                                           xml=None, timeout=WFS_TIMEOUT)
+            except ServiceException as e:
+                LOGGER.error("Cannot reach service %s: %s", param_dict[model_name].WFS_URL, str(e))
     return param_dict, wfs_dict
 
 
