@@ -93,7 +93,8 @@ if __name__ == "__main__":
             os.mkdir(outDir)
 
             # Run model conversion
-            execList = ["./conv_webasset.py", "-x", "-r", "-f", outDir, srcDir, inConvFile]
+            # NB: Assumes 'conv_webasset.py' lives in ../scripts dir
+            execList = [os.path.join(os.pardir,"scripts","conv_webasset.py"), "-x", "-r", "-f", outDir, srcDir, inConvFile]
             print("Executing: ", execList)
             cmdProc = subprocess.run(execList)
             print("Returned: ", cmdProc)
