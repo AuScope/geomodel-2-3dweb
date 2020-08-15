@@ -703,50 +703,6 @@ def convert_gltf2xxx(start_response, model_name, filename, format):
     return send_blob(model_name, 'export_{0}_{1}'.format(model_name, filename), blob_obj, 60.0)
 
 
-# New API starts here
-
-# WFS and 3DPS
-@app.get("/api/{model}")
-async def processRequest(model: str, service: str, version: str, request: str, outputFormat: str = None, # Compulsory
-                         resourceId: str = None, # 3DPS
-                         exceptions: str = None,  typeName = None, valueReference = None # WFS
-                        ): 
-
-    if service == 'WFS':
-        return processWFS(model, version, request, outputFormat, exceptions, typeName, valueReference)
-    elif service == '3DPS':
-        return process3DPS(model, version, request, outputFormat, resourceId)
-
-    return {"message": "Unknown service name, should be one of: 'WFS', '3DPS'"}
-
-
-# WMSPROXY
-@app.get("/api/{model}/wmsproxy/{styles}")
-async def wmsProxy(model: str, styles: str, wmsUrl: str):
-    return processWMS(model, styles, wmsUrl)
-    # return {"message": "model={} styles={} wmsUrl={}".format(model, styles, wmsUrl)}
-
-
-# Import GOCAD file
-@app.get("/api/{model}/import/{id}")
-async def importFile(model: str, id: str):
-    return processIMPORT(model, id)
-    # return {"message": "model={} id={}".format(model, id)}
-
-
-# Export DXF file
-@app.get("/api/{model}/export/{filename}/{fileformat}")
-async def importFile(model: str, filename: str, fmt: str):
-    return processEXPORT(model, filename, fmt)
-    # return {"message": "model={} filename={} fmt={}".format(model, filename, fmt)}
-
-
-# Request blobfile, second part of 3DPS request
-@app.get("/api/{model}/$blobfile.bin/{id}")
-async def downloadBlobFile(model: str, id: str):
-    return processBLOB(model, id)
-    # return {"message": "model={} id={}".format(model, id)}
-
 
 def process3DPS(model, version, request, outputFormat, resourceId):
     '''
@@ -761,34 +717,26 @@ def process3DPS(model, version, request, outputFormat, resourceId):
         return make_getcap_response(model, G_PARAM_DICT)
 
     # Check for version
-    if version == '':
-        return make_json_exception_response('Unknown', 'MissingParameterValue',
-                                            'Missing version parameter')
     if version != '1.0':
         return make_json_exception_response('Unknown', 'OperationProcessingFailed',
                                                 'Incorrect version, try "1.0"')
 
     # Check request type
-    if request in ['getscene', 'getview', 'getfeatureinfobyray',
+    if request.lower() in ['getscene', 'getview', 'getfeatureinfobyray',
                            'getfeatureinfobyposition']:
         return make_json_exception_response(version, 'OperationNotSupported',
                                             'Request type is not implemented',
                                             request.lower())
 
-    if request == 'getfeatureinfobyobjectid':
+    if request.lower() == 'getfeatureinfobyobjectid':
         return make_getfeatinfobyid_response(model_name, version, query_format, layer_names, obj_id)
 
-    if request == 'getresourcebyid':
+    if request.lower() == 'getresourcebyid':
         return make_getresourcebyid_response(model, G_PARAM_DICT, G_WFS_DICT)
 
     # Unknown request
-    if request != '':
-        return make_json_exception_response(version, 'OperationNotSupported',
-                                                'Unknown request type')
+    return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request type')
 
-    # Missing request
-    return make_json_exception_response(version, 'MissingParameterValue',
-                                        'Missing request parameter')
 
 
 
@@ -808,15 +756,12 @@ def processWFS(model, version, request, outputFormat, exceptions, typeName, valu
 
     # Check for version 2.0
     LOGGER.debug('version = %s', version)
-    if version == '':
-        return make_json_exception_response('Unknown', 'MissingParameterValue',
-                                            'Missing version parameter')
     if version != '2.0':
         return make_json_exception_response('Unknown', 'OperationProcessingFailed',
                                             'Incorrect version, try "2.0"')
 
     # GetFeature
-    if request == 'getpropertyvalue':
+    if request.lower() == 'getpropertyvalue':
         return make_getpropvalue_response(model, version, output_format, type_name, value_ref, G_PARAM_DICT, G_WFS_DICT)
 
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request name')
@@ -914,6 +859,47 @@ def checkWMS(key, val):
     if lkey in ['height','width'] and lval.isnumeric():
         return True
     return False
+
+
+# Web API starts here
+
+# WFS and 3DPS
+@app.get("/api/{model}")
+async def processRequest(model: str, service: str, version: str, request: str, outputFormat: str = None, # Compulsory
+                         resourceId: str = None, # 3DPS
+                         exceptions: str = None,  typeName = None, valueReference = None # WFS
+                        ): 
+
+    if service == 'WFS':
+        return processWFS(model, version, request, outputFormat, exceptions, typeName, valueReference)
+    elif service == '3DPS':
+        return process3DPS(model, version, request, outputFormat, resourceId)
+
+    return {"message": "Unknown service name, should be one of: 'WFS', '3DPS'"}
+
+
+# WMSPROXY
+@app.get("/api/{model}/wmsproxy/{styles}")
+async def wmsProxy(model: str, styles: str, wmsUrl: str):
+    return processWMS(model, styles, wmsUrl)
+
+
+# Import GOCAD file
+@app.get("/api/{model}/import/{id}")
+async def importFile(model: str, id: str):
+    return processIMPORT(model, id)
+
+
+# Export DXF file
+@app.get("/api/{model}/export/{filename}/{fileformat}")
+async def importFile(model: str, filename: str, fmt: str):
+    return processEXPORT(model, filename, fmt)
+
+
+# Request blobfile, second part of 3DPS request
+@app.get("/api/{model}/$blobfile.bin/{id}")
+async def downloadBlobFile(model: str, id: str):
+    return processBLOB(model, id)
 
 
 '''

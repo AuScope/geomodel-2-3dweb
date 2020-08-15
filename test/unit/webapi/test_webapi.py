@@ -33,14 +33,49 @@ def test_basic_error():
                                       ]}
 
 
+@pytest.mark.parametrize("service, version", [ ("3DPS", "1.0") ])
+
+def test_getcap(service, version):
+    # Test getCapabilities
+    print("/api/tas?service={0}&request=GetCapabilities&version={1}".format(service, version))
+    response = client.get("/api/tas?service={0}&request=GetCapabilities&version={1}".format(service, version))
+    assert response.status_code == 200
+    print(response.json())
+    assert response.json()['message'][:53] ==  '<?xml version="1.0" encoding="UTF-8"?>\n<Capabilities '
+    
+
+
 @pytest.mark.parametrize("url,retcode,msg", [
     # Unknown service name
     ("/api/model?service=BLAH&request=GetCapabilities&version=1.0", 200,
      {"message":"Unknown service name, should be one of: 'WFS', '3DPS'"}),
 
-    # Unknown model name
+    # 3DPS GetCapabilities: Unknown model name
     ("/api/model?service=3DPS&request=GetCapabilities&version=1.0", 200,
-     {'message': {'exceptions': [{'code': 'OperationNotSupported', 'locator': 'noLocator', 'text': 'Unknown model name'}], 'version': '1.0'}})
+     {'message': {'exceptions': [{'code': 'OperationNotSupported', 'locator': 'noLocator', 'text': 'Unknown model name'}], 'version': '1.0'}}),
+
+    # 3DPS GetResourceById wrong version
+    ("/api/tas?service=3DPS&request=GetResourceById&version=5.0", 200,
+     {'message': {'exceptions': [{'code': 'OperationProcessingFailed', 'locator': 'noLocator', 'text': 'Incorrect version, try "1.0"'}], 'version': 'Unknown'}}),
+
+    # 3DPS unsupported request type
+    ("/api/model?service=3DPS&request=GetScene&version=1.0", 200,
+     {'message': {'exceptions': [{'code': 'OperationNotSupported', 'locator': 'getscene', 'text': 'Request type is not implemented'}], 'version': '1.0'}}),
+
+    # 3DPS GetResourceById unknown request
+    ("/api/model?service=3DPS&request=GetResourceByIdd&version=1.0", 200,
+     {'message': {'exceptions': [{'code': 'OperationNotSupported', 'locator': 'noLocator', 'text': 'Unknown request type'}], 'version': '1.0'}}),
+
+    # WFS wrong version
+    ("/api/model?service=WFS&request=GetPropertyValue&version=1.0", 200,
+     {'message': {'exceptions': [{'code': 'OperationProcessingFailed', 'locator': 'noLocator', 'text': 'Incorrect version, try "2.0"'}], 'version': 'Unknown'}}),
+
+    # WFS unknown request name
+    ("/api/model?service=WFS&request=GetPropertyValuee&version=2.0", 200,
+     {'message': {'exceptions': [{'code': 'OperationNotSupported', 'locator': 'noLocator', 'text': 'Unknown request name'}], 'version': '2.0'}}),
+
+
+
     ])
 
 def test_service_errors(url, retcode, msg):
