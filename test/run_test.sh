@@ -14,7 +14,7 @@ popd > /dev/null
 
 pushd unit/webapi > /dev/null
 coverage erase
-coverage run -m pytest
+coverage run --source webapi -m pytest
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
 
