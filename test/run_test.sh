@@ -12,6 +12,12 @@ coverage run test_assimp_kit.py
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
 
+pushd unit/webapi > /dev/null
+coverage erase
+coverage run -m pytest
+[ $? -ne 0 ] && exit 1
+popd > /dev/null
+
 pushd regression > /dev/null
 ./reg_run.sh
 [ $? -ne 0 ] && exit 1
@@ -22,6 +28,6 @@ coverage erase
 coverage run db_tables.py
 popd > /dev/null
 
-coverage combine unit/gocad_import/.coverage unit/assimp_kit/.coverage ../scripts/.coverage ../scripts/lib/db/.coverage
+coverage combine unit/gocad_import/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage ../scripts/.coverage ../scripts/lib/db/.coverage
 coverage report
 

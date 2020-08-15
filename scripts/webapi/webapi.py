@@ -75,7 +75,7 @@ if not LOGGER.hasHandlers():
 LOGGER.setLevel(DEBUG_LVL)
 
 
-LOCAL_DIR = os.path.join(os.path.dirname(__file__), os.pardir)
+LOCAL_DIR = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'web_build')
 DATA_DIR = os.path.join(LOCAL_DIR, 'data')
 
 
@@ -306,6 +306,9 @@ def make_getcap_response(model_name, param_dict):
     :param param_dict: model param
     :returns: byte array HTTP response
     '''
+    if model_name not in param_dict:
+        return make_json_exception_response("1.0", "OperationNotSupported", "Unknown model name")
+
     response = """<?xml version="1.0" encoding="UTF-8"?>
 <Capabilities xmlns="http://www.opengis.net/3dps/1.0/core"
  xmlns:core="http://www.opengis.net/3dps/1.0/core"
@@ -745,7 +748,7 @@ async def downloadBlobFile(model: str, id: str):
     # return {"message": "model={} id={}".format(model, id)}
 
 
-def process3DPS(url_kvp, request, model_name):
+def process3DPS(model, version, request, outputFormat, resourceId):
     '''
     Process an OCG 3PS request. Roughly trying to conform to 3DPS standard
 
@@ -755,13 +758,12 @@ def process3DPS(url_kvp, request, model_name):
     :returns: a response that can be returned from the 'application()' function
     '''
     if request.lower() == 'getcapabilities':
-        return make_getcap_response(model_name, G_PARAM_DICT)
+        return make_getcap_response(model, G_PARAM_DICT)
 
     # Check for version
-    version = get_val('version', url_kvp)
     if version == '':
         return make_json_exception_response('Unknown', 'MissingParameterValue',
-                                            'missing version parameter')
+                                            'Missing version parameter')
     if version != '1.0':
         return make_json_exception_response('Unknown', 'OperationProcessingFailed',
                                                 'Incorrect version, try "1.0"')
@@ -769,27 +771,23 @@ def process3DPS(url_kvp, request, model_name):
     # Check request type
     if request in ['getscene', 'getview', 'getfeatureinfobyray',
                            'getfeatureinfobyposition']:
-        return make_json_exception_response(get_val('version', url_kvp),
-                                            'OperationNotSupported',
+        return make_json_exception_response(version, 'OperationNotSupported',
                                             'Request type is not implemented',
                                             request.lower())
 
     if request == 'getfeatureinfobyobjectid':
-        return make_getfeatinfobyid_response(url_kvp, model_name)
+        return make_getfeatinfobyid_response(model_name, version, query_format, layer_names, obj_id)
 
     if request == 'getresourcebyid':
-        return make_getresourcebyid_response(url_kvp, model_name,
-                                                 G_PARAM_DICT, G_WFS_DICT)
+        return make_getresourcebyid_response(model, G_PARAM_DICT, G_WFS_DICT)
 
     # Unknown request
     if request != '':
-        return make_json_exception_response(get_val('version', url_kvp),
-                                                'OperationNotSupported',
+        return make_json_exception_response(version, 'OperationNotSupported',
                                                 'Unknown request type')
 
     # Missing request
-    return make_json_exception_response(get_val('version', url_kvp),
-                                        'MissingParameterValue',
+    return make_json_exception_response(version, 'MissingParameterValue',
                                         'Missing request parameter')
 
 

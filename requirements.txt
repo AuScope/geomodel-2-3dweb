@@ -10,3 +10,4 @@ nvcl_kit
 coverage
 netCDF4
 fastapi
+pytest
