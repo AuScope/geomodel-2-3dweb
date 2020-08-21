@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 from lib.file_processing import read_json_file
 from lib.config_builder import ConfigBuilder
-from gocad2webasset import Gocad2WebAsset
+from converters.gocad2webasset import Gocad2WebAsset
 
 CONVERT_COLLADA = True
 ''' Runs the collada2gltf program after creating COLLADA files
