@@ -1,5 +1,7 @@
 # geomodel-2-3dweb
 
+[![Build Status](https://travis-ci.com/AuScope/geomodel-2-3dweb.svg?branch=master)](https://travis-ci.com/AuScope/geomodel-2-3dweb)
+
 Generates 3D web versions of geological models primarily for geomodelportal website (https://github.com/AuScope/geomodelportal)
 
 
