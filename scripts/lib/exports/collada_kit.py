@@ -357,7 +357,7 @@ class ColladaKit(ExportKit):
 
 
 
-    def write_vol_collada(self, geom_obj, style_obj, meta_obj, out_filename):
+    def write_vol_collada(self, geom_obj, style_obj, meta_obj, out_filename): # pragma: no cover (not currently in use)
         ''' Write out a COLLADA file from a vo file
 
         :param geom_obj: MODEL_GEOMETRY object that geometry and text

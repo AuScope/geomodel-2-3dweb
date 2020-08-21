@@ -6,8 +6,8 @@ import logging
 
 from lib.db.style.false_colour import make_false_colour_tup
 
-class ObjKit():
-    ''' Class to output geometries to Wavefront OBJ format
+class ObjKit(): # pragma: no cover (this class is not in use)
+    ''' Class to output point, line, surface and volume geometries to Wavefront OBJ format
     '''
     # Limit to 256 colours
     MAX_COLOURS = 256.0
