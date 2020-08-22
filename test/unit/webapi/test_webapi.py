@@ -34,7 +34,6 @@ def test_basic_error():
 
 
 @pytest.mark.parametrize("service, version", [ ("3DPS", "1.0") ])
-
 def test_getcap(service, version):
     # Test getCapabilities
     print("/api/tas?service={0}&request=GetCapabilities&version={1}".format(service, version))
@@ -77,7 +76,6 @@ def test_getcap(service, version):
 
 
     ])
-
 def test_service_errors(url, retcode, msg):
     response = client.get(url)
     assert response.status_code == retcode

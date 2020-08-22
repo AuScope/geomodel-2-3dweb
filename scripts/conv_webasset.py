@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 from lib.file_processing import read_json_file
 from lib.config_builder import ConfigBuilder
-from converters.gocad2webasset import Gocad2WebAsset
+from converters.converter_factory import get_converter, FileType
 
 CONVERT_COLLADA = True
 ''' Runs the collada2gltf program after creating COLLADA files
@@ -220,7 +220,10 @@ if __name__ == "__main__":
 
     # Read parameters & initialise converter
     params_obj, model_url_path, coord_offset, ct_file_dict = initialise_params(ARGS.param_file)
-    converter = Gocad2WebAsset(DEBUG_LVL, params_obj, model_url_path, coord_offset, ct_file_dict, ARGS.nondefault_coords)
+
+    # Only does 'GOCAD' files
+    ConverterClass = get_converter(FileType.GOCAD)
+    converter = ConverterClass(DEBUG_LVL, params_obj, model_url_path, coord_offset, ct_file_dict, ARGS.nondefault_coords)
 
     # Process a directory of files
     if os.path.isdir(ARGS.src):
