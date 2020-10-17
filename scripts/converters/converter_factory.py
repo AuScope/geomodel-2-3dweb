@@ -15,6 +15,6 @@ def get_converter(file_type):
     :param type: file type e.g. FileType.GOCAD
     :return: 'Converter' object, or None if not found
     '''
-    if type==FileType.GOCAD:
+    if file_type==FileType.GOCAD:
         return Gocad2WebAsset
     return None
