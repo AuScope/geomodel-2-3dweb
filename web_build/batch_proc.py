@@ -13,8 +13,8 @@ under the name '<model_name>_new.json'
 
 import os
 import shutil
-import subprocess
 import sys
+import argparse
 
 from model_conv import convert_model
 
@@ -71,18 +71,27 @@ MODELS = [
 
 # MAIN PART OF PROGRAMME
 if __name__ == "__main__":
-    try:
-        GEOMODELS_DIR = os.path.join(os.path.join(DEST_DIR), 'geomodels')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
+    parser.print_help()
+    args = parser.parse_args()
+    if args.model is None:
+        try:
+            GEOMODELS_DIR = os.path.join(os.path.join(DEST_DIR), 'geomodels')
 
-        # Remove and recreate models dir
-        if os.path.exists(GEOMODELS_DIR):
-            print("Removing", GEOMODELS_DIR)
-            shutil.rmtree(GEOMODELS_DIR)
-        os.mkdir(GEOMODELS_DIR)
+            # Remove and recreate models dir
+            if os.path.exists(GEOMODELS_DIR):
+                print("Removing", GEOMODELS_DIR)
+                shutil.rmtree(GEOMODELS_DIR)
+            os.mkdir(GEOMODELS_DIR)
 
-        for urlStr, modelDirName, inConvFile, sDir in MODELS:
-            convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
+            for urlStr, modelDirName, inConvFile, sDir in MODELS:
+                convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
 
-    except OSError as exc:
-        print("ERROR - ", repr(exc))
-        sys.exit(1)
+        except OSError as exc:
+            print("ERROR - ", repr(exc))
+            sys.exit(1)
+    else:
+        MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir = args.model
+        convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
+
