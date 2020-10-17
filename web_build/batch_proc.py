@@ -16,6 +16,8 @@ import shutil
 import subprocess
 import sys
 
+from model_conv import convert_model
+
 DEST_DIR = ''
 
 MODELS_SRC_DIR = os.path.join(os.environ['HOME'], 'GEO_MODELS')
@@ -79,40 +81,7 @@ if __name__ == "__main__":
         os.mkdir(GEOMODELS_DIR)
 
         for urlStr, modelDirName, inConvFile, sDir in MODELS:
-            # Check source dir
-            srcDir = os.path.join(MODELS_SRC_DIR, sDir)
-            if not os.path.exists(srcDir):
-                print("ERROR - source directory does not exist", srcDir)
-                sys.exit(1)
-
-            # Remove and recreate output dir
-            outDir = os.path.join(srcDir, 'output')
-            if os.path.exists(outDir):
-                print("Removing", outDir)
-                shutil.rmtree(outDir)
-            os.mkdir(outDir)
-
-            # Run model conversion
-            # NB: Assumes 'conv_webasset.py' lives in ../scripts dir
-            execList = [os.path.join(os.pardir,"scripts","conv_webasset.py"), "-x", "-r", "-f", outDir, srcDir, inConvFile]
-            print("Executing: ", execList)
-            cmdProc = subprocess.run(execList)
-            print("Returned: ", cmdProc)
-            if cmdProc.returncode != 0:
-                print("Conversion returned an error")
-                sys.exit(1)
-
-            # Copy results to models dir
-            modelDir = os.path.join(GEOMODELS_DIR, modelDirName)
-            print("Copying results from ", outDir, " -> ", modelDir)
-            shutil.copytree(outDir, modelDir)
-
-            # Move config file up to models dir
-            config_file = os.path.join(modelDir, 'output_config.json')
-            model_config = os.path.join(GEOMODELS_DIR, modelDirName+'_new.json')
-            if os.path.exists(config_file):
-                print("Moving ", config_file, " to ", model_config)
-                os.rename(config_file, model_config)
+            convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
 
     except OSError as exc:
         print("ERROR - ", repr(exc))

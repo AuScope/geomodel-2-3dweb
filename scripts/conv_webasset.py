@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from lib.file_processing import read_json_file
 from lib.config_builder import ConfigBuilder
 from converters.converter_factory import get_converter, FileType
+from lib.exports.collada2gltf import convert_dir, convert_file
 
 CONVERT_COLLADA = True
 ''' Runs the collada2gltf program after creating COLLADA files
@@ -82,7 +83,7 @@ def find_and_process(converter_obj, src_dir, dest_dir):
 
     # Convert all files from COLLADA to GLTF v2
     if CONVERT_COLLADA:
-        collada2gltf.convert_dir(dest_dir)
+        convert_dir(dest_dir)
 
 
 def check_input_params(param_dict, param_file):
@@ -246,7 +247,7 @@ if __name__ == "__main__":
             sys.exit(1)
         if CONVERT_COLLADA:
             FILE_NAME, FILE_EXT = os.path.splitext(ARGS.src)
-            collada2gltf.convert_file(os.path.join(DEST_DIR,
+            convert_file(os.path.join(DEST_DIR,
                                       os.path.basename(FILE_NAME) + ".dae"))
 
     else:
