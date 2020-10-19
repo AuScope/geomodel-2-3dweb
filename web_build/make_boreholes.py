@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-This code creates a set of COLLADA (.dae) or GLTF files and a sqlite database
+This code creates GLTF files and a sqlite database
 which can be used to embed NVCL boreholes in a geological model
 """
 
 import sys
 import os
 
+sys.path.append(os.path.join(os.pardir, 'scripts'))
+
 import json
 from json import JSONDecodeError
 import logging
 import argparse
+
+
 
 from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
 from lib.exports.bh_utils import get_blob_boreholes, get_nvcl_data
