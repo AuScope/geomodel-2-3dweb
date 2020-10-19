@@ -24,10 +24,12 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
     # NB: Assumes 'conv_webasset.py' lives in ../scripts dir
     execList = [os.path.join(os.pardir,"scripts","conv_webasset.py"), "-x", "-r", "-f", outDir, srcDir, inConvFile]
     print("Executing: ", execList)
-    cmdProc = subprocess.run(execList)
-    print("Returned: ", cmdProc)
+    cmdProc = subprocess.run(execList, capture_output=True)
+    print("Returned:", cmdProc.returncode)
     if cmdProc.returncode != 0:
         print("Conversion returned an error")
+        print("Returned - stdout:", cmdProc.stdout)
+        print("           stderr:", cmdProc.stderr)
         sys.exit(1)
 
     # Copy results to models dir
