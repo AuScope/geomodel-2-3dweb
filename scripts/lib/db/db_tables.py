@@ -142,7 +142,7 @@ class QueryDB():
                 Base.metadata.drop_all()
                 Base.metadata.create_all()
             # 'scoped_session()' makes a thread-safe cache of session objects
-            #  NOTE: Would like to ventually make scope_session() more global
+            #  NOTE: Would like to eventually make scope_session() more global
             self.session_obj = scoped_session(sessionmaker(eng))
             self.ses = self.session_obj()
         except DatabaseError as db_exc:
@@ -274,7 +274,8 @@ class QueryDB():
 
     def __del__(self):
         try:
-            self.session_obj.remove()
+            if hasattr(self, 'session_obj'):
+                self.session_obj.remove()
         except DatabaseError:
             pass
 
