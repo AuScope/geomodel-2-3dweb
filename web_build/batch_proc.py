@@ -73,7 +73,6 @@ MODELS = [
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
-    parser.print_help()
     args = parser.parse_args()
     if args.model is None:
         try:

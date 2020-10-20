@@ -320,16 +320,16 @@ if __name__ == "__main__":
     assert QUERY_DB.ses.query(ModelInfo).count() == 1
     assert QUERY_DB.ses.query(UserInfo).count() == 1
 
-    # LoOK for a 'Query' with all info tables
+    # Look for a 'Query' with all info tables
     OK, Q1 = QUERY_DB.query('label2', 'model_name2')
     assert(OK and Q1 is not None and Q1[0] == 'label2' and Q1[1] == 'model_name2' \
            and Q1[2] == 'seg3')
 
-    # LoOK for 'Query' containing Nones
+    # Look for 'Query' containing Nones
     OK, Q2 = QUERY_DB.query('label_3_i', 'model_name3')
     assert(OK and Q2[0] == 'label_3_i' and Q2[1] == 'model_name3' and Q2[5] is None)
 
-    # LoOK for 'Query' with trailling number in label
+    # Look for 'Query' with trailling number in label
     OK, Q2 = QUERY_DB.query('label_3_i_44', 'model_name3')
     assert(OK and Q2[0] == 'label_3_i' and Q2[1] == 'model_name3' and Q2[5] is None)
 
