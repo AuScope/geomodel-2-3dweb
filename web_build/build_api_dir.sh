@@ -7,26 +7,25 @@
 #
 test "$1" = "" && echo "Usage: `basename $0` <db file>"  && exit 1
 API_TAR=`date +%Y%m%d`-api.tar
+\rm -f $API_TAR
 
 # Create data dir and copy in db
-\rm -rf api
+[ -d api ] && \rm -rf api
 mkdir -p api/data/cache
 cp $1 api/data
 
-# Assemble archive
-git archive -o $API_TAR --prefix=./api/ HEAD ./lib ./make_boreholes.py ./index.py ./input
-test $? -ne 0 && exit 1
+# Assemble api files
+cp make_boreholes.py api
+cp -r ../scripts/lib api
+cp ../scripts/webapi/webapi.py api
+cp -r ./input api
+
+# Remove unwanted files
+find api/lib -type f |  egrep -v ".*py$" | xargs -iX \rm -f X
+find api/lib -type d | grep __pycache__ | xargs -iX \rm -rf X
 
 # Add in data
 tar uf $API_TAR ./api
 \rm -rf api
-
-# Strip out gitignore files
-tar vf $API_TAR --delete `tar tvf $API_TAR | grep gitignore | awk '{ printf("%s ", $6); }'`
-test $? -ne 0 && exit 1
-
-# Remove README.md
-tar vf $API_TAR --delete ./api/input/README.md
-test $? -ne 0 && exit 1
 
 echo "Done. Results are in: $API_TAR"
