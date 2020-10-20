@@ -14,6 +14,8 @@ from lib.file_processing import is_only_small
 import lib.exports.collada2gltf as collada2gltf
 from lib.config_builder import ConfigBuilder
 
+from converters.converter import Converter
+
 GROUP_LIMIT = 8
 ''' If there are more than GROUP_LIMIT number of GOCAD objects in a group file
     then use one COLLADA file else put use separate COLLADA files for each object
@@ -24,12 +26,9 @@ VOL_SLICER = True
     else will create cubes, which will only work for smaller volumes
 '''
 
-DEBUG_LVL = logging.CRITICAL
-''' Initialise debug level to minimal debugging
-'''
 
 
-class Gocad2WebAsset:
+class Gocad2WebAsset(Converter):
     """ Converts some GOCAD files to COLLADA, then GLTFs, others are converted to GZIP or NetCDF
 
         TS -> COLLADA -> GLTF
@@ -71,6 +70,7 @@ class Gocad2WebAsset:
         # Add handler to LOGGER and set level
         self.logger.addHandler(handler)
         self.logger.setLevel(debug_lvl)
+        self.debug_lvl = debug_lvl
 
         # If true will not stop if a file has non default coordinates
         self.nondef_coords = nondef_coords
@@ -92,9 +92,9 @@ class Gocad2WebAsset:
         self.config_build_obj = ConfigBuilder()
 
         # Output kits
-        self.coll_kit_obj = ColladaKit(DEBUG_LVL)
-        self.png_kit_obj = PngKit(DEBUG_LVL)
-        self.netcdf_kit_obj = NetCDFKit(DEBUG_LVL)
+        self.coll_kit_obj = ColladaKit(self.debug_lvl)
+        self.png_kit_obj = PngKit(self.debug_lvl)
+        self.netcdf_kit_obj = NetCDFKit(self.debug_lvl)
 
         self.file_datastr_map = GocadFileDataStrMap()
 
@@ -126,7 +126,7 @@ class Gocad2WebAsset:
             if len(file_lines_list) > 1:
                 o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
                 out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
-            gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+            gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
@@ -172,6 +172,7 @@ class Gocad2WebAsset:
         :param file_name_str: source file name with path and extension
         :param src_dir: source directory
         """
+        self.logger.debug("process_volumes("+file_name+")")
         file_lines_list = split_gocad_objs(whole_file_lines)
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
@@ -179,7 +180,7 @@ class Gocad2WebAsset:
                 out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
                                                                os.path.basename(file_name)),
                                                   mask_idx)
-            gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+            gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
@@ -217,7 +218,7 @@ class Gocad2WebAsset:
         node_label = ''
         has_result = False
         for file_lines in file_lines_list:
-            gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+            gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords)
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
             if not is_ok:
@@ -260,7 +261,7 @@ class Gocad2WebAsset:
         :param src_dir: source directory
         '''
         gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
-                                    DEBUG_LVL, self.nondef_coords, self.ct_file_dict)
+                                    self.debug_lvl, self.nondef_coords, self.ct_file_dict)
 
         # If there are too many entries in the GP file, then use one COLLADA file only
         has_result = False

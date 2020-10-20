@@ -179,7 +179,6 @@ class GocadImporter():
         :param ct_file_dict: a dictionary of files which contain a tuple: (filename of CSV colour table,
                             list of values to be rendered transparent) key is GOCAD filename 
         '''
-        super().__init__()
         # Set up logging, use an attribute of class name so it is only called once
         if not hasattr(GocadImporter, 'logger'):
             GocadImporter.logger = logging.getLogger(__name__)
