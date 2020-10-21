@@ -115,29 +115,29 @@ G_WFS_DICT = {}
 
 
 
-def create_borehole_dict_list(model_name, param_dict, wfs_dict):
+def create_borehole_dict_list(model, param_dict, wfs_dict):
     '''
     Call upon network services to create dictionary and a list of boreholes for a model
 
-    :param model_name: name of model, string
+    :param model: name of model, string
     :param param_dict: parameter dictionary
     :param wfs_dict: dictionary of WFS services
     :returns: borehole_dict, response_list
     '''
     # Concatenate response
     response_list = []
-    if model_name not in wfs_dict or model_name not in param_dict:
-        LOGGER.warning("model_name %s not in wfs_dict or param_dict", model_name)
+    if model not in wfs_dict or model not in param_dict:
+        LOGGER.warning("model %s not in wfs_dict or param_dict", model)
         return {}, []
     param = SimpleNamespace()
     param.MAX_BOREHOLES = MAX_BOREHOLES
-    param.NVCL_URL = param_dict[model_name].NVCL_URL
-    param.WFS_URL = param_dict[model_name].WFS_URL
-    if hasattr(param_dict[model_name], 'BOREHOLE_CRS'):
-        param.BOREHOLE_CRS = param_dict[model_name].BOREHOLE_CRS
-    if hasattr(param_dict[model_name], 'BBOX'):
-        param.BOREHOLE_CRS = param_dict[model_name].BBOX
-    reader = NVCLReader(param_dict[model_name], wfs=wfs_dict[model_name])
+    param.NVCL_URL = param_dict[model].NVCL_URL
+    param.WFS_URL = param_dict[model].WFS_URL
+    if hasattr(param_dict[model], 'BOREHOLE_CRS'):
+        param.BOREHOLE_CRS = param_dict[model].BOREHOLE_CRS
+    if hasattr(param_dict[model], 'BBOX'):
+        param.BOREHOLE_CRS = param_dict[model].BBOX
+    reader = NVCLReader(param_dict[model], wfs=wfs_dict[model])
     borehole_list = reader.get_boreholes_list()
     result_dict = {}
     for borehole_dict in borehole_list:
@@ -148,23 +148,23 @@ def create_borehole_dict_list(model_name, param_dict, wfs_dict):
 
 
 
-def get_cached_dict_list(model_name, param_dict, wfs_dict):
+def get_cached_dict_list(model, param_dict, wfs_dict):
     '''
     Fetches borehole dictionary and response list from cache or creates them if necessary
 
-    :param model_name: name of model, string
+    :param model: name of model, string
     :param param_dict: parameter dictionary
     :param wfs_dict: dictionary of WFS services
     :returns: borehole_dict, response_list
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
-            bhd_key = 'bh_dict|' + model_name
-            bhl_key = 'bh_list|' + model_name
+            bhd_key = 'bh_dict|' + model
+            bhl_key = 'bh_list|' + model
             bh_dict = cache_obj.get(bhd_key)
             bh_list = cache_obj.get(bhl_key)
             if bh_dict is None or bh_list is None:
-                bh_dict, bh_list = create_borehole_dict_list(model_name, param_dict, wfs_dict)
+                bh_dict, bh_list = create_borehole_dict_list(model, param_dict, wfs_dict)
                 cache_obj.add(bhd_key, bh_dict)
                 cache_obj.add(bhl_key, bh_list)
             return bh_dict, bh_list
@@ -177,11 +177,11 @@ def get_cached_dict_list(model_name, param_dict, wfs_dict):
 
 
 
-def cache_blob(model_name, blob_id, blob, blob_sz, exp_timeout=None):
+def cache_blob(model, blob_id, blob, blob_sz, exp_timeout=None):
     '''
     Cache a GLTF blob and its size
 
-    :param model_name: name of model, string
+    :param model: name of model, string
     :param blob_id: blob id string, must be unique within each model
     :param blob: binary string
     :param size of blob
@@ -190,7 +190,7 @@ def cache_blob(model_name, blob_id, blob, blob_sz, exp_timeout=None):
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model_name + '|' + blob_id
+            blob_key = 'blob|' + model + '|' + blob_id
             return cache_obj.set(blob_key, (blob, blob_sz), expire=exp_timeout)
 
     except OSError as os_exc:
@@ -202,17 +202,17 @@ def cache_blob(model_name, blob_id, blob, blob_sz, exp_timeout=None):
 
 
 
-def get_cached_blob(model_name, blob_id):
+def get_cached_blob(model, blob_id):
     '''
     Get blob from cache
 
-    :param model_name: name of model, string
+    :param model: name of model, string
     :param blob_id: blob id string, must be unique within each model
     :returns: a GLTF blob (binary string) and its size
     '''
     try:
         with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model_name + '|' + blob_id
+            blob_key = 'blob|' + model + '|' + blob_id
             blob, blob_sz = cache_obj.get(blob_key, (None, 0))
             return blob, blob_sz
 
@@ -261,20 +261,20 @@ def get_cached_parameters():
         model_list = model_dict['models']
         # For each model within a provider
         for model_obj in model_list:
-            model_name = model_obj['modelUrlPath']
+            model = model_obj['modelUrlPath']
             file_prefix = model_obj['configFile'][:-5]
             # Open up model's conversion input parameter file
             input_file = os.path.join(INPUT_DIR, file_prefix + 'ConvParam.json')
             if not os.path.exists(input_file):
                 continue
             # Create params and WFS service
-            param_dict[model_name] = get_json_input_param(input_file)
+            param_dict[model] = get_json_input_param(input_file)
             try:
-                wfs_dict[model_name] = MyWebFeatureService(param_dict[model_name].WFS_URL,
-                                                           version=param_dict[model_name].WFS_VERSION,
+                wfs_dict[model] = MyWebFeatureService(param_dict[model].WFS_URL,
+                                                           version=param_dict[model].WFS_VERSION,
                                                            xml=None, timeout=WFS_TIMEOUT)
             except ServiceException as e:
-                LOGGER.error("Cannot reach service %s: %s", param_dict[model_name].WFS_URL, str(e))
+                LOGGER.error("Cannot reach service %s: %s", param_dict[model].WFS_URL, str(e))
     return param_dict, wfs_dict
 
 
@@ -296,17 +296,24 @@ def make_json_exception_response(version, code, message, locator='noLocator'):
     return {"message": msg_json}
 
 
+def make_str_response(msg):
+    '''
+    :param message: text message explaining error in more detail
+    :returns: byte array HTTP response
+    '''
+    return {"message": msg}
 
 
-def make_getcap_response(model_name, param_dict):
+
+def make_getcap_response(model, param_dict):
     '''
     Create and initialise the 3DPS 'GetCapabilities' response
 
-    :param model_name: Model name
+    :param model: Model name
     :param param_dict: model param
     :returns: byte array HTTP response
     '''
-    if model_name not in param_dict:
+    if model not in param_dict:
         return make_json_exception_response("1.0", "OperationNotSupported", "Unknown model name")
 
     response = """<?xml version="1.0" encoding="UTF-8"?>
@@ -399,11 +406,11 @@ def make_getcap_response(model_name, param_dict):
       </ows:Parameter>
     </ows:Operation>
   </ows:OperationsMetadata>
-  <Contents>""".format(model_name)
+  <Contents>""".format(model)
     response += """       <Layer>
       <ows:Identifier>{0}</ows:Identifier>
       <AvailableCRS>{1}</AvailableCRS>
-    </Layer>""".format(LAYER_NAME, param_dict[model_name].MODEL_CRS)
+    </Layer>""".format(LAYER_NAME, param_dict[model].MODEL_CRS)
 
     response += "</Contents>\n</Capabilities>"
 
@@ -411,11 +418,11 @@ def make_getcap_response(model_name, param_dict):
 
 
 
-def make_getfeatinfobyid_response(model_name, version, query_format, layer_names, obj_id):
+def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj_id):
     '''
     Create and initialise the 3DPS 'GetFeatureInfoByObjectId' response
 
-    :param model_name: model name
+    :param model: model name
     :param version: 3DPS version parameter
     :param query_format: response format
     :param layer_names: names of layers requested in query
@@ -435,7 +442,7 @@ def make_getfeatinfobyid_response(model_name, version, query_format, layer_names
 
     # Parse layers from query string
     if not layer_names:
-        return make_json_exception_response(version, 'MissingParameterValue', 'missing format parameter')
+        return make_json_exception_response(version, 'MissingParameterValue', 'missing layers parameter')
     if layer_names != LAYER_NAME:
         return make_json_exception_response(version, 'InvalidParameterValue', 'incorrect layers, try "'+ LAYER_NAME + '"')
 
@@ -447,11 +454,11 @@ def make_getfeatinfobyid_response(model_name, version, query_format, layer_names
     if err_msg != '':
         LOGGER.error('Could not open query db %s: %s', db_path, err_msg)
         return make_str_response(start_response, ' ')
-    LOGGER.debug('querying db: %s %s', obj_id, model_name)
-    o_k, result = qdb.query(obj_id, model_name)
+    LOGGER.debug('querying db: %s %s', obj_id, model)
+    o_k, result = qdb.query(obj_id, model)
     if o_k:
         # pylint: disable=W0612
-        label, out_model_name, segment_str, part_str, model_str, user_str = result
+        label, out_model, segment_str, part_str, model_str, user_str = result
         resp_dict = {'type': 'FeatureInfoList', 'totalFeatureInfo': 1,
                      'featureInfos': [{'type': 'FeatureInfo', 'objectId': obj_id,
                                        'featureId': obj_id, 'featureAttributeList': []}]}
@@ -479,11 +486,11 @@ def make_getfeatinfobyid_response(model_name, version, query_format, layer_names
 
 
 
-def make_getresourcebyid_response(model_name, version, output_format, res_id, param_dict, wfs_dict):
+def make_getresourcebyid_response(model, version, output_format, res_id, param_dict, wfs_dict):
     '''
     Create and initialise the 3DPS 'GetResourceById' response
 
-    :param model_name: name of model (string)
+    :param model: name of model (string)
     :param version: 3DPS request version
     :param output_format: 3DPS response format
     :param res_id: requested resource id
@@ -493,7 +500,7 @@ def make_getresourcebyid_response(model_name, version, output_format, res_id, pa
     '''
     # This sends back the first part of the GLTF object - the GLTF file for the
     # resource id specified
-    LOGGER.debug('make_getresourcebyid_response(model_name = %s)', model_name)
+    LOGGER.debug('make_getresourcebyid_response(model = %s)', model)
 
     # Parse outputFormat from query string
     LOGGER.debug('output_format = %s', output_format)
@@ -511,17 +518,17 @@ def make_getresourcebyid_response(model_name, version, output_format, res_id, pa
 
     # Get borehole dictionary for this model
     # pylint: disable=W0612
-    model_bh_dict, model_bh_list = get_cached_dict_list(model_name, param_dict, wfs_dict)
+    model_bh_dict, model_bh_list = get_cached_dict_list(model, param_dict, wfs_dict)
     LOGGER.debug('model_bh_dict = %s', repr(model_bh_dict))
     borehole_dict = model_bh_dict.get(res_id, None)
     if borehole_dict is not None:
         borehole_id = borehole_dict['nvcl_id']
 
         # Get blob from cache
-        blob = get_blob_boreholes(borehole_dict, param_dict[model_name])
+        blob = get_blob_boreholes(borehole_dict, param_dict[model])
         # Some boreholes do not have the requested metric
         if blob is not None:
-            return send_blob(model_name, res_id, blob)
+            return send_blob(model, res_id, blob)
         LOGGER.debug('Empty GLTF blob')
     else:
         LOGGER.debug('Resource not found in borehole dict')
@@ -530,10 +537,10 @@ def make_getresourcebyid_response(model_name, version, output_format, res_id, pa
 
 
 
-def send_blob(model_name, blob_id, blob, exp_timeout=None):
+def send_blob(model, blob_id, blob, exp_timeout=None):
     ''' Returns a blob in response
 
-    :param model_name: name of model (string)
+    :param model: name of model (string)
     :param blob_id: unique id string for blob, used for caching
     :param blob: blob object
     :param exp_timeout: cache expiry timeout, float, in seconds
@@ -568,7 +575,7 @@ def send_blob(model_name, blob_id, blob, exp_timeout=None):
                     # This modifies the URL of the .bin file associated with the GLTF file
                     # Inserting model name and resource id as a parameter so we can tell
                     # the .bin files apart
-                    gltf_json["buffers"][0]["uri"] = model_name + '/' + \
+                    gltf_json["buffers"][0]["uri"] = model + '/' + \
                         gltf_json["buffers"][0]["uri"] + "?id=" + blob_id
 
                     # Convert back to bytes and send
@@ -585,7 +592,7 @@ def send_blob(model_name, blob_id, blob, exp_timeout=None):
             bcd_bytes = b''
             for bitt in bcd.contents:
                 bcd_bytes += bitt
-            cache_blob(model_name, blob_id, bcd_bytes, blob.contents.size, exp_timeout)
+            cache_blob(model, blob_id, bcd_bytes, blob.contents.size, exp_timeout)
 
 
         blob = blob.contents.next
@@ -599,13 +606,13 @@ def send_blob(model_name, blob_id, blob, exp_timeout=None):
     return make_str_response('{}')
 
 
-def make_getpropvalue_response(model_name, version, output_format, type_name, value_ref, param_dict, wfs_dict):
+def make_getpropvalue_response(model, version, output_format, type_name, value_ref, param_dict, wfs_dict):
     '''
     Returns a response to a WFS getPropertyValue request, example: \
       https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue& \
         outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
 
-    :param model_name: name of model (string)
+    :param model: name of model (string)
     :param version: 3DPS request version
     :param output_format: 3DPS response format
     :param type_name: type name
@@ -637,18 +644,18 @@ def make_getpropvalue_response(model_name, version, output_format, type_name, va
 
     # Fetch list of borehole ids
     # pylint: disable=W0612
-    model_bh_dict, response_list = get_cached_dict_list(model_name, param_dict, wfs_dict)
+    model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
     response_str = json.dumps({'type': 'ValueCollection', 'totalValues': len(response_list),
                                'values': response_list})
     response_bytes = bytes(response_str, 'utf-8')
     return {"message": response_bytes}
 
 
-def convert_gocad2gltf(model_name, id_str, gocad_list):
+def convert_gocad2gltf(model, id_str, gocad_list):
     '''
     Call the conversion code to convert a GOCAD string to GLTF
 
-    :param model_name: name of model
+    :param model: name of model
     :param id_str: sequence number string
     :param gocad_list: GOCAD file lines as a list of strings
     :returns: a JSON response
@@ -666,22 +673,22 @@ def convert_gocad2gltf(model_name, id_str, gocad_list):
         assimp_obj.start_scene()
         assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
         blob_obj = assimp_obj.end_scene("")
-        return send_blob(model_name, 'drag_and_drop_'+id_str, blob_obj, 60.0)
+        return send_blob(model, 'drag_and_drop_'+id_str, blob_obj, 60.0)
     return make_str_response(' ')
 
 
-def convert_gltf2xxx(start_response, model_name, filename, format):
+def convert_gltf2xxx(start_response, model, filename, format):
     '''
     Call the conversion code to convert GLTF string to a certain format
 
     :param start_response: function call required to create a response
-    :param model_name: name of model
+    :param model: name of model
     :param filename: filename of GLTF file to be converted
     :param format: string indicating what format to convert to, e.g. 'DXF'
     :returns: a JSON response
     '''
     # Use model name and file name to get full GLTF file path
-    gltf_path = find_gltf(model_name, filename)
+    gltf_path = find_gltf(model, filename)
     if not gltf_path:
         LOGGER.error("Cannot find %s", gltf_path)
         return make_str_response(' ')
@@ -700,18 +707,23 @@ def convert_gltf2xxx(start_response, model_name, filename, format):
         LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
         return make_str_response(start_response, ' ')
 
-    return send_blob(model_name, 'export_{0}_{1}'.format(model_name, filename), blob_obj, 60.0)
+    return send_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
 
 
 
-def process3DPS(model, version, request, outputFormat, resourceId):
+def process3DPS(model, version, request, format, outputFormat, layers, objectId, resourceId):
     '''
     Process an OCG 3PS request. Roughly trying to conform to 3DPS standard
 
+    :param model: name of model
+    :param version: WFS version parameter
     :param request: string, 3DPS request type string
-    :param model_name: name of model
-    :param start_response: function call required to create a response
-    :returns: a response that can be returned from the 'application()' function
+    :param format: requested response output format in 'getfeatureinfobyobjectid' request
+    :param outputFormat: requested response output format in 'getresourcebyid' request
+    :param layers: list of layers
+    :param objectId: objectId parameter in 'getfeatureinfobyobjectid' request
+    :param resourceId: resourceId parameter in 'getresourcebyid' request
+    :returns: a JSON response
     '''
     if request.lower() == 'getcapabilities':
         return make_getcap_response(model, G_PARAM_DICT)
@@ -729,10 +741,10 @@ def process3DPS(model, version, request, outputFormat, resourceId):
                                             request.lower())
 
     if request.lower() == 'getfeatureinfobyobjectid':
-        return make_getfeatinfobyid_response(model_name, version, query_format, layer_names, obj_id)
+        return make_getfeatinfobyid_response(model, version, format, layers, objectId)
 
     if request.lower() == 'getresourcebyid':
-        return make_getresourcebyid_response(model, G_PARAM_DICT, G_WFS_DICT)
+        return make_getresourcebyid_response(model, version, outputFormat, resourceId, G_PARAM_DICT, G_WFS_DICT)
 
     # Unknown request
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request type')
@@ -762,30 +774,30 @@ def processWFS(model, version, request, outputFormat, exceptions, typeName, valu
 
     # GetFeature
     if request.lower() == 'getpropertyvalue':
-        return make_getpropvalue_response(model, version, output_format, type_name, value_ref, G_PARAM_DICT, G_WFS_DICT)
+        return make_getpropvalue_response(model, version, outputFormat, typeName, valueReference, G_PARAM_DICT, G_WFS_DICT)
 
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request name')
 
 
-def processEXPORT(model_name, filename, fmt):
+def processEXPORT(model, filename, fmt):
     '''
     Export a model part to DXF etc.
 
     :param environ: WSGI 'environ' variable
     :param url_kvp: dict of parameters extracted from the incoming URL
-    :param model_name: name of model
+    :param model: name of model
     :returns: a response that can be returned from the 'application()' function
     '''
-    return convert_gltf2xxx(model_name, filename, fmt)
+    return convert_gltf2xxx(model, filename, fmt)
 
 
-def processIMPORT(model_name, id_str):
+def processIMPORT(model, id_str):
     '''
     Process a GOCAD to GLTF conversion request
 
     :param environ: WSGI 'environ' variable
     :param url_kvp: dict of parameters extracted from the incoming URL
-    :param model_name: name of model
+    :param model: name of model
     :returns: a JSON response
     '''
     # FIXME: Not sure how to do this in FastAPI
@@ -793,7 +805,7 @@ def processIMPORT(model_name, id_str):
     resp_list = []
     for resp_str in resp_lines:
         resp_list.append(resp_str.decode())
-    return convert_gocad2gltf(model_name, id_str, resp_list)
+    return convert_gocad2gltf(model, id_str, resp_list)
 
 
 def processWMS(model, styles, wmsurl):
@@ -865,15 +877,16 @@ def checkWMS(key, val):
 
 # WFS and 3DPS
 @app.get("/api/{model}")
-async def processRequest(model: str, service: str, version: str, request: str, outputFormat: str = None, # Compulsory
-                         resourceId: str = None, # 3DPS
-                         exceptions: str = None,  typeName = None, valueReference = None # WFS
+async def processRequest(model: str, service: str, version: str, request: str,
+                         resourceId: str = None, layers: str = None, objectId: str = None, format: str = None, # 3DPS
+                         exceptions: str = None,  typeName = None, valueReference = None, outputFormat: str = None # WFS
                         ): 
-
+    print("model, service, version, request, outputFormat, format, resourceId, layers, objectId, exceptions,  typeName, valueReference")
+    print(model, service, version, request, outputFormat, format, resourceId, layers, objectId, exceptions,  typeName, valueReference)
     if service == 'WFS':
         return processWFS(model, version, request, outputFormat, exceptions, typeName, valueReference)
     elif service == '3DPS':
-        return process3DPS(model, version, request, outputFormat, resourceId)
+        return process3DPS(model, version, request, format, outputFormat, layers, objectId, resourceId)
 
     return {"message": "Unknown service name, should be one of: 'WFS', '3DPS'"}
 
