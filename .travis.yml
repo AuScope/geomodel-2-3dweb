@@ -4,6 +4,7 @@ before_install:
   - tar xvf v5.0.0.tar.gz
   - pushd assimp-5.0.0 && cmake CMakeLists.txt -G 'Unix Makefiles' && make && popd
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/assimp-5.0.0/lib
+  - pip install coverage
 language: python
 python:
   - "3.7"
