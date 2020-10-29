@@ -16,8 +16,7 @@
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetResourceById&resourceId=228563&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8
 '''
 
-import sys
-import os
+import sys, os
 import ctypes
 import json
 from json import JSONDecodeError
@@ -75,8 +74,14 @@ if not LOGGER.hasHandlers():
 LOGGER.setLevel(DEBUG_LVL)
 
 
-LOCAL_DIR = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, 'web_build')
+LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
+''' This file's absolute path
+'''
+
+
 DATA_DIR = os.path.join(LOCAL_DIR, 'data')
+''' Directory where web cache data files are stored
+'''
 
 
 INPUT_DIR = os.path.join(LOCAL_DIR, 'input')
