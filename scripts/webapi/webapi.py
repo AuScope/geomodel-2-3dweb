@@ -483,8 +483,7 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
         for key, val in query_dict.items():
             feat_dict = {'type': 'FeatureAttribute', 'name': key, 'value': val}
             resp_dict['featureInfos'][0]['featureAttributeList'].append(feat_dict)
-        resp_str = json.dumps(resp_dict)
-        return {"message": resp_str}
+        return {"message": resp_dict}
 
     LOGGER.error('Could not query db: %s', str(result))
     return make_str_response(' ')
@@ -650,10 +649,8 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
     # Fetch list of borehole ids
     # pylint: disable=W0612
     model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
-    response_str = json.dumps({'type': 'ValueCollection', 'totalValues': len(response_list),
-                               'values': response_list})
-    response_bytes = bytes(response_str, 'utf-8')
-    return {"message": response_bytes}
+    response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
+    return {"message": response_json}
 
 
 def convert_gocad2gltf(model, id_str, gocad_list):
