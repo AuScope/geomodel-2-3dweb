@@ -90,6 +90,6 @@ def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
         if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
             bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
             for depth in bh_data_dict:
-                ret_dict[depth] = bh_data_dict[depth].__dict__
+                ret_dict[depth] = bh_data_dict[depth]
             break
     return ret_dict, base_xyz

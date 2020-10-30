@@ -3,6 +3,7 @@ A collection of Python generator functions used to create geometries,
 including: borehole sticks, lines, cubes and pyramids
 '''
 import math
+from types import SimpleNamespace
 from lib.exports.bh_utils import make_borehole_label
 
 def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
@@ -11,17 +12,15 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
     :param pos: x,y,z position of collar of borehole, tuple of 3 floats
     :param borehole_name: borehole's name
     :param colour_info_dict: dict of: key = height, float; \
-                                      value = { 'colour': (R,G,B,A) floats, \
+                                      value = SimpleNamespace({ 'colour': (R,G,B,A) floats, \
                                                 'classText': mineral name, \
-                                                'className': measurement class }
+                                                'className': measurement class })
     :param ht_reso: height resolution, float
     :returns vert_list: list of floats, (x,y,z) vertices; \
         indices - list of integers, index pointers to which vertices are joined as triangles; \
         colour_idx - integer index pointing to material object array; \
         depth - depth of borehole segment, float; \
-        colour_info - colour information dict: { 'colour': (R,G,B,A) floats, \
-                                                 'classText': mineral name, \
-                                                 'className' : meas class } \
+        colour_info - colour tuple (R,G,B,A) floats; \
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
     bh_width = 10 # Width of stick
@@ -51,8 +50,12 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
                    1, 5, 3]
 
         mesh_name = make_borehole_label(borehole_name, depth)
+        if not isinstance(colour_info, SimpleNamespace):
+            rgba_colour = (1.0, 1.0, 1.0, 1.0)
+        else:
+            rgba_colour = colour_info.colour
 
-        yield vert_list, indices, colour_idx, depth, colour_info, mesh_name
+        yield vert_list, indices, colour_idx, depth, rgba_colour, mesh_name
 
 def tri_gen(trgl_arr, vrtx_arr, mesh_name):
     ''' A generator which is used to make a triangular mesh
