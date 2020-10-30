@@ -139,13 +139,11 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             # If there's NVCL data, then create the borehole
             first_depth = -1
             # pylint: disable=W0612
-            for vert_list, indices, colour_idx, depth, colour_info, mesh_name in \
+            for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in \
                 colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
                 if first_depth < 0:
                     first_depth = int(depth)
-                popup_info = colour_info.copy()
-                del popup_info['colour']
-                is_ok, s_obj = qdb.add_segment(json.dumps(popup_info))
+                is_ok, s_obj = qdb.add_segment(json.dumps(class_dict))
                 if not is_ok:
                     LOGGER.warning("Cannot add segment to db: %s", s_obj)
                     continue

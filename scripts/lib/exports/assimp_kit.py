@@ -166,7 +166,7 @@ class AssimpKit(ExportKit):
         self.scn.mNumMaterials = bh_size
 
         cb_gen = colour_borehole_gen(base_vrtx, borehole_name, colour_info_dict, height_reso)
-        for vert_list, indices, colour_idx, depth, colour_tup, mesh_name in cb_gen:
+        for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in cb_gen:
             # If there is only one mesh, then GLTFLoader does not append a '_0' to the name,
             # so we must do so, to be consistent with the database
             if one_only:
@@ -174,7 +174,7 @@ class AssimpKit(ExportKit):
             mesh_obj = self.make_a_mesh(mesh_name, indices, colour_idx)
             mesh_p_arr[colour_idx] = ctypes.pointer(mesh_obj)
             self.add_vertices_to_mesh(mesh_obj, vert_list)
-            mat_obj = self.make_material(colour_tup)
+            mat_obj = self.make_material(rgba_colour)
             mat_p_arr[colour_idx] = ctypes.pointer(mat_obj)
 
         return self.end_scene(out_filename)

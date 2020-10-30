@@ -168,7 +168,7 @@ class ColladaOut():
         cb_gen = colour_borehole_gen(pos, "borehole-{0}".format(borehole_label),
                                      colour_info_dict, ht_resol)
         # pylint:disable=W0612
-        for vert_list, indices, colour_idx, depth, colour_info, mesh_name in cb_gen:
+        for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in cb_gen:
             vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list),
                                                   ('X', 'Y', 'Z'))
             geom = Collada.geometry.Geometry(mesh, "geometry_{0}".format(int(depth)),
