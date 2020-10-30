@@ -6,7 +6,7 @@ import logging, sys
 
 from lib.coords import convert_coords
 from nvcl_kit.reader import NVCLReader
-from lib.exports.assimp_kit import write_borehole
+from lib.exports.assimp_kit import AssimpKit
 
 
 LOG_LVL = logging.INFO
@@ -49,7 +49,8 @@ def get_blob_boreholes(borehole_dict, param_obj):
 
         # If there's data, then create the borehole
         if bh_data_dict != {}:
-            blob_obj = write_borehole(base_xyz, borehole_dict['name'],
+            assimp_obj = AssimpKit(LOG_LVL)
+            blob_obj = assimp_obj.write_borehole(base_xyz, borehole_dict['name'],
                                                  bh_data_dict, height_res, '')
             LOGGER.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
