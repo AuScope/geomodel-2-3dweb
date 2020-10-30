@@ -31,7 +31,7 @@ import inspect
 from urllib.parse import urlparse
 
 from lib.file_processing import get_json_input_param
-from lib.exports.bh_utils import get_blob_boreholes
+from lib.exports.bh_make import get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file, find_gltf
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
@@ -298,7 +298,7 @@ def make_json_exception_response(version, code, message, locator='noLocator'):
     '''
     msg_json = {"version": version, "exceptions": [{"code": code, "locator": locator,
                                                     "text": message}]}
-    return {"message": msg_json}
+    return msg_json
 
 
 def make_str_response(msg):
@@ -306,7 +306,7 @@ def make_str_response(msg):
     :param message: text message explaining error in more detail
     :returns: byte array HTTP response
     '''
-    return {"message": msg}
+    return str(msg)
 
 
 
@@ -419,7 +419,7 @@ def make_getcap_response(model, param_dict):
 
     response += "</Contents>\n</Capabilities>"
 
-    return {"message": response}
+    return response
 
 
 
@@ -483,7 +483,7 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
         for key, val in query_dict.items():
             feat_dict = {'type': 'FeatureAttribute', 'name': key, 'value': val}
             resp_dict['featureInfos'][0]['featureAttributeList'].append(feat_dict)
-        return {"message": resp_dict}
+        return resp_dict
 
     LOGGER.error('Could not query db: %s', str(result))
     return make_str_response(' ')
@@ -650,7 +650,7 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
     # pylint: disable=W0612
     model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
     response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
-    return {"message": response_json}
+    return response_json
 
 
 def convert_gocad2gltf(model, id_str, gocad_list):
@@ -836,7 +836,7 @@ def processWMS(model, styles, wmsurl):
     blob_sz = len(blob)
 
     # FIXME: Not sure if this works
-    return {'message': blob}
+    return blob
 
 
 def checkWMS(key, val):
@@ -890,7 +890,7 @@ async def processRequest(model: str, service: str, version: str, request: str,
     elif service == '3DPS':
         return process3DPS(model, version, request, format, outputFormat, layers, objectId, resourceId)
 
-    return {"message": "Unknown service name, should be one of: 'WFS', '3DPS'"}
+    return "Unknown service name, should be one of: 'WFS', '3DPS'"
 
 
 # WMSPROXY
