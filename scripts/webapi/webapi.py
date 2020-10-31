@@ -42,6 +42,7 @@ from nvcl_kit.reader import NVCLReader
 from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 
 
@@ -814,8 +815,7 @@ def processEXPORT(model, filename, fmt):
     '''
     return convert_gltf2xxx(model, filename, fmt)
 
-
-def processIMPORT(model, id_str):
+def processIMPORT(model, id_str, import_file):
     '''
     Process a GOCAD to GLTF conversion request
 
@@ -824,12 +824,7 @@ def processIMPORT(model, id_str):
     :param model: name of model
     :returns: a JSON response
     '''
-    # FIXME: Not sure how to do this in FastAPI
-    #resp_lines = environ['wsgi.input'].readlines()
-    resp_list = []
-    for resp_str in resp_lines:
-        resp_list.append(resp_str.decode())
-    return convert_gocad2gltf(model, id_str, resp_list)
+    return convert_gocad2gltf(model, id_str, import_file.content.decode())
 
 
 def processWMS(model, styles, wmsurl):
@@ -921,10 +916,17 @@ async def wmsProxy(model: str, styles: str, wmsUrl: str):
     return processWMS(model, styles, wmsUrl)
 
 
+class ImportFile(BaseModel):
+    crs: str
+    content: bytes
+
+
 # Import GOCAD file
-@app.get("/api/{model}/import/{id}")
-async def importFile(model: str, id: str):
-    return processIMPORT(model, id)
+@app.post("/api/{model}/import/{id}")
+async def importFile(model: str, id: str, import_file: ImportFile):
+    print('content=', import_file.content)
+    print('crs=', import_file.crs)
+    return processIMPORT(model, id, import_file)
 
 
 # Export DXF file
