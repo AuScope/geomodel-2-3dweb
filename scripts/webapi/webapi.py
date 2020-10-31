@@ -17,7 +17,7 @@
 '''
 
 import sys, os
-import ctypes
+import ctypes, tempfile
 import json
 from json import JSONDecodeError
 import urllib
@@ -41,6 +41,8 @@ from nvcl_kit.reader import NVCLReader
 
 from typing import Optional
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+
 
 
 app = FastAPI()
@@ -781,6 +783,26 @@ def processWFS(model, version, request, outputFormat, exceptions, typeName, valu
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request name')
 
 
+def processBLOB(model, id_val):
+    '''
+    Process blob file request
+
+    :param model: name of model
+    :param id_val: blob file identifier string
+    :returns: a binary file response
+    '''
+    # Check that the id format is correct
+    print(id_val)
+    if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) \
+                                                                  or id_val.isnumeric():
+        blob, blob_sz = get_cached_blob(model, id_val)
+        if blob is not None:
+            with tempfile.NamedTemporaryFile(mode="w+b", suffix=".bin", delete=False) as fp:
+                fp.write(blob)
+            return FileResponse(fp.name, media_type="aplication/octet-stream")
+    return make_string_response("Unknown .bin file")
+
+
 def processEXPORT(model, filename, fmt):
     '''
     Export a model part to DXF etc.
@@ -912,7 +934,7 @@ async def importFile(model: str, filename: str, fmt: str):
 
 
 # Request blobfile, second part of 3DPS request
-@app.get("/api/{model}/$blobfile.bin/{id}")
+@app.get("/api/{model}/$blobfile.bin")
 async def downloadBlobFile(model: str, id: str):
     return processBLOB(model, id)
 
