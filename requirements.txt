@@ -9,4 +9,5 @@ diskcache
 nvcl_kit
 netCDF4
 fastapi
+aiofiles
 uvicorn
