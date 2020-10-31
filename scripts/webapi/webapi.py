@@ -929,7 +929,7 @@ async def importFile(model: str, id: str):
 
 # Export DXF file
 @app.get("/api/{model}/export/{filename}/{fileformat}")
-async def importFile(model: str, filename: str, fmt: str):
+async def exportFile(model: str, filename: str, fmt: str):
     return processEXPORT(model, filename, fmt)
 
 
