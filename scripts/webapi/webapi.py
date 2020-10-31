@@ -824,7 +824,11 @@ def processIMPORT(model, id_str, import_file):
     :param model: name of model
     :returns: a JSON response
     '''
-    return convert_gocad2gltf(model, id_str, import_file.content.decode())
+    file_str = import_file.content.decode()
+    print('file_str=', file_str)
+    file_str_list = file_str.split('\n')
+    print('file_str_list=', file_str_list)
+    return convert_gocad2gltf(model, id_str, file_str_list)
 
 
 def processWMS(model, styles, wmsurl):
