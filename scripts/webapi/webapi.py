@@ -20,15 +20,13 @@ import sys, os
 import ctypes, tempfile
 import json
 from json import JSONDecodeError
-import urllib
+import requests
 import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from owslib.util import ServiceException
 from diskcache import Cache, Timeout
 import pyassimp
 from types import SimpleNamespace
-import inspect
-from urllib.parse import urlparse
 
 from lib.file_processing import get_json_input_param
 from lib.exports.bh_make import get_blob_boreholes
@@ -39,7 +37,6 @@ from lib.exports.assimp_kit import AssimpKit
 
 from nvcl_kit.reader import NVCLReader
 
-from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -793,7 +790,6 @@ def processBLOB(model, id_val):
     :returns: a binary file response
     '''
     # Check that the id format is correct
-    print(id_val)
     if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) \
                                                                   or id_val.isnumeric():
         blob, blob_sz = get_cached_blob(model, id_val)
@@ -819,45 +815,41 @@ def processIMPORT(model, id_str, import_file):
     '''
     Process a GOCAD to GLTF conversion request
 
-    :param environ: WSGI 'environ' variable
-    :param url_kvp: dict of parameters extracted from the incoming URL
     :param model: name of model
+    :param id_str: identity string
+    :param import_file: content of file to be imported, bytes
     :returns: a JSON response
     '''
     file_str = import_file.content.decode()
-    print('file_str=', file_str)
     file_str_list = file_str.split('\n')
-    print('file_str_list=', file_str_list)
     return convert_gocad2gltf(model, id_str, file_str_list)
 
 
-def processWMS(model, styles, wmsurl):
+def processWMS(model, style, wms_url, **params):
     '''
     Processes an OCG WMS request by proxying
 
-    :param environ: WSGI 'environ' variable
-    :param url_kvp: dict of parameters extracted from the incoming URL
-    :returns: a response that can be returned from the 'application()' function
+    :param model: name of model
+    :param style: name of style
+    :param wms_url: WMS URL of service to proxy
+    :returns: a WMS response
     '''
 
-    wms_dict = urlparse(wmsurl)
-    if not checkWMS('wmsurl', wms_url):
-        return make_str_response(' ')
+    # Check params
+    for key,val in params.items():
+        if key not in ['service', 'wmsurl']:
+            if not checkWMS(key, val):
 
-    # Only add in WMS parameters if they are legitimate
-    for key in wms_dict.keys():
-        val = url_kvp[key][0]
-        if key not in ['service', 'wmsurl'] and not checkWMS(key, val):
-            return make_str_response('{}')
+                return make_str_response('{}')
 
     # Make the WMS request
-    req = urllib.request.Request(wms_url)
-    with urllib.request.urlopen(req) as resp:
-        blob = resp.read()
-    blob_sz = len(blob)
+    url = wms_url.split('?')[0]
+    params['SERVICE']='WMS'
 
-    # FIXME: Not sure if this works
-    return blob
+    resp = requests.get(url, params)
+    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=False) as fp:
+        fp.write(resp.content)
+    return FileResponse(fp.name, media_type="image/png")
 
 
 def checkWMS(key, val):
@@ -875,12 +867,14 @@ def checkWMS(key, val):
         if (lval[:7] == 'http://' or lval[:8] == 'https://') and \
            lval[-12:] == '?service=wms' and lval.count('?') == 1:
             return any(c in 'abcdefghijklmnopqrstuvwxyz_-?:/.=' for c in lval)
+    if lkey == 'service':
+        return (lval == 'wms')
     if lkey == 'layers':
-        return any(c in 'abcdefghijklmnopqrstuvwxyz_-' for c in lval)
+        return all(c in '1234567890abcdefghijklmnopqrstuvwxyz_-' for c in lval)
     if lkey == 'request' and lval.isalpha():
         return True
     if lkey == 'version':
-        return any(c in '1234567890.' for c in lval)
+        return all(c in '1234567890.' for c in lval)
     if lkey == 'styles' and lval in ['default', '']:
         return True
     if lkey == 'format' and lval in ['image/png', 'image/jpeg']:
@@ -888,7 +882,7 @@ def checkWMS(key, val):
     if lkey in ['transparent', 'displayoutsidemaxextent'] and lval in ['true','false']:
         return True
     if lkey == 'bbox':
-        return any(c in '1234567890,.-' for c in lval)
+        return all(c in '1234567890,.-' for c in lval)
     if lkey == 'crs' and lval[:5] == 'epsg:' and lval[5:].isnumeric():
         return True
     if lkey in ['height','width'] and lval.isnumeric():
@@ -904,8 +898,6 @@ async def processRequest(model: str, service: str, version: str, request: str,
                          resourceId: str = None, layers: str = None, objectId: str = None, format: str = None, # 3DPS
                          exceptions: str = None,  typeName = None, valueReference = None, outputFormat: str = None # WFS
                         ): 
-    print("model, service, version, request, outputFormat, format, resourceId, layers, objectId, exceptions,  typeName, valueReference")
-    print(model, service, version, request, outputFormat, format, resourceId, layers, objectId, exceptions,  typeName, valueReference)
     if service == 'WFS':
         return processWFS(model, version, request, outputFormat, exceptions, typeName, valueReference)
     elif service == '3DPS':
@@ -916,8 +908,10 @@ async def processRequest(model: str, service: str, version: str, request: str,
 
 # WMSPROXY
 @app.get("/api/{model}/wmsproxy/{styles}")
-async def wmsProxy(model: str, styles: str, wmsUrl: str):
-    return processWMS(model, styles, wmsUrl)
+async def wmsProxy(model: str, styles: str, wmsUrl: str, REQUEST: str, LAYERS: str, VERSION: str, STYLES: str, FORMAT:str, BBOX:str, CRS: str, WIDTH: str, HEIGHT:str):
+
+    return processWMS(model, styles, wmsUrl, request=REQUEST, layers=LAYERS, version=VERSION, styles=STYLES,
+                                             format=FORMAT, bbox=BBOX, crs=CRS, width=WIDTH, height=HEIGHT)
 
 
 class ImportFile(BaseModel):
@@ -928,8 +922,6 @@ class ImportFile(BaseModel):
 # Import GOCAD file
 @app.post("/api/{model}/import/{id}")
 async def importFile(model: str, id: str, import_file: ImportFile):
-    print('content=', import_file.content)
-    print('crs=', import_file.crs)
     return processIMPORT(model, id, import_file)
 
 
