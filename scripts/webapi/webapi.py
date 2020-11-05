@@ -679,21 +679,22 @@ def convert_gocad2gltf(model, id_str, gocad_list):
     return make_str_response(' ')
 
 
-def convert_gltf2xxx(start_response, model, filename, format):
+def convert_gltf2xxx(model, filename, fmt):
     '''
     Call the conversion code to convert GLTF string to a certain format
 
-    :param start_response: function call required to create a response
     :param model: name of model
     :param filename: filename of GLTF file to be converted
-    :param format: string indicating what format to convert to, e.g. 'DXF'
-    :returns: a JSON response
+    :param fmt: string indicating what format to convert to, e.g. 'DXF'
+    :returns: a file response
     '''
     # Use model name and file name to get full GLTF file path
-    gltf_path = find_gltf(model, filename)
+    gltf_path = find_gltf(GEOMODELS_DIR, INPUT_DIR, model, filename)
     if not gltf_path:
         LOGGER.error("Cannot find %s", gltf_path)
         return make_str_response(' ')
+
+    gltf_path = os.path.abspath(gltf_path)
 
     # Load GLTF file
     try:
@@ -702,9 +703,10 @@ def convert_gltf2xxx(start_response, model, filename, format):
         LOGGER.error("Cannot load %s:%s", gltf_path, str(ae))
         return make_str_response(' ')
 
+
     # Export as whatever format desired
     try:
-        blob_obj = pyassimp.export_blob(assimp_obj, format, processing=None)
+        blob_obj = pyassimp.export_blob(assimp_obj, fmt, processing=None)
     except AssimpError as ae:
         LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
         return make_str_response(start_response, ' ')
@@ -926,7 +928,7 @@ async def importFile(model: str, id: str, import_file: ImportFile):
 
 
 # Export DXF file
-@app.get("/api/{model}/export/{filename}/{fileformat}")
+@app.get("/api/{model}/export/{filename}/{fmt}")
 async def exportFile(model: str, filename: str, fmt: str):
     return processEXPORT(model, filename, fmt)
 

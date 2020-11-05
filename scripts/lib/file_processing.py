@@ -73,12 +73,17 @@ def get_json_input_param(input_file):
     return param_obj
 
 
-def find_gltf(target_model_name, gltf_file):
+def find_gltf(geomodels_dir, input_dir, target_model_name, gltf_file):
     '''
-    Searches for the model's file path in the model's config file                                                                                                                                                                                             :param target_model_name: name of model we're searching for                                                                  :param gltf_file: GLTF filename
+    Searches for the model's file path in the model's config file
+
+    :param geomodels_dir: dir path where geomodels files are kept
+    :param input_dir: dir path where website input config files are kept
+    :param target_model_name: name of model we're searching for
+    :param gltf_file: GLTF filename
     :returns: model file full path                                                                                               '''
     # Open up and parse 'input/ProviderModelInfo.json'
-    config_file = os.path.join(INPUT_DIR, 'ProviderModelInfo.json')
+    config_file = os.path.join(input_dir, 'ProviderModelInfo.json')
     conf_dict = read_json_file(config_file)
     # pylint: disable=W0612
     for prov_name, model_dict in conf_dict.items():
@@ -87,7 +92,7 @@ def find_gltf(target_model_name, gltf_file):
         for model_obj in model_list:
             model_name = model_obj['modelUrlPath']
             if model_name == target_model_name:
-                model_filepath = os.path.join(GEOMODELS_DIR, model_obj['modelDir'], gltf_file)
+                model_filepath = os.path.join(geomodels_dir, model_obj['modelDir'], gltf_file)
                 if os.path.exists(model_filepath):
                     return model_filepath
     return ''
