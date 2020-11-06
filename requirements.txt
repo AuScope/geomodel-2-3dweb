@@ -3,7 +3,7 @@ OWSLib
 Pillow
 pyassimp
 pycollada
-pyproj
+pyproj==3.0.0
 SQLAlchemy
 diskcache
 nvcl_kit
