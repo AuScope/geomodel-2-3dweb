@@ -699,7 +699,7 @@ def convert_gltf2xxx(model, filename, fmt):
     # Load GLTF file
     try:
         assimp_obj = pyassimp.load(gltf_path, 'gltf2')
-    except AssimpError as ae:
+    except pyassimp.AssimpError as ae:
         LOGGER.error("Cannot load %s:%s", gltf_path, str(ae))
         return make_str_response(' ')
 
@@ -707,7 +707,7 @@ def convert_gltf2xxx(model, filename, fmt):
     # Export as whatever format desired
     try:
         blob_obj = pyassimp.export_blob(assimp_obj, fmt, processing=None)
-    except AssimpError as ae:
+    except pyassimp.AssimpError as ae:
         LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
         return make_str_response(start_response, ' ')
 

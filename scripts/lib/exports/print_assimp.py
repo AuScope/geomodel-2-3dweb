@@ -233,7 +233,7 @@ def print_blob(blob):
         for byt in bcd.contents:
             bcd_bytes += byt
         print("blob.contents.data = ", bcd_bytes)
-        print("blob.contents.name =", blob.contents.name.data)
+        print("blob.contents.name.data =", blob.contents.name.data)
         print("blob.contents.next =", blob.contents.next)
         if not blob.contents.next:
             break
