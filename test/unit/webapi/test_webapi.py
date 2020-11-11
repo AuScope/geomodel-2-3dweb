@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
-import sys, os
+import sys, os, shutil
 import pytest
 from fastapi.testclient import TestClient
 
 # Add in path to local library files
 sys.path.append(os.path.join(os.pardir, os.pardir, os.pardir, 'scripts'))
+
+WEBAPI_INPUT = os.path.join(os.pardir, os.pardir, os.pardir, 'scripts', 'webapi', 'input')
+if not os.path.exists(WEBAPI_INPUT):
+    shutil.copytree(os.path.join(os.pardir, os.pardir, os.pardir, 'web_build', 'input'),
+                    WEBAPI_INPUT)
 
 from webapi.webapi import app
 
