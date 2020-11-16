@@ -1,6 +1,9 @@
 ''' This class is used to build a config file
 '''
-import logging, sys, os, json
+import logging
+import sys
+import os
+import json
 from collections import defaultdict
 
 # Set up debugging
@@ -18,10 +21,12 @@ LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
 # Add handler to logger
 LOCAL_LOGGER.addHandler(LOCAL_HANDLER)
 
+LOCAL_LOGGER.setLevel(logging.INFO)  # logging.DEBUG
+
 class ConfigBuilder():
 
 
-    def __init__(self):
+    def __init__(self, debug_level=logging.INFO):
         '''
         A list of geographical extents [ [min_x, max_x, min_y, max_y], ... ]
         NB: An extent is a list of coords defining boundaries of model
@@ -29,6 +34,7 @@ class ConfigBuilder():
         self.extent_list = []
 
         '''
+        A list of model config dicts
         '''
         self.config_list = []
 
@@ -126,8 +132,8 @@ class ConfigBuilder():
             LOCAL_LOGGER.error("Cannot open file %s %s", output_filename, os_exc)
 
 
-    def add_config(self, gs_dict, label_str, popup_dict, file_name, model_name,
-                   file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}):
+    def add_config(self, gs_dict, label_str, popup_dict, file_name, outsrc_filename,
+                   model_name, file_ext='.gltf', position=[0.0, 0.0, 0.0], styling={}):
         ''' Adds more config information to popup dictionary
 
         :param gs_dict: group structure dictionary (group struct dict format: \
@@ -137,6 +143,8 @@ class ConfigBuilder():
         :param popup_dict: information to display in popup window \
         ( popup dict format: { object_name: { 'attr_name': attr_val, ... } } where 'attr_name' is one of: 'name', 'title', 'href')
         :param file_name:  file and path (without extension) of model part source file
+        :param outsrc_filename: file & path of source file when copied to output dir
+        :param model_name: model name
         :param file_ext: optional file extension of 'file_name', defaults to '.gltf'
         :param position: optional [x,y,z] position of model part
         :param styling: optional dict of styling parameters e.g. \
@@ -153,12 +161,14 @@ class ConfigBuilder():
                         }
         :returns: a dict of model configuration info, which includes the popup dict
         '''
-        LOCAL_LOGGER.debug("add_config2popup(%s, %s, %s)", label_str, file_name, file_ext)
+        LOCAL_LOGGER.debug("add_config2popup(%s, %s, %s, %s)", label_str, file_name, model_name, file_ext)
         np_filename = os.path.basename(file_name)
         modelconf_dict = {}
         modelconf_dict['styling'] = styling
         model_url = np_filename + file_ext
         modelconf_dict['model_url'] = model_url
+        if outsrc_filename is not None:
+            modelconf_dict['src_filename'] = os.path.basename(outsrc_filename)
         if file_ext.upper() == ".PNG":
             # PNG files do not have any coordinates, so they must be supplied
             modelconf_dict['type'] = 'ImagePlane'

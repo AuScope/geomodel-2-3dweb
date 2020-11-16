@@ -3,6 +3,7 @@ import os
 import logging
 import gzip
 import shutil
+from shutil import SameFileError
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
@@ -115,7 +116,7 @@ class Gocad2WebAsset(Converter):
         :param dest_dir: destination directory
         :param file_name: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param file_name_str: source file name with path and extension
+        :param filename_str: source file name with path and extension
         :param src_dir: source directory
 
         '''
@@ -155,9 +156,11 @@ class Gocad2WebAsset(Converter):
                                                                   meta_obj,
                                                                   prop_filename)
  
+                src_filename = self.copy_source(filename_str, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name, popup_dict,
-                                            prop_filename, self.model_url_path)
+                                            prop_filename, src_filename,
+                                            self.model_url_path)
                 has_result = True
                 self.config_build_obj.add_ext(geom_obj.get_extent())
 
@@ -207,7 +210,7 @@ class Gocad2WebAsset(Converter):
         :param dest_dir: destination directory
         :param file_name: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param file_name_str: source file name with path and extension
+        :param filename_str: source file name with path and extension
         :param src_dir: source directory
         :param ext_str: file extent string
         :param out_filename: output filename
@@ -244,25 +247,45 @@ class Gocad2WebAsset(Converter):
                 for labl in meta_obj.label_list:
                     s_dict["labels"].append({"display_name": labl['name'],
                                              "position": labl['position'] })
+            src_filename = self.copy_source(filename_str, dest_dir)
             self.config_build_obj.add_config(self.params.grp_struct_dict,
                                           os.path.basename(file_name),
-                                          popup_dict, file_name,
+                                          popup_dict, file_name, src_filename,
                                           self.model_url_path, styling=s_dict)
             self.coll_kit_obj.end_collada(out_filename, node_label)
 
+    def copy_source(self, src_filename, dest_dir):
+        '''
+        :param src_filename: source filename (with path and extension)
+        :param dest_dir: destination directory
+        :returns path & filename of destination file or None upon error
+        '''
+        dest_filename = os.path.join(dest_dir, os.path.basename(src_filename))
+        try:
+            shutil.copyfile(src_filename, dest_filename)
+        except SameFileError:
+            return dest_filename
+        except (OSError, IOError) as exc:
+            self.logger.error("Cannot copy file %s to %s: %s", src_filename,
+                              dest_filename, str(exc))
+            return None
+        return dest_filename
 
     def process_groups(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename):
         ''' Process GOCAD group file
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param file_name: source file name with path but without file extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param file_name_str: source file name with path and extension
+        :param filename_str: source file name with path and file extension
         :param src_dir: source directory
+        :param out_filename: output path and filename but without file extension
         '''
         gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
                                     self.debug_lvl, self.nondef_coords, self.ct_file_dict)
 
+        print("filename_str=", filename_str)
+        print("out_filename=", out_filename)
         # If there are too many entries in the GP file, then use one COLLADA file only
         has_result = False
         if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
@@ -277,10 +300,12 @@ class Gocad2WebAsset(Converter):
                 self.config_build_obj.add_ext(geom_obj.get_extent())
                 has_result = True
             if has_result:
+                src_filename = self.copy_source(filename_str, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             os.path.basename(file_name), popup_dict,
-                                            file_name, self.model_url_path)
+                                            file_name, src_filename, self.model_url_path)
                 self.coll_kit_obj.end_collada(out_filename, node_label)
+                
 
         # Else place each GOCAD object in its own COLLADA file
         else:
@@ -294,9 +319,10 @@ class Gocad2WebAsset(Converter):
                     prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                     p_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
+                    src_filename = self.copy_source(filename_str, dest_dir)
                     self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                 meta_obj.name, p_dict,
-                                                prop_filename,
+                                                prop_filename, src_filename,
                                                 self.model_url_path)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
                 has_result = True
@@ -386,16 +412,19 @@ class Gocad2WebAsset(Converter):
                     popup_list = self.coll_kit_obj.write_vol_collada(geom_obj, style_obj, meta_obj,
                                                                 out_filename)
                     for popup_dict_key, popup_dict, out_file in popup_list:
+                        # NB: No source file available for volumes yet
                         self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                     popup_dict_key, popup_dict,
-                                                    out_file, self.model_url_path)
+                                                    out_file, None, self.model_url_path)
 
             # Produce a PNG file from voxet file
             else:
                 popup_dict = self.png_kit_obj.write_single_voxel_png(geom_obj, style_obj, meta_obj,
                                                                 out_filename)
+                # Just supply the PNG file as the downloadable source for single layer volumes
+                src_filename = out_filename + '.PNG'
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             "{0}_{1}".format(meta_obj.name, prop_idx+1),
-                                            popup_dict, out_filename,
+                                            popup_dict, out_filename, src_filename,
                                             self.model_url_path, file_ext='.PNG',
                                             position=geom_obj.vol_origin)
