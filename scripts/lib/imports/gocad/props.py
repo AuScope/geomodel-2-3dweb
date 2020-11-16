@@ -227,7 +227,7 @@ class PROPS:
             val - value to be assigned
         '''
         x,y,z = xyz
-        if not isinstance(x, float) or not is_instance(y, float) or \
+        if not isinstance(x, float) or not isinstance(y, float) or \
            not isinstance(z, float):
             self.logger.error("Internal error: adding float index to int array %s", repr(xyz))
             sys.exit(1)
@@ -240,7 +240,7 @@ class PROPS:
             val - value to be assigned
         '''
         i,j,k = ijk
-        if not isinstance(i, int) or not is_instance(j, int) or \
+        if not isinstance(i, int) or not isinstance(j, int) or \
            not isinstance(k, int):
             self.logger.error("Internal error: adding float index to int array %s", repr(ijk))
             sys.exit(1)

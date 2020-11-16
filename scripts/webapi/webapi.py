@@ -458,7 +458,7 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
     err_msg = qdb.get_error()
     if err_msg != '':
         LOGGER.error('Could not open query db %s: %s', db_path, err_msg)
-        return make_str_response(start_response, ' ')
+        return make_str_response(' ')
     LOGGER.debug('querying db: %s %s', obj_id, model)
     o_k, result = qdb.query(obj_id, model)
     if o_k:
@@ -512,8 +512,7 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
         return make_json_exception_response(version, 'MissingParameterValue', 'missing outputFormat parameter')
     if output_format != 'model/gltf+json;charset=UTF-8':
         resp_msg = 'incorrect outputFormat, try "model/gltf+json;charset=UTF-8"'
-        return make_json_exception_response(get_val('version', url_kvp),
-                                            'InvalidParameterValue', resp_msg)
+        return make_json_exception_response(version, 'InvalidParameterValue', resp_msg)
 
     # Parse resourceId from query string
     LOGGER.debug('resourceid = %s', res_id)
@@ -709,7 +708,7 @@ def convert_gltf2xxx(model, filename, fmt):
         blob_obj = pyassimp.export_blob(assimp_obj, fmt, processing=None)
     except pyassimp.AssimpError as ae:
         LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
-        return make_str_response(start_response, ' ')
+        return make_str_response(' ')
 
     return send_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
 
@@ -799,7 +798,7 @@ def processBLOB(model, id_val):
             with tempfile.NamedTemporaryFile(mode="w+b", suffix=".bin", delete=False) as fp:
                 fp.write(blob)
             return FileResponse(fp.name, media_type="aplication/octet-stream")
-    return make_string_response("Unknown .bin file")
+    return make_str_response("Unknown .bin file")
 
 
 def processEXPORT(model, filename, fmt):

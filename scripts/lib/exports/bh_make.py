@@ -55,7 +55,7 @@ def get_blob_boreholes(borehole_dict, param_obj):
             LOGGER.debug("Returning: blob_obj = %s", str(blob_obj))
             return blob_obj
 
-        LOGGER.debug("No borehole data len=%d", len(log_ids))
+        LOGGER.debug("No borehole data")
 
     return None
 

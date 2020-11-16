@@ -1,5 +1,8 @@
 import os
+import sys
 import numpy as np
+
+from lib.imports.gocad.props import PROPS
 
 def read_volume_binary_files(self):
     ''' Open up and read binary volume file, could be from VOXET or SGRID
