@@ -122,7 +122,6 @@ class Gocad2WebAsset(Converter):
         '''
         file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
-        has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
@@ -161,7 +160,6 @@ class Gocad2WebAsset(Converter):
                                             meta_obj.name, popup_dict,
                                             prop_filename, src_filename,
                                             self.model_url_path)
-                has_result = True
                 self.config_build_obj.add_ext(geom_obj.get_extent())
 
 
@@ -342,7 +340,6 @@ class Gocad2WebAsset(Converter):
         basefile = os.path.basename(filename_str)
         if basefile in self.coord_offset:
             base_xyz = self.coord_offset[basefile]
-        popup_dict = {}
         file_name, file_ext = os.path.splitext(filename_str)
         ext_str = file_ext.lstrip('.').upper()
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
@@ -397,7 +394,7 @@ class Gocad2WebAsset(Converter):
         self.logger.debug("src_dir=%s, out_filename=%s, prop_idx=%d)", src_dir, out_filename,
                           prop_idx)
 
-        if not geom_obj.vol_data is None:
+        if geom_obj.vol_data is not None:
             if not geom_obj.is_single_layer_vo():
                 if VOL_SLICER:
                     in_filename = os.path.join(src_dir, os.path.basename(out_filename))

@@ -53,7 +53,7 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
         # pylint: disable=W0123
         assert eval(assert_str)
     except (AssertionError, IndexError) as exc:
-        print(msg, ": FAIL !!")
+        print(msg, ": FAIL !!", str(exc))
         sys.exit(1)
     print(msg, ": PASS")
 
@@ -72,9 +72,8 @@ def test_group(msg, test_file, assert_str):
         print("Cannot find file: '"+test_file+"' in '"+INPUT_DIR+"' directory")
         sys.exit(1)
     # pylint: disable=W0612
-    gsm_list = extract_from_grp(INPUT_DIR, test_file, file_lines, (0.0, 0.0, 0.0),
+    gsm_list = extract_from_grp(INPUT_DIR, test_file, file_lines, (0.0, 0.0, 0.0),  # noqa: F841
                                 logging.ERROR, False, {})
-    #print("gsm_list=", repr(gsm_list))
     try:
         # pylint: disable=W0123
         assert eval(assert_str)

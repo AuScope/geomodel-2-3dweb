@@ -51,8 +51,6 @@ def find(converter_obj, src_dir, dest_dir, config_build_obj):
     :param config_build_obj: ConfigBuilder object
     '''
     LOGGER.debug("find(%s, %s)", src_dir, dest_dir)
-    model_dict_list = []
-    geoext_list = []
     walk_obj = os.walk(src_dir)
     for root, subfolders, files in walk_obj:
         done = False

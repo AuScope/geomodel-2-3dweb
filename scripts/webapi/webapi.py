@@ -525,8 +525,6 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     LOGGER.debug('model_bh_dict = %s', repr(model_bh_dict))
     borehole_dict = model_bh_dict.get(res_id, None)
     if borehole_dict is not None:
-        borehole_id = borehole_dict['nvcl_id']
-
         # Get blob from cache
         blob = get_blob_boreholes(borehole_dict, param_dict[model])
         # Some boreholes do not have the requested metric

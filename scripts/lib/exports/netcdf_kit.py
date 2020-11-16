@@ -54,7 +54,6 @@ class NetCDFKit(ExportKit):
         points_list = points_grp.createVariable("points_list", points_type, "points list", zlib=True)
 
         data = numpy.empty(size, points_type)
-        node_list = []
         prop_dict = geom_obj.get_loose_3d_data(True)
 
         geom_label=''

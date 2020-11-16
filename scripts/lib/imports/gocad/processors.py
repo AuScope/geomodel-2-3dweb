@@ -295,7 +295,6 @@ def process_well_info(self, field, line_gen):
     :returns: a boolean, is True iff we are at last line and info dict
     '''
     info = { 'feature_names': [], 'unit_names': [] }
-    depth = 0.0
     is_last = False
     while not is_last:
         # UNIT name1,name2
