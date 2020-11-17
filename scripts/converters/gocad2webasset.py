@@ -291,13 +291,23 @@ class Gocad2WebAsset(Converter):
             self.coll_kit_obj.start_collada()
             popup_dict = {}
             node_label = ''
-            for geom_obj, style_obj, meta_obj in gsm_list:
-                p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj, style_obj,
+            has_geom = False
+            for file_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
+                # Any single layer volumes are still written out to separate image files
+                if geom_obj.is_single_layer_vo():
+                    out_filename = os.path.join(dest_dir,
+                                                os.path.basename(meta_obj.src_filename))
+                    self.write_single_volume((geom_obj, style_obj, meta_obj),
+                                             src_dir, out_filename, file_idx)
+                else:
+                    p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj, style_obj,
                                                                   meta_obj)
-                popup_dict.update(p_dict)
+                    popup_dict.update(p_dict)
+                    has_geom = True
                 self.config_build_obj.add_ext(geom_obj.get_extent())
                 has_result = True
-            if has_result:
+            # Only write out the COLLADA file if there were geometries included
+            if has_geom and has_result:
                 src_filename = self.copy_source(filename_str, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             os.path.basename(file_name), popup_dict,
