@@ -28,12 +28,17 @@ VOL_SLICER = True
 '''
 
 
+NETCDF_THRESHOLD = 3000
+''' Threshold at which VS & PL files will revert to writing a NetCDF file instead of making GLTF
+'''
+
 
 class Gocad2WebAsset(Converter):
     """ Converts some GOCAD files to COLLADA, then GLTFs, others are converted to GZIP or NetCDF
 
         TS -> COLLADA -> GLTF
         PL -> COLLADA -> GLTF
+        PL -> NETCDF (larger number of lines)
         VO -> GZIP
         SG -> GZIP (only if there are no faults)
         VS -> COLLADA -> GLTF (small number of points)
@@ -122,6 +127,7 @@ class Gocad2WebAsset(Converter):
         '''
         file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
+        file_ext='.gltf'
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
@@ -144,7 +150,9 @@ class Gocad2WebAsset(Converter):
             for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
-                if len(geom_obj.vrtx_arr) < 3000:
+                # If too many points then output a point cloud
+                # TODO: Can't handle mixtures of GLTF and NC
+                if len(geom_obj.vrtx_arr) < NETCDF_THRESHOLD:
                     popup_dict = self.coll_kit_obj.write_collada(geom_obj,
                                                                  style_obj,
                                                                  meta_obj,
@@ -154,13 +162,15 @@ class Gocad2WebAsset(Converter):
                                                                   style_obj,
                                                                   meta_obj,
                                                                   prop_filename)
+                    file_ext='.nc'
  
                 src_filename = self.copy_source(filename_str, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name, popup_dict,
                                             prop_filename, src_filename,
-                                            self.model_url_path)
+                                            self.model_url_path, file_ext=file_ext)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
+        return True
 
 
     def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
@@ -218,6 +228,7 @@ class Gocad2WebAsset(Converter):
         popup_dict = {}
         node_label = ''
         has_result = False
+        file_ext='.gltf'
         for file_lines in file_lines_list:
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords)
@@ -231,26 +242,52 @@ class Gocad2WebAsset(Converter):
                 if ext_str == 'TS' and geom_obj.vrtx_arr and geom_obj.trgl_arr \
                            or (ext_str in ['PL', 'WL']) and geom_obj.vrtx_arr  \
                            and geom_obj.seg_arr:
-                    p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
+                    # If there are too many lines, write out NetCDF
+                    # TODO: Can't handle mixtures of GLTF and NC
+                    if ext_str == 'PL' and len(geom_obj.seg_arr) > NETCDF_THRESHOLD:
+                        popup_dict = self.netcdf_kit_obj.write_lines(geom_obj,
+                                                                      style_obj,
+                                                                      meta_obj,
+                                                                      out_filename)
+                        file_ext='.nc'
+                        self.make_config(meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext)
+                    # Else write out as COLLADA
+                    else: 
+                        p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
                                                                           style_obj, meta_obj)
-                    popup_dict.update(p_dict)
+                        popup_dict.update(p_dict)
+                        has_result = True
                     self.config_build_obj.add_ext(geom_obj.get_extent())
-                    has_result = True
 
+        # If COLLADA object was added
         if has_result:
-            # Add in any labels, if they were generated
-            s_dict = {}
-            if meta_obj.label_list:
-                s_dict = { "labels": [] }
-                for labl in meta_obj.label_list:
-                    s_dict["labels"].append({"display_name": labl['name'],
-                                             "position": labl['position'] })
-            src_filename = self.copy_source(filename_str, dest_dir)
-            self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                          os.path.basename(file_name),
-                                          popup_dict, file_name, src_filename,
-                                          self.model_url_path, styling=s_dict)
+            self.make_config(meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext)
             self.coll_kit_obj.end_collada(out_filename, node_label)
+        return True
+
+
+    def make_config(self, meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext):
+        '''
+        Make configuration data for model part
+
+        :param filename_str: source file name with path and extension
+        :param dest_dir: destination directory
+        :param file_name: source file name with path but without extension
+        :param popup_dict: dict of values displayed when model part is clicked on
+        :param file_ext: file extension
+        '''
+        # Add in any labels, if they were generated
+        s_dict = {}
+        if meta_obj.label_list:
+            s_dict = { "labels": [] }
+            for labl in meta_obj.label_list:
+                s_dict["labels"].append({"display_name": labl['name'],
+                                         "position": labl['position'] })
+        src_filename = self.copy_source(filename_str, dest_dir)
+        self.config_build_obj.add_config(self.params.grp_struct_dict,
+                                         os.path.basename(file_name),
+                                         popup_dict, file_name, src_filename,
+                                          self.model_url_path, styling=s_dict, file_ext=file_ext)
 
     def copy_source(self, src_filename, dest_dir):
         '''

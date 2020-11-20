@@ -161,7 +161,7 @@ class ConfigBuilder():
                         }
         :returns: a dict of model configuration info, which includes the popup dict
         '''
-        LOCAL_LOGGER.debug("add_config2popup(%s, %s, %s, %s)", label_str, file_name, model_name, file_ext)
+        LOCAL_LOGGER.debug("add_config(%s, %s, %s, %s)", label_str, file_name, model_name, file_ext)
         np_filename = os.path.basename(file_name)
         modelconf_dict = {}
         modelconf_dict['styling'] = styling
@@ -173,8 +173,11 @@ class ConfigBuilder():
             # PNG files do not have any coordinates, so they must be supplied
             modelconf_dict['type'] = 'ImagePlane'
             modelconf_dict['position'] = position
+        elif file_ext.upper() == '.NC':
+            modelconf_dict['type'] = 'NetCDF'
         else:
             modelconf_dict['type'] = 'GLTFObject'
+            # Removed: not ready yet
             ## Add in URLs to export model part to DXF
             #for part_name, p_dict in popup_dict.items():
             #    p_dict.setdefault('href',[])

@@ -62,6 +62,7 @@ class ColladaKit(ExportKit):
         self.logger.debug("start_collada()")
         self.mesh_obj = Collada.Collada()
         self.geomnode_list = []
+        self.obj_cnt = 0
 
 
     def add_geom_to_collada(self, geom_obj, style_obj, meta_obj):
@@ -200,17 +201,23 @@ class ColladaKit(ExportKit):
                            (used by the website to recognise model parts)
         '''
         self.logger.debug("end_collada(%s, %s)", out_filename, node_label)
+        self.logger.debug("len(self.geomnode_list)=%d", len(self.geomnode_list))
+
+        if self.obj_cnt == 0:
+            self.logger.warning("end_collada() No file written as there were no objects to write out")
+            return
 
         node = Collada.scene.Node(node_label, children=self.geomnode_list)
         myscene = Collada.scene.Scene("myscene", [node])
         self.mesh_obj.scenes.append(myscene)
         self.mesh_obj.scene = myscene
         dest_path = out_filename + '.dae'
-        self.logger.info("end_collada() Writing COLLADA file: %s", dest_path)
+        self.logger.info("end_collada() Start writing COLLADA file: %s", dest_path)
         try:
             self.mesh_obj.write(dest_path)
         except OSError as os_exc:
             self.logger.error("ERROR - Cannot write file %s: %s", dest_path, repr(os_exc))
+        self.logger.info("end_collada() Finished writing COLLADA file: %s", dest_path)
 
 
     def write_collada(self, geom_obj, style_obj, meta_obj, out_filename):

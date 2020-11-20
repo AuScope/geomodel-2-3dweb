@@ -26,9 +26,9 @@ class NetCDFKit(ExportKit):
 
 
     def write_points(self, geom_obj, style_obj, meta_obj, out_filename):
-        ''' Write out a NetCDF file from a point geometry file
+        ''' Write out a NetCDF file containing point geometries
 
-        :param geom_obj: MODEL_GEOMETRY object that hold geometry and text
+        :param geom_obj: MODEL_GEOMETRY object that holds geometry and text
         :param style_obj: STYLE object containing colour info
         :param meta_obj: METADATA object, used for labelling
         :param out_filename: path & filename of NetCDF file to output, without extension
@@ -70,12 +70,83 @@ class NetCDFKit(ExportKit):
                 popup_dict[geom_label]['val'] = prop_dict[vrtx.xyz]
                 try:
                     data[point_cnt]["data"] = float(prop_dict[vrtx.xyz])
-                except ValueError:
+                except (ValueError, TypeError):
                     pass
 
         # Write points to file
         self.logger.info("write_points() Writing NetCDF file: %s.nc", out_filename)
         points_list[:] = data
+        try:
+            root_grp.close()
+        except OSError as os_exc:
+            self.logger.error("ERROR - Cannot write file %s.nc: %s", out_filename, repr(os_exc))
+            return {}
+
+        return popup_dict
+
+    def write_lines(self, geom_obj, style_obj, meta_obj, out_filename):
+        ''' Write out a NetCDF file containing line geometries
+
+        :param geom_obj: MODEL_GEOMETRY object that holds geometry and text
+        :param style_obj: STYLE object containing colour info
+        :param meta_obj: METADATA object, used for labelling
+        :param out_filename: path & filename of NetCDF file to output, without extension
+        '''
+        self.logger.debug("NetCDFKit.write_lines(%s)", out_filename)
+        self.logger.debug("NetCDFKit.write_lines() geom_obj=%s", repr(geom_obj))
+
+        if not geom_obj.is_line():
+            self.logger.error("ERROR - Cannot use NetCDFKit.write_lines for point, triangle or volume")
+            sys.exit(1)
+
+        root_grp = Dataset(out_filename+".nc", "w", format="NETCDF4")
+        lines_grp = root_grp.createGroup("lines")
+        lines_grp.createDimension('lines list', None)
+
+        # Just does a single fp value for each XYZ pair, later expand to multiple values
+        xyzxyzd_dtype = numpy.dtype([("x1", numpy.float32), ("y1", numpy.float32), ("z1", numpy.float32),
+                                  ("x2", numpy.float32), ("y2", numpy.float32), ("z2", numpy.float32),
+                                  ("data", numpy.float32)])
+        lines_type = lines_grp.createCompoundType(xyzxyzd_dtype, "xyzxyzd_dtype")
+
+        size = len(geom_obj.seg_arr)
+        popup_dict = {}
+        geometry_name = meta_obj.name
+        lines_list = lines_grp.createVariable("lines_list", lines_type, "lines list", zlib=True)
+
+        data = numpy.empty(size, lines_type)
+        prop_dict = geom_obj.get_loose_3d_data(True)
+
+        geom_label=''
+        for seg_cnt, seg in enumerate(geom_obj.seg_arr):
+            xyz1 = geom_obj.vrtx_arr[seg.ab[0]-1]
+            xyz2 = geom_obj.vrtx_arr[seg.ab[1]-1]
+            data[seg_cnt]["x1"] = xyz1.xyz[0]
+            data[seg_cnt]["y1"] = xyz1.xyz[1]
+            data[seg_cnt]["z1"] = xyz1.xyz[2]
+            data[seg_cnt]["x2"] = xyz2.xyz[0]
+            data[seg_cnt]["y2"] = xyz2.xyz[1]
+            data[seg_cnt]["z2"] = xyz2.xyz[2]
+            geom_label = "{0}-{1:010d}".format(geometry_name, seg_cnt)
+
+            # Create popup info
+            # Not used at present
+            # popup_dict[geom_label] = {'name': meta_obj.get_property_name(),
+            #                          'title': geometry_name.replace('_', ' ')}
+            # Grab first data value
+            for coord in (xyz1, xyz2):
+                if coord.xyz in prop_dict:
+                    # Not used at present
+                    # popup_dict[geom_label]['val'] = prop_dict[coord.xyz]
+                    try:
+                        data[seg_cnt]["data"] = float(prop_dict[coord.xyz])
+                    except (ValueError, TypeError):
+                        pass
+                    break
+
+        # Write lines to file
+        self.logger.info("write_lines() Writing NetCDF file: %s.nc", out_filename)
+        lines_list[:] = data
         try:
             root_grp.close()
         except OSError as os_exc:
