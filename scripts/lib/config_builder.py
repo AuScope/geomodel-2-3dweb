@@ -175,10 +175,10 @@ class ConfigBuilder():
             modelconf_dict['position'] = position
         else:
             modelconf_dict['type'] = 'GLTFObject'
-            # Add in URLs to export model part to DXF
-            for part_name, p_dict in popup_dict.items():
-                p_dict.setdefault('href',[])
-                p_dict['href'].append({'label': 'Export DXF', 'URL': 'http://geomodels.auscope.org/'+model_name+'?service=EXPORT&filename='+model_url+'&format=DXF'})
+            ## Add in URLs to export model part to DXF
+            #for part_name, p_dict in popup_dict.items():
+            #    p_dict.setdefault('href',[])
+            #    p_dict['href'].append({'label': 'Export DXF', 'URL': 'http://geomodels.auscope.org/'+model_name+'?service=EXPORT&filename='+model_url+'&format=DXF'})
         modelconf_dict['popups'] = popup_dict
 
         self.add_inserts(gs_dict, model_url, modelconf_dict, label_str.replace('_', ' '))
