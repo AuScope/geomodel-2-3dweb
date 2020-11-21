@@ -22,6 +22,9 @@ DEST_DIR = ''
 
 MODELS_SRC_DIR = os.path.join(os.environ['HOME'], 'GEO_MODELS')
 
+# Prevents NetCDF file locking errors on NFS mounts
+os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+
 # This is the list of models to be converted. 'URL string' is for future use.
 # Format:
 # [ ( <URL string>, <model_name>, <model input file>, <src_dir> ), ... ]
@@ -29,6 +32,12 @@ MODELS_SRC_DIR = os.path.join(os.environ['HOME'], 'GEO_MODELS')
 MODELS = [
     # Vic - Otway
     ("otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway"),
+
+    # Vic - Bendigo
+    ("bendigo", "Bendigo", "input/BendigoConvParam.json", "Victoria/Bendigo/3D_model_attributes"),
+
+    # Vic - Stavely
+    ("stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD"),
 
     # WA - Windimurra
     ("windimurra", "Windimurra", "input/WindimurraConvParam.json",
@@ -38,21 +47,70 @@ MODELS = [
     ("sandstone", "Sandstone", "input/SandstoneConvParam.json",
      "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
 
+
+    # SA - Cariewerloo
+    ("cariewerloo", "Cariewerloo", "input/CariewerlooConvParam.json", "SouthAust/GDP00005"),
+
+    # SA - Emmie Bluff
+    ("emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects"),
+
+    # SA - Burra Mine
+    ("burramine", "BurraMine", "input/BurraMinnConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad"),
+
+    # SA - Central Flinders
+    ("centralflinders", "CentralFlinders", "input/CentralFlinders.json", "SouthAust/GDP00024"),
+
+    # SA - North Flinders
+    ("northflinders", "NorthFlinders", "input/NorthFLinders.json", "SouthAust/GDP00025"),
+
     # SA - North Gawler
     ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026"),
+
+    # SA - Curnamone Sedimentary Basins
+    ("curnamonased", "CurnamonaSed", "input/CurnamonaSed.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
+
+    # SA - Western Gawler
+    ("westerngawler", "WesternGawler", "input/WesternGawler.json", "SouthAust/GDP00067/gocad objects"),
+
 
     # Tas - Rosebery Lyell
     ("rosebery", "RoseberyLyell", "input/RoseberyLyellConvParam.json", "Tasmania/RoseberyLyell"),
 
+
     # QLD - Quamby
     ("quamby", "Quamby", "input/QuambyConvParam.json", "Queensland/Quamby/Quamby/TSurf"),
+
+    # QLD - MtDore
+    ("mtdore", "MtDore", "input/MtDoreConvParam.json", "Queensland/MtDore/Model Objects"),
+
+    
 
     # NSW - West Tamworth
     ("tamworth", "Tamworth", "input/WestTamworthConvParam.json", "NewSouthWales/WesternTamworth"),
 
+    # NSW - Cobar
+    ("cobar", "Cobar", "input/CobarConvParam.json", "NewSouthWales/Cobar_GM_gocad_May18/Cobar_GM_gocad_May18"),
+
+    # NSW - Curnamona
+    ("curnamona", "Curnamona", "input/CurnamonaConvParam.json", "NewSouthWales/Curnamona_Delamerian_GDA94_Z54_GOCAD"),
+
+    # NSW - East Lachlan
+    ("eastlachlan", "EastLachlan", "input/EastLachlanConvParam.json", "NewSouthWales/E_Lachlan_Orogen_GDA94_Z55_GOCAD"),
+
+    # NSW - West Lachlan
+    ("westlachlan", "WestLachlan", "input/WestLachlanConvParam.json", "NewSouthWales/W_Lachlan_Orogen_GDA94_Z55_GOCAD"),
+
+    # NSW - Southern New England
+    ("sthnewengland", "SthNewEngland", "input/SthNewEnglandConvParam.json", "NewSouthWales/20150626_SNEO_Deep_Struture_SKUA"),
+
+    # NSW - New England
+    ("newengland", "NewEngland", "input/NewEnglandConvParam.json", "NewSouthWales/NEO_GDA94_Z56_GOCAD"),
+
+
     # NT - McArthur Basin
     ("mcarthur", "McArthurBasin", "input/McArthurBasinConvParam.json",
      "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL"),
+
 
     # GA - North Qld
     ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json",
@@ -64,8 +122,9 @@ MODELS = [
     # GA - Yilgarn
     ("yilgarn", "Yilgarn", "input/YilgarnConvParam.json", "GA/Yilgarn-NWS"),
 
-    ## CSIRO - RockLea Dome
-    #("rocklea", "Rocklea Dome", "input/RockleaConvParam.json", "CSIRO/RockleaDome")
+
+    # CSIRO - RockLea Dome
+    ("rocklea", "Rocklea Dome", "input/RockleaConvParam.json", "CSIRO/RockleaDome")
 ]
 
 
