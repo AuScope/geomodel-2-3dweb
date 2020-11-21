@@ -125,12 +125,13 @@ class Gocad2WebAsset(Converter):
         :param src_dir: source directory
 
         '''
+        self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(file_name), repr(base_xyz), repr(filename_str), repr(src_dir))
         file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(file_name))
         file_ext='.gltf'
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
-                o_fname = os.path.join(dest_dir, os.path.basename(file_name)),
+                o_fname = os.path.join(dest_dir, os.path.basename(file_name))
                 out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
@@ -319,8 +320,6 @@ class Gocad2WebAsset(Converter):
         gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
                                     self.debug_lvl, self.nondef_coords, self.ct_file_dict)
 
-        print("filename_str=", filename_str)
-        print("out_filename=", out_filename)
         # If there are too many entries in the GP file, then use one COLLADA file only
         has_result = False
         if len(gsm_list) > GROUP_LIMIT or is_only_small(gsm_list):
