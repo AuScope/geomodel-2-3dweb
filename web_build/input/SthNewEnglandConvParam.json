@@ -1,0 +1,130 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 149, "south": -33, "east": 153.67, "north": -28 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:28356",
+        "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:28356",
+        "init_cam_dist": 900000.0,
+        "name": "West Tamworth Belt",
+        "modelUrlPath": "tamworth",
+        "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    },
+    "WMSServices": [
+        {
+            "display_name": "GA Lithostratigraphy",
+            "model_url": "http://services.ga.gov.au/gis/services/GA_Surface_Geology/MapServer/WMSServer",
+            "name": "AUS_GA_2500k_GUPoly_Lithostratigraphy",
+            "version": "1.3.0"
+        }    
+    ],
+    "GroupStructure": {
+        "DTM": [
+            {
+                "FileNameKey": "NEO_DTM_1000m_Palaeozoic.gltf",
+                "Insert": {
+                    "display_name": "1000m Palaeozoic"
+                }
+            }
+        ],
+        "Structures and Faults": [
+            {
+                "FileNameKey": "NEO_TB_CA1.gltf",
+                "Insert": {
+                    "display_name": "CA1"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA2.gltf",
+                "Insert": {
+                    "display_name": "CA2"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA3.gltf",
+                "Insert": {
+                    "display_name": "CA3"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA4.gltf",
+                "Insert": {
+                    "display_name": "CA4"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA5.gltf",
+                "Insert": {
+                    "display_name": "CA5"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CAGr5.gltf",
+                "Insert": {
+                    "display_name": "CAGr5"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Carboniferous_Devonian_z56.gltf",
+                "Insert": {
+                    "display_name": "Carboniferous Devonian"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Carboniferous_z56.gltf",
+                "Insert": {
+                    "display_name": "Carboniferous"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Devonian_z56.gltf",
+                "Insert": {
+                    "display_name": "Devonian"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Fault_Package_Far_North.gltf",
+                "Insert": {
+                    "display_name": "Fault Package Far North"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Fault_Package_Major.gltf",
+                "Insert": {
+                    "display_name": "Fault Package Major"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Fault_Package_North.gltf",
+                "Insert": {
+                    "display_name": "Fault Package North"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Fault_Package_Southeast.gltf",
+                "Insert": {
+                    "display_name": "Fault Package Southeast"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Permian_Intrusives.gltf",
+                "Insert": {
+                    "display_name": "Permian Intrusives"
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_Permian_z56.gltf",
+                "Insert": {
+                    "display_name": "Permian"
+                }
+            }
+        ]
+    }
+}

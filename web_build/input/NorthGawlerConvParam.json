@@ -17,6 +17,12 @@
         "init_cam_dist": 500000.0,
         "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
+    "CoordOffsets": [
+        {
+             "filename": "UBC_Susc_0_0100.ts",
+             "offset": [-802095, -6821605, 0]
+        }
+    ],
     "WMSServices": [
         {
             "display_name": "GA Lithostratigraphy",
