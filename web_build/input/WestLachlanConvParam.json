@@ -1,0 +1,29 @@
+{
+    "BoreholeData": {
+        "BBOX": { "west": 149, "south": -33, "east": 153.67, "north": -28 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:28356",
+        "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
+    },
+    "ModelProperties": {
+        "crs": "EPSG:28356",
+        "init_cam_dist": 900000.0,
+        "name": "West Lachlan",
+        "modelUrlPath": "westlachlan",
+        "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    },
+    "WMSServices": [
+        {
+            "display_name": "GA Lithostratigraphy",
+            "model_url": "http://services.ga.gov.au/gis/services/GA_Surface_Geology/MapServer/WMSServer",
+            "name": "AUS_GA_2500k_GUPoly_Lithostratigraphy",
+            "version": "1.3.0"
+        }    
+    ],
+    "GroupStructure": {}
+}
