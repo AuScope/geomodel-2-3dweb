@@ -55,22 +55,22 @@ MODELS = [
     ("emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects"),
 
     # SA - Burra Mine
-    ("burramine", "BurraMine", "input/BurraMinnConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad"),
+    ("burramine", "BurraMine", "input/BurraMineConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad"),
 
     # SA - Central Flinders
-    ("centralflinders", "CentralFlinders", "input/CentralFlinders.json", "SouthAust/GDP00024"),
+    ("centralflinders", "CentralFlinders", "input/CentralFlindersConvParam.json", "SouthAust/GDP00024"),
 
     # SA - North Flinders
-    ("northflinders", "NorthFlinders", "input/NorthFLinders.json", "SouthAust/GDP00025"),
+    ("northflinders", "NorthFlinders", "input/NorthFlindersConvParam.json", "SouthAust/GDP00025"),
 
     # SA - North Gawler
     ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026"),
 
     # SA - Curnamone Sedimentary Basins
-    ("curnamonased", "CurnamonaSed", "input/CurnamonaSed.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
+    ("curnamonased", "CurnamonaSed", "input/CurnamonaSedConvParam.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
 
     # SA - Western Gawler
-    ("westerngawler", "WesternGawler", "input/WesternGawler.json", "SouthAust/GDP00067/gocad objects"),
+    ("westerngawler", "WesternGawler", "input/WesternGawlerConvParam.json", "SouthAust/GDP00067/gocad objects"),
 
 
     # Tas - Rosebery Lyell
