@@ -49,7 +49,7 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
                     print(line, flush=True, end='')
                 time.sleep(10)
             print("Returned:", proc.returncode, flush=True)
-            if cmdProc.returncode != 0:
+            if proc.returncode != 0:
                 sys.exit(1)
 
     # Copy results to models dir
