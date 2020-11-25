@@ -13,8 +13,8 @@
     "ModelProperties": {
         "crs": "EPSG:28356",
         "init_cam_dist": 900000.0,
-        "name": "West Tamworth Belt",
-        "modelUrlPath": "tamworth",
+        "name": "East Lachlan",
+        "modelUrlPath": "eastlachlan",
         "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
     "WMSServices": [
@@ -26,105 +26,5 @@
         }    
     ],
     "GroupStructure": {
-        "DTM": [
-            {
-                "FileNameKey": "NEO_DTM_1000m_Palaeozoic.gltf",
-                "Insert": {
-                    "display_name": "1000m Palaeozoic"
-                }
-            }
-        ],
-        "Structures and Faults": [
-            {
-                "FileNameKey": "NEO_TB_CA1.gltf",
-                "Insert": {
-                    "display_name": "CA1"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_CA2.gltf",
-                "Insert": {
-                    "display_name": "CA2"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_CA3.gltf",
-                "Insert": {
-                    "display_name": "CA3"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_CA4.gltf",
-                "Insert": {
-                    "display_name": "CA4"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_CA5.gltf",
-                "Insert": {
-                    "display_name": "CA5"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_CAGr5.gltf",
-                "Insert": {
-                    "display_name": "CAGr5"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Carboniferous_Devonian_z56.gltf",
-                "Insert": {
-                    "display_name": "Carboniferous Devonian"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Carboniferous_z56.gltf",
-                "Insert": {
-                    "display_name": "Carboniferous"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Devonian_z56.gltf",
-                "Insert": {
-                    "display_name": "Devonian"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Fault_Package_Far_North.gltf",
-                "Insert": {
-                    "display_name": "Fault Package Far North"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Fault_Package_Major.gltf",
-                "Insert": {
-                    "display_name": "Fault Package Major"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Fault_Package_North.gltf",
-                "Insert": {
-                    "display_name": "Fault Package North"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Fault_Package_Southeast.gltf",
-                "Insert": {
-                    "display_name": "Fault Package Southeast"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Permian_Intrusives.gltf",
-                "Insert": {
-                    "display_name": "Permian Intrusives"
-                }
-            },
-            {
-                "FileNameKey": "NEO_TB_Permian_z56.gltf",
-                "Insert": {
-                    "display_name": "Permian"
-                }
-            }
-        ]
     }
 }
