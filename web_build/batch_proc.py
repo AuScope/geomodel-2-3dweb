@@ -70,7 +70,7 @@ MODELS = [
     ("curnamonased", "CurnamonaSed", "input/CurnamonaSedConvParam.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
 
     # SA - Western Gawler
-    ("westerngawler", "WesternGawler", "input/WesternGawlerConvParam.json", "SouthAust/GDP00067/gocad objects"),
+    ("westerngawler", "WesternGawler", "input/WesternGawlerConvParam.json", "SouthAust/GDP00067/Gocad objects"),
 
 
     # Tas - Rosebery Lyell
