@@ -41,13 +41,17 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
         with subprocess.Popen(execList, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                               encoding='utf-8', errors='ignore') as proc:
             while proc.poll() is None:
-                line = proc.stdout.readline()
-                if line != "":
-                    print(line, flush=True, end='')
-                line = proc.stdout.readline()
-                if line != "":
-                    print(line, flush=True, end='')
-                time.sleep(10)
+                line = 'X'
+                while line != '':
+                    line = proc.stdout.readline()
+                    if line != '':
+                        print(line, flush=True, end='')
+                line = 'X'
+                while line != '':
+                    line = proc.stderr.readline()
+                    if line != []:
+                        print(line, flush=True, end='')
+                time.sleep(1)
             print("Returned:", proc.returncode, flush=True)
             if proc.returncode != 0:
                 sys.exit(1)
