@@ -183,8 +183,10 @@ class ColladaKit(ExportKit):
                                                            self.POINT_SIZE, colour_num)
 
                 popup_dict[geom_label] = {'name': meta_obj.get_property_name(),
-                                          'val': prop_dict[vrtx.xyz],
                                           'title': geometry_name.replace('_', ' ')}
+                # Some vertices do not have properties
+                if vrtx.xyz in prop_dict:
+                    popup_dict[geom_label]['val'] = prop_dict[vrtx.xyz]
                 node_label = geom_label
 
 
