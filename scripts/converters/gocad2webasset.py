@@ -4,6 +4,7 @@ import logging
 import gzip
 import shutil
 from shutil import SameFileError
+import zipfile
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
@@ -292,23 +293,43 @@ class Gocad2WebAsset(Converter):
 
     def copy_source(self, src_filename, dest_dir):
         '''
+        Compress (using ZIP compression) and copy model source files
+
         :param src_filename: source filename (with path and extension)
         :param dest_dir: destination directory
         :returns path & filename of destination file or None upon error
         '''
-        dest_filename = os.path.join(dest_dir, os.path.basename(src_filename))
+        # First, copy source file to destination directory
+        copy_filename = os.path.join(dest_dir, os.path.basename(src_filename))
         try:
-            shutil.copyfile(src_filename, dest_filename)
+            shutil.copyfile(src_filename, copy_filename)
         except SameFileError:
-            return dest_filename
-        except (OSError, IOError) as exc:
-            self.logger.error("Cannot copy file %s to %s: %s", src_filename,
-                              dest_filename, str(exc))
+            pass
+        except OSError as exc:
+            self.logger.error("Cannot copy file %s to %s: %s", src_filename, dest_filename, str(exc))
             return None
-        return dest_filename
+
+        # Then create a compressed ZIP file, relative to destination directory
+        noext_src_filename = os.path.splitext(src_filename)[0]
+        zip_filename = os.path.basename(noext_src_filename) + '.zip'
+        try:
+            cwd = os.getcwd()
+            os.chdir(dest_dir)
+            with zipfile.ZipFile(zip_filename, mode="w", compression=zipfile.ZIP_DEFLATED) as z_obj:
+                z_obj.write(os.path.basename(copy_filename)) 
+            os.chdir(cwd)
+            # Remove copy file
+            os.remove(copy_filename)
+        except OSError as exc:
+            self.logger.error("Cannot compress file %s into %s: %s", src_filename, zip_filename, str(exc))
+            os.chdir(cwd)
+            return None
+
+        return zip_filename
 
     def process_groups(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename):
         ''' Process GOCAD group file
+
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
         :param file_name: source file name with path but without file extension
@@ -444,6 +465,7 @@ class Gocad2WebAsset(Converter):
             if not geom_obj.is_single_layer_vo():
                 if VOL_SLICER:
                     in_filename = os.path.join(src_dir, os.path.basename(out_filename))
+                    # Compress volume data and save to file
                     with open(in_filename, 'rb') as fp_in:
                         with gzip.open(out_filename + '.gz', 'wb') as fp_out:
                             shutil.copyfileobj(fp_in, fp_out)

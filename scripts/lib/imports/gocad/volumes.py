@@ -116,9 +116,9 @@ def read_volume_binary_files(self):
                             # self.logger.debug("x,y,z=[%f, %f, %f]", x_coord, y_coord, z_coord)
 
 
-        except IOError as io_exc:
-            self.logger.error("SORRY - Cannot process voxel file IOError %s %s %s",
-                              prop_obj.file_name, str(io_exc), io_exc.args)
+        except OSError as exc:
+            self.logger.error("SORRY - Cannot process voxel file OSError %s %s %s",
+                              prop_obj.file_name, str(exc), io_exc.args)
             return False
 
     self.logger.debug("Done looping")
@@ -240,9 +240,9 @@ def read_region_flags_file(self, flags_array_len, flags_file,
                         cnt -= 1
                     f_idx += 1
 
-    except IOError as io_exc:
-        self.logger.error("SORRY - Cannot process voxel flags file, IOError %s %s %s",
-                          flags_file, str(io_exc), io_exc.args)
+    except OSError as exc:
+        self.logger.error("SORRY - Cannot process voxel flags file, OSError %s %s %s",
+                          flags_file, str(exc), io_exc.args)
         self.logger.debug("read_region_flags_file() return False")
         return False
 
