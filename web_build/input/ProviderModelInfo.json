@@ -10,6 +10,24 @@
                         "configFile": "Otway.json",
                         "modelDir": "Otway",
                         "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=1083&cID=54"
+                    },
+                    {
+                        "name": "Bendigo",
+                        "modelUrlPath": "bendigo",
+                        "icon": "vic-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "Bendigo.json",
+                        "modelDir": "Bendigo",
+                        "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=1075&cID=54"
+                    },
+                    {
+                        "name": "Stavely",
+                        "modelUrlPath": "stavely",
+                        "icon": "vic-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "Stavely.json",
+                        "modelDir": "Stavely",
+                        "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=970&cID=54"
                     }
                 ],
                 "icon": "vic-white-icon.png",
@@ -43,8 +61,53 @@
                 "infoUrl": "http://www.dmp.wa.gov.au/"
             },
             "sa": {
-                "name": "South Australia (Minerals)",
+                "name": "South Australia (Energy & Mining)",
                 "models": [
+                    {
+                        "name":"Cariewerloo Basin",
+                        "modelUrlPath":"cariewerloo",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile":"Cariewerloo.json",
+                        "modelDir":"Cariewerloo",
+                        "srcUrl":"https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/cariewerloo_basin"
+                    },
+                    {
+                        "name": "Emmie Bluff",
+                        "modelUrlPath": "emmiebluff",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "EmmieBluff.json",
+                        "modelDir": "EmmieBluff",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/emmie_bluff_regional"
+                    },
+                    {
+                        "name": "Burra Mine",
+                        "modelUrlPath": "burramine",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "BurraMine.json",
+                        "modelDir": "BurraMine",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/burra_mine"
+                    },
+                    {
+                        "name": "Central Flinders",
+                        "modelUrlPath": "centralflinders",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "CentralFlinders.json",
+                        "modelDir": "CentralFlinders",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/central_flinders"
+                    },
+                    {
+                        "name": "Northern Flinders",
+                        "modelUrlPath": "northflinders",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "NorthFlinders.json",
+                        "modelDir": "NorthFlinders",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/northern_flinders"
+                    },
                     {
                         "name": "North Gawler",
                         "modelUrlPath": "ngawler",
@@ -52,12 +115,30 @@
                         "colourClass": "warning",
                         "configFile": "NorthGawler.json",
                         "modelDir": "NorthGawler",
-                        "srcUrl" : "http://www.minerals.statedevelopment.sa.gov.au/geoscience/geoscientific_data/3d_geological_models/northern_gawler_province"
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/northern_gawler_province"
+                    },
+                    {
+                        "name": "Curnamona Basins",
+                        "modelUrlPath": "curnamonased",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "CurnamonaSed.json",
+                        "modelDir": "CurnamonaSed",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/curnamona_sedimentary_basin"
+                    },
+                    {
+                        "name": "Western Gawler",
+                        "modelUrlPath": "westgawler",
+                        "icon": "sa-white-icon.png",
+                        "colourClass": "warning",
+                        "configFile": "WestGawler.json",
+                        "modelDir": "WestGawler",
+                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/wgc_3d_architecture"
                     }
                 ],
                 "icon": "sa-white-icon.png",
                 "colourClass": "success",
-                "infoUrl": "http://www.minerals.statedevelopment.sa.gov.au/home"
+                "infoUrl": "https://energymining.sa.gov.au/minerals"
             },
             "tas": {
                 "name": "Tasmania (MRT)",
@@ -69,7 +150,7 @@
                         "colourClass": "warning",
                         "configFile": "RoseberyLyell.json",
                         "modelDir": "RoseberyLyell",
-                        "srcUrl" : "http://www.mrt.tas.gov.au/portal/west-tasmania-3d-geological-geophysical-modelling"
+                        "srcUrl" : "http://www.mrt.tas.gov.au/geoscience/3d_geological_and_geophysical_modelling/west_tasmania_3d_geological_and_geophysical_modelling"
                     }
                 ],
                 "icon": "tas-white-icon.png",
@@ -86,7 +167,16 @@
                         "colourClass": "danger",
                         "configFile": "Quamby.json",
                         "modelDir": "Quamby",
-                        "srcUrl" : "https://qdexguest.dnrm.qld.gov.au/portal/site/qdex/search?REPORT_ID=89698&COLLECTION_ID=999"
+                        "srcUrl" : "https://geoscience.data.qld.gov.au/dataset/ds000006"
+                    },
+                    {
+                        "name": "MtDore",
+                        "modelUrlPath": "mtdore",
+                        "icon": "qld-white-icon.png",
+                        "colourClass": "danger",
+                        "configFile": "MtDore.json",
+                        "modelDir": "MtDore",
+                        "srcUrl" : "https://geoscience.data.qld.gov.au/dataset/ds000002"
                     }
                 ],
                 "icon": "qld-white-icon.png",
@@ -103,6 +193,60 @@
                         "colourClass": "info",
                         "configFile": "Tamworth.json",
                         "modelDir": "Tamworth",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "Cobar",
+                        "modelUrlPath": "cobar",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "Cobar.json",
+                        "modelDir": "Cobar",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "Curnamona Province",
+                        "modelUrlPath": "curnamona",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "Curnamona.json",
+                        "modelDir": "Curnamona",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "Eastern Lachlan",
+                        "modelUrlPath": "eastlachlan",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "EastLachlan.json",
+                        "modelDir": "EastLachlan",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "Western Lachlan",
+                        "modelUrlPath": "westlachlan",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "WestLachlan.json",
+                        "modelDir": "WestLachlan",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "South New England",
+                        "modelUrlPath": "southnewengland",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "SouthNewEngland.json",
+                        "modelDir": "SouthNewEngland",
+                        "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
+                    },
+                    {
+                        "name": "New England",
+                        "modelUrlPath": "newengland",
+                        "icon": "nsw-white-icon.png",
+                        "colourClass": "info",
+                        "configFile": "NewEngland.json",
+                        "modelDir": "NewEngland",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
                     }
                 ],
@@ -157,10 +301,26 @@
                         "modelDir": "Yilgarn",
                         "srcUrl" : ""
                     }
-
                 ],
                 "icon": "aus-white-icon.png",
                 "colourClass": "primary",
                 "infoUrl": "http://www.ga.gov.au/"
+            },
+            "csiro": {
+                "name":"Commonwealth Scientific and Industrial Research Organisation (CSIRO)",
+                "models": [
+                    {
+                        "name": "Rocklea Dome",
+                        "modelUrlPath": "rocklea",
+                        "icon": "aus-white-icon.png",
+                        "colourClass": "dark",
+                        "configFile": "Rocklea.json",
+                        "modelDir": "Rocklea",
+                        "srcUrl": "https://confluence.csiro.au/public/SpecSens/rocklea-dome"
+                    } 
+                ],
+                "icon": "aus-white-icon.png",
+                "colourClass": "dark",
+                "infoUrl": "https://www.csiro.au/en/Research/MRF"
             }
 }
