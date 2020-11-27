@@ -65,5 +65,5 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
     config_file = os.path.join(modelDir, 'output_config.json')
     model_config = os.path.join(geomodelsDir, modelDirName+'_new.json')
     if os.path.exists(config_file):
-        print("Moving ", config_file, " to ", model_config)
-        os.rename(config_file, model_config)
+        print("Copying ", config_file, " to ", model_config)
+        shutil.copyfile(config_file, model_config)
