@@ -8,7 +8,7 @@ import zipfile
 
 from lib.exports.png_kit import PngKit
 from lib.exports.collada_kit import ColladaKit
-from lib.exports.netcdf_kit import NetCDFKit
+from lib.exports.gzson_kit import GZSONKit
 from lib.imports.gocad.gocad_importer import GocadImporter, extract_from_grp
 from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
 from lib.imports.gocad.helpers import split_gocad_objs
@@ -29,21 +29,21 @@ VOL_SLICER = True
 '''
 
 
-NETCDF_THRESHOLD = 3000
-''' Threshold at which VS & PL files will revert to writing a NetCDF file instead of making GLTF
+POINTCLOUD_THRESHOLD = 3000
+''' Threshold at which VS & PL files will revert to writing a GZipped GEOJSON file instead of making GLTF
 '''
 
 
 class Gocad2WebAsset(Converter):
-    """ Converts some GOCAD files to COLLADA, then GLTFs, others are converted to GZIP or NetCDF
+    """ Converts some GOCAD files to COLLADA, then GLTFs, others are converted to GZIP
 
         TS -> COLLADA -> GLTF
         PL -> COLLADA -> GLTF
-        PL -> NETCDF (larger number of lines)
+        PL -> GZIP (larger number of lines)
         VO -> GZIP
         SG -> GZIP (only if there are no faults)
         VS -> COLLADA -> GLTF (small number of points)
-        VS -> NETCDF (larger number of points)
+        VS -> GZIP (larger number of points)
         WL -> GLTF
 
         NB: GP object files are split up and each sub object converted
@@ -101,7 +101,7 @@ class Gocad2WebAsset(Converter):
         # Output kits
         self.coll_kit_obj = ColladaKit(self.debug_lvl)
         self.png_kit_obj = PngKit(self.debug_lvl)
-        self.netcdf_kit_obj = NetCDFKit(self.debug_lvl)
+        self.gzson_kit_obj = GZSONKit(self.debug_lvl)
 
         self.file_datastr_map = GocadFileDataStrMap()
 
@@ -116,7 +116,7 @@ class Gocad2WebAsset(Converter):
 
     def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir):
         ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
-            else converts to a NetCDF file.
+            else converts to a GZipped GEOJSON file.
 
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
@@ -153,18 +153,18 @@ class Gocad2WebAsset(Converter):
                 if prop_idx > 0:
                     prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
                 # If too many points then output a point cloud
-                # TODO: Can't handle mixtures of GLTF and NC
-                if len(geom_obj.vrtx_arr) < NETCDF_THRESHOLD:
+                if len(geom_obj.vrtx_arr) < POINTCLOUD_THRESHOLD:
                     popup_dict = self.coll_kit_obj.write_collada(geom_obj,
                                                                  style_obj,
                                                                  meta_obj,
                                                                  prop_filename)
+                    file_ext='.gltf'
                 else:
-                    popup_dict = self.netcdf_kit_obj.write_points(geom_obj,
+                    popup_dict = self.gzson_kit_obj.write_points(geom_obj,
                                                                   style_obj,
                                                                   meta_obj,
                                                                   prop_filename)
-                    file_ext='.nc'
+                    file_ext='.gzson'
  
                 src_filename = self.copy_source(filename_str, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
@@ -244,10 +244,10 @@ class Gocad2WebAsset(Converter):
                 if ext_str == 'TS' and geom_obj.vrtx_arr and geom_obj.trgl_arr \
                            or (ext_str in ['PL', 'WL']) and geom_obj.vrtx_arr  \
                            and geom_obj.seg_arr:
-                    # If there are too many lines, write out NetCDF
+                    # If there are too many lines, write out Gzipped GEOJSON
                     # TODO: Can't handle mixtures of GLTF and NC
-                    if ext_str == 'PL' and len(geom_obj.seg_arr) > NETCDF_THRESHOLD:
-                        popup_dict = self.netcdf_kit_obj.write_lines(geom_obj,
+                    if ext_str == 'PL' and len(geom_obj.seg_arr) > POINTCLOUD_THRESHOLD:
+                        popup_dict = self.gzson_kit_obj.write_lines(geom_obj,
                                                                       style_obj,
                                                                       meta_obj,
                                                                       out_filename)
@@ -422,7 +422,7 @@ class Gocad2WebAsset(Converter):
         ok = False
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
-        # If the VS file has too many points, then output as NetCDF4 file
+        # If the VS file has too many points, then output as GZipped GEOJSON file
         if self.file_datastr_map.is_points(filename_str):
             ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
 

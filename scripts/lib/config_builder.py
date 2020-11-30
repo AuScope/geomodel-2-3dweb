@@ -173,8 +173,8 @@ class ConfigBuilder():
             # PNG files do not have any coordinates, so they must be supplied
             modelconf_dict['type'] = 'ImagePlane'
             modelconf_dict['position'] = position
-        elif file_ext.upper() == '.NC':
-            modelconf_dict['type'] = 'NetCDF'
+        elif file_ext.upper() == '.GZSON':
+            modelconf_dict['type'] = 'GZSON'
         else:
             modelconf_dict['type'] = 'GLTFObject'
             # Removed: not ready yet
