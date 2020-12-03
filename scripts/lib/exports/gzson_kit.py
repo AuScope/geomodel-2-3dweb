@@ -11,7 +11,7 @@ import json
 from geojson import Feature, FeatureCollection, Point, LineString
 
 
-from lib.db.style.false_colour import calculate_false_colour_num, make_false_colour_tup
+from lib.db.style.false_colour import make_false_colour_tup
 from lib.exports.export_kit import ExportKit
 
 class GZSONKit(ExportKit):
@@ -47,6 +47,8 @@ class GZSONKit(ExportKit):
 
         feature_list = []
         prop_dict = geom_obj.get_loose_3d_data(True)
+        prop_max = geom_obj.get_max_data()
+        prop_min = geom_obj.get_min_data()
 
         # geom_label=''
         for point_cnt, vrtx in enumerate(geom_obj.vrtx_arr):
@@ -60,7 +62,8 @@ class GZSONKit(ExportKit):
                 popup_dict[geom_label]['val'] = prop_dict[vrtx.xyz]
                 try:
                     pt = Point(vrtx.xyz)
-                    feature_list.append(Feature(geometry=pt, properties={"data": float(prop_dict[vrtx.xyz])}))
+                    colour_tup = make_false_colour_tup(float(prop_dict[vrtx.xyz]), prop_min, prop_max)
+                    feature_list.append(Feature(geometry=pt, properties={"colour": colour_tup}))
                 except (ValueError, TypeError):
                     feature_list.append(Feature(geometry=pt))
 
