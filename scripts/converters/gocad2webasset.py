@@ -306,7 +306,7 @@ class Gocad2WebAsset(Converter):
         except SameFileError:
             pass
         except OSError as exc:
-            self.logger.error("Cannot copy file %s to %s: %s", src_filename, dest_filename, str(exc))
+            self.logger.error("Cannot copy file %s to %s: %s", src_filename, copy_filename, str(exc))
             return None
 
         # Then create a compressed ZIP file, relative to destination directory
