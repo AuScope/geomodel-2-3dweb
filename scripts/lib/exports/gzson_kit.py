@@ -54,12 +54,14 @@ class GZSONKit(ExportKit):
         for point_cnt, vrtx in enumerate(geom_obj.vrtx_arr):
             geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
 
-            # Create popup info
-            popup_dict[geom_label] = {'name': meta_obj.get_property_name(),
-                                      'title': geometry_name.replace('_', ' ')}
+            # 'popup_dict' not used at the moment
+            ## Create popup info
+            #popup_dict[geom_label] = {'name': meta_obj.get_property_name(),
+            #                          'title': geometry_name.replace('_', ' ')}
             # Create a list of features
             if vrtx.xyz in prop_dict:
-                popup_dict[geom_label]['val'] = prop_dict[vrtx.xyz]
+                # Not used at the moment
+                #popup_dict[geom_label]['val'] = prop_dict[vrtx.xyz]
                 try:
                     pt = Point(vrtx.xyz)
                     colour_tup = make_false_colour_tup(float(prop_dict[vrtx.xyz]), prop_min, prop_max)
