@@ -27,6 +27,7 @@ class Converter:
 
         :param filename_str: filename of file to be processed, including path
         :param dest_dir: output destination directory
+        :returns True or False
         '''
         raise NotImplementedError
 

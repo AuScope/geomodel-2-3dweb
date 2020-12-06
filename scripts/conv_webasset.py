@@ -38,7 +38,8 @@ LOCAL_HANDLER.setFormatter(LOCAL_FORMATTER)
 # Add handler to LOGGER
 LOGGER.addHandler(LOCAL_HANDLER)
 
-#LOGGER.setLevel(logging.DEBUG)
+# Set debug level
+LOGGER.setLevel(DEBUG_LVL)
 
 
 
@@ -51,18 +52,23 @@ def find(converter_obj, src_dir, dest_dir, config_build_obj):
     :param config_build_obj: ConfigBuilder object
     '''
     LOGGER.debug("find(%s, %s)", src_dir, dest_dir)
+    found = False
     walk_obj = os.walk(src_dir)
+    supported_exts = converter_obj.get_supported_exts()
     for root, subfolders, files in walk_obj:
         done = False
         for file in files:
             name_str, fileext_str = os.path.splitext(file)
-            for target_fileext_str in converter_obj.get_supported_exts():
+            for target_fileext_str in supported_exts:
                 if fileext_str.lstrip('.').upper() == target_fileext_str:
                     find_and_process(converter_obj, root, dest_dir)
+                    found = True
                     done = True
                     break
             if done:
                 break
+    if not found:
+        LOGGER.info("No files found with extensions: %s ", supported_exts)
 
 
 def find_and_process(converter_obj, src_dir, dest_dir):
@@ -220,39 +226,39 @@ if __name__ == "__main__":
     # Read parameters & initialise converter
     params_obj, model_url_path, coord_offset, ct_file_dict = initialise_params(ARGS.param_file)
 
-    # Only does 'GOCAD' files
-    ConverterClass = get_converter(FileType.GOCAD)
-    converter = ConverterClass(DEBUG_LVL, params_obj, model_url_path, coord_offset, ct_file_dict, ARGS.nondefault_coords)
+    # Only does 'GOCAD' and 'XYZV' files
+    for file_type in (FileType.GOCAD, FileType.XYZV):
+        ConverterClass = get_converter(file_type)
+        converter = ConverterClass(DEBUG_LVL, params_obj, model_url_path, coord_offset, ct_file_dict, ARGS.nondefault_coords)
 
-    # Process a directory of files
-    if os.path.isdir(ARGS.src):
+        # Process a directory of files
+        if os.path.isdir(ARGS.src):
 
-        # Recursively search subdirectories
-        if ARGS.recursive:
-            find(converter, ARGS.src, DEST_DIR, converter.config_build_obj)
+            # Recursively search subdirectories
+            if ARGS.recursive:
+                find(converter, ARGS.src, DEST_DIR, converter.config_build_obj)
 
-        # Only search local directory
+            # Only search local directory
+            else:
+                find_and_process(converter, ARGS.src, DEST_DIR)
+
+        # Process a single file
+        elif os.path.isfile(ARGS.src):
+            converter.process(ARGS.src, DEST_DIR)
+
+            # Convert all files from COLLADA to GLTF v2
+            if not converter.config_build_obj.has_output():
+                print("Could not convert file", ARGS.src)
+                sys.exit(1)
+            if CONVERT_COLLADA:
+                FILE_NAME, FILE_EXT = os.path.splitext(ARGS.src)
+                convert_file(os.path.join(DEST_DIR,
+                                          os.path.basename(FILE_NAME) + ".dae"))
+
         else:
-            find_and_process(converter, ARGS.src, DEST_DIR)
-
-    # Process a single file
-    elif os.path.isfile(ARGS.src):
-        converter.process(ARGS.src, DEST_DIR)
-
-        # Convert all files from COLLADA to GLTF v2
-        if not converter.config_build_obj.has_output():
-            print("Could not convert file", ARGS.src)
+            print(ARGS.src, "does not exist")
             sys.exit(1)
-        if CONVERT_COLLADA:
-            FILE_NAME, FILE_EXT = os.path.splitext(ARGS.src)
-            convert_file(os.path.join(DEST_DIR,
-                                      os.path.basename(FILE_NAME) + ".dae"))
 
-    else:
-        print(ARGS.src, "does not exist")
-        sys.exit(1)
-
-    # Finally, create the config file
-    if converter.config_build_obj.has_output():
-        converter.config_build_obj.create_json_config(ARGS.output_config, DEST_DIR,
-                                         converter.params)
+        # Finally, create the config file
+        if converter.config_build_obj.has_output():
+            converter.config_build_obj.create_json_config(ARGS.output_config, DEST_DIR, converter.params)

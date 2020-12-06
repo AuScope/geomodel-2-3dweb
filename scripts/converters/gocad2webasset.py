@@ -418,7 +418,7 @@ class Gocad2WebAsset(Converter):
             whole_file_lines = file_d.readlines()
         except OSError as os_exc:
             self.logger.error("Can't open or read - skipping file %s %s", filename_str, os_exc)
-            return False, [], []
+            return False
         ok = False
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
