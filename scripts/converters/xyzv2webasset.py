@@ -93,7 +93,7 @@ class XYZV2WebAsset(Converter):
         '''
         self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(noext_filename), repr(base_xyz), repr(filename), repr(src_dir))
         out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
-        file_ext='.xyzv'
+        file_ext=self.get_supported_exts()[0].lower()
 
         # Check that conversion worked
         is_ok, gsm_list = self.process_xyz(points_list, src_dir, filename)
@@ -195,6 +195,9 @@ class XYZV2WebAsset(Converter):
             base_xyz = self.coord_offset[basefile]
         noext_filename, file_ext = os.path.splitext(filename_str)
         ext_str = file_ext.lstrip('.').upper()
+        if ext_str != self.get_supported_exts()[0]:
+            self.logger.debug("Cannot process %s - wrong file extension", filename_str)
+            return False 
         out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
         src_dir = os.path.dirname(filename_str)
         points_list = []

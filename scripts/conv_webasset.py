@@ -247,10 +247,7 @@ if __name__ == "__main__":
             converter.process(ARGS.src, DEST_DIR)
 
             # Convert all files from COLLADA to GLTF v2
-            if not converter.config_build_obj.has_output():
-                print("Could not convert file", ARGS.src)
-                sys.exit(1)
-            if CONVERT_COLLADA:
+            if converter.config_build_obj.has_output() and CONVERT_COLLADA:
                 FILE_NAME, FILE_EXT = os.path.splitext(ARGS.src)
                 convert_file(os.path.join(DEST_DIR,
                                           os.path.basename(FILE_NAME) + ".dae"))
