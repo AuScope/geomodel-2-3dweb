@@ -10,7 +10,7 @@ import csv
 from lib.exports.gzson_kit import GZSONKit
 from lib.config_builder import ConfigBuilder
 
-from lib.imports.xyzv_importer import process_xyzv
+from lib.imports.xyzv.xyzv_importer import process_xyzv
 
 from converters.converter import Converter
 
