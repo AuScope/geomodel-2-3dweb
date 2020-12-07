@@ -30,11 +30,11 @@ os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 # [ ( <URL string>, <model_name>, <model input file>, <src_dir> ), ... ]
 #
 MODELS = [
-    # Vic - Otway
-    ("otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway"),
-
     # Vic - Bendigo
     ("bendigo", "Bendigo", "input/BendigoConvParam.json", "Victoria/Bendigo/3D_model_attributes"),
+
+    # Vic - Otway
+    ("otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway"),
 
     # Vic - Stavely
     ("stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD"),
@@ -44,8 +44,7 @@ MODELS = [
      "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD"),
 
     # WA - Sandstone
-    ("sandstone", "Sandstone", "input/SandstoneConvParam.json",
-     "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
+    ("sandstone", "Sandstone", "input/SandstoneConvParam.json", "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
 
 
     # SA - Cariewerloo
@@ -66,7 +65,7 @@ MODELS = [
     # SA - North Gawler
     ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026"),
 
-    # SA - Curnamone Sedimentary Basins
+    # SA - Curnamona Sedimentary Basins
     ("curnamonased", "CurnamonaSed", "input/CurnamonaSedConvParam.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
 
     # SA - Western Gawler
@@ -106,15 +105,13 @@ MODELS = [
     # NSW - New England
     ("newengland", "NewEngland", "input/NewEnglandConvParam.json", "NewSouthWales/NEO_GDA94_Z56_GOCAD"),
 
-
     # NT - McArthur Basin
     ("mcarthur", "McArthurBasin", "input/McArthurBasinConvParam.json",
      "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL"),
 
 
     # GA - North Qld
-    ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json",
-     "GA/North-Queensland"),
+    ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json", "GA/North-Queensland"),
 
     # GA - Tasmania
     ("tas", "Tas", "input/TasConvParam.json", "GA/Tas"),
@@ -124,7 +121,10 @@ MODELS = [
 
 
     # CSIRO - RockLea Dome
-    ("rocklea", "Rocklea Dome", "input/RockleaConvParam.json", "CSIRO/RockleaDome")
+    ("rocklea", "RockleaDome", "input/RockleaConvParam.json", "CSIRO/RockleaDome"),
+
+    # GA/NCI Stuart Shelf MT model
+    ("stuartshelf", "StuartShelf", "input/StuartShelfConvParam.json", "NCI/MT")
 ]
 
 
