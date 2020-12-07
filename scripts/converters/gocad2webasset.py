@@ -114,34 +114,34 @@ class Gocad2WebAsset(Converter):
         return GocadImporter.SUPPORTED_EXTS
 
 
-    def process_points(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir):
+    def process_points(self, whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir):
         ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
             else converts to a GZipped GEOJSON file.
 
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param noext_filename: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param filename_str: source file name with path and extension
+        :param filename: source file name with path and extension
         :param src_dir: source directory
 
         '''
-        self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(file_name), repr(base_xyz), repr(filename_str), repr(src_dir))
+        self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(noext_filename), repr(base_xyz), repr(filename), repr(src_dir))
         file_lines_list = split_gocad_objs(whole_file_lines)
-        out_filename = os.path.join(dest_dir, os.path.basename(file_name))
+        out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
         file_ext='.gltf'
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
-                o_fname = os.path.join(dest_dir, os.path.basename(file_name))
+                o_fname = os.path.join(dest_dir, os.path.basename(noext_filename))
                 out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
             # Check that conversion worked
-            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("Could not process %s", filename_str)
+                self.logger.warning("Could not process %s", filename)
                 continue
 
             # Write out files
@@ -166,7 +166,7 @@ class Gocad2WebAsset(Converter):
                                                                   prop_filename)
                     file_ext='.gzson'
  
-                src_filename = self.copy_source(filename_str, dest_dir)
+                src_filename = self.copy_source(filename, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name, popup_dict,
                                             prop_filename, src_filename,
@@ -175,32 +175,32 @@ class Gocad2WebAsset(Converter):
         return True
 
 
-    def process_volumes(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir): 
+    def process_volumes(self, whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir): 
         """ Process file that contains a 3D volume
 
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param noext_filename: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param file_name_str: source file name with path and extension
+        :param filename: source file name with path and extension
         :param src_dir: source directory
         """
-        self.logger.debug("process_volumes("+file_name+")")
+        self.logger.debug("process_volumes("+noext_filename+")")
         file_lines_list = split_gocad_objs(whole_file_lines)
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
-                                                               os.path.basename(file_name)),
+                                                               os.path.basename(noext_filename)),
                                                   mask_idx)
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
 
             # Check that conversion worked
-            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("Could not process %s", filename_str)
+                self.logger.warning("Could not process %s", filename)
                 continue
 
             # Loop around when several binary files in one GOCAD VOXET object
@@ -213,14 +213,14 @@ class Gocad2WebAsset(Converter):
         return has_result
 
 
-    def process_others(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename):
+    def process_others(self, whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir, ext_str, out_filename):
         """ Process other kinds of file, e.g. faults
 
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param noext_filename: source file name with path but without extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param filename_str: source file name with path and extension
+        :param filename: source file name with path and extension
         :param src_dir: source directory
         :param ext_str: file extent string
         :param out_filename: output filename
@@ -234,9 +234,9 @@ class Gocad2WebAsset(Converter):
         for file_lines in file_lines_list:
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords)
-            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename_str, file_lines)
+            is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("WARNING - could not process %s", filename_str)
+                self.logger.warning("WARNING - could not process %s", filename)
                 continue
             for geom_obj, style_obj, meta_obj in gsm_list:
 
@@ -245,14 +245,13 @@ class Gocad2WebAsset(Converter):
                            or (ext_str in ['PL', 'WL']) and geom_obj.vrtx_arr  \
                            and geom_obj.seg_arr:
                     # If there are too many lines, write out Gzipped GEOJSON
-                    # TODO: Can't handle mixtures of GLTF and NC
                     if ext_str == 'PL' and len(geom_obj.seg_arr) > POINTCLOUD_THRESHOLD:
                         popup_dict = self.gzson_kit_obj.write_lines(geom_obj,
                                                                       style_obj,
                                                                       meta_obj,
                                                                       out_filename)
                         file_ext='.nc'
-                        self.make_config(meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext)
+                        self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext)
                     # Else write out as COLLADA
                     else: 
                         p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
@@ -263,18 +262,19 @@ class Gocad2WebAsset(Converter):
 
         # If COLLADA object was added
         if has_result:
-            self.make_config(meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext)
+            self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext)
             self.coll_kit_obj.end_collada(out_filename, node_label)
         return True
 
 
-    def make_config(self, meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext):
+    def make_config(self, meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext):
         '''
         Make configuration data for model part
 
-        :param filename_str: source file name with path and extension
+        :param meta_obj: METADATA object
+        :param filename: source file name with path and extension
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param noext_filename: source file name with path but without extension
         :param popup_dict: dict of values displayed when model part is clicked on
         :param file_ext: file extension
         '''
@@ -285,10 +285,10 @@ class Gocad2WebAsset(Converter):
             for labl in meta_obj.label_list:
                 s_dict["labels"].append({"display_name": labl['name'],
                                          "position": labl['position'] })
-        src_filename = self.copy_source(filename_str, dest_dir)
+        src_filename = self.copy_source(filename, dest_dir)
         self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                         os.path.basename(file_name),
-                                         popup_dict, file_name, src_filename,
+                                         os.path.basename(noext_filename),
+                                         popup_dict, noext_filename, src_filename,
                                           self.model_url_path, styling=s_dict, file_ext=file_ext)
 
     def copy_source(self, src_filename, dest_dir):
@@ -327,18 +327,18 @@ class Gocad2WebAsset(Converter):
 
         return zip_filename
 
-    def process_groups(self, whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename):
+    def process_groups(self, whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir, out_filename):
         ''' Process GOCAD group file
 
         :param whole_file_lines: list of strings taken from file's lines
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without file extension
+        :param noext_filename: source file name with path but without file extension
         :param base_xyz: [x,y,z] offset for writing out coordinates
-        :param filename_str: source file name with path and file extension
+        :param filename: source file name with path and file extension
         :param src_dir: source directory
         :param out_filename: output path and filename but without file extension
         '''
-        gsm_list = extract_from_grp(src_dir, filename_str, whole_file_lines, base_xyz,
+        gsm_list = extract_from_grp(src_dir, filename, whole_file_lines, base_xyz,
                                     self.debug_lvl, self.nondef_coords, self.ct_file_dict)
 
         # If there are too many entries in the GP file, then use one COLLADA file only
@@ -365,10 +365,10 @@ class Gocad2WebAsset(Converter):
                 has_result = True
             # Only write out the COLLADA file if there were geometries included
             if has_geom and has_result:
-                src_filename = self.copy_source(filename_str, dest_dir)
+                src_filename = self.copy_source(filename, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                            os.path.basename(file_name), popup_dict,
-                                            file_name, src_filename, self.model_url_path)
+                                            os.path.basename(noext_filename), popup_dict,
+                                            noext_filename, src_filename, self.model_url_path)
                 self.coll_kit_obj.end_collada(out_filename, node_label)
                 
 
@@ -384,7 +384,7 @@ class Gocad2WebAsset(Converter):
                     prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
                     p_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
-                    src_filename = self.copy_source(filename_str, dest_dir)
+                    src_filename = self.copy_source(filename, dest_dir)
                     self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                 meta_obj.name, p_dict,
                                                 prop_filename, src_filename,
@@ -394,49 +394,49 @@ class Gocad2WebAsset(Converter):
         return has_result
 
 
-    def process(self, filename_str, dest_dir):
+    def process(self, filename, dest_dir):
         ''' Processes a GOCAD file. This one GOCAD file can contain many parts and produce many
             output files
 
-        :param filename_str: filename of GOCAD file, including path
+        :param filename: filename of GOCAD file, including path
         :param dest_dir: destination directory
         '''
-        self.logger.info("\nProcessing %s", filename_str)
+        self.logger.info("\nProcessing %s", filename)
         # If there is an offset from the input parameter file, then apply it
         base_xyz = (0.0, 0.0, 0.0)
-        basefile = os.path.basename(filename_str)
+        basefile = os.path.basename(filename)
         if basefile in self.coord_offset:
             base_xyz = self.coord_offset[basefile]
-        file_name, file_ext = os.path.splitext(filename_str)
+        noext_filename, file_ext = os.path.splitext(filename)
         ext_str = file_ext.lstrip('.').upper()
-        out_filename = os.path.join(dest_dir, os.path.basename(file_name))
-        src_dir = os.path.dirname(filename_str)
+        out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
+        src_dir = os.path.dirname(filename)
 
         # Open GOCAD file and read all its contents, assume it fits in memory
         try:
-            file_d = open(filename_str, 'r')
+            file_d = open(filename, 'r')
             whole_file_lines = file_d.readlines()
         except OSError as os_exc:
-            self.logger.error("Can't open or read - skipping file %s %s", filename_str, os_exc)
+            self.logger.error("Can't open or read - skipping file %s %s", filename, os_exc)
             return False
         ok = False
 
         # VS files usually have lots of data points and thus one COLLADA file for each GOCAD file
         # If the VS file has too many points, then output as GZipped GEOJSON file
-        if self.file_datastr_map.is_points(filename_str):
-            ok = self.process_points(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
+        if self.file_datastr_map.is_points(filename):
+            ok = self.process_points(whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir)
 
         # One VO or SG file can produce many other files
-        elif self.file_datastr_map.is_volume(filename_str):
-            ok = self.process_volumes(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir)
+        elif self.file_datastr_map.is_volume(filename):
+            ok = self.process_volumes(whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir)
 
         # For triangles, wells and lines, place multiple GOCAD objects in one COLLADA file
-        elif self.file_datastr_map.is_borehole(filename_str) or self.file_datastr_map.is_flat_shape(filename_str):
-            ok = self.process_others(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, ext_str, out_filename)
+        elif self.file_datastr_map.is_borehole(filename) or self.file_datastr_map.is_flat_shape(filename):
+            ok = self.process_others(whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir, ext_str, out_filename)
 
         # Process group files, depending on the number of GOCAD objects inside
-        elif self.file_datastr_map.is_mixture(filename_str):
-            ok = self.process_groups(whole_file_lines, dest_dir, file_name, base_xyz, filename_str, src_dir, out_filename)
+        elif self.file_datastr_map.is_mixture(filename):
+            ok = self.process_groups(whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir, out_filename)
 
         file_d.close()
         if ok:
