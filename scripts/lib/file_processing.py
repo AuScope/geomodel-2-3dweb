@@ -11,7 +11,7 @@ from json import JSONDecodeError
 from types import SimpleNamespace
 
 # Set up debugging
-LOGGER = logging.getLogger("file_processing")
+LOGGER = logging.getLogger(__name__)
 
 # Create console handler
 LOCAL_HANDLER = logging.StreamHandler(sys.stdout)

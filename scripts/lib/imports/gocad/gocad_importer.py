@@ -21,7 +21,7 @@ from lib.imports.gocad.gocad_filestr_types import GocadFileDataStrMap
 from .helpers import make_line_gen, check_vertex
 
 # Set up debugging
-LOCAL_LOGGER = logging.getLogger("gocad_importer")
+LOCAL_LOGGER = logging.getLogger(__name__)
 
 # Create console handler
 LOCAL_HANDLER = logging.StreamHandler(sys.stdout)

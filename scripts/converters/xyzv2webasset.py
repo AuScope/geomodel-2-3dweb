@@ -10,6 +10,8 @@ import csv
 from lib.exports.gzson_kit import GZSONKit
 from lib.config_builder import ConfigBuilder
 
+from lib.imports.xyzv_importer import process_xyzv
+
 from converters.converter import Converter
 
 class XYZV2WebAsset(Converter):
@@ -75,10 +77,6 @@ class XYZV2WebAsset(Converter):
         '''
         return ['XYZV']
 
-    def process_xyz(self, file_lines, src_dir, filename_str):
-        # TODO: convert to Geom, Style, Meta points
-        return False, []
-
     def process_points(self, points_list, dest_dir, noext_filename, base_xyz, filename, src_dir):
         ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
             else converts to a GZipped GEOJSON file.
@@ -96,7 +94,7 @@ class XYZV2WebAsset(Converter):
         file_ext=self.get_supported_exts()[0].lower()
 
         # Check that conversion worked
-        is_ok, gsm_list = self.process_xyz(points_list, src_dir, filename)
+        is_ok, gsm_list = process_xyzv(points_list, src_dir, filename)
         if not is_ok:
             self.logger.warning("Could not process %s", filename)
             return False
