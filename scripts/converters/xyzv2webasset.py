@@ -90,11 +90,12 @@ class XYZV2WebAsset(Converter):
 
         '''
         self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(noext_filename), repr(base_xyz), repr(filename), repr(src_dir))
-        out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
+        base_filename = os.path.basename(noext_filename)
+        out_filename = os.path.join(dest_dir, base_filename)
         file_ext=self.get_supported_exts()[0].lower()
 
         # Check that conversion worked
-        is_ok, gsm_list = process_xyzv(points_list, src_dir, filename)
+        is_ok, gsm_list = process_xyzv(points_list, src_dir, filename, base_filename)
         if not is_ok:
             self.logger.warning("Could not process %s", filename)
             return False
@@ -109,22 +110,22 @@ class XYZV2WebAsset(Converter):
                 prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
             popup_dict = self.gzson_kit_obj.write_points(geom_obj, style_obj, meta_obj, prop_filename)
  
-            src_filename = self.copy_source(filename_str, dest_dir)
+            src_filename = self.copy_source(filename, dest_dir)
             self.config_build_obj.add_config(self.params.grp_struct_dict,
                                             meta_obj.name, popup_dict,
                                             prop_filename, src_filename,
-                                            self.model_url_path, file_ext=file_ext)
+                                            self.model_url_path, file_ext='.gzson')
             self.config_build_obj.add_ext(geom_obj.get_extent())
         return True
 
 
-    def make_config(self, meta_obj, filename_str, dest_dir, file_name, popup_dict, file_ext):
+    def make_config(self, meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext):
         '''
         Make configuration data for model part
 
-        :param filename_str: source file name with path and extension
+        :param filename: source file name with path and extension
         :param dest_dir: destination directory
-        :param file_name: source file name with path but without extension
+        :param noext_filename: source file name with path but without extension
         :param popup_dict: dict of values displayed when model part is clicked on
         :param file_ext: file extension
         '''
@@ -135,10 +136,10 @@ class XYZV2WebAsset(Converter):
             for labl in meta_obj.label_list:
                 s_dict["labels"].append({"display_name": labl['name'],
                                          "position": labl['position'] })
-        src_filename = self.copy_source(filename_str, dest_dir)
+        src_filename = self.copy_source(filename, dest_dir)
         self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                         os.path.basename(file_name),
-                                         popup_dict, file_name, src_filename,
+                                         os.path.basename(noext_filename),
+                                         popup_dict, noext_filename, src_filename,
                                           self.model_url_path, styling=s_dict, file_ext=file_ext)
 
     def copy_source(self, src_filename, dest_dir):
@@ -178,46 +179,46 @@ class XYZV2WebAsset(Converter):
         return zip_filename
 
 
-    def process(self, filename_str, dest_dir):
+    def process(self, filename, dest_dir):
         ''' Processes an XYZV file.
 
-        :param filename_str: filename of XYZV file, including path
+        :param filename: filename of XYZV file, including path
         :param dest_dir: destination directory
         :returns True if successful
         '''
-        self.logger.info("\nProcessing %s", filename_str)
+        self.logger.info("\nProcessing %s", filename)
         # If there is an offset from the input parameter file, then apply it
         base_xyz = (0.0, 0.0, 0.0)
-        basefile = os.path.basename(filename_str)
+        basefile = os.path.basename(filename)
         if basefile in self.coord_offset:
             base_xyz = self.coord_offset[basefile]
-        noext_filename, file_ext = os.path.splitext(filename_str)
+        noext_filename, file_ext = os.path.splitext(filename)
         ext_str = file_ext.lstrip('.').upper()
         if ext_str != self.get_supported_exts()[0]:
-            self.logger.debug("Cannot process %s - wrong file extension", filename_str)
+            self.logger.debug("Cannot process %s - wrong file extension", filename)
             return False 
         out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
-        src_dir = os.path.dirname(filename_str)
+        src_dir = os.path.dirname(filename)
         points_list = []
 
         # Open XYZV file and read all its contents, assume it fits in memory
         try:
-            with open(filename_str, newline='') as csvfile:
+            with open(filename, newline='') as csvfile:
                 csvreader = csv.reader(csvfile, delimiter=' ', skipinitialspace=True)
                 for xyzv_line in csvreader:
                     if len(xyzv_line) > 3:
                         points_list.append(xyzv_line)
                     else:
-                        self.logger.info("Can't read %s - incorrect number of columns", filename_str)
+                        self.logger.info("Can't read %s - incorrect number of columns", filename)
                         return False
 
-                ok = self.process_points(points_list, dest_dir, noext_filename, base_xyz, filename_str, src_dir)
+                ok = self.process_points(points_list, dest_dir, noext_filename, base_xyz, filename, src_dir)
                 if ok:
                     self.logger.debug("process() returns True")
                     return True
 
         except (OSError, csv.Error) as exc:
-            self.logger.info("Can't open or read - skipping file %s %s", filename_str, str(exc))
+            self.logger.info("Can't open or read - skipping file %s %s", filename, str(exc))
             return False
 
         self.logger.debug("process() returns False, no result")
