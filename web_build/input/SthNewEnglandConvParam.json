@@ -13,7 +13,7 @@
     "ModelProperties": {
         "crs": "EPSG:28356",
         "init_cam_dist": 900000.0,
-        "name": "South New England",
+        "name": "South New England Deep Crustal",
         "modelUrlPath": "sthnewengland",
         "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
@@ -26,5 +26,209 @@
         }    
     ],
     "GroupStructure": {
+        "DTM": [
+            {
+                "FileNameKey": "GAB_CMB_DTM_1000m.gltf",
+                "Insert": {
+                    "display_name": "GAB CMB DTM 1000m"
+                }
+            },
+            {
+                "FileNameKey": "GAB_Surat_DTM_1000m.gltf",
+                "Insert": {
+                    "display_name": "GAB Surat DTM 1000m"
+                }
+            },
+            {
+                "FileNameKey": "NEO_DTM_1000m_Palaeozoic.gltf",
+                "Insert": {
+                    "display_name": "NEO DTM 1000m Palaeozoic"
+                 }
+            }
+       ],
+       "Confidence Attribution": [
+            {
+                "FileNameKey": "NEO_CMB_CA1.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level 1",
+                    "popups": {
+                        "NEO_CMB_CA1": {
+                            "name": "NEO_CMB_CA1",
+                            "title": "NEO_CMB_CA1",
+                            "confidence_level": "1 - Highest Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_CMB_CA2.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level 2",
+                    "popups": {
+                        "NEO_CMB_CA2": {
+                            "name": "NEO_CMB_CA2",
+                            "title": "NEO_CMB_CA2",
+                            "confidence_level": "2 - Moderate to high Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_CMB_CA3.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level 3",
+                    "popups": {
+                        "NEO_CMB_CA3": {
+                            "name": "NEO_CMB_CA3",
+                            "title": "NEO_CMB_CA3",
+                            "confidence_level": "3 - Moderate Constraint"
+                        }
+                    }
+                 }
+            },
+            {
+                "FileNameKey": "NEO_CMB_CA4.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level 4",
+                    "popups": {
+                        "NEO_CMB_CA4": {
+                            "name": "NEO_CMB_CA4",
+                            "title": "NEO_CMB_CA4",
+                            "confidence_level": "4 - Intermediate to Poor Constraint"
+                        }
+                    }
+                 }
+            },
+            {
+                "FileNameKey": "NEO_CMB_CA5.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level 5",
+                    "popups": {
+                        "NEO_CMB_CA5": {
+                            "name": "NEO_CMB_CA5",
+                            "title": "NEO_CMB_CA5",
+                            "confidence_level": "5 - Poor Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_CMB_CAGr5.gltf",
+                "Insert": {
+                    "display_name": "NEO CMB Conf Level >5",
+                    "popups": {
+                        "NEO_CMB_CAGR5": {
+                            "name": "NEO_CMB_CAGR5",
+                            "title": "NEO_CMB_CAGR5",
+                            "confidence_level": ">5 - No constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA1.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level 1",
+                    "popups": {
+                        "NEO_TB_CA1": {
+                            "name": "NEO_TB_CA1",
+                            "title": "NEO_TB_CA1",
+                            "confidence_level": "1 - Highest Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA2.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level 2",
+                    "popups": {
+                        "NEO_TB_CA2": {
+                            "name": "NEO_TB_CA2",
+                            "title": "NEO_TB_CA2",
+                            "confidence_level": "2 - Moderate to high Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA3.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level 3",
+                    "popups": {
+                        "NEO_TB_CA3": {
+                            "name": "NEO_TB_CA3",
+                            "title": "NEO_TB_CA3",
+                            "confidence_level": "3 - Moderate Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA4.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level 4",
+                    "popups": {
+                        "NEO_TB_CA4": {
+                            "name": "NEO_TB_CA4",
+                            "title": "NEO_TB_CA4",
+                            "confidence_level": "4 - Intermediate to Poor Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CA5.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level 5",
+                    "popups": {
+                        "NEO_TB_CA5": {
+                            "name": "NEO_TB_CA5",
+                            "title": "NEO_TB_CA5",
+                            "confidence_level": "5 - Poor Constraint"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "NEO_TB_CAGr5.gltf",
+                "Insert": {
+                    "display_name": "NEO TB Conf Level >5",
+                    "popups": {
+                        "NEO_TB_CAGR5": {
+                            "name": "NEO_TB_CAGR5",
+                            "title": "NEO_TB_CAGR5",
+                            "confidence_level": ">5 - No constraint"
+                        }
+                    }
+                }
+            }
+        ],
+        "New England Orogen Faults": [
+            {
+                "FileNameKey": "NEO_Flt_Demon.gltf",
+                "Insert": {
+                    "display_name": "Demon Fault"
+                }
+            },
+            {
+                "FileNameKey": "NEO_Flt_Drakeedge.gltf",
+                "Insert": {
+                    "display_name": "Drake Edge Fault"
+                }
+            },
+            {
+                "FileNameKey": "NEO_Flt_Hunter_Mooki.gltf",
+                "Insert": {
+                    "display_name": "Hunter Mooki Fault"
+                }
+            },
+            {
+                "FileNameKey": "NEO_Flt_Peel_Manning.gltf",
+                "Insert": {
+                    "display_name": "Peel Manning Fault"
+                }
+            }
+        ]
     }
 }
