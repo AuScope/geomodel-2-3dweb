@@ -122,12 +122,11 @@ def check_input_params(param_dict, param_file):
                 LOGGER.error("Cannot process JSON file {0}: duplicate FileNameKey {1}".format(param_file, part["FileNameKey"]))
                 sys.exit(1)
             filename_set.add(part["FileNameKey"])
-            if "display_name" in part["Insert"] and \
-                                 part["Insert"]["display_name"] in display_name_set:
-                LOGGER.error("Cannot process JSON file {0}: duplicate display_name {1}".format(param_file, part["Insert"]["display_name"]))
-                sys.exit(1)
-            display_name_set.add(part["Insert"]["display_name"])
-
+            if "display_name" in part["Insert"]:
+                if part["Insert"]["display_name"] in display_name_set:
+                    LOGGER.error("Cannot process JSON file {0}: duplicate display_name {1}".format(param_file, part["Insert"]["display_name"]))
+                    sys.exit(1)
+                display_name_set.add(part["Insert"]["display_name"])
 
 def initialise_params(param_file):
     ''' Reads the input parameter file and returns a dict version of input params
