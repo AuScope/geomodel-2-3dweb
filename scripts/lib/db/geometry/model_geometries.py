@@ -214,7 +214,7 @@ class ModelGeometries:
             pass
 
     def get_extent(self):
-        ''' :returns: estimate of the geographic extent of the model, using max and min \
+        ''' :returns: estimate of the 2D (XY) geographic extent of the model, using max and min \
             coordinate values format is [min_x, max_x, min_y, max_y]
         '''
         return [self.min_x, self.max_x, self.min_y, self.max_y]

@@ -27,20 +27,28 @@ LOGGER.addHandler(LOCAL_HANDLER)
 LOGGER.setLevel(DEBUG_LVL)
 
 
-def process_xyzv(file_lines, src_dir, filename, label):
-    # TODO: convert to Geom, Style, Meta points
+def process_xyzv(file_lines, src_dir, filename, label, no_data_val=1e+10):
     LOGGER.debug("process_xyzv(file_lines[0]=%s)", file_lines[0])
     geom_obj = ModelGeometries()
     d_dict = {}
+    (x_list, y_list, z_list) = ([], [], [])
+    (min_v, max_v) = (sys.float_info.max, sys.float_info.min)
     for idx, l in enumerate(file_lines):
         try:
             (x, y, z, v) = (float(l[0]), float(l[1]), float(l[2]), float(l[3]))
         except ValueError:
             continue
         geom_obj.vrtx_arr.append(VRTX(idx+1, (x, y, z)))
+        geom_obj.calc_minmax(x, y, z)
+        if v != no_data_val:
+            if v < min_v:
+                min_v = v
+            if v > max_v:
+                max_v = v
         d_dict[x, y, z] = v
 
     geom_obj.add_loose_3d_data(True, d_dict)
+    geom_obj.add_stats(min_v, max_v, no_data_val)
     meta_obj = METADATA()
     meta_obj.name = label
     style_obj = STYLE()

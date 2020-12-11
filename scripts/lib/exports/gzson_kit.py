@@ -67,7 +67,8 @@ class GZSONKit(ExportKit):
                     colour_tup = make_false_colour_tup(float(prop_dict[vrtx.xyz]), prop_min, prop_max)
                     feature_list.append(Feature(geometry=pt, properties={"colour": colour_tup}))
                 except (ValueError, TypeError):
-                    feature_list.append(Feature(geometry=pt))
+                    # Makes white points when no colour is available
+                    feature_list.append(Feature(geometry=pt, properties={"colour": (1.0, 1.0, 1.0, 1.0)}))
 
         # Write feature collecton to file
         self.logger.info("write_points() Writing gzson file: %s.gzson", out_filename)

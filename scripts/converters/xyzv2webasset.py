@@ -78,8 +78,7 @@ class XYZV2WebAsset(Converter):
         return ['XYZV']
 
     def process_points(self, points_list, dest_dir, noext_filename, base_xyz, filename, src_dir):
-        ''' Takes in GOCAD lines and converts to a COLLADA file if less than 3000 points,
-            else converts to a GZipped GEOJSON file.
+        ''' Takes in XYZV lines and converts to a GZipped GEOJSON file.
 
         :param points_list: list of [x,y,z,v] taken from file's lines
         :param dest_dir: destination directory
