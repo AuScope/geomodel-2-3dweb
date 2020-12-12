@@ -15,7 +15,12 @@ from lib.db.style.false_colour import make_false_colour_tup
 from lib.exports.export_kit import ExportKit
 
 class GZSONKit(ExportKit):
-    ''' Class used to output GZipped GEOJSON files, given geometry, style and metadata data structures
+    ''' Class used to output large numbers of points and lines to GZipped GEOJSON files, given geometry, style and
+        metadata data structures. Why do we need this?
+        1. Unfortunately GLTF 2.0 does not fully specify points and lines (https://github.com/KhronosGroup/glTF/issues/1277)
+        2. Rendering points and lines as GLTF rectangles (pairs of triangles) is not feasible when there are hundreds
+           of thousands lines and points
+        So I have to send the data in compressed format and draw my own lines and points
     '''
 
     def __init__(self, debug_level):
@@ -112,11 +117,11 @@ class GZSONKit(ExportKit):
                     # Not used at present
                     # popup_dict[geom_label]['val'] = prop_dict[coord.xyz]
                     ls = LineString([xyz1.xyz, xyz2.xyz])
-                    try:
-                        feature_list.append(Feature(geometry=ls, properties={"data": float(prop_dict[coord.xyz])}))
-                    except (ValueError, TypeError):
-                        feature_list.append(Feature(geometry=ls))
-                    break
+                    if style_obj.has_single_colour():
+                        feature_list.append(Feature(geometry=ls, properties={"colour": style_obj.get_rgba_tup()}))
+                    else:
+                        # If no colour, then add yellow lines
+                        feature_list.append(Feature(geometry=ls, properties={"colour": (1.0, 1.0, 0.0, 1.0)}))
 
         # Write feature collection to file
         self.logger.info("write_points() Writing gzson file: %s.gzson", out_filename)
