@@ -250,8 +250,7 @@ class Gocad2WebAsset(Converter):
                                                                       style_obj,
                                                                       meta_obj,
                                                                       out_filename)
-                        file_ext='.nc'
-                        self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext)
+                        self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext='.gzson')
                     # Else write out as COLLADA
                     else: 
                         p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
