@@ -84,25 +84,25 @@ MODELS = [
 
     
 
-    # NSW - West Tamworth
+    # NSW - "Western Tamworth Belt"
     ("tamworth", "Tamworth", "input/WestTamworthConvParam.json", "NewSouthWales/WesternTamworth"),
 
-    # NSW - Cobar
+    # NSW - "Cobar geological and fault model package"
     ("cobar", "Cobar", "input/CobarConvParam.json", "NewSouthWales/Cobar_GM_gocad_May18/Cobar_GM_gocad_May18"),
 
-    # NSW - Curnamona
+    # NSW - "Curnamona Province and Delamerian Orogen 3D fault model"
     ("curnamona", "Curnamona", "input/CurnamonaConvParam.json", "NewSouthWales/Curnamona_Delamerian_GDA94_Z54_GOCAD"),
 
-    # NSW - East Lachlan
+    # NSW - "Eastern Lachlan Orogen 3D fault model"
     ("eastlachlan", "EastLachlan", "input/EastLachlanConvParam.json", "NewSouthWales/E_Lachlan_Orogen_GDA94_Z55_GOCAD"),
 
-    # NSW - West Lachlan
+    # NSW - "Western Lachlan Orogen and southern Thomson Orogen 3D fault model"
     ("westlachlan", "WestLachlan", "input/WestLachlanConvParam.json", "NewSouthWales/W_Lachlan_Orogen_GDA94_Z55_GOCAD"),
 
-    # NSW - Southern New England
+    # NSW - Southern New England Deep Crustal
     ("sthnewengland", "SthNewEngland", "input/SthNewEnglandConvParam.json", "NewSouthWales/20150626_SNEO_Deep_Struture_SKUA"),
 
-    # NSW - New England
+    # NSW - "New England Orogen 3D fault model"
     ("newengland", "NewEngland", "input/NewEnglandConvParam.json", "NewSouthWales/NEO_GDA94_Z56_GOCAD"),
 
     # NT - McArthur Basin
