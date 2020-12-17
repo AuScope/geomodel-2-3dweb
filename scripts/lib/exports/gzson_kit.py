@@ -89,14 +89,13 @@ class GZSONKit(ExportKit):
         :param meta_obj: METADATA object, used for labelling
         :param out_filename: path & filename of GZSON file to output, without extension
         '''
-        self.logger.debug("GZSONKit.write_lines(%s)", out_filename)
-        self.logger.debug("GZSONKit.write_lines() geom_obj=%s", repr(geom_obj))
+        self.logger.info("GZSONKit.write_lines(%s)", out_filename)
+        self.logger.info("GZSONKit.write_lines() geom_obj=%s", repr(geom_obj))
 
         if not geom_obj.is_line():
             self.logger.error("ERROR - Cannot use GZSONKit.write_lines for point, triangle or volume")
             sys.exit(1)
 
-        popup_dict = {}
         # geometry_name = meta_obj.name
         feature_list = []
         prop_dict = geom_obj.get_loose_3d_data(True)
@@ -112,21 +111,19 @@ class GZSONKit(ExportKit):
             #                          'title': geometry_name.replace('_', ' ')}
             # Grab first data value
             # Create a list of line features
-            for coord in (xyz1, xyz2):
-                if coord.xyz in prop_dict:
-                    # Not used at present
-                    # popup_dict[geom_label]['val'] = prop_dict[coord.xyz]
-                    ls = LineString([xyz1.xyz, xyz2.xyz])
-                    if style_obj.has_single_colour():
-                        feature_list.append(Feature(geometry=ls, properties={"colour": style_obj.get_rgba_tup()}))
-                    else:
-                        # If no colour, then add yellow lines
-                        feature_list.append(Feature(geometry=ls, properties={"colour": (1.0, 1.0, 0.0, 1.0)}))
+            # Not used at present
+            # popup_dict[geom_label]['val'] = prop_dict[coord.xyz]
+            ls = LineString([xyz1.xyz, xyz2.xyz])
+            if style_obj.has_single_colour():
+                feature_list.append(Feature(geometry=ls, properties={"colour": style_obj.get_rgba_tup()}))
+            else:
+                # If no colour, then add yellow lines
+                feature_list.append(Feature(geometry=ls, properties={"colour": (1.0, 1.0, 0.0, 1.0)}))
 
         # Write feature collection to file
-        self.logger.info("write_points() Writing gzson file: %s.gzson", out_filename)
+        self.logger.info("write_lines() Writing gzson file: %s.gzson", out_filename)
         if self._write_file(out_filename, FeatureCollection(feature_list)):
-            return popup_dict
+            return {}  # popup_dict
         return {}
 
     def _write_file(self, out_filename, json_obj):

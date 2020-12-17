@@ -39,11 +39,11 @@ class Gocad2WebAsset(Converter):
 
         TS -> COLLADA -> GLTF
         PL -> COLLADA -> GLTF
-        PL -> GZIP (larger number of lines)
+        PL -> GZIP+GEOJSON (larger number of lines)
         VO -> GZIP
         SG -> GZIP (only if there are no faults)
         VS -> COLLADA -> GLTF (small number of points)
-        VS -> GZIP (larger number of points)
+        VS -> GZIP+GEOJSON (larger number of points)
         WL -> GLTF
 
         NB: GP object files are split up and each sub object converted
@@ -225,6 +225,7 @@ class Gocad2WebAsset(Converter):
         :param ext_str: file extent string
         :param out_filename: output filename
         """
+        self.logger.debug("process_others(%s, %s, %s, %s, %s, %s)", dest_dir, filename, base_xyz, src_dir, ext_str, out_filename)
         file_lines_list = split_gocad_objs(whole_file_lines)
         self.coll_kit_obj.start_collada()
         popup_dict = {}
@@ -247,9 +248,9 @@ class Gocad2WebAsset(Converter):
                     # If there are too many lines, write out Gzipped GEOJSON
                     if ext_str == 'PL' and len(geom_obj.seg_arr) > POINTCLOUD_THRESHOLD:
                         popup_dict = self.gzson_kit_obj.write_lines(geom_obj,
-                                                                      style_obj,
-                                                                      meta_obj,
-                                                                      out_filename)
+                                                                    style_obj,
+                                                                    meta_obj,
+                                                                    out_filename)
                         self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext='.gzson')
                     # Else write out as COLLADA
                     else: 
