@@ -146,6 +146,7 @@ if __name__ == "__main__":
             os.mkdir(GEOMODELS_DIR)
 
             for urlStr, modelDirName, inConvFile, srcSubDir in MODEL_DATA:
+                # Run model conversion as a separate process
                 convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir)
 
         except OSError as exc:
@@ -153,5 +154,6 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir = args.model
+        # Run model conversion as a separate process
         convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir)
 
