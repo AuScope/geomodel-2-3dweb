@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 class Converter:
     ''' Super class for implementing a file format converter

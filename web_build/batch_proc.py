@@ -27,9 +27,11 @@ os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 
 # This is the list of models to be converted. 'URL string' is for future use.
 # Format:
-# [ ( <URL string>, <model_name>, <model input file>, <src_dir> ), ... ]
+# [ ( <URL string>, <model_name>, <model input file>, <src_sub_dir> ), ... ]
 #
-MODELS = [
+# <src_sub_dir> is the subdirectory within 'MODELS_SRC_DIR' where the models source files live
+#
+MODEL_DATA = [
     # Vic - Bendigo
     ("bendigo", "Bendigo", "input/BendigoConvParam.json", "Victoria/Bendigo/3D_model_attributes"),
 
@@ -143,13 +145,13 @@ if __name__ == "__main__":
                 shutil.rmtree(GEOMODELS_DIR)
             os.mkdir(GEOMODELS_DIR)
 
-            for urlStr, modelDirName, inConvFile, sDir in MODELS:
-                convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
+            for urlStr, modelDirName, inConvFile, srcSubDir in MODEL_DATA:
+                convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir)
 
         except OSError as exc:
             print("ERROR - ", repr(exc))
             sys.exit(1)
     else:
-        MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir = args.model
-        convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir)
+        MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir = args.model
+        convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir)
 

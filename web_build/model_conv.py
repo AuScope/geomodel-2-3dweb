@@ -7,9 +7,18 @@ import sys
 import time
 
 
-def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, sDir):
+''' Converts a geological model by forking 'conv_webasset.py' as a shell executable script
+
+:param modelsSrcDir: model source directory - where all the models are kept
+:param geomodelsDir: output directory
+:param urlStr: path name for this model in website
+:param modelDirName: directory name for model in the website's internal directory structure
+:param inConvFile: input parameter file for model conversion
+:param srcSubDir: source subdirectory for model files - where this model can be found within 'modelSrcDir'
+'''
+def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, srcSubDir):
     # Check source dir
-    srcDir = os.path.join(modelsSrcDir, sDir)
+    srcDir = os.path.join(modelsSrcDir, srcSubDir)
     if not os.path.exists(srcDir):
         print("ERROR - source directory does not exist", srcDir)
         sys.exit(1)
