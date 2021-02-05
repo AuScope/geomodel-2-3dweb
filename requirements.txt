@@ -11,3 +11,4 @@ geojson
 fastapi
 aiofiles
 uvicorn
+wheel
