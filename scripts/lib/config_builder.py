@@ -1,4 +1,4 @@
-''' This class is used to build a config file
+''' This class is used to build the config file for each model within the website
 '''
 import logging
 import sys
@@ -83,7 +83,7 @@ class ConfigBuilder():
 
 
     def create_json_config(self, output_filename, dest_dir, params):
-        ''' Creates a JSON file of GLTF objects to display in 3D
+        ''' Creates a JSON file for the website, specifying webasset objects to display in 3D
 
         :param output_filename: name of file containing created config file
         :param dest_dir: destination directory for output file

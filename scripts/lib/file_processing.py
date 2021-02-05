@@ -32,8 +32,8 @@ MAX_BOREHOLES = 9999
 '''
 
 
-def get_json_input_param(input_file):
-    ''' Reads the parameters from input JSON file and stores them in global 'Param' object
+def get_input_conv_param(input_file):
+    ''' Reads the parameters from conversion input file and stores them in global 'Param' object
 
     :param input_file: filename of input parameter file
     :return: dictionary object of input parameter file
@@ -72,7 +72,6 @@ def get_json_input_param(input_file):
         sys.exit(1)
     return param_obj
 
-
 def find_gltf(geomodels_dir, input_dir, target_model_name, gltf_file):
     '''
     Searches for the model's file path in the model's config file
@@ -97,7 +96,6 @@ def find_gltf(geomodels_dir, input_dir, target_model_name, gltf_file):
                     return model_filepath
     return ''
 
-
 def read_json_file(file_name):
     ''' Reads a JSON file and returns the contents
 
@@ -114,7 +112,6 @@ def read_json_file(file_name):
         LOGGER.error("Cannot read JSON file %s %s", file_name, jd_exc)
         sys.exit(1)
     return json_dict
-
 
 def is_only_small(gsm_list):
     ''' Returns True if this list of geometries contains only lines and points

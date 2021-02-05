@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-This converts geological structure and geophysical data files into a format for displaying in a web browser
+This is the main script that converts geological structure and geophysical data files into a format for displaying
+in a web browser
 """
 
 import sys
@@ -129,9 +130,9 @@ def check_input_params(param_dict, param_file):
                 display_name_set.add(part["Insert"]["display_name"])
 
 def initialise_params(param_file):
-    ''' Reads the input parameter file and returns a dict version of input params
+    ''' Reads the conversion input parameter file and returns a dict version of input parameters
 
-    :param param_file: file name of input parameter file
+    :param param_file: file name of conversion input parameter file
     '''
     params_obj = SimpleNamespace()
     param_dict = read_json_file(param_file)

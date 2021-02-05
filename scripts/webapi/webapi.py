@@ -28,7 +28,7 @@ from diskcache import Cache, Timeout
 import pyassimp
 from types import SimpleNamespace
 
-from lib.file_processing import get_json_input_param
+from lib.file_processing import get_input_conv_param
 from lib.exports.bh_make import get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file, find_gltf
@@ -78,11 +78,9 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 ''' This file's absolute path
 '''
 
-
 DATA_DIR = os.path.join(LOCAL_DIR, 'data')
 ''' Directory where web cache data files are stored
 '''
-
 
 INPUT_DIR = os.path.join(LOCAL_DIR, 'input')
 ''' Directory where conversion parameter files are stored, one for each model
@@ -141,7 +139,7 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     if hasattr(param_dict[model], 'BOREHOLE_CRS'):
         param.BOREHOLE_CRS = param_dict[model].BOREHOLE_CRS
     if hasattr(param_dict[model], 'BBOX'):
-        param.BOREHOLE_CRS = param_dict[model].BBOX
+        param.BBOX = param_dict[model].BBOX
     reader = NVCLReader(param_dict[model], wfs=wfs_dict[model])
     borehole_list = reader.get_boreholes_list()
     result_dict = {}
@@ -272,8 +270,17 @@ def get_cached_parameters():
             input_file = os.path.join(INPUT_DIR, file_prefix + 'ConvParam.json')
             if not os.path.exists(input_file):
                 continue
-            # Create params and WFS service
-            param_dict[model] = get_json_input_param(input_file)
+            # Load params and connect to WFS service
+            param_dict[model] = get_input_conv_param(input_file)
+            # If input conversion file does not have a bounding box, use the one calculated from the model
+            # conversion process
+            if not hasattr(param_dict[model], 'BOREHOLE_CRS') or not hasattr(param_dict[model], 'BBOX'):
+                webasset_file = os.path.join(GEOMODELS_DIR, file_prefix + '.json')
+                if os.path.exists(input_file):
+                    webasset_dict = read_json_file(webasset_file)
+                    param_dict[model].BOREHOLE_CRS = webasset_dict['properties']['crs']
+                    extent =  webasset_dict['properties']['extent']
+                    param_dict[model].BBOX = {'north': extent[3], 'south': extent[2], 'east': extent[1], 'west': extent[0]}
             try:
                 wfs_dict[model] = MyWebFeatureService(param_dict[model].WFS_URL,
                                                            version=param_dict[model].WFS_VERSION,
