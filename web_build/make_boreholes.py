@@ -68,8 +68,9 @@ def get_bh_info_dict(borehole_dict, param_obj):
     for key in GSMLP_IDS:
         if key not in ['name', 'identifier', 'metadata_uri'] and borehole_dict[key]:
             info_obj[key] = borehole_dict[key]
-    info_obj['href'] = [{'label': 'WFS URL', 'URL': borehole_dict['href']},
-                        {'label': 'AuScope URL', 'URL': param_obj.EXTERNAL_LINK['URL']}]
+    info_obj['href'] = [{'label': 'WFS URL', 'URL': borehole_dict['href']}]
+    if hasattr(param_obj, 'EXTERNAL_LINK'):
+        info_obj['href'].append({'label': 'AuScope URL', 'URL': param_obj.EXTERNAL_LINK['URL']})
     if borehole_dict['metadata_uri']:
         info_obj['href'].append({'label': 'Metadata URI', 'URL': borehole_dict['metadata_uri']})
     return info_obj
