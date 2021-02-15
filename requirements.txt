@@ -1,9 +1,9 @@
 numpy
-OWSLib
+OWSLib==0.22.0
 Pillow
 pyassimp
 pycollada
-pyproj==2.6.1
+pyproj
 SQLAlchemy
 diskcache
 nvcl_kit
