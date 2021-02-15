@@ -12,7 +12,7 @@ API_TAR=`date +%Y%m%d`-api.tar
 # Create data dir and copy in db
 [ -d api ] && \rm -rf api
 mkdir -p api/data/cache
-cp $1 api/data
+cp $1 api/data || exit 1
 
 # Assemble api files
 cp make_boreholes.py api
