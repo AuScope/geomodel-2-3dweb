@@ -60,7 +60,9 @@ def get_input_conv_param(input_file):
     param_obj.MAX_BOREHOLES = MAX_BOREHOLES
     for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS',
                        'WFS_VERSION', 'NVCL_URL']:
-        if field_name not in param_dict['BoreholeData']:
+        # Check for compulsory fields
+        if field_name not in param_dict['BoreholeData'] and \
+                    field_name not in ['BBOX', 'EXTERNAL_LINK', 'BOREHOLE_CRS']:
             LOGGER.error("Cannot find '%s' key in input file %s", field_name, input_file)
             sys.exit(1)
         setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
