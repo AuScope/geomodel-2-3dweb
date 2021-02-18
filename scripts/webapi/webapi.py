@@ -959,3 +959,5 @@ try:
             cache.add(WFS_CACHE_KEY, G_WFS_DICT)
 except OSError as os_exc:
     LOGGER.error("Cannot fetch parameters & wfs from cache: %s", str(os_exc))
+    G_PARAM_DICT = {}
+    G_WFS_DICT = {}
