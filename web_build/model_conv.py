@@ -70,7 +70,10 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
 
     # Move config file up to models dir
     config_file = os.path.join(modelDir, 'output_config.json')
-    model_config = os.path.join(geomodelsDir, modelDirName+'_new.json')
+    model_config = os.path.join(geomodelsDir, modelDirName+'.json')
+    if os.path.exists(model_config):
+        print("Renaming ", model_config, " to ", model_config+'.old')
+        os.rename(model_config, model_config+'.old')
     if os.path.exists(config_file):
         print("Copying ", config_file, " to ", model_config)
         shutil.copyfile(config_file, model_config)
