@@ -61,14 +61,15 @@ def get_input_conv_param(input_file):
     for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS',
                        'WFS_VERSION', 'NVCL_URL']:
         # Check for compulsory fields
-        if field_name not in param_dict['BoreholeData'] and \
-                    field_name not in ['BBOX', 'EXTERNAL_LINK', 'BOREHOLE_CRS']:
-            LOGGER.error("Cannot find '%s' key in input file %s", field_name, input_file)
-            sys.exit(1)
-        setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
+        if field_name not in param_dict['BoreholeData']:
+            if field_name not in ['BBOX', 'EXTERNAL_LINK', 'BOREHOLE_CRS']:
+                LOGGER.error("Cannot find '%s' key in input file %s", field_name, input_file)
+                sys.exit(1)
+        else:
+            setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
 
-    if 'west' not in param_obj.BBOX or 'south' not in param_obj.BBOX or \
-       'east' not in param_obj.BBOX or 'north' not in param_obj.BBOX:
+    if 'BBOX' in param_dict['BoreholeData'] and ('west' not in param_obj.BBOX or 'south' not in param_obj.BBOX or \
+       'east' not in param_obj.BBOX or 'north' not in param_obj.BBOX):
         LOGGER.error("Cannot find 'west','south','east','north' in 'BBOX' in input file %s",
                      input_file)
         sys.exit(1)
