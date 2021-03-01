@@ -1,10 +1,6 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 132.5142, "south": -17.525, "east": 135.5984, "north": -13.9739 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28353",
         "WFS_URL": "http://geology.data.nt.gov.au:80/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",

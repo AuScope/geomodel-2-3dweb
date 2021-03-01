@@ -1,10 +1,6 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 118.99, "south": -28.34, "east": 119.51, "north": -27.55 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28350",
         "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
