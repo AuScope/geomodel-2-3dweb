@@ -32,46 +32,61 @@ MAX_BOREHOLES = 9999
 '''
 
 
-def get_input_conv_param(input_file):
+def get_input_conv_param_bh(input_file):
     ''' Reads the parameters from conversion input file and stores them in global 'Param' object
+    Used for processing borehole data.
 
-    :param input_file: filename of input parameter file
+    :param input_file: filename of conversion input parameter file
     :return: dictionary object of input parameter file
     '''
-    LOGGER.info("Opening: %s", input_file)
+    LOGGER.info(f"Opening {input_file}")
     with open(input_file, "r") as file_p:
         try:
             param_dict = json.load(file_p)
         except JSONDecodeError as exc:
-            LOGGER.error("Cannot read JSON file %s: %s", input_file, str(exc))
+            LOGGER.error(f"Cannot read JSON file {input_file}: {str(exc)}")
             sys.exit(1)
+
+    # Check presence of broad categories
     if 'BoreholeData' not in param_dict:
-        LOGGER.error('Cannot find "BoreholeData" key in input file %s', input_file)
+        LOGGER.error(f"Cannot find 'BoreholeData' key in input file {input_file}")
         sys.exit(1)
     if 'ModelProperties' not in param_dict:
-        LOGGER.error('Cannot find "ModelProperties" key in input file %s', input_file)
+        LOGGER.error(f"Cannot find 'ModelProperties' key in input file {input_file}")
         sys.exit(1)
 
+    # Check for model's CRS
     param_obj = SimpleNamespace()
-    if 'modelUrlPath' not in param_dict['ModelProperties']:
-        LOGGER.error("'modelUrlPath' not in input file %s", input_file)
+    param_obj.MODEL_CRS = param_dict['ModelProperties'].get('crs', None)
+    if param_obj.MODEL_CRS is None:
+        LOGGER.error(f"Cannot find 'crs' under 'ModelProperties' in input file {input_file}")
         sys.exit(1)
-    param_obj.modelUrlPath = param_dict['ModelProperties']['modelUrlPath']
+    # If 'MODEL_CRS' is in 'BoreholeData', this overrides the one in 'ModelProperties'
+    if 'MODEL_CRS' in param_dict['BoreholeData']:
+        param_obj.MODEL_CRS = param_dict['BoreholeData']['MODEL_CRS']
+
+    # Check for model's URL path
+    param_obj.modelUrlPath = param_dict['ModelProperties'].get('modelUrlPath', None)
+    if param_obj.modelUrlPath is None:
+        LOGGER.error(f"'modelUrlPath' not in input file {input_file}")
+        sys.exit(1)
     param_obj.MAX_BOREHOLES = MAX_BOREHOLES
-    for field_name in ['BBOX', 'EXTERNAL_LINK', 'MODEL_CRS', 'WFS_URL', 'BOREHOLE_CRS',
-                       'WFS_VERSION', 'NVCL_URL']:
+
+    # Check and setup other fields
+    for field_name in ['BBOX', 'EXTERNAL_LINK', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
         # Check for compulsory fields
         if field_name not in param_dict['BoreholeData']:
+            # NB: BBOX, EXTERNAL_LINK and BOREHOLE_CRS are optional
             if field_name not in ['BBOX', 'EXTERNAL_LINK', 'BOREHOLE_CRS']:
-                LOGGER.error("Cannot find '%s' key in input file %s", field_name, input_file)
+                LOGGER.error(f"Cannot find '{field_name}' key in {input_file}")
                 sys.exit(1)
         else:
             setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
 
+    # Check for missing bounding box fields
     if 'BBOX' in param_dict['BoreholeData'] and ('west' not in param_obj.BBOX or 'south' not in param_obj.BBOX or \
        'east' not in param_obj.BBOX or 'north' not in param_obj.BBOX):
-        LOGGER.error("Cannot find 'west','south','east','north' in 'BBOX' in input file %s",
-                     input_file)
+        LOGGER.error(f"Cannot find 'west','south','east','north' in 'BBOX' in {input_file}")
         sys.exit(1)
     return param_obj
 
@@ -108,11 +123,11 @@ def read_json_file(file_name):
         with open(file_name, "r") as file_p:
             json_dict = json.load(file_p)
     except OSError as oe_exc:
-        LOGGER.error("Cannot open JSON file %s %s", file_name, oe_exc)
+        LOGGER.error(f"Cannot open JSON file {file_name}: {oe_exc}")
         sys.exit(1)
     except JSONDecodeError as jd_exc:
         json_dict = {}
-        LOGGER.error("Cannot read JSON file %s %s", file_name, jd_exc)
+        LOGGER.error(f"Cannot read JSON file {file_name}: {jd_exc}")
         sys.exit(1)
     return json_dict
 

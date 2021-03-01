@@ -28,7 +28,7 @@ from diskcache import Cache, Timeout
 import pyassimp
 from types import SimpleNamespace
 
-from lib.file_processing import get_input_conv_param
+from lib.file_processing import get_input_conv_param_bh
 from lib.exports.bh_make import get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file, find_gltf
@@ -271,7 +271,7 @@ def get_cached_parameters():
             if not os.path.exists(input_file):
                 continue
             # Load params and connect to WFS service
-            param_dict[model] = get_input_conv_param(input_file)
+            param_dict[model] = get_input_conv_param_bh(input_file)
             # If input conversion file does not have a bounding box, use the one calculated from the model
             # conversion process
             if not hasattr(param_dict[model], 'BOREHOLE_CRS') or not hasattr(param_dict[model], 'BBOX'):

@@ -21,7 +21,7 @@ from lib.exports.bh_make import get_blob_boreholes, get_nvcl_data
 from lib.exports.assimp_kit import AssimpKit
 from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
-from lib.file_processing import get_input_conv_param
+from lib.file_processing import get_input_conv_param_bh
 from lib.coords import convert_coords
 
 from nvcl_kit.reader import GSMLP_IDS, NVCLReader
@@ -200,7 +200,7 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     '''
     LOGGER.info("Processing %s", input_file)
     out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
-    param_obj = get_input_conv_param(input_file)
+    param_obj = get_input_conv_param_bh(input_file)
     reader = NVCLReader(param_obj)
     if reader.wfs is None:
         LOGGER.error("Cannot contact web service")
