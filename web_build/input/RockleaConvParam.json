@@ -1,21 +1,17 @@
 {
    "BoreholeData": {
         "BBOX": { "west": 114.606468, "south": -23.4859203, "east": 118.283877, "north": -19.271620 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28350",
         "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/ows",
         "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
-        "crs": "EPSG:28353",
+        "crs": "EPSG:28350",
         "init_cam_dist": 1500000.0,
         "name": "Rocklea Dome",
         "modelUrlPath": "rocklea",
-        "proj4_defn": "+proj=utm +zone=53 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=50 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
     "WMSServices": [
         {

@@ -1,21 +1,17 @@
 {
     "BoreholeData": {
-        "BBOX": { "west": 149, "south": -33, "east": 153.67, "north": -28 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28356",
+        "BOREHOLE_CRS": "EPSG:28355",
+        "BBOX": { "west": 0, "east": 0, "south": 0, "north": 0 },
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
-        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
-        "crs": "EPSG:28356",
+        "crs": "EPSG:28355",
         "init_cam_dist": 150000.0,
         "name": "Cobar Geology & Faults",
         "modelUrlPath": "cobar",
-        "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
     "WMSServices": [
         {

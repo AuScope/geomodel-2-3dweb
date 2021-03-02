@@ -1,20 +1,17 @@
 {
     "BoreholeData": {    
-        "BBOX": { "west": 134.5153745, "south": -33.5286433, "east": 137.8876463, "north": -29.4832313 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": "" },
-        "MODEL_CRS": "EPSG:28352",
+        "BOREHOLE_CRS": "EPSG:28354",
+        "BBOX": { "west": 193373, "east": 361439, "south": 6453698, "north": 6574485 },
         "WFS_URL": "https://sarigdata.pir.sa.gov.au/nvcl/geoserver/ows",
-        "BOREHOLE_CRS": "EPSG:4283",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices"
     },
     "ModelProperties": {
-        "crs": "EPSG:32753",
+        "crs": "EPSG:28354",
         "name": "CentralFlinders",
         "modelUrlPath": "centralflinders",
         "init_cam_dist": 500000.0,
-        "proj4_defn": "+proj=utm +zone=53 +south +datum=WGS84 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
     "WMSServices": [
         {

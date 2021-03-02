@@ -1,10 +1,6 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 149, "south": -33, "east": 153.67, "north": -28 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28356",
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4326",
         "WFS_VERSION": "1.1.0",

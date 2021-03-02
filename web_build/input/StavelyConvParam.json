@@ -1,12 +1,8 @@
 {
     "BoreholeData": {
-        "BBOX": { "west": 140.5291197, "north": -36.7200975, "east": 145.2273001, "south": -40.3891862 },
-        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
-                           "URL": ""
-                         },
-        "MODEL_CRS": "EPSG:28354",
+        "BBOX": { "west": 532000, "north": 6034500, "east": 681500, "south": 5755000 },
         "WFS_URL": "http://geology.data.vic.gov.au/nvcl/ows",
-        "BOREHOLE_CRS": "EPSG:4283",
+        "BOREHOLE_CRS": "EPSG:28354",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "http://geology.data.vic.gov.au/NVCLDataServices"
     },
