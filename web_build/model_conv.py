@@ -13,8 +13,10 @@ import time
 :param modelDirName: directory name for model in the website's internal directory structure
 :param inConvFile: input parameter file for model conversion
 :param srcSubDir: source subdirectory for model files - where this model can be found within 'modelSrcDir'
+:param recreateOutDir: recreate output directory
 '''
-def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, srcSubDir):
+def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, srcSubDir,
+                 recreateOutDir=True):
     # Check source dir
     srcDir = os.path.join(modelsSrcDir, srcSubDir)
     if not os.path.exists(srcDir):
@@ -24,6 +26,9 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
     # Remove and recreate output dir
     outDir = os.path.join(srcDir, 'output')
     if os.path.exists(outDir):
+        if not recreateOutDir:
+            print("Skipping ", srcDir)
+            return
         print("Removing", outDir)
         shutil.rmtree(outDir)
     os.mkdir(outDir)

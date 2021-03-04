@@ -27,106 +27,106 @@ os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 
 # This is the list of models to be converted. 'URL string' is for future use.
 # Format:
-# [ ( <URL string>, <model_name>, <model input file>, <src_sub_dir> ), ... ]
+# [ ( <URL string>, <model_name>, <model input file>, <src_sub_dir>, <recreate_outdir> ), ... ]
 #
 # <src_sub_dir> is the subdirectory within 'MODELS_SRC_DIR' where the models source files live
 #
 MODEL_DATA = [
     # Vic - Bendigo
-    ("bendigo", "Bendigo", "input/BendigoConvParam.json", "Victoria/Bendigo/3D_model_attributes"),
+    ("bendigo", "Bendigo", "input/BendigoConvParam.json", "Victoria/Bendigo/3D_model_attributes", False),
 
     # Vic - Otway
-    ("otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway"),
+    ("otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway", False),
 
     # Vic - Stavely
-    ("stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD"),
+    ("stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD", False),
 
     # WA - Windimurra
     ("windimurra", "Windimurra", "input/WindimurraConvParam.json",
-     "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD"),
+     "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD", False),
 
     # WA - Sandstone
-    ("sandstone", "Sandstone", "input/SandstoneConvParam.json", "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD"),
+    ("sandstone", "Sandstone", "input/SandstoneConvParam.json", "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD", False),
 
 
     # SA - Cariewerloo
-    ("cariewerloo", "Cariewerloo", "input/CariewerlooConvParam.json", "SouthAust/GDP00005"),
+    ("cariewerloo", "Cariewerloo", "input/CariewerlooConvParam.json", "SouthAust/GDP00005", False),
 
     # SA - Emmie Bluff
-    ("emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects"),
+    ("emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects", True),
 
     # SA - Burra Mine
-    ("burramine", "BurraMine", "input/BurraMineConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad"),
+    ("burramine", "BurraMine", "input/BurraMineConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad", True),
 
     # SA - Central Flinders
-    ("centralflinders", "CentralFlinders", "input/CentralFlindersConvParam.json", "SouthAust/GDP00024"),
+    ("centralflinders", "CentralFlinders", "input/CentralFlindersConvParam.json", "SouthAust/GDP00024", True),
 
     # SA - North Flinders
-    ("northflinders", "NorthFlinders", "input/NorthFlindersConvParam.json", "SouthAust/GDP00025"),
+    ("northflinders", "NorthFlinders", "input/NorthFlindersConvParam.json", "SouthAust/GDP00025", True),
 
     # SA - North Gawler
-    ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026"),
+    ("ngawler", "NorthGawler", "input/NorthGawlerConvParam.json", "SouthAust/GDP00026", False),
 
     # SA - Curnamona Sedimentary Basins
-    ("curnamonased", "CurnamonaSed", "input/CurnamonaSedConvParam.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad"),
+    ("curnamonased", "CurnamonaSed", "input/CurnamonaSedConvParam.json", "SouthAust/GDP00033/CurnamonaSedimentaryBasins/Gocad", True),
 
     # SA - Western Gawler
-    ("westerngawler", "WesternGawler", "input/WesternGawlerConvParam.json", "SouthAust/GDP00067/Gocad objects"),
+    ("westerngawler", "WesternGawler", "input/WesternGawlerConvParam.json", "SouthAust/GDP00067/Gocad objects", True),
 
 
     # Tas - Rosebery Lyell
-    ("rosebery", "RoseberyLyell", "input/RoseberyLyellConvParam.json", "Tasmania/RoseberyLyell"),
+    ("rosebery", "RoseberyLyell", "input/RoseberyLyellConvParam.json", "Tasmania/RoseberyLyell", False),
 
 
     # QLD - Quamby
-    ("quamby", "Quamby", "input/QuambyConvParam.json", "Queensland/Quamby/Quamby/TSurf"),
+    ("quamby", "Quamby", "input/QuambyConvParam.json", "Queensland/Quamby/Quamby/TSurf", False),
 
     # QLD - MtDore
-    ("mtdore", "MtDore", "input/MtDoreConvParam.json", "Queensland/MtDore/Model Objects"),
+    ("mtdore", "MtDore", "input/MtDoreConvParam.json", "Queensland/MtDore/Model Objects", True),
 
     
 
     # NSW - "Western Tamworth Belt"
-    ("tamworth", "Tamworth", "input/WestTamworthConvParam.json", "NewSouthWales/WesternTamworth"),
+    ("tamworth", "Tamworth", "input/WestTamworthConvParam.json", "NewSouthWales/WesternTamworth", False),
 
     # NSW - "Cobar geological and fault model package"
-    ("cobar", "Cobar", "input/CobarConvParam.json", "NewSouthWales/Cobar_GM_gocad_May18/Cobar_GM_gocad_May18"),
+    ("cobar", "Cobar", "input/CobarConvParam.json", "NewSouthWales/Cobar_GM_gocad_May18/Cobar_GM_gocad_May18", True),
 
     # NSW - "Curnamona Province and Delamerian Orogen 3D fault model"
-    ("curnamona", "Curnamona", "input/CurnamonaConvParam.json", "NewSouthWales/Curnamona_Delamerian_GDA94_Z54_GOCAD"),
+    ("curnamona", "Curnamona", "input/CurnamonaConvParam.json", "NewSouthWales/Curnamona_Delamerian_GDA94_Z54_GOCAD", True),
 
     # NSW - "Eastern Lachlan Orogen 3D fault model"
-    ("eastlachlan", "EastLachlan", "input/EastLachlanConvParam.json", "NewSouthWales/E_Lachlan_Orogen_GDA94_Z55_GOCAD"),
+    ("eastlachlan", "EastLachlan", "input/EastLachlanConvParam.json", "NewSouthWales/E_Lachlan_Orogen_GDA94_Z55_GOCAD", True),
 
     # NSW - "Western Lachlan Orogen and southern Thomson Orogen 3D fault model"
-    ("westlachlan", "WestLachlan", "input/WestLachlanConvParam.json", "NewSouthWales/W_Lachlan_Orogen_GDA94_Z55_GOCAD"),
+    ("westlachlan", "WestLachlan", "input/WestLachlanConvParam.json", "NewSouthWales/W_Lachlan_Orogen_GDA94_Z55_GOCAD", True),
 
     # NSW - Southern New England Deep Crustal
-    ("sthnewengland", "SthNewEngland", "input/SthNewEnglandConvParam.json", "NewSouthWales/20150626_SNEO_Deep_Struture_SKUA"),
+    ("sthnewengland", "SthNewEngland", "input/SthNewEnglandConvParam.json", "NewSouthWales/20150626_SNEO_Deep_Struture_SKUA", True),
 
     # NSW - "New England Orogen 3D fault model"
-    ("newengland", "NewEngland", "input/NewEnglandConvParam.json", "NewSouthWales/NEO_GDA94_Z56_GOCAD"),
+    ("newengland", "NewEngland", "input/NewEnglandConvParam.json", "NewSouthWales/NEO_GDA94_Z56_GOCAD", True),
 
     # NT - McArthur Basin
     ("mcarthur", "McArthurBasin", "input/McArthurBasinConvParam.json",
-     "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL"),
+     "NorthernTerritory/McArthurBasin/DIP012/Digital_Data/REGIONAL_MODEL", False),
 
 
     # GA - North Qld
-    ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json", "GA/North-Queensland"),
+    ("nqueensland", "NorthQueensland", "input/NorthQueenslandConvParam.json", "GA/North-Queensland", False),
 
     # GA - Tasmania
-    ("tas", "Tas", "input/TasConvParam.json", "GA/Tas"),
+    ("tas", "Tas", "input/TasConvParam.json", "GA/Tas", False),
 
     # GA - Yilgarn
-    ("yilgarn", "Yilgarn", "input/YilgarnConvParam.json", "GA/Yilgarn-NWS"),
+    ("yilgarn", "Yilgarn", "input/YilgarnConvParam.json", "GA/Yilgarn-NWS", False),
 
 
     # CSIRO - RockLea Dome
-    ("rocklea", "RockleaDome", "input/RockleaConvParam.json", "CSIRO/RockleaDome"),
+    ("rocklea", "RockleaDome", "input/RockleaConvParam.json", "CSIRO/RockleaDome", True),
 
     # GA/NCI Stuart Shelf MT model
-    ("stuartshelf", "StuartShelf", "input/StuartShelfConvParam.json", "NCI/MT")
+    ("stuartshelf", "StuartShelf", "input/StuartShelfConvParam.json", "NCI/MT", True)
 ]
 
 
@@ -145,9 +145,9 @@ if __name__ == "__main__":
                 shutil.rmtree(GEOMODELS_DIR)
             os.mkdir(GEOMODELS_DIR)
 
-            for urlStr, modelDirName, inConvFile, srcSubDir in MODEL_DATA:
+            for urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir in MODEL_DATA:
                 # Run model conversion as a separate process
-                convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir)
+                convert_model(MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir)
 
         except OSError as exc:
             print("ERROR - ", repr(exc))
