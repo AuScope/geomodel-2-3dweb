@@ -1,6 +1,6 @@
 {
     "BoreholeData": {    
-        "BBOX": { "west": 665000, "south": 6543000, "east": 726000, "north": 6596000 }
+        "BBOX": { "west": 665000, "south": 6543000, "east": 726000, "north": 6596000 },
         "BOREHOLE_CRS": "EPSG:28353",
         "WFS_URL": "https://sarigdata.pir.sa.gov.au/nvcl/geoserver/ows",
         "WFS_VERSION": "1.1.0",
