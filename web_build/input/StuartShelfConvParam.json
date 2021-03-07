@@ -22,5 +22,13 @@
         }    
     ],
     "GroupStructure": {
+        "3D MT Inversion Model": [
+            {
+                "FileNameKey": "04_LP_3dmod_it100.gzson",
+                "Insert": {
+                    "display_name": "Model"
+                }
+            }
+        ]
     }
 }
