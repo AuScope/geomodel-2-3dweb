@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28355",
-        "BBOX": { "west": 0, "east": 0, "south": 0, "north": 0 },
+        "BBOX": { "west": 300000.0, "east": 984000.0, "south": 5844000.0, "north": 6840000.0 },
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
@@ -9,7 +9,7 @@
     "ModelProperties": {
         "crs": "EPSG:28355",
         "init_cam_dist": 900000.0,
-        "name": "East Lachlan",
+        "name": "East Lachlan Orogen",
         "modelUrlPath": "eastlachlan",
         "proj4_defn": "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
@@ -22,5 +22,21 @@
         }    
     ],
     "GroupStructure": {
+        "Depth To Basement Model": [
+            {
+                "FileNameKey": "Depth_To_Basement.gltf",
+                "Insert": {
+                    "display_name": "Depth To Basement"
+                }
+            }
+        ],
+        "Faults": [
+            {
+                "FileNameKey": "Eastern_Lachlan_Orogen_3D_Fault_Architecture.gltf",
+                "Insert": {
+                    "display_name": "3D Fault Architecture"
+                }
+            }
+        ]
     }
 }
