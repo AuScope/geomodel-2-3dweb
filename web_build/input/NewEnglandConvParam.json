@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28356",
-        "BBOX": { "west": 0, "east": 0, "south": 0, "north": 0 },
+        "BBOX": { "west": -697305.375, "east": 1169699.9375, "south": 5790345.0625, "north": 7191158.125 },
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
@@ -22,5 +22,37 @@
         }    
     ],
     "GroupStructure": {
+        "Base of Unconsolidated": [
+            {
+                "FileNameKey": "2019_Z56_Base_of_Unconsolidated_GDA94_Z56.gltf",
+                "Insert": {
+                    "display_name": "2019 Base of Unconsolidated"
+                }
+            }
+        ],
+        "Top of Basement": [
+            {
+                "FileNameKey": "2019_Z56_Top_of_Basement_GDA94_Z56.gltf",
+                "Insert": {
+                    "display_name": "2019 Top of Basement"
+                }
+            }
+        ],
+        "Seismic": [
+            {
+                "FileNameKey": "NSW_Seismic_Profiles_Location_GDA94_Z56.gzson",
+                "Insert": {
+                    "display_name": "NSW Seismic Profiles Location"
+                }
+            }
+        ],
+        "Faults": [
+            {
+                "FileNameKey": "New_England_Orogen_3D_Fault_Architecture_GDA94_Z56.gltf",
+                "Insert": {
+                    "display_name": "New England Orogen 3D Fault Architecture"
+                }
+            }
+        ]
     }
 }
