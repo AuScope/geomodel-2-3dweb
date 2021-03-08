@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28355",
-        "BBOX": { "west": 0, "east": 0, "south": 0, "north": 0 },
+        "BBOX": { "west": -109557.59375, "east": 1743569.125, "south": 5791793.5, "north": 7174549.5625 },
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
@@ -9,7 +9,7 @@
     "ModelProperties": {
         "crs": "EPSG:28355",
         "init_cam_dist": 900000.0,
-        "name": "West Lachlan",
+        "name": "West Lachlan & South Thomson Orogen",
         "modelUrlPath": "westlachlan",
         "proj4_defn": "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
@@ -21,5 +21,36 @@
             "version": "1.3.0"
         }    
     ],
-    "GroupStructure": {}
+    "GroupStructure": {
+        "Top of Basement": [
+            {
+                "FileNameKey": "2019_Z54_Top_of_Basement_GDA94_Z55.gltf",
+                "Insert": {
+                    "display_name": "2019 Zone 54 Depth To Basement"
+                }
+            },
+            {
+                "FileNameKey": "2019_Z55_Top_of_Basement_GDA94_Z55.gltf",
+                "Insert": {
+                    "display_name": "2019 Zone 55 Depth To Basement"
+                }
+            }
+        ],
+        "Seismic": [
+            {
+                "FileNameKey": "NSW_Seismic_Profiles_Location_GDA94_Z55.gzson",
+                "Insert": {
+                    "display_name": "Seismic Profiles Location"
+                }
+            }
+        ],
+        "Faults": [
+            {
+                "FileNameKey": "Western_Lachlan_South_Thomson_3D_Fault_Architecture_GDA94_Z55.gltf",
+                "Insert": {
+                    "display_name": "West Lachlan & South Thomson Orogen"
+                }
+            }
+        ]
+    }
 }
