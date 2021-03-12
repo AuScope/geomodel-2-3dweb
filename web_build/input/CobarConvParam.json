@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28355",
-        "BBOX": { "west": 0, "east": 0, "south": 0, "north": 0 },
+        "BBOX": { "west": 411839.48227417044, "east": 452433.54486757674, "south": 6410221.7202726165, "north": 6466286.830872239 },
         "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
         "WFS_VERSION": "1.1.0",
         "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
@@ -22,5 +22,298 @@
         }    
     ],
     "GroupStructure": {
+	"Faults": [
+		{
+			"FileNameKey": "GM - Barrow Fault.gltf",
+			"Insert": {
+				"display_name": "Barrow Fault",
+				"popups": {
+					"GM - BARROW FAULT": {
+						"name": "BARROW FAULT",
+						"title": "BARROW FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Boxtank Fault.gltf",
+			"Insert": {
+				"display_name": "Boxtank Fault",
+				"popups": {
+					"GM - BOXTANK FAULT": {
+						"name": "BOXTANK FAULT",
+						"title": "BOXTANK FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Coonara Fault.gltf",
+			"Insert": {
+				"display_name": "Coonara Fault",
+				"popups": {
+					"GM - COONARA FAULT": {
+						"name": "COONARA FAULT",
+						"title": "COONARA FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Crowl Fault.gltf",
+			"Insert": {
+				"display_name": "Crowl Fault",
+				"popups": {
+					"GM - CROWL FAULT": {
+						"name": "CROWL FAULT",
+						"title": "CROWL FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Ironbark Fault.gltf",
+			"Insert": {
+				"display_name": "Ironbark Fault",
+				"popups": {
+					"GM - IRONBARK FAULT": {
+						"name": "IRONBARK FAULT",
+						"title": "IRONBARK FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Myrt Fault.gltf",
+			"Insert": {
+				"display_name": "Myrt Fault",
+				"popups": {
+					"GM - MYRT FAULT": {
+						"name": "MYRT FAULT",
+						"title": "MYRT FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Rookery Fault.gltf",
+			"Insert": {
+				"display_name": "Rookery Fault",
+				"popups": {
+					"GM - ROOKERY FAULT": {
+						"name": "ROOKERY FAULT",
+						"title": "ROOKERY FAULT"
+					}
+				}
+			}
+		},
+				{
+			"FileNameKey": "GM - Wildcat Fault.gltf",
+			"Insert": {
+				"display_name": "Wildcat Fault",
+				"popups": {
+					"GM - WILDCAT FAULT": {
+						"name": "WILDCAT FAULT",
+						"title": "WILDCAT FAULT"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Woorara Fault.gltf",
+			"Insert": {
+				"display_name": "Woorara Fault",
+				"popups": {
+					"GM - WOORARA FAULT": {
+						"name": "WOORARA FAULT",
+						"title": "WOORARA FAULT"
+					}
+				}
+			}
+		}
+	],
+	"Stratigraphy": [
+		{
+			"FileNameKey": "GM - Babinda Volcanics.gltf",
+			"Insert": {
+				"display_name": "Babinda Volcanics",
+				"popups": {
+					"GM - BABINDA VOLCANICS.TS.TMP": {
+						"name": "BABINDA VOLCANICS",
+						"title": "BABINDA VOLCANICS"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Balemund Formation.gltf",
+			"Insert": {
+				"display_name": "Balemund Formation",
+				"popups": {
+					"GM - BALEMUND FORMATION.TS.TMP": {
+						"name": "BALEMUND FORMATION",
+						"title": "BALEMUND FORMATION"
+					}
+				}
+			}
+		},
+
+		{
+			"FileNameKey": "GM - Bendoc Group.gltf",
+			"Insert": {
+				"display_name": "Bendoc Group",
+				"popups": {
+					"GM - BENDOC GROUP.TS.TMP": {
+						"name": "BENDOC GROUP",
+						"title": "BENDOC GROUP"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Clements Formation.gltf",
+			"Insert": {
+				"display_name": "Clements Formation",
+				"popups": {
+					"GM - CLEMENTS FORMATION.TS.TMP": {
+						"name": "CLEMENTS FORMATION",
+						"title": "CLEMENTS FORMATION"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Erimeran Granite.gltf",
+			"Insert": {
+				"display_name": "Erimeran Granite",
+				"popups": {
+					"GM - ERIMERAN GRANITE.TS.TMP": {
+						"name": "ERIMERAN GRANITE",
+						"title": "ERIMERAN GRANITE"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Lang-Ballast Formation.gltf",
+			"Insert": {
+				"display_name": "Lang-Ballast Formation",
+				"popups": {
+					"GM - LANG-BALLAST FORMATION.TS.TMP": {
+						"name": "LANG-BALLAST FORMATION",
+						"title": "LANG-BALLAST FORMATION"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Lower Amphitheatre.gltf",
+			"Insert": {
+				"display_name": "Lower Amphitheatre",
+				"popups": {
+					"GM - LOWER AMPHITHEATRE.TS.TMP": {
+						"name": "LOWER AMPHITHEATRE",
+						"title": "LOWER AMPHITHEATRE"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Majaba Volcanics.gltf",
+			"Insert": {
+				"display_name": "Majaba Volcanics",
+				"popups": {
+					"GM - MAJABA VOLCANICS.TS.TMP": {
+						"name": "MAJABA VOLCANICS",
+						"title": "MAJABA VOLCANICS"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Nymagee Igneous.gltf",
+			"Insert": {
+				"display_name": "Nymagee Igneous",
+				"popups": {
+					"GM - NYMAGEE IGNEOUS.TS.TMP": {
+						"name": "NYMAGEE IGNEOUS",
+						"title": "NYMAGEE IGNEOUS"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Shume Formation.gltf",
+			"Insert": {
+				"display_name": "Shume Formation",
+				"popups": {
+					"GM - SHUME FORMATION.TS.TMP": {
+						"name": "SHUME FORMATION",
+						"title": "SHUME FORMATION"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Tarran Volcanics.gltf",
+			"Insert": {
+				"display_name": "Tarran Volcanics",
+				"popups": {
+					"GM - TARRAN VOLCANICS.TS.TMP": {
+						"name": "TARRAN VOLCANICS",
+						"title": "TARRAN VOLCANICS"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Undiff. Girilambone.gltf",
+			"Insert": {
+				"display_name": "Undiff. Girilambone",
+				"popups": {
+					"GM - UNDIFF. GIRILAMBONE.TS.TMP": {
+						"name": "UNDIFF. GIRILAMBONE",
+						"title": "UNDIFF. GIRILAMBONE"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Unknwon Intrusive.gltf",
+			"Insert": {
+				"display_name": "Unknown Intrusive",
+				"popups": {
+					"GM - UNKNWON INTRUSIVE.TS.TMP": {
+						"name": "UNKNOWN INTRUSIVE",
+						"title": "UNKNOWN INTRUSIVE"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Upper Amphitheatre.gltf",
+			"Insert": {
+				"display_name": "Upper Amphitheatre",
+				"popups": {
+					"GM - UPPER AMPHITHEATRE.TS.TMP": {
+						"name": "UPPER AMPHITHEATRE",
+						"title": "UPPER AMPHITHEATRE"
+					}
+				}
+			}
+		},
+		{
+			"FileNameKey": "GM - Wagga Group.gltf",
+			"Insert": {
+				"display_name": "Wagga Group",
+				"popups": {
+					"GM - WAGGA GROUP.TS.TMP": {
+						"name": "WAGGA GROUP",
+						"title": "WAGGA GROUP"
+					}
+				}
+			}
+		}
+	]
     }
 }
