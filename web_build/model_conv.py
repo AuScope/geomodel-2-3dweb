@@ -40,7 +40,7 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
     # Run model conversion
     # NB: Assumes 'conv_webasset.py' lives in ../scripts dir
     if not skip_conversion:
-        execList = [os.path.join(os.pardir,"scripts","conv_webasset.py"), "-d", "-x", "-r", "-f", outDir, srcDir, inConvFile]
+        execList = [os.path.join(os.pardir,"scripts","conv_webasset.py"), "-x", "-r", "-f", outDir, srcDir, inConvFile]
         print("Executing: ", execList, flush=True)
         # Flag: display output as process runs or not
         interactive = True
