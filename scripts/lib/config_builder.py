@@ -126,10 +126,32 @@ class ConfigBuilder():
         if hasattr(params, 'proj4_defn'):
             config_dict["properties"]["proj4_defn"] = params.proj4_defn
         try:
-            with open(os.path.join(dest_dir, os.path.basename(output_filename)), "w") as file_p:
+            # Save out web asset JSON config file
+            out_file = os.path.join(dest_dir, os.path.basename(output_filename))
+            with open(out_file, "w") as file_p:
                 json.dump(config_dict, file_p, indent=4, sort_keys=True)
         except OSError as os_exc:
-            LOCAL_LOGGER.error("Cannot open file %s %s", output_filename, os_exc)
+            LOCAL_LOGGER.error(f"Cannot open file {output_filename}, {os_exc}")
+            return
+
+        # Optionally create the 'GroupStructure' section of model conversion JSON config file
+        # This can be added to the model conv file to make it easy to categorise
+        # the model parts in the website's sidebar
+        conv_part_list = []
+        if len(config_dict['groups']['Not Grouped']) > 0:
+            for part in config_dict['groups']['Not Grouped']:
+                conv_part = {'FileNameKey': part['model_url'], "Insert": { 'display_name': part['display_name'] }}
+                if 'popups' in part:
+                    conv_part['Insert']['popups'] = part['popups']
+                conv_part_list.append(conv_part)
+
+            try:
+                # Save model conversion file
+                out_file = os.path.join(dest_dir, "conv_group_struct.json")
+                with open(out_file, 'w') as out_fp:
+                    json.dump({'GroupStructure': {"Not Grouped": conv_part_list}}, out_fp, indent=4, sort_keys=True)
+            except OSError as os_exc:
+                LOCAL_LOGGER.error(f"Cannot save file {out_file}, {os_exc}")
 
 
     def add_config(self, gs_dict, label_str, popup_dict, file_name, outsrc_filename,
@@ -177,11 +199,6 @@ class ConfigBuilder():
             modelconf_dict['type'] = 'GZSON'
         else:
             modelconf_dict['type'] = 'GLTFObject'
-            # Removed: not ready yet
-            ## Add in URLs to export model part to DXF
-            #for part_name, p_dict in popup_dict.items():
-            #    p_dict.setdefault('href',[])
-            #    p_dict['href'].append({'label': 'Export DXF', 'URL': 'http://geomodels.auscope.org/'+model_name+'?service=EXPORT&filename='+model_url+'&format=DXF'})
         modelconf_dict['popups'] = popup_dict
 
         self.add_inserts(gs_dict, model_url, modelconf_dict, label_str.replace('_', ' '))
