@@ -8,7 +8,9 @@ which holds the converted files.
 Once the conversion of a model is complete, the files in the 'output' dir
 are copied to the 'geomodels' directory in DEST_DIR, into a <model_name>
 directory. The model's config file is copied to the 'geomodels' directory,
-under the name '<model_name>_new.json'
+under the name '<model_name>.json'
+
+The model source directory is set via GEOMODELS_HOME environment var or the command line
 """
 
 import os
@@ -29,7 +31,9 @@ POOL_SZ = 3
 GEOMODELS_DIR = os.path.join(os.path.join(DEST_DIR), 'geomodels')
 
 # Directory where all the model source files are kept
-MODELS_SRC_DIR = os.path.join(os.environ['HOME'], 'GEO_MODELS')
+MODELS_SRC_DIR = None
+if 'GEOMODELS_HOME' in os.environ:
+    MODELS_SRC_DIR = os.environ['GEOMODELS_HOME']
 
 # Prevents NetCDF file locking errors on NFS mounts
 os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
@@ -148,6 +152,9 @@ if __name__ == "__main__":
     parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
     args = parser.parse_args()
     if args.model is None:
+        if MODELS_SRC_DIR is None:
+            print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
+            sys.exit(1)
         try:
             # Remove and recreate models dir
             if os.path.exists(GEOMODELS_DIR):
