@@ -60,6 +60,35 @@ def check_vertex(num, vrtx_arr):
     return False
 
 
+def _parse_quoted_labels(line_str):
+    ''' Look out for double-quoted label strings and substitute underscores
+
+    :param line_str: line string
+    :reurns: all double-quoted labels with spaces now have double quotes removed and underscores
+             substituted for labels
+    '''
+    while line_str.count('"') >= 2:
+        before_tup = line_str.partition('"')
+        after_tup = before_tup[2].partition('"')
+        line_str = before_tup[0] + " " + after_tup[0].strip(' ').replace(' ', '_') \
+                   + " " + after_tup[2]
+    return line_str
+
+
+def _parse_quoted_filename(line):
+    ''' Split up the string, correctly parsing a quoted filename
+
+    :param line: a line of input file
+    :returns: array of tokens, split up version of line, token separator is a space
+    '''
+    if line.count('"') < 2:
+        return line.split()
+    if line.count('"') >= 2:
+        before_tup = line.partition('"')
+        after_tup = before_tup[2].partition('"')
+    return before_tup[0].split() + [after_tup[0]] + after_tup[2].split()
+
+
 def make_line_gen(file_lines):
     ''' This is a Python generator function that processes lines of the GOCAD object file
         and returns each line in various forms, from quite unprocessed to fully processed
@@ -73,14 +102,13 @@ def make_line_gen(file_lines):
     '''
     for line in file_lines:
         line_str = line.rstrip(' \n\r').upper()
-        # Look out for double-quoted strings
-        while line_str.count('"') >= 2:
-            before_tup = line_str.partition('"')
-            after_tup = before_tup[2].partition('"')
-            line_str = before_tup[0] + " " + after_tup[0].strip(' ').replace(' ', '_') \
-                       + " " + after_tup[2]
-        splitstr_arr_raw = line.rstrip(' \n\r').split()
+
+        # Split up the string, substituting underscores for spaces in doubled quoted labels
+        line_str = _parse_quoted_labels(line_str)
         splitstr_arr = line_str.split()
+
+        # Split up the string, correctly parsing quoted filename
+        splitstr_arr_raw = _parse_quoted_filename(line.rstrip(' \n\r'))
 
         # Skip blank lines
         if not splitstr_arr:

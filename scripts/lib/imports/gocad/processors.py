@@ -83,14 +83,13 @@ def process_coord_hdr(self, line_gen):
                 # NOTE: I can't support non default coords yet - need to enter via command line?
                 # If does not support default coords then exit
                 if not self.nondefault_coords:
-                    self.logger.warning("SORRY - Does not support non-DEFAULT coordinates: %s",
-                                        repr(field[1]))
+                    self.logger.warning(f"SORRY - Does not support non-DEFAULT coordinates: {field[1]}")
                     return False, True
 
         # Does coordinate system use inverted z-axis?
         elif field[0] == "ZPOSITIVE" and field[1] == "DEPTH":
             self.invert_zaxis = True
-            self.logger.debug("invert_zaxis = %s", repr(self.invert_zaxis))
+            self.logger.debug(f"invert_zaxis = {self.invert_zaxis}")
 
         # Axis units - check if units are kilometres, and update coordinate multiplier
         elif field[0] == "AXIS_UNIT":
@@ -122,20 +121,18 @@ def process_header(self, line_gen):
         name_str, sep, value_str = line_str.partition(':')
         name_str = name_str.strip()
         value_str = value_str.strip()
-        self.logger.debug("inHeader name_str = %s value_str = %s", name_str, value_str)
+        self.logger.debug(f"inHeader name_str = {name_str} value_str = {value_str}")
         if name_str in ('*SOLID*COLOR', '*ATOMS*COLOR', '*LINE*COLOR'):
             self.style_obj.add_rgba_tup(self.parse_colour(value_str))
-            self.logger.debug("self.style_obj.rgba_tup = %s",
-                              repr(self.style_obj.get_rgba_tup()))
+            self.logger.debug(f"self.style_obj.rgba_tup = {self.style_obj.get_rgba_tup()}")
         elif name_str[:9] == '*REGIONS*' and name_str[-12:] == '*SOLID*COLOR':
             region_name = name_str.split('*')[2]
             self.region_colour_dict[region_name] = self.parse_colour(value_str)
-            self.logger.debug("region_colour_dict[%s] = %s", region_name,
-                              repr(self.region_colour_dict[region_name]))
+            self.logger.debug(f"region_colour_dict[{region_name}] = {self.region_colour_dict[region_name]}")
         # Get header name
         elif name_str == 'NAME':
             self.header_name = value_str.replace('/', '-')
-            self.logger.debug("self.header_name = %s", self.header_name)
+            self.logger.debug(f"self.header_name = {self.header_name}")
 
 
 
@@ -147,7 +144,7 @@ def process_ascii_well_path(self, line_gen, field):
     :returns: a boolean, is True iff we are at last line; well_path, list of \
              coordinates of well path; marker_list, list of markers
     '''
-    self.logger.debug("START ascii well path, field = %s %s", repr(field[0]), repr(field[1]))
+    self.logger.debug(f"START ascii well path, field = {field[0]}, {field[1]}")
     zm_units = 'M'
     convert = False
     well_path = []
@@ -162,7 +159,7 @@ def process_ascii_well_path(self, line_gen, field):
         if field[0] == 'PATH_ZM_UNIT':
             zm_units = field[1]
             if zm_units not in ['M', 'KM']:
-                self.logger.error("Cannot process PATH_ZM_UNITS = %s", zm_units)
+                self.logger.error(f"Cannot process PATH_ZM_UNITS = {zm_units}")
                 sys.exit(1)
 
         # WREF X Y Z
@@ -170,7 +167,7 @@ def process_ascii_well_path(self, line_gen, field):
             is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], False,
                                                   False)
             if not is_ok:
-                self.logger.error("Cannot process WREF: %s", repr(field))
+                self.logger.error(f"Cannot process WREF: {field}")
                 sys.exit(1)
             well_path = [(x_x, y_y, z_z)]
             prev_stat = None
@@ -191,7 +188,7 @@ def process_ascii_well_path(self, line_gen, field):
                     ok2, dia2 = to_dia(field)
                     if ok1 and ok2:
                         x_d, y_d, z_d = to_xyz_min_curve(dia1, dia2)
-                        self.logger.debug("Converted from %s to %s => %f, %f, %f", repr(prev_stat), repr(field), x_d, y_d, z_d)
+                        self.logger.debug(f"Converted from {prev_stat} to {field} => {x_d}, {y_d}, {z_d}")
                         if len(well_path) > 0:
                             old_x = well_path[-1][0]
                             old_y = well_path[-1][1]
@@ -215,7 +212,7 @@ def process_ascii_well_path(self, line_gen, field):
                 is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4],
                                                       False, convert)
                 if not is_ok:
-                    self.logger.error("Cannot read PATH %s", repr(field))
+                    self.logger.error(f"Cannot read PATH {field}")
                     sys.exit(1)
                 old_x = well_path[-1][0]
                 old_y = well_path[-1][1]
@@ -228,7 +225,7 @@ def process_ascii_well_path(self, line_gen, field):
                 is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3],
                                                       False, convert)
                 if not is_ok:
-                    self.logger.error("Cannot read VRTX %s", repr(field))
+                    self.logger.error(f"Cannot read VRTX {field}")
                     sys.exit(1)
                 well_path.append((x_x, y_y, z_z))
 
@@ -280,8 +277,7 @@ def process_ascii_well_path(self, line_gen, field):
             break
 
 
-    self.logger.debug("END ascii well path = %s marker_list = %s",
-                      repr(well_path[1:]), repr(marker_list))
+    self.logger.debug(f"END ascii well path = {well_path[1:]} marker_list = {marker_list}")
 
     # Do not return the first element in well_path, it is a WREF, not a PATH
     return is_last, well_path[1:], marker_list
@@ -354,11 +350,11 @@ def process_well_binary_file(self, file_name):
     try:
         stat_obj = os.stat(file_name)
         num_flts = int(stat_obj.st_size / 4 )
-        self.logger.debug('num_flts=%s', repr(num_flts))
+        self.logger.debug(f"num_flts={num_flts}")
         with open(file_name, 'rb') as f:
             flt_arr = struct.unpack('>{}f'.format(num_flts), f.read(4*num_flts))
     except OSError as oe:
-        self.logger.error("ERROR - Cannot read well binary file: %s: %s", file_name, repr(oe))
+        self.logger.error(f"Cannot read well binary file: {file_name} {oe}")
         return []
     return flt_arr
 
@@ -430,55 +426,55 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
     '''
     self.logger.info("START process_vol_data(field = %s)", repr(field))
     while True:
-        self.logger.debug('process_vol_data processing: field= %s', repr(field))
+        self.logger.debug(f"process_vol_data processing: field={field}")
         if field[0] == "AXIS_O":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], True)
             if is_ok:
                 self.axis_o = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_o = %s", repr(self.axis_o))
+                self.logger.debug(f"self.axis_o = {self.axis_o}")
 
         elif field[0] == "AXIS_U":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.axis_u = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_u = %s", repr(self.axis_u))
+                self.logger.debug(f"self.axis_u = {self.axis_u}")
 
         elif field[0] == "AXIS_V":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.axis_v = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_v = %s", repr(self.axis_v))
+                self.logger.debug(f"self.axis_v = {self.axis_v}")
 
         elif field[0] == "AXIS_W":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.axis_w = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_w= %s", repr(self.axis_w))
+                self.logger.debug(f"self.axis_w={self.axis_w}")
 
         elif field[0] == "AXIS_N":
             is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.vol_sz = (x_int, y_int, z_int)
-                self.logger.debug("self.vol_sz= %s", repr(self.vol_sz))
+                self.logger.debug(f"self.vol_sz={self.vol_sz}")
 
         elif field[0] == "AXIS_MIN":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.axis_min = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_min= %s", repr(self.axis_min))
+                self.logger.debug(f"self.axis_min={self.axis_min}")
 
         elif field[0] == "AXIS_MAX":
             is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
                                                         field[3], False, False)
             if is_ok:
                 self.axis_max = (x_flt, y_flt, z_flt)
-                self.logger.debug("self.axis_max= %s", repr(self.axis_max))
+                self.logger.debug(f"self.axis_max={self.axis_max}")
 
         elif field[0] == "AXIS_UNIT":
             self.parse_axis_unit(field)
@@ -490,33 +486,33 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
             is_ok, int_val = self.parse_int(field[1])
             if is_ok:
                 self.flags_array_length = int_val
-                self.logger.debug("self.flags_array_length= %d", self.flags_array_length)
+                self.logger.debug(f"self.flags_array_length={self.flags_array_length}")
 
         elif field[0] == "FLAGS_BIT_LENGTH":
             is_ok, int_val = self.parse_int(field[1])
             if is_ok:
                 self.flags_bit_length = int_val
-                self.logger.debug("self.flags_bit_length= %d", self.flags_bit_length)
+                self.logger.debug(f"self.flags_bit_length={self.flags_bit_length}")
 
         elif field[0] == "FLAGS_ESIZE":
             is_ok, int_val = self.parse_int(field[1])
             if is_ok:
                 self.flags_bit_size = int_val
-                self.logger.debug("self.flags_bit_size= %d", self.flags_bit_size)
+                self.logger.debug(f"self.flags_bit_size={self.flags_bit_size}")
 
         elif field[0] == "FLAGS_OFFSET":
             is_ok, int_val = self.parse_int(field[1])
             if is_ok:
                 self.flags_offset = int_val
-                self.logger.debug("self.flags_offset= %d", self.flags_offset)
+                self.logger.debug(f"self.flags_offset={self.flags_offset}")
 
         elif field[0] == "FLAGS_FILE":
             self.flags_file = os.path.join(src_dir, field_raw[1])
-            self.logger.debug("self.flags_file= %s", self.flags_file)
+            self.logger.debug(f"self.flags_file={self.flags_file}")
 
         elif field[0] == "REGION":
             self.region_dict[field[2]] = field[1]
-            self.logger.debug("self.region_dict[%s] = %s", field[2], field[1])
+            self.logger.debug(f"self.region_dict[{field[2]}]={field[1]}")
 
         elif field[0] == "REGION_FLAGS_ARRAY_LENGTH":
             is_ok, int_val = self.parse_int(field[1])
@@ -540,7 +536,7 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
 
         elif field[0] == "REGION_FLAGS_FILE":
             self.region_flags_file = os.path.join(src_dir, field_raw[1])
-            self.logger.debug("self.flags_file= %s", self.flags_file)
+            self.logger.debug(f"self.flags_file={self.flags_file}")
 
         elif field[0] == "ASCII_DATA_FILE":
             self.logger.warning("Sorry - cannot process ASCII_DATA_FILE keyword")
@@ -563,12 +559,12 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
             is_ok, int_val = self.parse_int(field[1])
             if is_ok:
                 self.points_offset = int_val
-                self.logger.debug("self.points_offset= %d", self.points_offset)
+                self.logger.debug(f"self.points_offset={self.points_offset}")
 
         elif field[0] == "POINTS_FILE":
             # Name of points file
             self.points_file = os.path.join(src_dir, field_raw[1])
-            self.logger.debug("self.points_file= %s", self.points_file)
+            self.logger.debug(f"self.points_file={self.points_file}")
 
         else:
             self.logger.debug('Exiting volume data')

@@ -453,6 +453,7 @@ class GocadImporter():
             self.logger.error("process_gocad() Can't detect GOCAD file object type, return False")
             return False, []
 
+        # Create a line generator to parse each line
         line_gen = make_line_gen(file_lines)
         is_last = False
         # Retry flag forces parsing of the field array without asking for the next line
@@ -464,9 +465,7 @@ class GocadImporter():
             if is_last and not field:
                 break
 
-            self.logger.debug("field = %s line_str = %s is_last = %s",
-                              repr(field), repr(line_str), repr(is_last))
-
+            self.logger.debug(f"field = {field} field_raw={field_raw} line_str = {line_str} is_last = {is_last}") 
             # Skip the subsets keywords
             if field[0] in ["SUBVSET", "ILINE", "TFACE", "TVOLUME"]:
                 self.logger.debug("Skip subset keywords")
@@ -543,12 +542,12 @@ class GocadImporter():
                         # Convert well path into a series of SEG types
                         if len(well_path) > 1:
                             self._vrtx_arr.append(VRTX(1, well_path[0]))
-                            for idx in range(1,len(well_path)):
-                                self._seg_arr.append(SEG((idx, idx+1)))
-                                self._vrtx_arr.append(VRTX(idx+1, well_path[idx]))
+                            for idx in range(1, len(well_path)):
+                                self._seg_arr.append(SEG((idx, idx + 1)))
+                                self._vrtx_arr.append(VRTX(idx + 1, well_path[idx]))
                              
-                        self.logger.debug("Well path: %s", repr(well_path))
-                        self.logger.debug("Label list: %s", repr(self.meta_obj.label_list))
+                        self.logger.debug(f"Well path: {well_path}")
+                        self.logger.debug(f"Label list: {self.meta_obj.label_list}")
                         retry = True
 
                     # Well files with well curve block
@@ -557,14 +556,16 @@ class GocadImporter():
                         field, field_raw, is_last = self.process_well_curve(line_gen, field)
 
                     elif field[0] == "BINARY_DATA_FILE":
-                        bin_file = os.path.join(src_dir, field_raw[1].strip('"'))
+                        bin_file = os.path.join(src_dir, field_raw[1])
+                        self.logger.debug(f"Opening well binary file: {bin_file}")
                         flt_arr = self.process_well_binary_file(bin_file)
-                        self.logger.debug('bin_flts=%s', repr(flt_arr[:40]))
+                        self.logger.debug(f"bin_flts={flt_arr[:40]}")
 
                     elif field[0] == "WP_CATALOG_FILE":
-                        bin_file = os.path.join(src_dir, field_raw[1].strip('"'))
+                        bin_file = os.path.join(src_dir, field_raw[1])
+                        self.logger.debug(f"Opening well wp catalog file: {bin_file}")
                         flt_arr = self.process_well_binary_file(bin_file)
-                        self.logger.debug('wp_flts=%s', repr(flt_arr[:40]))
+                        self.logger.debug(f"p_flts={flt_arr[:40]}")
 
                     elif field[0] == "STATION":
                         """ Format is:  STATION MD INC AZ
