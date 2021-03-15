@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 Unit test for GocadImporter class
+
+Run this in local directory
 """
 import sys
 import logging
@@ -402,7 +404,6 @@ gsm_list[0][2].mapped_feat == MapFeat.CONTACT")
     # Parse and convert STATION keyword with meas. depth, inclination, azimuth
     #
     test_this("Parse and convert STATION keyword with meas. depth, inclination, azimuth",
-    # 94.4795874134504, 2005.6239995358749, 128.80712107653724)), VRTX(n=2, xyz=(990.655890123452, 2009.403974792015, 153.78217326370554
          "test038.wl", "len(gsm_list)==1 and \
 gsm_list[0][0].vrtx_arr[0].xyz == (994.4795874134504, 2005.6239995358749, 128.80712107653724) and \
 gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.78217326370554)")
@@ -431,3 +432,31 @@ gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.7821
     # Parse GP with 10 single layer volumes
     #
     test_group("Parse GP with 10 single layer volumes", "test040.gp", "len(gsm_list)==10")
+
+    #
+    # Parse well filename with spaces
+    #
+    test_this("Parse and convert well filename with spaces",
+         "test041 space test.wl", "len(gsm_list) > 0")
+
+    #
+    # Parse well filename and binary filename with spaces
+    #
+    test_this("Parse and convert well filename and binary filename with spaces",
+         "test042  space  test.wl", "len(gsm_list) > 0")
+
+    #
+    #  Voxet binary file with spaces in filename
+    #
+    test_this("Voxet binary file with spaces in filename", "test043.vo",
+              """'1' in gocad_obj.prop_dict and \
+gocad_obj.prop_dict['1'].no_data_marker == -9999.0 and \
+gocad_obj.prop_dict['1'].signed_int == True and \
+gocad_obj.prop_dict['1'].data_type == 'h' and \
+gocad_obj.prop_dict['1'].file_name == './spaced  voxet  test  file@@' and \
+gocad_obj.prop_dict['1'].data_sz == 2 and \
+gsm_list[0][0].vol_origin == (696000.0, 6863000.0, -40000.0) and \
+gsm_list[0][0].vol_axis_u == (51000.0, 0.0, 0.0) and \
+gsm_list[0][0].vol_axis_v == (0.0, 87000.0, 0.0) and \
+gsm_list[0][0].vol_axis_w == (0.0, 0.0, 51000.0) and \
+gsm_list[0][0].vol_sz == (1.0, 1.0, 1.0) """)
