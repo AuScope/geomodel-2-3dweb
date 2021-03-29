@@ -64,24 +64,6 @@
                 "name": "South Australia (Energy & Mining)",
                 "models": [
                     {
-                        "name":"Cariewerloo Basin",
-                        "modelUrlPath":"cariewerloo",
-                        "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
-                        "configFile":"Cariewerloo.json",
-                        "modelDir":"Cariewerloo",
-                        "srcUrl":"https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/cariewerloo_basin"
-                    },
-                    {
-                        "name": "Emmie Bluff",
-                        "modelUrlPath": "emmiebluff",
-                        "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
-                        "configFile": "EmmieBluff.json",
-                        "modelDir": "EmmieBluff",
-                        "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/emmie_bluff_regional"
-                    },
-                    {
                         "name": "Burra Mine",
                         "modelUrlPath": "burramine",
                         "icon": "sa-white-icon.png",

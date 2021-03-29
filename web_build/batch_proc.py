@@ -65,12 +65,6 @@ MODEL_DATA = [
     (MODELS_SRC_DIR, GEOMODELS_DIR, "sandstone", "Sandstone", "input/SandstoneConvParam.json", "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD", True),
 
 
-    # SA - Cariewerloo
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "cariewerloo", "Cariewerloo", "input/CariewerlooConvParam.json", "SouthAust/GDP00005", True),
-
-    # SA - Emmie Bluff
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects", True),
-
     # SA - Burra Mine
     (MODELS_SRC_DIR, GEOMODELS_DIR, "burramine", "BurraMine", "input/BurraMineConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad", True),
 
