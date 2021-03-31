@@ -22,5 +22,19 @@
         }    
     ],
     "GroupStructure": {
-    }
+        "3D Surface": [
+           {
+            "FileNameKey": "BurraMine3DSurface.gltf",
+            "Insert": {
+                "display_name": "3D Surface",
+                "popups": {
+                    "BURRAMINEMODEL": {
+                        "name": "BURRAMINEMODEL",
+                        "title": "BURRAMINEMODEL"
+                    }
+               }
+           }
+       }
+     ]
+   }
 }
