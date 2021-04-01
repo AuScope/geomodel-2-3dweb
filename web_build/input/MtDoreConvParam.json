@@ -12,5 +12,675 @@
         "modelUrlPath": "mtdore",
         "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
-    "GroupStructure": { }
+    "GroupStructure": {
+        "Base Layers": [
+            {
+                "FileNameKey": "Base_3layer_Stavley_REP_ForIncisionIntoTooleCreek.gltf",
+                "Insert": {
+                    "display_name": "Base 3layer Stavley REP ForIncisionIntoTooleCreek",
+                    "popups": {
+                        "BASE_3LAYER_STAVLEY_REP_FORINCISIONINTOTOOLECREEK": {
+                            "name": "BASE_3LAYER_STAVLEY_REP_FORINCISIONINTOTOOLECREEK",
+                            "title": "BASE_3LAYER_STAVLEY_REP_FORINCISIONINTOTOOLECREEK"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "Base_3layer_TooleCreek_0.gltf",
+                "Insert": {
+                    "display_name": "Base 3layer TooleCreek 0",
+                    "popups": {
+                        "BASE_3LAYER_TOOLECREEK_0": {
+                            "name": "BASE_3LAYER_TOOLECREEK_0",
+                            "title": "BASE_3LAYER_TOOLECREEK_0"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "Base of Cover.gltf",
+                "Insert": {
+                    "display_name": "Base of Cover",
+                    "popups": {
+                        "FINAL_BASE_OF_COVER": {
+                            "name": "FINAL_BASE_OF_COVER",
+                            "title": "FINAL_BASE_OF_COVER"
+                        }
+                    }
+                }
+            }
+		],
+		"Metamorphic Volume": [
+            {
+                "FileNameKey": "DoubleCrossing_MetamorphicVolume.gltf",
+                "Insert": {
+                    "display_name": "DoubleCrossing MetamorphicVolume",
+                    "popups": {
+                        "DOUBLECROSSING_METAMORPHICVOLUME": {
+                            "name": "DOUBLECROSSING_METAMORPHICVOLUME",
+                            "title": "DOUBLECROSSING_METAMORPHICVOLUME"
+                        }
+                    }
+                }
+            }
+    ],
+    "Inversion Results": [
+            {
+                "FileNameKey": "MtDore_Inversion_Geologically_constrained_density_inversion@@.gz",
+                "Insert": {
+                    "display_name": "Geo Constrained Density"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_Inversion_Geologically_constrained_susceptibility_inversion@@.gz",
+                "Insert": {
+                    "display_name": "Geo Constrained Susc"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_Inversion_Rockcode@@.gz",
+                "Insert": {
+                    "display_name": "Rockcode"
+                }
+            }
+    ],
+    "CDI Conductivity": [
+            {
+                "FileNameKey": "MtDore_targeting_CDI_Conductivity_ASharp_Krig21_TopoMask@@.gz",
+                "Insert": {
+                    "display_name": "ASharp Krig21 TopoMask"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_CDI_Conductivity_ASharp_Krig21_TopoMask_max@@.gz",
+                "Insert": {
+                    "display_name": "ASharp Krig21 TopoMask_max"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_CDI_Conductivity_CSharp_Krig1_TopoMask@@.gz",
+                "Insert": {
+                    "display_name": "CSharp Krig1 TopoMask"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_CDI_Conductivity_CSharp_Krig1_TopoMask_EdgeDetect@@.gz",
+                "Insert": {
+                    "display_name": "CSharp Krig1 TopoMask EdgeDet"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_CDI_Conductivity_CSharp_Krig1_TopoMask_max@@.gz",
+                "Insert": {
+                    "display_name": "CSharp Krig1 TopoMask max"
+                }
+            }
+    ],
+    "Coincident Gravity": [
+            {
+                "FileNameKey": "MtDore_targeting_Coincident_GravityHigh_MagneticHigh@@.gz",
+                "Insert": {
+                    "display_name": "High Magnetic High"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Coincident_GravityHigh_MagneticHigh_out@@.gz",
+                "Insert": {
+                    "display_name": "High Magnetic High"
+                }
+            }
+   ],
+   "Distance": [
+            {
+                "FileNameKey": "MtDore_targeting_Distance_CSharp_ISO_Gt35@@.gz",
+                "Insert": {
+                    "display_name": "CSharp ISO Gt 35"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_CSharp_ISO_Gt35_out@@.gz",
+                "Insert": {
+                    "display_name": "CSharp ISO Gt 35 out"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_CrustalFaults@@.gz",
+                "Insert": {
+                    "display_name": "Crustal Faults"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_CrustalFaults_out@@.gz",
+                "Insert": {
+                    "display_name": "Crustal Faults out"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_MaficIntrusives_NormSuscGt0pt05@@.gz",
+                "Insert": {
+                    "display_name": "Mafic Intrusives Norm Susc Gt Opt 05"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_MtDore_FaultModel_Surface_intersectingMafics@@.gz",
+                "Insert": {
+                    "display_name": "Fault Model Intersecting Mafics"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_MtDore_FaultModel_Surface_intersectingMafics_out@@.gz",
+                "Insert": {
+                    "display_name": "Fault Model Intersecting Mafics out"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Distance_Williams_Batholith_InsideSet30000@@.gz",
+                "Insert": {
+                    "display_name": "Williams Batholith Inside Set"
+                }
+            }
+    ],
+    "Fault Roughness": [
+            {
+                "FileNameKey": "MtDore_targeting_Fault_Roughness@@.gz",
+                "Insert": {
+                    "display_name": "Fault Roughness"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Fault_Roughness_out@@.gz",
+                "Insert": {
+                    "display_name": "Fault Roughness out"
+                }
+            }
+	],
+	"Geological Complex": [
+            {
+                "FileNameKey": "MtDore_targeting_GeolComplex_552_moving_average_filter@@.gz",
+                "Insert": {
+                    "display_name": "Moving Average Filter"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_GeolComplex_552_moving_average_filter_out@@.gz",
+                "Insert": {
+                    "display_name": "Moving Average Filter out"
+                }
+            }
+	],
+	"Mineral Favourability": [
+            {
+                "FileNameKey": "MtDore_targeting_Mineral_favourability_complete_model@@.gz",
+                "Insert": {
+                    "display_name": "Complete Model"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Mineral_favourability_logscale@@.gz",
+                "Insert": {
+                    "display_name": "Log Scale"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Mineral_favourability_under_cover_logscale@@.gz",
+                "Insert": {
+                    "display_name": "Under Cover Log Scale"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Mineral_favourability_under_cover_model@@.gz",
+                "Insert": {
+                    "display_name": "Under Cover Model"
+                }
+            }
+	],
+	"Density": [
+            {
+                "FileNameKey": "MtDore_targeting_Normalised_Density@@.gz",
+                "Insert": {
+                    "display_name": "Normalised"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Normalised_Density_Scaled0to1@@.gz",
+                "Insert": {
+                    "display_name": "Normalised Scaled 0-1"
+                }
+            }
+	],
+	"Susceptibility": [
+            {
+                "FileNameKey": "MtDore_targeting_Normalised_Susceptibility@@.gz",
+                "Insert": {
+                    "display_name": "Normalised"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Normalised_Susceptibility_Scaled0to1@@.gz",
+                "Insert": {
+                    "display_name": "Normalised Scaled 0-1"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Normalised_Susceptibility_out@@.gz",
+                "Insert": {
+                    "display_name": "Normalised out"
+                }
+            }
+	],
+	"Pseudo Lithology": [
+            {
+                "FileNameKey": "MtDore_targeting_PseudoLithology@@.gz",
+                "Insert": {
+                    "display_name": "Pseudo Lithology"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_PseudoLithology_Merged_Timberoo_Stavley_Llewellyn@@.gz",
+                "Insert": {
+                    "display_name": "Merged Timberoo Stavley Llewellyn"
+                }
+            }
+	],
+	"Regional Density Model": [
+            {
+                "FileNameKey": "MtDore_targeting_Regional_density_model_upscaled_TopoMask@@.gz",
+                "Insert": {
+                    "display_name": "Upscaled Topo Mask"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Regional_density_model_upscaled_TopoMask_out@@.gz",
+                "Insert": {
+                    "display_name": "Upscaled Topo Mask out"
+                }
+            }
+	],
+	"Rock Code": [
+            {
+                "FileNameKey": "MtDore_targeting_RockCode@@.gz",
+                "Insert": {
+                    "display_name": "Rock Code"
+                }
+            }
+	],
+	"Magnetic Inversion": [
+            {
+                "FileNameKey": "MtDore_targeting_Tiled_mag_inversion_mask_TopoMask@@.gz",
+                "Insert": {
+                    "display_name": "Topo Mask"
+                }
+            }
+	],
+	"Geochemistry": [
+            {
+                "FileNameKey": "MtDore_targeting_Uranium_divided_Thorium@@.gz",
+                "Insert": {
+                    "display_name": "Uranium / Thorium"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_Uranium_divided_Thorium_out@@.gz",
+                "Insert": {
+                    "display_name": "Uranium / Thorium out"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_dist_Geochem_merged_AuGt150@@.gz",
+                "Insert": {
+                    "display_name": "Merged Au Gt 150"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_dist_Geochem_merged_AuGt150_out@@.gz",
+                "Insert": {
+                    "display_name": "Merged Au Gt 150 out"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_dist_Geochem_merged_CuGt1000@@.gz",
+                "Insert": {
+                    "display_name": "Merged Cu Gt 1000"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_dist_Geochem_merged_CuGt2000@@.gz",
+                "Insert": {
+                    "display_name": "Merged Cu Gt 2000"
+                }
+            },
+            {
+                "FileNameKey": "MtDore_targeting_dist_Geochem_merged_CuGt2000_out@@.gz",
+                "Insert": {
+                    "display_name": "Merged Cu Gt 2000 out"
+                }
+            }
+    ],
+    "Faults": [
+            {
+                "FileNameKey": "Mt Dore Model Faults.gltf",
+                "Insert": {
+                    "display_name": "Mt Dore Model Faults",
+                    "popups": {
+                        "MT DORE MODEL FAULTS": {
+                            "name": "MT DORE MODEL FAULTS",
+                            "title": "MT DORE MODEL FAULTS"
+                        }
+                    }
+                }
+            }
+    ],
+    "Horizon Base 3 Layer Curves": [
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_3Layer_Bulonga_curves_ts.gltf",
+                "Insert": {
+                    "display_name": "Bulonga",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_BULONGA_CURVES_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_BULONGA_CURVES_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_BULONGA_CURVES_TS"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_3Layer_Llewellyn_REP_curves_ts.gltf",
+                "Insert": {
+                    "display_name": "Llewellyn REP",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_REP_CURVES_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_REP_CURVES_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_REP_CURVES_TS"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_3Layer_Llewellyn_curves_ts.gltf",
+                "Insert": {
+                    "display_name": "Llewellyn",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_CURVES_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_CURVES_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_LLEWELLYN_CURVES_TS"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_3Layer_Stavley_REP_curves_ts.gltf",
+                "Insert": {
+                    "display_name": "Stavley REP",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_REP_CURVES_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_REP_CURVES_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_REP_CURVES_TS"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_3Layer_Stavley_curves_ts.gltf",
+                "Insert": {
+                    "display_name": "Stavley",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_CURVES_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_CURVES_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_3LAYER_STAVLEY_CURVES_TS"
+                        }
+                    }
+                }
+            }
+    ],
+    "Horizon Base": [
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_MarrabaVolcanics_ts.gltf",
+                "Insert": {
+                    "display_name": "Marraba Volcanics",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_MARRABAVOLCANICS_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_MARRABAVOLCANICS_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_MARRABAVOLCANICS_TS"
+                        }
+                    }
+                }
+            },
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_Base_Timberoo_etc_Seds_ts.gltf",
+                "Insert": {
+                    "display_name": "Timberoo etc Seds",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_BASE_TIMBEROO_ETC_SEDS_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_BASE_TIMBEROO_ETC_SEDS_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_BASE_TIMBEROO_ETC_SEDS_TS"
+                        }
+                    }
+                }
+            }
+    ],
+    "Horizon Model CRC": [
+            {
+                "FileNameKey": "MtDore_skua_model_horizon_ModelCRC_Basement_ts.gltf",
+                "Insert": {
+                    "display_name": "Model CRC Basement",
+                    "popups": {
+                        "MTDORE_SKUA_MODEL_HORIZON_MODELCRC_BASEMENT_TS": {
+                            "name": "MTDORE_SKUA_MODEL_HORIZON_MODELCRC_BASEMENT_TS",
+                            "title": "MTDORE_SKUA_MODEL_HORIZON_MODELCRC_BASEMENT_TS"
+                        }
+                    }
+                }
+            }
+    ],
+    "Training Sites": [
+            {
+                "FileNameKey": "TrainingSites_FINAL_transposed.gltf",
+                "Insert": {
+                    "display_name": "TRAINING SITES FINAL TRANSPOSED",
+                    "popups": {
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000000": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000001": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000002": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000003": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000004": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000005": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000006": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000007": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000008": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000009": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000010": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000011": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000012": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000013": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000014": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000015": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000016": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000017": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000018": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000019": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000020": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000021": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000022": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000023": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000024": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000025": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000026": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED",
+                            "val": 0.0
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000027": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000028": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000029": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000030": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000031": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000032": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000033": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000034": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        },
+                        "TRAININGSITES_FINAL_TRANSPOSED-0000000035": {
+                            "name": "Z_ORIGINAL",
+                            "title": "TRAININGSITES FINAL TRANSPOSED"
+                        }
+                    }
+                }
+            }
+    ],
+    "Topology": [
+            {
+                "FileNameKey": "Topo.gltf",
+                "Insert": {
+                    "display_name": "Topo",
+                    "popups": {
+                        "TOPO": {
+                            "name": "TOPO",
+                            "title": "TOPO"
+                        }
+                    }
+                }
+            }
+    ],
+    "Batholith": [
+            {
+                "FileNameKey": "WilliamsNaraku_Batholith.gltf",
+                "Insert": {
+                    "display_name": "Williams Naraku Batholith",
+                    "popups": {
+                        "WILLIAMSNARAKU_BATHOLITH": {
+                            "name": "WILLIAMSNARAKU_BATHOLITH",
+                            "title": "WILLIAMSNARAKU_BATHOLITH"
+                        }
+                    }
+                }
+            }
+        ]
+    }
 }
