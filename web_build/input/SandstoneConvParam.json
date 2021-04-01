@@ -94,15 +94,17 @@
         ],
         "Inversion Results": [
             {
-                "FileNameKey": "VPmg_gravity_inversion_results.gltf",
+                "FileNameKey": "VPmg_gravity_inversion_results.gzson",
                 "Insert": {
-                    "display_name": "VPMG GRAVITY"
+                    "display_name": "VPMG GRAVITY",
+		    "popups": {}
                 }
             },
             {
-                "FileNameKey": "VPmg_magnetic_inversion_results.gltf",
+                "FileNameKey": "VPmg_magnetic_inversion_results.gzson",
                 "Insert": {
-                    "display_name": "VPMG MAGNETIC"
+                    "display_name": "VPMG MAGNETIC",
+		    "popups": {}
                 }
             }
         ],
