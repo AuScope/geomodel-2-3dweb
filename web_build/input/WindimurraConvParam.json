@@ -132,21 +132,24 @@
         ],
         "Seismic Reflection Surveys": [
             {
-                "FileNameKey": "10GA_YU1.gltf",
+                "FileNameKey": "10GA_YU1.gzson",
                 "Insert": {
-                    "display_name": "10GA YU1"
+                    "display_name": "10GA YU1",
+		    "popups": {}
                 }
             },
             {
-                "FileNameKey": "10GA_YU2.gltf",
+                "FileNameKey": "10GA_YU2.gzson",
                 "Insert": {
-                    "display_name": "10GA YU2"
+                    "display_name": "10GA YU2",
+		    "popups": {}
                 }
             },
             {
-                "FileNameKey": "10GA_YU3.gltf",
+                "FileNameKey": "10GA_YU3.gzson",
                 "Insert": {
-                    "display_name": "10GA YU3"
+                    "display_name": "10GA YU3",
+		    "popups": {}
                 }
             }
         ],
