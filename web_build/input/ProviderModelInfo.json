@@ -6,7 +6,7 @@
                         "name": "Otway",
                         "modelUrlPath": "otway",
                         "icon": "vic-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "vic",
                         "configFile": "Otway.json",
                         "modelDir": "Otway",
                         "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=1083&cID=54"
@@ -15,7 +15,7 @@
                         "name": "Bendigo",
                         "modelUrlPath": "bendigo",
                         "icon": "vic-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "vic",
                         "configFile": "Bendigo.json",
                         "modelDir": "Bendigo",
                         "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=1075&cID=54"
@@ -24,14 +24,14 @@
                         "name": "Stavely",
                         "modelUrlPath": "stavely",
                         "icon": "vic-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "vic",
                         "configFile": "Stavely.json",
                         "modelDir": "Stavely",
                         "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=970&cID=54"
                     }
                 ],
                 "icon": "vic-white-icon.png",
-                "colourClass": "primary",
+                "colourClass": "vic",
                 "infoUrl": "http://earthresources.vic.gov.au/home"
             },
             "wa": {
@@ -41,7 +41,7 @@
                         "name": "Windimurra",
                         "modelUrlPath": "windimurra",
                         "icon": "wa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "wa",
                         "configFile": "Windimurra.json",
                         "modelDir": "Windimurra",
                         "srcUrl" : "https://dasc.dmp.wa.gov.au/DASC?productAlias=Windimurra3D"
@@ -50,14 +50,14 @@
                         "name": "Sandstone",
                         "modelUrlPath": "sandstone",
                         "icon": "wa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "wa",
                         "configFile": "Sandstone.json",
                         "modelDir": "Sandstone",
                         "srcUrl" : "https://dasc.dmp.wa.gov.au/DASC?productAlias=Sandstone3D"
                     }
                 ],
                 "icon": "wa-white-icon.png",
-                "colourClass": "warning",
+                "colourClass": "wa",
                 "infoUrl": "http://www.dmp.wa.gov.au/"
             },
             "sa": {
@@ -67,7 +67,7 @@
                         "name": "Burra Mine",
                         "modelUrlPath": "burramine",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "BurraMine.json",
                         "modelDir": "BurraMine",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/burra_mine"
@@ -76,7 +76,7 @@
                         "name": "Central Flinders",
                         "modelUrlPath": "centralflinders",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "CentralFlinders.json",
                         "modelDir": "CentralFlinders",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/central_flinders"
@@ -85,7 +85,7 @@
                         "name": "Northern Flinders",
                         "modelUrlPath": "northflinders",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "NorthFlinders.json",
                         "modelDir": "NorthFlinders",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/northern_flinders"
@@ -94,7 +94,7 @@
                         "name": "North Gawler",
                         "modelUrlPath": "ngawler",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "NorthGawler.json",
                         "modelDir": "NorthGawler",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/northern_gawler_province"
@@ -103,7 +103,7 @@
                         "name": "Curnamona Sedimentary Basins",
                         "modelUrlPath": "curnamonased",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "CurnamonaSed.json",
                         "modelDir": "CurnamonaSed",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/curnamona_sedimentary_basin"
@@ -112,14 +112,14 @@
                         "name": "Western Gawler",
                         "modelUrlPath": "westgawler",
                         "icon": "sa-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "sa",
                         "configFile": "WestGawler.json",
                         "modelDir": "WestGawler",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/wgc_3d_architecture"
                     }
                 ],
                 "icon": "sa-white-icon.png",
-                "colourClass": "success",
+                "colourClass": "sa",
                 "infoUrl": "https://energymining.sa.gov.au/minerals"
             },
             "tas": {
@@ -129,14 +129,14 @@
                         "name": "Rosebery Lyell",
                         "modelUrlPath": "rosebery",
                         "icon": "tas-white-icon.png",
-                        "colourClass": "warning",
+                        "colourClass": "tas",
                         "configFile": "RoseberyLyell.json",
                         "modelDir": "RoseberyLyell",
                         "srcUrl" : "http://www.mrt.tas.gov.au/geoscience/3d_geological_and_geophysical_modelling/west_tasmania_3d_geological_and_geophysical_modelling"
                     }
                 ],
                 "icon": "tas-white-icon.png",
-                "colourClass": "secondary",
+                "colourClass": "tas",
                 "infoUrl": "http://www.mrt.tas.gov.au/portal/home"
             },
             "qld": {
@@ -146,7 +146,7 @@
                         "name": "Quamby",
                         "modelUrlPath": "quamby",
                         "icon": "qld-white-icon.png",
-                        "colourClass": "danger",
+                        "colourClass": "qld",
                         "configFile": "Quamby.json",
                         "modelDir": "Quamby",
                         "srcUrl" : "https://geoscience.data.qld.gov.au/dataset/ds000006"
@@ -155,14 +155,14 @@
                         "name": "Mt Dore",
                         "modelUrlPath": "mtdore",
                         "icon": "qld-white-icon.png",
-                        "colourClass": "danger",
+                        "colourClass": "qld",
                         "configFile": "MtDore.json",
                         "modelDir": "MtDore",
                         "srcUrl" : "https://geoscience.data.qld.gov.au/dataset/ds000002"
                     }
                 ],
                 "icon": "qld-white-icon.png",
-                "colourClass": "danger",
+                "colourClass": "qld",
                 "infoUrl": "https://www.dnrme.qld.gov.au/"
             },
             "nsw": {
@@ -172,7 +172,7 @@
                         "name": "Western Tamworth Belt",
                         "modelUrlPath": "tamworth",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "Tamworth.json",
                         "modelDir": "Tamworth",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -181,7 +181,7 @@
                         "name": "Cobar",
                         "modelUrlPath": "cobar",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "Cobar.json",
                         "modelDir": "Cobar",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -190,7 +190,7 @@
                         "name": "Curnamona Province and Delamerian Orogen",
                         "modelUrlPath": "curnamona",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "Curnamona.json",
                         "modelDir": "Curnamona",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -199,7 +199,7 @@
                         "name": "Eastern Lachlan Orogen",
                         "modelUrlPath": "eastlachlan",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "EastLachlan.json",
                         "modelDir": "EastLachlan",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -208,7 +208,7 @@
                         "name": "Western Lachlan and Southern Thomson Orogens",
                         "modelUrlPath": "westlachlan",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "WestLachlan.json",
                         "modelDir": "WestLachlan",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -217,7 +217,7 @@
                         "name": "South New England Deep Crustal",
                         "modelUrlPath": "sthnewengland",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "SthNewEngland.json",
                         "modelDir": "SthNewEngland",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
@@ -226,14 +226,14 @@
                         "name": "New England Orogen",
                         "modelUrlPath": "newengland",
                         "icon": "nsw-white-icon.png",
-                        "colourClass": "info",
+                        "colourClass": "nsw",
                         "configFile": "NewEngland.json",
                         "modelDir": "NewEngland",
                         "srcUrl" : "https://www.resourcesandgeoscience.nsw.gov.au/miners-and-explorers/geoscience-information/products-and-data/3d-mapping-data"
                     }
                 ],
                 "icon": "nsw-white-icon.png",
-                "colourClass": "info",
+                "colourClass": "nsw",
                 "infoUrl": "https://www.resourcesandgeoscience.nsw.gov.au/"
             },
             "nt": {
@@ -243,14 +243,14 @@
                         "name": "McArthur Basin",
                         "modelUrlPath": "mcarthur",
                         "icon": "nt-white-icon.png",
-                        "colourClass": "dark",
+                        "colourClass": "nt",
                         "configFile": "McArthurBasin.json",
                         "modelDir": "McArthurBasin",
                         "srcUrl": "https://geoscience.nt.gov.au/gemis/ntgsjspui/handle/1/81751"
                     }
                 ],
                 "icon": "nt-white-icon.png",
-                "colourClass": "dark",
+                "colourClass": "nt",
                 "infoUrl": "https://dpir.nt.gov.au/"
             },
             "ga": {
@@ -260,7 +260,7 @@
                         "name": "North Queensland",
                         "modelUrlPath": "nqueensland",
                         "icon": "aus-white-icon.png",
-                        "colourClass": "primary",
+                        "colourClass": "ga",
                         "configFile": "NorthQueensland.json",
                         "modelDir": "NorthQueensland",
                         "srcUrl" : "https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search?node=srv#/metadata/a05f7892-eeeb-7506-e044-00144fdd4fa6"
@@ -269,7 +269,7 @@
                         "name": "Tasmania",
                         "modelUrlPath": "tas",
                         "icon": "aus-white-icon.png",
-                        "colourClass": "primary",
+                        "colourClass": "ga",
                         "configFile": "Tas.json",
                         "modelDir": "Tas",
                         "srcUrl" : "https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search?node=srv#/metadata/a05f7892-c08a-7506-e044-00144fdd4fa6"
@@ -278,14 +278,14 @@
                         "name": "Yilgarn NWS",
                         "modelUrlPath": "yilgarn",
                         "icon": "aus-white-icon.png",
-                        "colourClass": "primary",
+                        "colourClass": "ga",
                         "configFile": "Yilgarn.json",
                         "modelDir": "Yilgarn",
                         "srcUrl" : ""
                     }
                 ],
                 "icon": "aus-white-icon.png",
-                "colourClass": "primary",
+                "colourClass": "ga",
                 "infoUrl": "http://www.ga.gov.au/"
             },
             "csiro": {
@@ -295,14 +295,14 @@
                         "name": "Rocklea Dome",
                         "modelUrlPath": "rocklea",
                         "icon": "aus-white-icon.png",
-                        "colourClass": "dark",
+                        "colourClass": "csiro",
                         "configFile": "Rocklea.json",
                         "modelDir": "Rocklea",
                         "srcUrl": "https://confluence.csiro.au/public/SpecSens/rocklea-dome"
                     } 
                 ],
                 "icon": "aus-white-icon.png",
-                "colourClass": "dark",
+                "colourClass": "csiro",
                 "infoUrl": "https://www.csiro.au/en/Research/MRF"
             },
             "nci-ga": {
@@ -312,14 +312,14 @@
                         "name": "Stuart Shelf",
                         "modelUrlPath": "stuartshelf",
                         "icon": "aus-white-icon.png",
-                        "colourClass": "dark",
+                        "colourClass": "nci",
                         "configFile": "StuartShelf.json",
                         "modelDir": "StuartShelf",
                         "srcUrl": ""
                     }
                 ],
                 "icon": "aus-white-icon.png",
-                "colourClass": "success",
+                "colourClass": "nci",
                 "infoUrl": "https://nci.org.au/"
             }
 }
