@@ -263,5 +263,6 @@ class ConfigBuilder():
             modelconf_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
         if style_obj.get_label_table():
             modelconf_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
+        modelconf_dict['alt_group_label'] = f'3D Volume {model_url[:-3].replace("_"," ")}'
         self.config_list.append(modelconf_dict)
 
