@@ -22,6 +22,14 @@
         }    
     ],
     "GroupStructure": {
+        "3D Volume Slice": [
+            {
+                "FileNameKey": "DIP_DATA_VOXET_Dip@@.gz",
+				"Insert": {
+					"display_name": "Seismic bedding plane dip"
+				}
+            }
+        ],
         "Interpreted Objects": [
             {
                 "FileNameKey": "S_Topograpgy_2017.gltf",
