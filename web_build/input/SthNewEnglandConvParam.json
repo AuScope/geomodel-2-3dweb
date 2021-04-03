@@ -35,7 +35,7 @@
                     }
                 }
             },
-			{
+            {
                 "FileNameKey": "NEO_DTM_1000m_Palaeozoic.gltf",
                 "Insert": {
                     "display_name": "NEO DTM 1000m Palaeozoic",
@@ -64,9 +64,10 @@
             {
                 "FileNameKey": "NEO_CMB_CA1.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CA1",
+                    "display_name": "NEO CMB Conf Level 1",
                     "popups": {
                         "NEO_CMB_CA1": {
+		            "confidence level": "1 - Highest Constraint",
                             "name": "NEO_CMB_CA1",
                             "title": "NEO_CMB_CA1"
                         }
@@ -76,9 +77,10 @@
             {
                 "FileNameKey": "NEO_CMB_CA2.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CA2",
+                    "display_name": "NEO CMB Conf Level 2",
                     "popups": {
                         "NEO_CMB_CA2": {
+                            "confidence level": "2 - Moderate to high Constraint",
                             "name": "NEO_CMB_CA2",
                             "title": "NEO_CMB_CA2"
                         }
@@ -88,9 +90,10 @@
             {
                 "FileNameKey": "NEO_CMB_CA3.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CA3",
+                    "display_name": "NEO CMB Conf Level 3",
                     "popups": {
                         "NEO_CMB_CA3": {
+                            "confidence level": "3 - Moderate Constraint",
                             "name": "NEO_CMB_CA3",
                             "title": "NEO_CMB_CA3"
                         }
@@ -100,9 +103,10 @@
             {
                 "FileNameKey": "NEO_CMB_CA4.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CA4",
+                    "display_name": "NEO CMB Conf Level 4",
                     "popups": {
                         "NEO_CMB_CA4": {
+                            "confidence level": "4 - Intermediate to Poor Constraint",
                             "name": "NEO_CMB_CA4",
                             "title": "NEO_CMB_CA4"
                         }
@@ -112,9 +116,10 @@
             {
                 "FileNameKey": "NEO_CMB_CA5.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CA5",
+                    "display_name": "NEO CMB Conf Level 5",
                     "popups": {
                         "NEO_CMB_CA5": {
+                            "confidence level": "5 - Poor Constraint",
                             "name": "NEO_CMB_CA5",
                             "title": "NEO_CMB_CA5"
                         }
@@ -124,9 +129,10 @@
             {
                 "FileNameKey": "NEO_CMB_CAGr5.gltf",
                 "Insert": {
-                    "display_name": "NEO CMB CAGr5",
+                    "display_name": "NEO CMB Conf Level >5",
                     "popups": {
                         "NEO_CMB_CAGR5": {
+                            "confidence level": ">5 - No constraint",
                             "name": "NEO_CMB_CAGR5",
                             "title": "NEO_CMB_CAGR5"
                         }
@@ -136,9 +142,10 @@
 		    {
                 "FileNameKey": "NEO_TB_CA1.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CA1",
+                    "display_name": "NEO TB Conf Level 1",
                     "popups": {
                         "NEO_TB_CA1": {
+                            "confidence level": "1 - Highest Constraint",
                             "name": "NEO_TB_CA1",
                             "title": "NEO_TB_CA1"
                         }
@@ -148,9 +155,10 @@
             {
                 "FileNameKey": "NEO_TB_CA2.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CA2",
+                    "display_name": "NEO TB Conf Level 2",
                     "popups": {
                         "NEO_TB_CA2": {
+                            "confidence level": "2 - Moderate to high Constraint",
                             "name": "NEO_TB_CA2",
                             "title": "NEO_TB_CA2"
                         }
@@ -160,9 +168,10 @@
             {
                 "FileNameKey": "NEO_TB_CA3.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CA3",
+                    "display_name": "NEO TB Conf Level 3",
                     "popups": {
                         "NEO_TB_CA3": {
+                            "confidence level": "3 - Moderate Constraint",
                             "name": "NEO_TB_CA3",
                             "title": "NEO_TB_CA3"
                         }
@@ -172,9 +181,10 @@
             {
                 "FileNameKey": "NEO_TB_CA4.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CA4",
+                    "display_name": "NEO TB Conf Level 4",
                     "popups": {
                         "NEO_TB_CA4": {
+                            "confidence level": "4 - Intermediate to Poor Constraint",
                             "name": "NEO_TB_CA4",
                             "title": "NEO_TB_CA4"
                         }
@@ -184,9 +194,10 @@
             {
                 "FileNameKey": "NEO_TB_CA5.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CA5",
+                    "display_name": "NEO TB Conf Level 5",
                     "popups": {
                         "NEO_TB_CA5": {
+                            "confidence level": "5 - Poor Constraint",
                             "name": "NEO_TB_CA5",
                             "title": "NEO_TB_CA5"
                         }
@@ -196,9 +207,10 @@
             {
                 "FileNameKey": "NEO_TB_CAGr5.gltf",
                 "Insert": {
-                    "display_name": "NEO TB CAGr5",
+                    "display_name": "NEO TB Conf Level >5",
                     "popups": {
                         "NEO_TB_CAGR5": {
+                            "confidence_level": ">5 - No constraint",
                             "name": "NEO_TB_CAGR5",
                             "title": "NEO_TB_CAGR5"
                         }
