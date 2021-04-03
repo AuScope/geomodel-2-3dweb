@@ -214,9 +214,9 @@ class ConfigBuilder():
 
         modelconf_dict['include'] = True
         modelconf_dict['displayed'] = True
-        # Make an alternative group name from the last two segments of source file's directory path
+        # Make an alternative group name from the last segment of source file's directory path
         pp = PurePath(file_name)
-        modelconf_dict['alt_group_label'] = '_'.join(pp.parts[-2:])
+        modelconf_dict['alt_group_label'] = '_'.join(pp.parts[-2:-1])
         self.config_list.append(modelconf_dict)
 
 
