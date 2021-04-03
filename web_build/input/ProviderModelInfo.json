@@ -113,7 +113,7 @@
                         "modelUrlPath": "westgawler",
                         "icon": "sa-white-icon.png",
                         "colourClass": "sa",
-                        "configFile": "WestGawler.json",
+                        "configFile": "WesternGawler.json",
                         "modelDir": "WestGawler",
                         "srcUrl" : "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/wgc_3d_architecture"
                     }
