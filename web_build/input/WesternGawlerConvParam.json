@@ -8,7 +8,7 @@
     },
     "ModelProperties": {
         "crs": "EPSG:28353",
-        "name": "westerngawler",
+        "name": "Western Gawler",
         "modelUrlPath": "westerngawler",
         "init_cam_dist": 500000.0,
         "proj4_defn": "+proj=utm +zone=53 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
