@@ -20,7 +20,7 @@ CONVERT_COLLADA = True
 ''' Runs the collada2gltf program after creating COLLADA files
 '''
 
-DEBUG_LVL = logging.CRITICAL
+DEBUG_LVL = logging.INFO
 ''' Initialise debug level to minimal debugging
 '''
 
