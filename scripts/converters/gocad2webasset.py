@@ -126,14 +126,14 @@ class Gocad2WebAsset(Converter):
         :param src_dir: source directory
 
         '''
-        self.logger.debug("process_points(%s, %s, %s, %s, %s)", repr(dest_dir), repr(noext_filename), repr(base_xyz), repr(filename), repr(src_dir))
+        self.logger.debug(f"process_points({dest_dir}, {noext_filename}, {base_xyz}, {filename}, {src_dir})")
         file_lines_list = split_gocad_objs(whole_file_lines)
         out_filename = os.path.join(dest_dir, os.path.basename(noext_filename))
         file_ext='.gltf'
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
                 o_fname = os.path.join(dest_dir, os.path.basename(noext_filename))
-                out_filename = "{0}_{1:d}".format(o_fname, mask_idx)
+                out_filename = f"{o_fname}_{mask_idx}"
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
@@ -141,7 +141,7 @@ class Gocad2WebAsset(Converter):
             # Check that conversion worked
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("Could not process %s", filename)
+                self.logger.warning(f"Could not process {filename}")
                 continue
 
             # Write out files
@@ -151,7 +151,7 @@ class Gocad2WebAsset(Converter):
             # Loop around when several properties in one GOCAD object
             for prop_idx, (geom_obj, style_obj, meta_obj) in enumerate(gsm_list):
                 if prop_idx > 0:
-                    prop_filename = "{0}_{1:d}".format(out_filename, prop_idx)
+                    prop_filename = f"{out_filename}_{prop_idx}"
                 # If too many points then output a point cloud
                 if len(geom_obj.vrtx_arr) < POINTCLOUD_THRESHOLD:
                     popup_dict = self.coll_kit_obj.write_collada(geom_obj,
@@ -166,11 +166,12 @@ class Gocad2WebAsset(Converter):
                                                                   prop_filename)
                     file_ext='.gzson'
  
+                # Copy source file for downloading
                 src_filename = self.copy_source(filename, dest_dir)
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                            meta_obj.name, popup_dict,
-                                            prop_filename, src_filename,
-                                            self.model_url_path, file_ext=file_ext)
+                                          meta_obj.name, popup_dict,
+                                          os.path.join(os.path.dirname(filename), os.path.basename(prop_filename)),
+                                          src_filename, self.model_url_path, file_ext=file_ext)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
         return True
 
@@ -185,14 +186,12 @@ class Gocad2WebAsset(Converter):
         :param filename: source file name with path and extension
         :param src_dir: source directory
         """
-        self.logger.debug("process_volumes("+noext_filename+")")
+        self.logger.debug(f"process_volumes({noext_filename}")
         file_lines_list = split_gocad_objs(whole_file_lines)
         has_result = False
         for mask_idx, file_lines in enumerate(file_lines_list):
             if len(file_lines_list) > 1:
-                out_filename = "{0}_{1:d}".format(os.path.join(dest_dir,
-                                                               os.path.basename(noext_filename)),
-                                                  mask_idx)
+                out_filename = f"{os.path.join(dest_dir, os.path.basename(noext_filename))}_{mask_idx}"
             gocad_obj = GocadImporter(self.debug_lvl, base_xyz=base_xyz,
                                       nondefault_coords=self.nondef_coords,
                                       ct_file_dict=self.ct_file_dict)
@@ -200,7 +199,7 @@ class Gocad2WebAsset(Converter):
             # Check that conversion worked
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("Could not process %s", filename)
+                self.logger.warning(f"Could not process {filename}")
                 continue
 
             # Loop around when several binary files in one GOCAD VOXET object
@@ -225,7 +224,7 @@ class Gocad2WebAsset(Converter):
         :param ext_str: file extent string
         :param out_filename: output filename
         """
-        self.logger.debug("process_others(%s, %s, %s, %s, %s, %s)", dest_dir, filename, base_xyz, src_dir, ext_str, out_filename)
+        self.logger.debug(f"process_others({dest_dir}, {filename}, {base_xyz}, {src_dir}, {ext_str}, {out_filename}")
         file_lines_list = split_gocad_objs(whole_file_lines)
         self.coll_kit_obj.start_collada()
         popup_dict = {}
@@ -237,7 +236,7 @@ class Gocad2WebAsset(Converter):
                                       nondefault_coords=self.nondef_coords)
             is_ok, gsm_list = gocad_obj.process_gocad(src_dir, filename, file_lines)
             if not is_ok:
-                self.logger.warning("WARNING - could not process %s", filename)
+                self.logger.warning(f"WARNING - could not process {filename}")
                 continue
             for geom_obj, style_obj, meta_obj in gsm_list:
 
@@ -281,7 +280,7 @@ class Gocad2WebAsset(Converter):
         # Add in any labels, if they were generated
         s_dict = {}
         if meta_obj.label_list:
-            s_dict = { "labels": [] }
+            s_dict = {"labels": []}
             for labl in meta_obj.label_list:
                 s_dict["labels"].append({"display_name": labl['name'],
                                          "position": labl['position'] })
@@ -306,7 +305,7 @@ class Gocad2WebAsset(Converter):
         except SameFileError:
             pass
         except OSError as exc:
-            self.logger.error("Cannot copy file %s to %s: %s", src_filename, copy_filename, str(exc))
+            self.logger.error(f"Cannot copy file {src_filename} to {copy_filename}, {exc}")
             return None
 
         # Then create a compressed ZIP file, relative to destination directory
@@ -321,7 +320,7 @@ class Gocad2WebAsset(Converter):
             # Remove copy file
             os.remove(copy_filename)
         except OSError as exc:
-            self.logger.error("Cannot compress file %s into %s: %s", src_filename, zip_filename, str(exc))
+            self.logger.error(f"Cannot compress file {src_filename} into {zip_filename}: {exc}")
             os.chdir(cwd)
             return None
 
@@ -381,13 +380,15 @@ class Gocad2WebAsset(Converter):
                     self.write_single_volume((geom_obj, style_obj, meta_obj),
                                              src_dir, out_filename, file_idx)
                 else:
-                    prop_filename = "{0}_{1:d}".format(out_filename, file_idx)
+                    prop_filename = f"{out_filename}_{file_idx}"
                     p_dict = self.coll_kit_obj.write_collada(geom_obj, style_obj, meta_obj,
                                                         prop_filename)
                     src_filename = self.copy_source(filename, dest_dir)
                     self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                 meta_obj.name, p_dict,
-                                                prop_filename, src_filename,
+                                                os.path.join(os.path.dirname(noext_filename),
+                                                             os.path.basename(prop_filename)),
+                                                src_filename,
                                                 self.model_url_path)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
                 has_result = True
@@ -401,7 +402,7 @@ class Gocad2WebAsset(Converter):
         :param filename: filename of GOCAD file, including path
         :param dest_dir: destination directory
         '''
-        self.logger.info("\nProcessing %s", filename)
+        self.logger.info(f"\nProcessing {filename}")
         # If there is an offset from the input parameter file, then apply it
         base_xyz = (0.0, 0.0, 0.0)
         basefile = os.path.basename(filename)
@@ -417,7 +418,7 @@ class Gocad2WebAsset(Converter):
             file_d = open(filename, 'r')
             whole_file_lines = file_d.readlines()
         except OSError as os_exc:
-            self.logger.error("Can't open or read - skipping file %s %s", filename, os_exc)
+            self.logger.error(f"Can't open or read - skipping file {filename}, {os_exc}")
             return False
         ok = False
 
@@ -456,15 +457,13 @@ class Gocad2WebAsset(Converter):
         :param prop_idx: property index of volume's properties, integer
         '''
         geom_obj, style_obj, meta_obj = gsm_obj
-        self.logger.debug("write_single_volume(geom_obj=%s, style_obj=%s, meta_obj=%s)",
-                          repr(geom_obj), repr(style_obj), repr(meta_obj))
-        self.logger.debug("src_dir=%s, out_filename=%s, prop_idx=%d)", src_dir, out_filename,
-                          prop_idx)
+        self.logger.debug(f"write_single_volume(geom_obj={geom_obj}, style_obj={style_obj}, meta_obj={meta_obj})")
+        self.logger.debug(f"src_dir={src_dir}, out_filename={out_filename}, prop_idx={prop_idx})")
 
         if geom_obj.vol_data is not None:
+            in_filename = os.path.join(src_dir, os.path.basename(out_filename))
             if not geom_obj.is_single_layer_vo():
                 if VOL_SLICER:
-                    in_filename = os.path.join(src_dir, os.path.basename(out_filename))
                     # Compress volume data and save to file
                     with open(in_filename, 'rb') as fp_in:
                         with gzip.open(out_filename + '.gz', 'wb') as fp_out:
@@ -480,7 +479,8 @@ class Gocad2WebAsset(Converter):
                         # NB: No source file available for volumes yet
                         self.config_build_obj.add_config(self.params.grp_struct_dict,
                                                     popup_dict_key, popup_dict,
-                                                    out_file, None, self.model_url_path)
+                                                    os.path.join(src_dir, os.path.basename(out_file)),
+                                                    None, self.model_url_path)
 
             # Produce a PNG file from voxet file
             else:
@@ -489,7 +489,7 @@ class Gocad2WebAsset(Converter):
                 # Just supply the PNG file as the downloadable source for single layer volumes
                 src_filename = out_filename + '.PNG'
                 self.config_build_obj.add_config(self.params.grp_struct_dict,
-                                            "{0}_{1}".format(meta_obj.name, prop_idx+1),
-                                            popup_dict, out_filename, src_filename,
+                                            f"{meta_obj.name}_{prop_idx + 1}",
+                                            popup_dict, in_filename, src_filename,
                                             self.model_url_path, file_ext='.PNG',
                                             position=geom_obj.vol_origin)
