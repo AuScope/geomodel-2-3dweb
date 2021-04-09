@@ -189,7 +189,7 @@ def process_ascii_well_path(self, line_gen, field):
                     if ok1 and ok2:
                         x_d, y_d, z_d = to_xyz_min_curve(dia1, dia2)
                         self.logger.debug(f"Converted from {prev_stat} to {field} => {x_d}, {y_d}, {z_d}")
-                        if len(well_path) > 0:
+                        if len(well_path) > 0 and (x_d, y_d, z_d) != (0.0, 0.0, 0.0) > 0:
                             old_x = well_path[-1][0]
                             old_y = well_path[-1][1]
                             old_z = well_path[-1][2]
@@ -204,7 +204,7 @@ def process_ascii_well_path(self, line_gen, field):
             # pylint: disable=W0612
             is_ok, num_pts = self.parse_int(field[1])
 
-        elif well_path is not None:
+        elif len(well_path) > 0:
             # Well path
             # PATH meas-Z Z X-diff Y-diff
             if field[0] == 'PATH':
@@ -337,9 +337,11 @@ def process_well_curve(self, line_gen, field):
         elif field[0] == "BLOCKED_INTERPOLATION_METHOD":
             pass
         elif field[0] == "NPTS":
-            pass
+            self.logger.warning("Currently there is no capability to process binary well files")
+
         elif field[0] == "SEEK":
-            pass
+            self.logger.warning("Currently there is no capability to process binary well files")
+
         if field[0] in ['END', 'END_CURVE']:
             break
 
