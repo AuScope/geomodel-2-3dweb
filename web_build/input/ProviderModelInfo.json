@@ -296,7 +296,7 @@
                         "modelUrlPath": "rocklea",
                         "icon": "aus-white-icon.png",
                         "colourClass": "csiro",
-                        "configFile": "Rocklea.json",
+                        "configFile": "RockleaDome.json",
                         "modelDir": "Rocklea",
                         "srcUrl": "https://confluence.csiro.au/public/SpecSens/rocklea-dome"
                     } 
