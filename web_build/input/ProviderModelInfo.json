@@ -297,7 +297,7 @@
                         "icon": "aus-white-icon.png",
                         "colourClass": "csiro",
                         "configFile": "RockleaDome.json",
-                        "modelDir": "Rocklea",
+                        "modelDir": "RockleaDome",
                         "srcUrl": "https://confluence.csiro.au/public/SpecSens/rocklea-dome"
                     } 
                 ],
