@@ -228,5 +228,9 @@
                 }
             }
         ]
-    }
+    },
+    "GroupRenameList": [
+	    ["Wells (.wl)", "Wells"],
+	    ["Unassigned", "Depths & Surface Meas"]
+    ]
 }

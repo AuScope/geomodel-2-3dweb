@@ -21,6 +21,12 @@
             "version": "1.3.0"
         }    
     ],
-    "GroupStructure": {
-    }
+    "GroupRenameList": [
+            ["3D Volume 1 Stavely Block Model Lith ID@@", "3D Lithology"],
+            ["Stavely Section", "Sections"],
+            ["Cross-section Voxets", "3D Volumes"],
+            ["Points Vs", "Points"],
+            ["Surfaces Ts", "Surfaces"],
+            ["Curve Pl", "Curves"]
+    ]
 }

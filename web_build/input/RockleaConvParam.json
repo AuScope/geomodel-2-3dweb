@@ -21,6 +21,8 @@
             "version": "1.3.0"
         }    
     ],
-    "GroupStructure": {
-    }
+    "GroupRenameList": [
+	    ["Pointset", "Points"],
+	    ["Voxets", "3D Volumes"]
+    ]
 }
