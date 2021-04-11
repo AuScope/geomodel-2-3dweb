@@ -80,7 +80,12 @@ Here is an example conversion parameter file
                 }
             }
         ],
-    }
+    },
+    "GroupRenameList": [
+        ["Old name 1", "New name 1"],
+        ["Old name 2", "New name 2"],
+        ["Old name 3", "New name 3"]
+    ]
 }
 ```
 
@@ -147,4 +152,8 @@ Thus the "Insert" can be used to insert:
 * "styling" - change the style of the model part:
     1) "is_labelled" if true, then the object will be labelled in the scene with its "display_name". Default: false
     2) "scale" will scale the object in the z-direction, 1.0 is unscaled, 2.0 will double its height etc. Default: 1.0
+
+### 7. GroupRenameList
+
+The optional "GroupRenameList" section can be used to rename the group labels in the sidebar if the automatically generated ones are not suitable
 

@@ -52,7 +52,7 @@ def find(converter_obj, src_dir, dest_dir, config_build_obj):
     :param dest_dir: directory to store output
     :param config_build_obj: ConfigBuilder object
     '''
-    LOGGER.debug("find(%s, %s)", src_dir, dest_dir)
+    LOGGER.debug(f"find({src_dir}, {dest_dir})")
     found = False
     walk_obj = os.walk(src_dir)
     supported_exts = converter_obj.get_supported_exts()
@@ -69,7 +69,7 @@ def find(converter_obj, src_dir, dest_dir, config_build_obj):
             if done:
                 break
     if not found:
-        LOGGER.info("No files found with extensions: %s ", supported_exts)
+        LOGGER.info(f"No files found with extensions: {supported_exts}")
 
 
 def find_and_process(converter_obj, src_dir, dest_dir):
@@ -79,7 +79,7 @@ def find_and_process(converter_obj, src_dir, dest_dir):
     :param dest_dir: destination directory where output is written to
     :param ext_list: list of supported file extensions
     '''
-    LOGGER.debug("find_and_process(%s, %s)", src_dir, dest_dir)
+    LOGGER.debug(f"find_and_process({src_dir}, {dest_dir})")
     for ext_str in converter_obj.get_supported_exts():
         wildcard_str = os.path.join(src_dir, "*."+ext_str.lower())
         file_list = glob.glob(wildcard_str)
@@ -100,34 +100,31 @@ def check_input_params(param_dict, param_file):
     """
     # Check for 'ModelProperties'
     if 'ModelProperties' not in param_dict:
-        LOGGER.error("Cannot find 'ModelProperties' key in JSON file: %s", param_file)
+        LOGGER.error(f"Cannot find 'ModelProperties' key in JSON file: {param_file}")
         sys.exit(1)
 
-    # Check for 'GroupStructure'
-    if 'GroupStructure' not in param_dict:
-        LOGGER.error("Cannot find 'GroupStructure' key in JSON file: %s", param_file)
-        sys.exit(1)
+    if 'GroupStructure' in param_dict:
+        # Check for duplicate group names in group structure
+        group_names = param_dict['GroupStructure'].keys()
+        if len(group_names) > len(set(group_names)):
+            LOGGER.error(f"Cannot process JSON file: {param_file} - found duplicate group names")
+            sys.exit(1)
 
-    # Check for duplicate group names
-    group_names = param_dict['GroupStructure'].keys()
-    if len(group_names) > len(set(group_names)):
-        LOGGER.error("Cannot process JSON file: %s - found duplicate group names", param_file)
-        sys.exit(1)
-
-    # Check for duplicate labels
-    for part_list in param_dict['GroupStructure'].values():
-        display_name_set = set()
-        filename_set = set()
-        for part in part_list:
-            if part["FileNameKey"] in filename_set:
-                LOGGER.error("Cannot process JSON file {0}: duplicate FileNameKey {1}".format(param_file, part["FileNameKey"]))
-                sys.exit(1)
-            filename_set.add(part["FileNameKey"])
-            if "display_name" in part["Insert"]:
-                if part["Insert"]["display_name"] in display_name_set:
-                    LOGGER.error("Cannot process JSON file {0}: duplicate display_name {1}".format(param_file, part["Insert"]["display_name"]))
+        # Check for duplicate labels
+        for part_list in param_dict['GroupStructure'].values():
+            display_name_set = set()
+            filename_set = set()
+            for part in part_list:
+                if part['FileNameKey'] in filename_set:
+                    LOGGER.error("Cannot process JSON file {param_file}: duplicate FileNameKey {part['FileNameKey']}")
                     sys.exit(1)
-                display_name_set.add(part["Insert"]["display_name"])
+                filename_set.add(part['FileNameKey'])
+                if 'display_name' in part['Insert']:
+                    if part['Insert']['display_name'] in display_name_set:
+                        LOGGER.error(f"Cannot process JSON file {param_file}: duplicate display_name {part['Insert']['display_name']}")
+                        sys.exit(1)
+                    display_name_set.add(part['Insert']['display_name'])
+
 
 def initialise_params(param_file):
     ''' Reads the conversion input parameter file and returns a dict version of input parameters
@@ -141,7 +138,7 @@ def initialise_params(param_file):
     # Mandatory parameters
     for field_name in ['crs', 'name', 'init_cam_dist', 'modelUrlPath']:
         if field_name not in param_dict['ModelProperties']:
-            LOGGER.error('Field "{0}" not in "ModelProperties" in JSON input param file {1}'.format(field_name, param_file))
+            LOGGER.error(f'Field "{field_name}" not in "ModelProperties" in JSON input param file {param_file}')
             sys.exit(1)
         setattr(params_obj, field_name, param_dict['ModelProperties'][field_name])
     model_url_path = param_dict['ModelProperties']['modelUrlPath']
@@ -171,13 +168,21 @@ def initialise_params(param_file):
         for wms_svc in param_dict['WMSServices']:
             params_obj.wms_services.append(wms_svc)
 
-    # Optional labels for sidebars
+    # Optional addition of items in model config file, keyed on model part download filename
     setattr(params_obj, 'grp_struct_dict', {})
     if 'GroupStructure' in param_dict:
         for group_name, command_list in param_dict['GroupStructure'].items():
             for command in command_list:
-                params_obj.grp_struct_dict[command["FileNameKey"]] = (group_name,
-                                                                      command["Insert"])
+                # Create a substitution dict
+                params_obj.grp_struct_dict[command['FileNameKey']] = (group_name,
+                                                                      command['Insert'])
+
+    # Optionally rename auto-generated group labels in sidebar
+    setattr(params_obj, 'grp_rename_list', [])
+    if 'GroupRenameList' in param_dict:
+        # Create a substitution list
+        params_obj.grp_rename_list = param_dict['GroupRenameList']
+
     return params_obj, model_url_path, coord_offset, ct_file_dict
 
 

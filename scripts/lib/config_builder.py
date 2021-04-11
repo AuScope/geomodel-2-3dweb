@@ -91,7 +91,7 @@ class ConfigBuilder():
         :param params: model input parameters, SimpleNamespace() object,
                       keys are: 'name' 'crs' 'init_cam_dist' and optional 'proj4_defn'
         '''
-        LOCAL_LOGGER.debug("create_json_config(%s)", output_filename)
+        LOCAL_LOGGER.debug(f"create_json_config{output_filename}")
 
         # Sort by display name before saving to file, sort by display name, then model URL
         sorted_model_dict_list = sorted(self.config_list,
@@ -120,14 +120,20 @@ class ConfigBuilder():
                 else:
                     config_dict["groups"]['Not Grouped'].append(model)
 
+        # Are there WMS layers?
+        if hasattr(params, 'wms_services'):
+            for layer in params.wms_services:
+                config_dict['groups']['WMS Layers'].append({ **layer,
+                                                            "type": "WMSLayer",
+                                                            "displayed": True,
+                                                            "include": True})
 
-            # Are there WMS layers?
-            if hasattr(params, 'wms_services'):
-                for layer in params.wms_services:
-                    config_dict['groups']['WMS Layers'].append({ **layer,
-                                                                "type": "WMSLayer",
-                                                                "displayed": True,
-                                                                "include": True})
+        # Are there any group names to be renamed?
+        if hasattr(params, 'grp_rename_list'):
+            for from_name, to_name in params.grp_rename_list:
+                if from_name in config_dict['groups']:
+                    LOCAL_LOGGER.debug(f"Renaming group labels: {to_name} renamed to {from_name}")
+                    config_dict['groups'][to_name] = config_dict['groups'].pop(from_name)
 
         # Is there a proj4 definition?
         if hasattr(params, 'proj4_defn'):
