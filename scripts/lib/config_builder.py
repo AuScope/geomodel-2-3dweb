@@ -222,7 +222,9 @@ class ConfigBuilder():
         modelconf_dict['displayed'] = True
         # Make an alternative group name from the last segment of source file's directory path
         pp = PurePath(file_name)
-        modelconf_dict['alt_group_label'] = '_'.join(pp.parts[-2:-1])
+        # Make each word of group name capitalised
+        uncap_str = ' '.join(pp.parts[-2:-1]).replace('_', ' ')
+        modelconf_dict['alt_group_label'] = ' '.join([ s.capitalize() for s in uncap_str.split(' ')])
         self.config_list.append(modelconf_dict)
 
 
