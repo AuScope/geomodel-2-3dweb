@@ -155,5 +155,5 @@ Thus the "Insert" can be used to insert:
 
 ### 7. GroupRenameList
 
-The optional "GroupRenameList" section can be used to rename the group labels in the sidebar if the automatically generated ones are not suitable
+The optional "GroupRenameList" section can be used to rename the group labels in the sidebar if the automatically generated ones are not suitable. When looking for group names to convert from "from_name" to "to_name", it matches the "from_name" with the group name in a case-insensitive manner
 

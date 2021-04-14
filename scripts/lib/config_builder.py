@@ -131,9 +131,11 @@ class ConfigBuilder():
         # Are there any group names to be renamed?
         if hasattr(params, 'grp_rename_list'):
             for from_name, to_name in params.grp_rename_list:
-                if from_name in config_dict['groups']:
-                    LOCAL_LOGGER.debug(f"Renaming group labels: {to_name} renamed to {from_name}")
-                    config_dict['groups'][to_name] = config_dict['groups'].pop(from_name)
+                for grp in config_dict['groups']:
+                    # Case insensitive compare
+                    if grp.casefold() == from_name.casefold():
+                        LOCAL_LOGGER.debug(f"Renaming group labels: {to_name} renamed to {from_name}")
+                        config_dict['groups'][to_name] = config_dict['groups'].pop(grp)
 
         # Is there a proj4 definition?
         if hasattr(params, 'proj4_defn'):
