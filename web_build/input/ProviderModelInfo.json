@@ -110,7 +110,7 @@
                     },
                     {
                         "name": "Western Gawler",
-                        "modelUrlPath": "westgawler",
+                        "modelUrlPath": "westerngawler",
                         "icon": "sa-white-icon.png",
                         "colourClass": "sa",
                         "configFile": "WesternGawler.json",
