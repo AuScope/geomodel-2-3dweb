@@ -8,7 +8,7 @@
     },
     "ModelProperties": {
         "crs": "EPSG:28354",
-        "init_cam_dist": 900000.0,
+        "init_cam_dist": 4000000.0,
         "name": "Curnamona Province and Delamerian Orogen",
         "modelUrlPath": "curnamona",
         "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"

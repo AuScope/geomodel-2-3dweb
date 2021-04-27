@@ -25,7 +25,8 @@ Here is an example conversion parameter file
         "init_cam_dist": 900000.0,
         "name": "Tamworth",
         "modelUrlPath": "tamworth",
-        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "background_colour": "rgb(255,255,0)"
     },
     "CoordOffsets": [
          {
@@ -112,6 +113,7 @@ The "ModelProperties" section is compulsory and contains the following:
 * "name" - name of model for display purposes (used by the geomodelportal website)
 * "modelUrlPath" - name of model in the website URL (should be the same as in https://github.com/AuScope/geomodelportal/ui/src/assets/geomodels/ProviderModelInfo.json)
 * "proj4_defn" - (optional) if the CRS is not common, a 'proj4' definition may be necessary (http://proj4js.org/)
+* "background_colour" - (optional) can specify background colour as an RGB string 'rgb(<RED 0..255>, <BLUE 0..255>, <GREEN 0..255>)' e.g. 'rgb(255,255,0)'
 
 
 ### 3. CoordOffsets

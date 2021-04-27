@@ -11,7 +11,8 @@
         "init_cam_dist": 900000.0,
         "name": "South New England Deep Crustal",
         "modelUrlPath": "sthnewengland",
-        "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=56 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "background_colour": "rgb(159, 157, 230)"
     },
     "WMSServices": [
         {
