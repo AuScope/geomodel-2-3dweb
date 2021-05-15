@@ -53,6 +53,43 @@ def to_dia(sdia):
     return True, [d, i, a]
 
 
+def calc_z(z_meas, kelly_b, well_path):
+    ''' Calculate z position given down hole depth
+
+    :param z_meas: down hole depth
+    :param kelly_b: elevation of kelly bushing at top of hole
+    :param well_path: well path, array of [[x1,y1,z1], [x2,y2,z2] ... ]
+    :returns: z coordinate
+    '''
+    if kelly_b is not None:
+        # Use kelly bushing as the top
+        z = kelly_b - z_meas
+    elif len(well_path) > 1:
+        # Take the first valid segment of well path
+        z = well_path[1][2] - z_meas
+    else:
+        # If info not available, have to assume that hole is zero elevation
+        z = -z_meas
+    return z
+
+def add_marker_label(name, position, meta_data, marker_list):
+    ''' Add a label to marker list, if position already occupied
+        then will concatenate marker label
+
+    :param name: label string to add to marker list
+    :param position: [x,y,z] coords for label
+    :param meta_data: meta data dict
+    :param marker_list: list of markers
+    '''
+    done = False
+    for marker in marker_list:
+        if position == marker['position']:
+            marker['name'] += ", " + name
+            done = True
+    if not done:
+        marker_list.append({'name': name, 'position': position, 'meta_data': meta_data})
+
+
 def process_coord_hdr(self, line_gen):
     ''' Process fields within coordinate header.
 
@@ -135,7 +172,6 @@ def process_header(self, line_gen):
             self.logger.debug(f"self.header_name = {self.header_name}")
 
 
-
 def process_ascii_well_path(self, line_gen, field):
     ''' Process ascii well path header
 
@@ -149,8 +185,9 @@ def process_ascii_well_path(self, line_gen, field):
     convert = False
     well_path = []
     marker_list = []
+    kelly_b = None
     while True:
-        # KB = kelly bush height
+        # KB = kelly bushing height
         if field[0] == 'KB':
             # pylint: disable=W0612
             is_ok, kelly_b = self.parse_float(field[1])
@@ -206,7 +243,8 @@ def process_ascii_well_path(self, line_gen, field):
 
         elif len(well_path) > 0:
             # Well path
-            # PATH meas-Z Z X-diff Y-diff
+            # PATH Z-meas Z X-diff Y-diff
+            # Z-meas is depth of hole measured from the top
             if field[0] == 'PATH':
                 convert = (zm_units == 'KM')
                 is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4],
@@ -231,25 +269,28 @@ def process_ascii_well_path(self, line_gen, field):
 
             # Well marker
             # MRKR name flag Z-meas
+            # Z-meas is depth of hole measured from the top
             elif field[0] == 'MRKR' and len(well_path)>0:
-                is_ok, z_flt = self.parse_float(field[3])
+                is_ok, z_meas = self.parse_float(field[3])
                 if is_ok:
                     marker_name = field[1]
                     field, marker_info = self.process_well_info(field, line_gen)
                     # NB: Does not follow the curve of the well
                     x = well_path[0][0]
                     y = well_path[0][1]
-                    info = { 'depth': str(z_flt) }
+
+                    # Convert Z-meas to a Z-coord
+                    z = calc_z(z_meas, kelly_b, well_path)
+                    info = { 'depth': str(z_meas) }
                     info.update(marker_info)
-                    marker_list.append({'name': marker_name,
-                                        'position': [x,y,z_flt],
-                                        'metadata': info})
+                    add_marker_label(marker_name, [x,y,z], info, marker_list)
                     continue
 
             # ZONE name Z-meas1 Z-meas2 index
+            # Z-meas is depth of hole measured from the top
             elif field[0] == 'ZONE' and len(well_path)>0:
-                is_ok1, z1_flt = self.parse_float(field[2])
-                is_ok2, z2_flt = self.parse_float(field[3])
+                is_ok1, z1_meas = self.parse_float(field[2])
+                is_ok2, z2_meas = self.parse_float(field[3])
                 if is_ok1 and is_ok2 and len(well_path)>0:
                     # NB: Does not follow the curve of the well
                     x = well_path[0][0]
@@ -257,16 +298,14 @@ def process_ascii_well_path(self, line_gen, field):
                     zone_name = field[1]
                     # Put down 2 labels for zone, one for start, one for end
                     field, zone_info = self.process_well_info(field, line_gen)
-                    info = { 'depth': str(z1_flt) }
+                    z1 = calc_z(z1_meas, kelly_b, well_path)
+                    info = { 'depth': str(z1_meas) }
                     info.update(marker_info)
-                    marker_list.append({'name': zone_name+' zone start',
-                                        'position': [x,y,z1_flt],
-                                        'metadata': info})
-                    info = { 'depth': str(z2_flt) }
+                    add_marker_label(f"{zone_name} ZONE START", [x,y,z1], info, marker_list)
+                    z2 = calc_z(z2_meas, kelly_b, well_path)
+                    info = { 'depth': str(z2_meas) }
                     info.update(marker_info)
-                    marker_list.append({'name': zone_name+' zone end',
-                                        'position': [x,y,z2_flt],
-                                        'metadata': info})
+                    add_marker_label(f"{zone_name} ZONE END", [x,y,z2], info, marker_list)
                     continue
 
 
