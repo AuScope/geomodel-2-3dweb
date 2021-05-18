@@ -119,9 +119,6 @@ def read_volume_binary_files(self):
                 for z_val in range(self.vol_sz[2]):
                     for y_val in range(self.vol_sz[1]):
                         for x_val in range(self.vol_sz[0]):
-                            # Calculate minimum excluding 'no_data_marker' value
-                            if data_val < min_val and data_val != prop_obj.no_data_marker:
-                                min_val = data_val
                             # Calculate x,y,z coords
                             x_coord, y_coord, z_coord = self.calc_sg_xyz(x_val, y_val, z_val, pt_arr)
                             data_val = fp_arr[fp_idx]
@@ -129,6 +126,9 @@ def read_volume_binary_files(self):
                             prop_obj.assign_to_ijk((x_val, y_val, z_val), data_val)
                             has_values = True
                             fp_idx += 1
+                            # Calculate minimum excluding 'no_data_marker' value
+                            if data_val < min_val and data_val != prop_obj.no_data_marker:
+                                min_val = data_val
 
                             # self.logger.debug(f"fp[{x_val}, {y_val}, {z_val}] = {data_val}")
                             # self.logger.debug(f"x,y,z=[{x_coord}, {y_coord}, {z_coord}]")
