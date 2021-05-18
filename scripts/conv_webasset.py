@@ -143,9 +143,13 @@ def initialise_params(param_file):
         setattr(params_obj, field_name, param_dict['ModelProperties'][field_name])
     model_url_path = param_dict['ModelProperties']['modelUrlPath']
 
-    # Optional parameter
+    # Optional proj4 definition parameter
     if 'proj4_defn' in param_dict['ModelProperties']:
         setattr(params_obj, 'proj4_defn', param_dict['ModelProperties']['proj4_defn'])
+
+    # Optional background colour parameter
+    if 'background_colour' in param_dict['ModelProperties']:
+        setattr(params_obj, 'background_colour', param_dict['ModelProperties']['background_colour'])
 
     # Optional Coordinate Offsets
     coord_offset = {}

@@ -90,6 +90,7 @@ class ConfigBuilder():
         :param dest_dir: destination directory for output file
         :param params: model input parameters, SimpleNamespace() object,
                       keys are: 'name' 'crs' 'init_cam_dist' and optional 'proj4_defn'
+                      and 'background_colour'
         '''
         LOCAL_LOGGER.debug(f"create_json_config{output_filename}")
 
@@ -140,6 +141,11 @@ class ConfigBuilder():
         # Is there a proj4 definition?
         if hasattr(params, 'proj4_defn'):
             config_dict["properties"]["proj4_defn"] = params.proj4_defn
+
+        # Is there a background colour?
+        if hasattr(params, 'background_colour'):
+            config_dict["properties"]["background_colour"] = params.background_colour
+
         try:
             # Save out web asset JSON config file
             out_file = os.path.join(dest_dir, os.path.basename(output_filename))
