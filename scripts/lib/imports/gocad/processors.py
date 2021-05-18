@@ -226,7 +226,7 @@ def process_ascii_well_path(self, line_gen, field):
                     if ok1 and ok2:
                         x_d, y_d, z_d = to_xyz_min_curve(dia1, dia2)
                         self.logger.debug(f"Converted from {prev_stat} to {field} => {x_d}, {y_d}, {z_d}")
-                        if len(well_path) > 0 and (x_d, y_d, z_d) != (0.0, 0.0, 0.0) > 0:
+                        if len(well_path) > 0 and (x_d, y_d, z_d) != (0.0, 0.0, 0.0):
                             old_x = well_path[-1][0]
                             old_y = well_path[-1][1]
                             old_z = well_path[-1][2]
