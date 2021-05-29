@@ -42,14 +42,19 @@ class STYLE:
                " label_table={0}".format(str(self.__label_table))
 
 
-    def get_rgba_tup(self, idx=0, def_rand=False):
+    def get_rgba_tup(self, idx=None, def_rand=False):
         ''' Gets the previously stored single colour (for objects of only one colour)
         :param idx: optional index into colour array
         :param def_rand: optional boolean will generate a random colour if no colour stored
         :returns: colour (R,G,B,A) 4-float tuple
         '''
-        if len(self.__rgba_tup) > idx:
-            return self.__rgba_tup[idx]
+        if len(self.__rgba_tup) > 0:
+            # If caller supplied a valid index return its colour
+            if idx is not None and len(self.__rgba_tup) > idx:
+                return self.__rgba_tup[idx]
+            # If no valid index supplied, return last colour in array
+            return self.__rgba_tup[-1]
+
         # Return a random or a default if no colour specified
         if def_rand:
             r, g, b = random.choice(self.COLOUR_LIST)
