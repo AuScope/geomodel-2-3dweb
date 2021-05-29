@@ -1,9 +1,19 @@
+import random
+
 """
 Contains the STYLE class
 """
 class STYLE:
     ''' Container class for style (colour, shading etc.) of objects
     '''
+    # Used to generate random colours when no colour is provided
+    COLOUR_LIST = [ (235, 77, 77), (235, 77, 111), (235, 77, 156), (235, 77, 219), (193, 77, 235),
+                    (141, 77, 235), (101, 77, 235), (77, 112, 235), (77, 167, 235), (77, 216, 235),
+                    (77, 235, 215), (77, 235, 161), (77, 235, 95), (192, 235, 77), (230, 235, 77),
+                    (235, 192, 77), (235, 171, 77), (235, 136, 77), (240, 194, 195), (240, 194, 231),
+                    (226, 194, 240), (194, 195, 240), (194, 217, 240), (194, 240, 240), (194, 240, 216),
+                    (220, 240, 194), (238, 240, 194), (240, 227, 194), (240, 209, 194)
+                  ]
 
     def __init__(self):
 
@@ -32,12 +42,18 @@ class STYLE:
                " label_table={0}".format(str(self.__label_table))
 
 
-    def get_rgba_tup(self, idx=0):
-        ''' Gets the single colour for objects of only one colour
+    def get_rgba_tup(self, idx=0, def_rand=False):
+        ''' Gets the previously stored single colour (for objects of only one colour)
+        :param idx: optional index into colour array
+        :param def_rand: optional boolean will generate a random colour if no colour stored
         :returns: colour (R,G,B,A) 4-float tuple
         '''
         if len(self.__rgba_tup) > idx:
             return self.__rgba_tup[idx]
+        # Return a random or a default if no colour specified
+        if def_rand:
+            r, g, b = random.choice(self.COLOUR_LIST)
+            return(r / 256.0, g / 256.0, b / 256.0, 1.0)
         return (1.0, 1.0, 1.0, 1.0)
 
 

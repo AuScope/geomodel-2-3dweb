@@ -94,7 +94,8 @@ class ColladaKit(ExportKit):
             effect = Collada.material.Effect("effect-{0:05d}".format(self.obj_cnt), [],
                                              self.SHADING, emission=self.EMISSION,
                                              ambient=self.AMBIENT,
-                                             diffuse=style_obj.get_rgba_tup(),
+                                             # Return a random colour if none was defined
+                                             diffuse=style_obj.get_rgba_tup(def_rand=True),
                                              specular=self.SPECULAR,
                                              shininess=self.SHININESS,
                                              double_sided=True)
