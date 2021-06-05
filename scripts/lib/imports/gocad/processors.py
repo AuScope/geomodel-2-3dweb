@@ -83,7 +83,8 @@ def add_marker_label(name, position, meta_data, marker_list):
     '''
     done = False
     for marker in marker_list:
-        if position == marker['position']:
+        # To ensure labels don't clash, if new marker is within 10m of another one, it is appended
+        if marker['position'][2] - 10.0 <= position[2] <= marker['position'][2] + 10:
             marker['name'] += ", " + name
             done = True
     if not done:
