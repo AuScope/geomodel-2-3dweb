@@ -110,7 +110,7 @@
                     },
                     {
                         "name": "Western Gawler",
-                        "modelUrlPath": "westerngawler",
+                        "modelUrlPath": "westgawler",
                         "icon": "sa-white-icon.png",
                         "colourClass": "sa",
                         "configFile": "WesternGawler.json",
@@ -305,8 +305,8 @@
                 "colourClass": "csiro",
                 "infoUrl": "https://www.csiro.au/en/Research/MRF"
             },
-            "nci-ga": {
-                "name":"National Computational Infrstructure (NCI) and Geoscience Australia (GA)",
+            "nci": {
+                "name":"National Computational Infrastructure (NCI) & G. Heinson (Uni. of Adelaide)",
                 "models": [
                     {
                         "name": "Stuart Shelf",
