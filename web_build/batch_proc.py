@@ -54,9 +54,6 @@ MODEL_DATA = [
     # Vic - Otway
     (MODELS_SRC_DIR, GEOMODELS_DIR, "otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway", True),
 
-    # Vic - Stavely
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD", True),
-
     # WA - Windimurra
     (MODELS_SRC_DIR, GEOMODELS_DIR, "windimurra", "Windimurra", "input/WindimurraConvParam.json",
      "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD", True),

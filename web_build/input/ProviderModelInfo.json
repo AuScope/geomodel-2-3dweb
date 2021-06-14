@@ -19,15 +19,6 @@
                         "configFile": "Bendigo.json",
                         "modelDir": "Bendigo",
                         "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=1075&cID=54"
-                    },
-                    {
-                        "name": "Stavely",
-                        "modelUrlPath": "stavely",
-                        "icon": "vic-white-icon.png",
-                        "colourClass": "vic",
-                        "configFile": "Stavely.json",
-                        "modelDir": "Stavely",
-                        "srcUrl" : "http://earthresources.efirst.com.au/product.asp?pID=970&cID=54"
                     }
                 ],
                 "icon": "vic-white-icon.png",
