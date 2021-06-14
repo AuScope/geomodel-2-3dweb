@@ -237,7 +237,8 @@
                         "colourClass": "nt",
                         "configFile": "McArthurBasin.json",
                         "modelDir": "McArthurBasin",
-                        "srcUrl": "https://geoscience.nt.gov.au/gemis/ntgsjspui/handle/1/81751"
+                        "srcUrl": "https://geoscience.nt.gov.au/gemis/ntgsjspui/handle/1/81751",
+                        "infoMessage": "Please note that this model can take a little while to load. Best results can be achieved by using a Google Chrome browser."
                     }
                 ],
                 "icon": "nt-white-icon.png",
