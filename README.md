@@ -77,6 +77,6 @@ Please see [README](doc_src/README.md) file for documentation generation details
 
 Funding provided by AuScope Ltd
 
-SKUA/GOCAD software from the "Paradigm Academic Software Program" (http://www.pdgm.com/affiliations/academic-software-programs/) was used to validate the colours displayed for some types of GOCAD object files
+SKUA/GOCAD software from the [Paradigm Academic Software Program](http://www.pdgm.com/affiliations/academic-software-programs/) was used to view some types of GOCAD object files and produce sample GOCAD OBJECT files used for testing
 
 
