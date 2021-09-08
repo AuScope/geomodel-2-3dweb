@@ -18,11 +18,11 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 + numpy (http://www.numpy.org/)
 + diskcache (http://www.grantjenks.com/docs/diskcache/)
 + nvcl_kit (https://pypi.org/project/nvcl-kit/)
-+ geojson
-+ fastapi
-+ aiofiles
-+ uvicorn
-+ wheel
++ geojson (https://pypi.org/project/geojson/)
++ fastapi (https://fastapi.tiangolo.com/)
++ aiofiles (https://pypi.org/project/aiofiles/)
++ uvicorn (http://www.uvicorn.org/)
++ wheel (https://wheel.readthedocs.io/en/stable/)
 
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 
