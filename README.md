@@ -18,7 +18,11 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 + numpy (http://www.numpy.org/)
 + diskcache (http://www.grantjenks.com/docs/diskcache/)
 + nvcl_kit (https://pypi.org/project/nvcl-kit/)
-+ netCDF4 (http://unidata.github.io/netcdf4-python/netCDF4/index.html)
++ geojson
++ fastapi
++ aiofiles
++ uvicorn
++ wheel
 
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 
