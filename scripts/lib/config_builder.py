@@ -5,6 +5,7 @@ import sys
 import os
 import json
 from collections import defaultdict
+from pathlib import PurePath
 
 # Set up debugging
 LOCAL_LOGGER = logging.getLogger(__name__)
@@ -83,48 +84,68 @@ class ConfigBuilder():
 
 
     def create_json_config(self, output_filename, dest_dir, params):
-        ''' Creates a JSON file for the website, specifying webasset objects to display in 3D
+        ''' Creates a JSON file for the website, specifying web asset objects to display in 3D
 
         :param output_filename: name of file containing created config file
         :param dest_dir: destination directory for output file
         :param params: model input parameters, SimpleNamespace() object,
                       keys are: 'name' 'crs' 'init_cam_dist' and optional 'proj4_defn'
+                      and 'background_colour'
         '''
-        LOCAL_LOGGER.debug("create_json_config(%s)", output_filename)
+        LOCAL_LOGGER.debug(f"create_json_config{output_filename}")
 
         # Sort by display name before saving to file, sort by display name, then model URL
         sorted_model_dict_list = sorted(self.config_list,
                                     key=lambda x: (x['display_name'], x['model_url']))
+        # Create the first entries in our JSON output
         config_dict = {"properties": {"crs": params.crs, "extent": self.reduce_extents(),
                                       "name": params.name,
                                       "init_cam_dist": params.init_cam_dist
                                      },
                        "type": "GeologicalModel",
-                      "version": 1.0
+                       "version": 1.0
                       }
         # Are there any sidebar group labels that we can use?
-        # If not, then put them in "Not Grouped"
         if hasattr(params, 'grp_struct_dict'):
             config_dict['groups'] = defaultdict(list)
             for model in sorted_model_dict_list:
                 model_file = model['model_url']
+                # Can we use the group label defined in the model conversion config file?
                 if model_file in params.grp_struct_dict:
                     group_name = params.grp_struct_dict[model_file][0]
                     config_dict["groups"][group_name].append(model)
+                # Use the alternative group label
+                elif 'alt_group_label' in model:
+                    config_dict["groups"][model['alt_group_label']].append(model)
+                # Otherwise categorise as 'Not Grouped'
                 else:
-                    config_dict["groups"]["Not Grouped"].append(model)
+                    config_dict["groups"]['Not Grouped'].append(model)
 
-            # Are there WMS layers?
-            if hasattr(params, 'wms_services'):
-                for layer in params.wms_services:
-                    config_dict['groups']['WMS Layers'].append({ **layer,
-                                                                "type": "WMSLayer",
-                                                                "displayed": True,
-                                                                "include": True})
+        # Are there WMS layers?
+        if hasattr(params, 'wms_services'):
+            for layer in params.wms_services:
+                config_dict['groups']['WMS Layers'].append({ **layer,
+                                                            "type": "WMSLayer",
+                                                            "displayed": True,
+                                                            "include": True})
+
+        # Are there any group names to be renamed?
+        if hasattr(params, 'grp_rename_list'):
+            for from_name, to_name in params.grp_rename_list:
+                for grp in config_dict['groups']:
+                    # Case insensitive compare
+                    if grp.casefold() == from_name.casefold():
+                        LOCAL_LOGGER.debug(f"Renaming group labels: {to_name} renamed to {from_name}")
+                        config_dict['groups'][to_name] = config_dict['groups'].pop(grp)
 
         # Is there a proj4 definition?
         if hasattr(params, 'proj4_defn'):
             config_dict["properties"]["proj4_defn"] = params.proj4_defn
+
+        # Is there a background colour?
+        if hasattr(params, 'background_colour'):
+            config_dict["properties"]["background_colour"] = params.background_colour
+
         try:
             # Save out web asset JSON config file
             out_file = os.path.join(dest_dir, os.path.basename(output_filename))
@@ -134,11 +155,13 @@ class ConfigBuilder():
             LOCAL_LOGGER.error(f"Cannot open file {output_filename}, {os_exc}")
             return
 
-        # Optionally create the 'GroupStructure' section of model conversion JSON config file
+        # If there are model parts which do not have a group label create a sample version
+        # of the 'GroupStructure' section of model conversion JSON config file
         # This can be added to the model conv file to make it easy to categorise
         # the model parts in the website's sidebar
         conv_part_list = []
         if len(config_dict['groups']['Not Grouped']) > 0:
+            LOCAL_LOGGER.warning(f"There are {len(config_dict['groups']['Not Grouped'])} ungrouped model parts saved to 'conv_group_struct.json'")
             for part in config_dict['groups']['Not Grouped']:
                 conv_part = {'FileNameKey': part['model_url'], "Insert": { 'display_name': part['display_name'] }}
                 if 'popups' in part:
@@ -146,7 +169,7 @@ class ConfigBuilder():
                 conv_part_list.append(conv_part)
 
             try:
-                # Save model conversion file
+                # Save sample model conversion file
                 out_file = os.path.join(dest_dir, "conv_group_struct.json")
                 with open(out_file, 'w') as out_fp:
                     json.dump({'GroupStructure': {"Not Grouped": conv_part_list}}, out_fp, indent=4, sort_keys=True)
@@ -205,6 +228,11 @@ class ConfigBuilder():
 
         modelconf_dict['include'] = True
         modelconf_dict['displayed'] = True
+        # Make an alternative group name from the last segment of source file's directory path
+        pp = PurePath(file_name)
+        # Make each word of group name capitalised
+        uncap_str = ' '.join(pp.parts[-2:-1]).replace('_', ' ')
+        modelconf_dict['alt_group_label'] = ' '.join([ s.capitalize() for s in uncap_str.split(' ')])
         self.config_list.append(modelconf_dict)
 
 
@@ -251,5 +279,6 @@ class ConfigBuilder():
             modelconf_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
         if style_obj.get_label_table():
             modelconf_dict['volumeData']['labelLookup'] = style_obj.get_label_table()
+        modelconf_dict['alt_group_label'] = f'3D Volume {model_url[:-3].replace("_"," ")}'
         self.config_list.append(modelconf_dict)
 

@@ -165,7 +165,7 @@ class ModelGeometries:
 
 
     def is_line(self):
-        ''' Returns True iff this contails line data
+        ''' Returns True iff this contains line data
         '''
         return len(self._seg_arr) > 0
 

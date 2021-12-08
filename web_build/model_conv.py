@@ -4,6 +4,18 @@ import subprocess
 import sys
 import time
 
+def print_output(proc):
+    line = 'X'
+    while line != '':
+        line = proc.stdout.readline()
+        if line != '':
+            print(line, flush=True, end='')
+    line = 'X'
+    while line != '':
+        line = proc.stderr.readline()
+        if line != []:
+            print(line, flush=True, end='')
+
 
 ''' Converts a geological model by forking 'conv_webasset.py' as a shell executable script
 
@@ -21,7 +33,7 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
     srcDir = os.path.join(modelsSrcDir, srcSubDir)
     if not os.path.exists(srcDir):
         print("ERROR - source directory does not exist", srcDir)
-        sys.exit(1)
+        return
 
     # Remove and recreate output dir
     skip_conversion = False
@@ -52,26 +64,19 @@ def convert_model(modelsSrcDir, geomodelsDir, urlStr, modelDirName, inConvFile, 
                 print("Conversion returned an error")
                 print("Returned - stdout:", cmdProc.stdout)
                 print("           stderr:", cmdProc.stderr)
-                sys.exit(1)
+                return
         else:
             # Displays output as process runs
             with subprocess.Popen(execList, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                   encoding='utf-8', errors='ignore') as proc:
                 while proc.poll() is None:
-                    line = 'X'
-                    while line != '':
-                        line = proc.stdout.readline()
-                        if line != '':
-                            print(line, flush=True, end='')
-                    line = 'X'
-                    while line != '':
-                        line = proc.stderr.readline()
-                        if line != []:
-                            print(line, flush=True, end='')
+                    print_output(proc)
                     time.sleep(1)
                 print("Returned:", proc.returncode, flush=True)
                 if proc.returncode != 0:
-                    sys.exit(1)
+                    print_output(proc)
+                    print("Exiting")
+                    return
 
     # Copy results to models dir
     modelDir = os.path.join(geomodelsDir, modelDirName)

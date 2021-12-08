@@ -8,7 +8,7 @@
     },
     "ModelProperties": {
         "crs": "EPSG:28354",
-        "name": "CentralFlinders",
+        "name": "Central Flinders",
         "modelUrlPath": "centralflinders",
         "init_cam_dist": 500000.0,
         "proj4_defn": "+proj=utm +zone=54 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"

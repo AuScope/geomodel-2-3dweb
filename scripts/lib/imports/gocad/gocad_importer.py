@@ -378,6 +378,11 @@ class GocadImporter():
         ''' List of (ModelGeometries, STYLE, METADATA)
         '''
 
+        self.well_bin_file_data = []
+        self.well_wp_file_data = []
+        ''' Data read from well files
+        '''
+
 
     def handle_exc(self, exc):
         ''' If stop_on_exc is set or debug is on, print details of exception and stop
@@ -553,27 +558,22 @@ class GocadImporter():
                     # Well files with well curve block
                     elif field[0] == "WELL_CURVE":
                         self.logger.debug("Processing well curve")
+                        # NB: Not complete
                         field, field_raw, is_last = self.process_well_curve(line_gen, field)
 
                     elif field[0] == "BINARY_DATA_FILE":
                         bin_file = os.path.join(src_dir, field_raw[1])
                         self.logger.debug(f"Opening well binary file: {bin_file}")
-                        flt_arr = self.process_well_binary_file(bin_file)
-                        self.logger.debug(f"bin_flts={flt_arr[:40]}")
+                        # NB: Not used yet
+                        self.well_bin_file_data = self.process_well_binary_file(bin_file)
+                        self.logger.debug(f"bin_flts={self.well_bin_file_data[:40]}")
 
                     elif field[0] == "WP_CATALOG_FILE":
                         bin_file = os.path.join(src_dir, field_raw[1])
                         self.logger.debug(f"Opening well wp catalog file: {bin_file}")
-                        flt_arr = self.process_well_binary_file(bin_file)
-                        self.logger.debug(f"p_flts={flt_arr[:40]}")
-
-                    elif field[0] == "STATION":
-                        """ Format is:  STATION MD INC AZ
-                            MD = measured depth
-                            INC = inclination
-                            AZ = azimuth
-                        """
-                        well_path = self.process_station_well_path(line_gen, field)
+                        # NB: Not used yet
+                        self.well_wp_file_data = self.process_well_binary_file(bin_file)
+                        self.logger.debug(f"p_flts={self.well_wp_file_data[:40]}")
 
                 # Atoms, with or without properties
                 elif field[0] == "ATOM" or field[0] == 'PATOM':
@@ -797,7 +797,7 @@ class GocadImporter():
 
         # Complete initialisation of metadata object
 
-        self.logger.debug("process_gocad() returns %s, %s", repr(ret_val), repr(self.gsm_list))
+        self.logger.debug(f"process_gocad() returns {ret_val} {self.gsm_list}")
         return ret_val, self.gsm_list
 
 

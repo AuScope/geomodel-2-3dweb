@@ -8,7 +8,9 @@ which holds the converted files.
 Once the conversion of a model is complete, the files in the 'output' dir
 are copied to the 'geomodels' directory in DEST_DIR, into a <model_name>
 directory. The model's config file is copied to the 'geomodels' directory,
-under the name '<model_name>_new.json'
+under the name '<model_name>.json'
+
+The model source directory is set via GEOMODELS_HOME environment var or the command line
 """
 
 import os
@@ -29,7 +31,9 @@ POOL_SZ = 3
 GEOMODELS_DIR = os.path.join(os.path.join(DEST_DIR), 'geomodels')
 
 # Directory where all the model source files are kept
-MODELS_SRC_DIR = os.path.join(os.environ['HOME'], 'GEO_MODELS')
+MODELS_SRC_DIR = None
+if 'GEOMODELS_HOME' in os.environ:
+    MODELS_SRC_DIR = os.environ['GEOMODELS_HOME']
 
 # Prevents NetCDF file locking errors on NFS mounts
 os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
@@ -50,9 +54,6 @@ MODEL_DATA = [
     # Vic - Otway
     (MODELS_SRC_DIR, GEOMODELS_DIR, "otway", "Otway", "input/OtwayConvParam.json", "Victoria/otway", True),
 
-    # Vic - Stavely
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "stavely", "Stavely", "input/StavelyConvParam.json", "Victoria/G154990_Stavely_3D_model_datapack/stavely_3D_model_datapack/GOCAD", True),
-
     # WA - Windimurra
     (MODELS_SRC_DIR, GEOMODELS_DIR, "windimurra", "Windimurra", "input/WindimurraConvParam.json",
      "WesternAust/Windimurra/3D_Windimurra_GOCAD/3D_Windimurra_GOCAD/GOCAD", True),
@@ -60,12 +61,6 @@ MODEL_DATA = [
     # WA - Sandstone
     (MODELS_SRC_DIR, GEOMODELS_DIR, "sandstone", "Sandstone", "input/SandstoneConvParam.json", "WesternAust/Sandstone/3D_Sandstone_GOCAD/GOCAD", True),
 
-
-    # SA - Cariewerloo
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "cariewerloo", "Cariewerloo", "input/CariewerlooConvParam.json", "SouthAust/GDP00005", True),
-
-    # SA - Emmie Bluff
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "emmiebluff", "EmmieBluff", "input/EmmieBluffConvParam.json", "SouthAust/GDP00006/GocadObjects", True),
 
     # SA - Burra Mine
     (MODELS_SRC_DIR, GEOMODELS_DIR, "burramine", "BurraMine", "input/BurraMineConvParam.json", "SouthAust/GDP0008/BurraMineDVD/3D Models/Gocad", True),
@@ -148,6 +143,9 @@ if __name__ == "__main__":
     parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
     args = parser.parse_args()
     if args.model is None:
+        if MODELS_SRC_DIR is None:
+            print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
+            sys.exit(1)
         try:
             # Remove and recreate models dir
             if os.path.exists(GEOMODELS_DIR):

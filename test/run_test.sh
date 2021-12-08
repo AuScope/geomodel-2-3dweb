@@ -12,11 +12,15 @@ coverage run test_assimp_kit.py
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
 
+# Avoid running in gitlab
+hostname -f | egrep '\.au$' > /dev/null 2>&1
+if [ $? -eq 0 ]; then
 pushd unit/webapi > /dev/null
 coverage erase
 coverage run --source webapi -m pytest
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
+fi
 
 pushd regression > /dev/null
 ./reg_run.sh

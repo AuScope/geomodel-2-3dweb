@@ -25,7 +25,8 @@ Here is an example conversion parameter file
         "init_cam_dist": 900000.0,
         "name": "Tamworth",
         "modelUrlPath": "tamworth",
-        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+        "proj4_defn": "+proj=utm +zone=52 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "background_colour": "rgb(255,255,0)"
     },
     "CoordOffsets": [
          {
@@ -80,7 +81,12 @@ Here is an example conversion parameter file
                 }
             }
         ],
-    }
+    },
+    "GroupRenameList": [
+        ["Old name 1", "New name 1"],
+        ["Old name 2", "New name 2"],
+        ["Old name 3", "New name 3"]
+    ]
 }
 ```
 
@@ -107,6 +113,7 @@ The "ModelProperties" section is compulsory and contains the following:
 * "name" - name of model for display purposes (used by the geomodelportal website)
 * "modelUrlPath" - name of model in the website URL (should be the same as in https://github.com/AuScope/geomodelportal/ui/src/assets/geomodels/ProviderModelInfo.json)
 * "proj4_defn" - (optional) if the CRS is not common, a 'proj4' definition may be necessary (http://proj4js.org/)
+* "background_colour" - (optional) can specify background colour as an RGB string 'rgb(<RED 0..255>, <BLUE 0..255>, <GREEN 0..255>)' e.g. 'rgb(255,255,0)'
 
 
 ### 3. CoordOffsets
@@ -147,4 +154,8 @@ Thus the "Insert" can be used to insert:
 * "styling" - change the style of the model part:
     1) "is_labelled" if true, then the object will be labelled in the scene with its "display_name". Default: false
     2) "scale" will scale the object in the z-direction, 1.0 is unscaled, 2.0 will double its height etc. Default: 1.0
+
+### 7. GroupRenameList
+
+The optional "GroupRenameList" section can be used to rename the group labels in the sidebar if the automatically generated ones are not suitable. When looking for group names to convert from "from_name" to "to_name", it matches the "from_name" with the group name in a case-insensitive manner
 
