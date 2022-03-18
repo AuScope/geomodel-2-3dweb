@@ -1,12 +1,10 @@
 input/BendigoConvParam.json
 input/BurraMineConvParam.json
-input/CariewerlooConvParam.json
 input/CentralFlindersConvParam.json
 input/CobarConvParam.json
 input/CurnamonaConvParam.json
 input/CurnamonaSedConvParam.json
 input/EastLachlanConvParam.json
-input/EmmieBluffConvParam.json
 input/McArthurBasinConvParam.json
 input/MtDoreConvParam.json
 input/NewEnglandConvParam.json
@@ -18,12 +16,11 @@ input/QuambyConvParam.json
 input/RockleaConvParam.json
 input/RoseberyLyellConvParam.json
 input/SandstoneConvParam.json
-input/StavelyConvParam.json
 input/SthNewEnglandConvParam.json
 input/StuartShelfConvParam.json
 input/TasConvParam.json
-input/WesternGawlerConvParam.json
 input/WestLachlanConvParam.json
 input/WestTamworthConvParam.json
+input/WesternGawlerConvParam.json
 input/WindimurraConvParam.json
 input/YilgarnConvParam.json
