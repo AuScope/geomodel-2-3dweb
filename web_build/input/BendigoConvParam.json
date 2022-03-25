@@ -2,9 +2,7 @@
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28355",
         "BBOX": { "west": 5720750, "east": 6093000, "south": 100100, "north": 315000 },
-        "WFS_URL": "http://geology.data.vic.gov.au/nvcl/ows",
-        "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "http://geology.data.vic.gov.au/NVCLDataServices"
+        "PROVIDER": "vic"
     },
     "ModelProperties": {
         "crs": "EPSG:28355",

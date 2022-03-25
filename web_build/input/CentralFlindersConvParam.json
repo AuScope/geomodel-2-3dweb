@@ -2,9 +2,7 @@
     "BoreholeData": {    
         "BOREHOLE_CRS": "EPSG:28354",
         "BBOX": { "west": 193373, "east": 361439, "south": 6453698, "north": 6574485 },
-        "WFS_URL": "https://sarigdata.pir.sa.gov.au/nvcl/geoserver/ows",
-        "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices"
+        "PROVIDER": "sa"
     },
     "ModelProperties": {
         "crs": "EPSG:28354",

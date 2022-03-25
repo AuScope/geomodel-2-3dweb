@@ -1,16 +1,21 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 132.5142, "south": -17.525, "east": 135.5984, "north": -13.9739 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:28353",
+        "WFS_URL": "http://geology.data.nt.gov.au:80/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
-        "PROVIDER": "nt"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "http://geology.data.nt.gov.au:80/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28353",
         "init_cam_dist": 1500000.0,
         "name": "McArthur Basin",
         "modelUrlPath": "mcarthur",
-        "proj4_defn": "+proj=utm +zone=53 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-        "background_colour": "rgb(159, 157, 230)"
+        "proj4_defn": "+proj=utm +zone=53 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
     },
     "WMSServices": [
         {
@@ -21,14 +26,6 @@
         }    
     ],
     "GroupStructure": {
-        "3D Volume Slice": [
-            {
-                "FileNameKey": "DIP_DATA_VOXET_Dip@@.gz",
-				"Insert": {
-					"display_name": "Seismic bedding plane dip"
-				}
-            }
-        ],
         "Interpreted Objects": [
             {
                 "FileNameKey": "S_Topograpgy_2017.gltf",
@@ -227,9 +224,5 @@
                 }
             }
         ]
-    },
-    "GroupRenameList": [
-	    ["Wells (.wl)", "Wells"],
-	    ["Unassigned", "Depths & Surface Meas"]
-    ]
+    }
 }

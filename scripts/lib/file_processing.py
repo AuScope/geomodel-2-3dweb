@@ -47,9 +47,12 @@ def get_input_conv_param_bh(input_file):
             LOGGER.error(f"Cannot read JSON file {input_file}: {str(exc)}")
             sys.exit(1)
 
-    # Check presence of broad categories
+    # Check for missing fields
     if 'BoreholeData' not in param_dict:
         LOGGER.error(f"Cannot find 'BoreholeData' key in input file {input_file}")
+        sys.exit(1)
+    if 'PROVIDER' not in param_dict['BoreholeData']:
+        LOGGER.error(f"Cannot find 'PROVIDER' in 'BoreholeData' in input file {input_file}")
         sys.exit(1)
     if 'ModelProperties' not in param_dict:
         LOGGER.error(f"Cannot find 'ModelProperties' key in input file {input_file}")
@@ -73,14 +76,8 @@ def get_input_conv_param_bh(input_file):
     param_obj.MAX_BOREHOLES = MAX_BOREHOLES
 
     # Check and setup other fields
-    for field_name in ['BBOX', 'EXTERNAL_LINK', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
-        # Check for compulsory fields
-        if field_name not in param_dict['BoreholeData']:
-            # NB: BBOX, EXTERNAL_LINK and BOREHOLE_CRS are optional
-            if field_name not in ['BBOX', 'EXTERNAL_LINK', 'BOREHOLE_CRS']:
-                LOGGER.error(f"Cannot find '{field_name}' key in {input_file}")
-                sys.exit(1)
-        else:
+    for field_name in ['PROVIDER', 'BBOX', 'EXTERNAL_LINK', 'WFS_URL', 'BOREHOLE_CRS', 'WFS_VERSION', 'NVCL_URL']:
+        if field_name in param_dict['BoreholeData']:
             setattr(param_obj, field_name, param_dict['BoreholeData'][field_name])
 
     # Check for missing bounding box fields

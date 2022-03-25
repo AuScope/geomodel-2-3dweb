@@ -25,6 +25,7 @@ from lib.file_processing import get_input_conv_param_bh
 from lib.coords import convert_coords
 
 from nvcl_kit.reader import GSMLP_IDS, NVCLReader
+from nvcl_kit.param_builder import param_builder
 
 
 LOG_LVL = logging.INFO
@@ -108,17 +109,16 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     :param dest_dir: optional directory where 3D model files are written
     :returns: config object list and optional GLTF blob object
     '''
-    LOGGER.debug("get_boreholes(%s, %s, %s)", str(param_obj), output_mode, dest_dir)
+    LOGGER.debug(f"get_boreholes({param_obj}, {output_mode}, {dest_dir})")
 
     # Get all NVCL scanned boreholes within BBOX
     borehole_list = reader.get_boreholes_list()
     if not borehole_list:
-        LOGGER.warning("No NVCL boreholes found for %s using %s", param_obj.modelUrlPath,
-                       param_obj.WFS_URL)
+        LOGGER.warning(f"No NVCL boreholes found for '{param_obj.modelUrlPath}' model")
         return [], None
 
     height_res = 10.0
-    LOGGER.debug("borehole_list = %s", str(borehole_list))
+    LOGGER.debug(f"borehole_list = {borehole_list}")
     blob_obj = None
     # Parse response for all boreholes, make COLLADA files
     bh_cnt = 0
@@ -129,13 +129,13 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         bh_info_dict = get_bh_info_dict(borehole_dict, param_obj)
         is_ok, p_obj = qdb.add_part(json.dumps(bh_info_dict))
         if not is_ok:
-            LOGGER.warning("Cannot add part to db: %s", p_obj)
+            LOGGER.warning(f"Cannot add part to db: {p_obj}")
             continue
 
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
             bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
             if bh_data_dict == {}:
-                LOGGER.warning('NVCL data not available for %s', borehole_dict['nvcl_id'])
+                LOGGER.warning(f"NVCL data not available for {borehole_dict['nvcl_id']}")
                 continue
             # If there's NVCL data, then create the borehole
             first_depth = -1
@@ -146,7 +146,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                     first_depth = int(depth)
                 is_ok, s_obj = qdb.add_segment(json.dumps(class_dict))
                 if not is_ok:
-                    LOGGER.warning("Cannot add segment to db: %s", s_obj)
+                    LOGGER.warning(f"Cannot add segment to db: {s_obj}")
                     continue
                 # Using 'make_borehole_label()' ensures that name is the same
                 # in both db and GLTF file
@@ -155,9 +155,9 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
                                              s_obj, p_obj, None, None)
                 if not is_ok:
-                    LOGGER.warning("Cannot add query to db: %s", r_obj)
+                    LOGGER.warning(f"Cannot add query to db: {r_obj}")
                     continue
-                LOGGER.debug("ADD_QUERY(%s, %s)", mesh_name, param_obj.modelUrlPath)
+                LOGGER.debug(f"ADD_QUERY({mesh_name}, {param_obj.modelUrlPath})")
 
             file_name = make_borehole_filename(borehole_dict['name'])
             if output_mode == 'GLTF':
@@ -178,14 +178,13 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
             bh_cnt += 1
 
-    LOGGER.info("Found NVCL data for %d/%d boreholes", bh_cnt, len(borehole_list))
+    LOGGER.info(f"Found NVCL data for {bh_cnt}/{len(borehole_list)} boreholes")
     if output_mode != 'GLTF':
         # Convert COLLADA files to GLTF
         exports.collada2gltf.convert_dir(dest_dir, "Borehole*.dae")
         # Return borehole objects
 
-    LOGGER.debug("Returning: loadconfig_list, blobobj = %s, %s", str(loadconfig_list),
-                 str(blob_obj))
+    LOGGER.debug(f"Returning: loadconfig_list, blobobj = {loadconfig_list}, {blob_obj}")
     return loadconfig_list, blob_obj
 
 
@@ -198,24 +197,33 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     :param create_db: optional (default True) create new database or append to existing one
 
     '''
-    LOGGER.info("Processing %s", input_file)
-    out_filename = os.path.join(dest_dir, 'borehole_'+os.path.basename(input_file))
-    param_obj = get_input_conv_param_bh(input_file)
-    reader = NVCLReader(param_obj)
+    LOGGER.info(f"Processing {input_file}")
+    out_filename = os.path.join(dest_dir, 'borehole_' + os.path.basename(input_file))
+    input_params = get_input_conv_param_bh(input_file)
+    builder_params = {}
+    # NB: Only supports a subset of nvcl_kit parameters
+    for param in ['bbox', 'borehole_crs', 'wfs_version', 'wfs_url', 'nvcl_url', 'max_boreholes']:
+        if hasattr(input_params, param.upper()):
+            builder_params[param] = getattr(input_params, param.upper())
+    bh_params = param_builder(input_params.PROVIDER, **builder_params)
+    if not bh_params:
+        LOGGER.error(f"Cannot build parameters from : {input_file}")
+        return
+    reader = NVCLReader(bh_params)
     if reader.wfs is None:
         LOGGER.error("Cannot contact web service")
         return
     qdb = QueryDB(create=create_db, db_name=db_name)
     err_str = qdb.get_error()
     if err_str != '':
-        LOGGER.error("Cannot open/create database: %s", err_str)
+        LOGGER.error(f"Cannot open/create database: {err_str}")
         sys.exit(1)
     # pylint: disable=W0612
-    borehole_loadconfig, none_obj = get_boreholes(reader, qdb, param_obj, output_mode='GLTF',
+    borehole_loadconfig, none_obj = get_boreholes(reader, qdb, input_params, output_mode='GLTF',
                                                   dest_dir=dest_dir)
-    LOGGER.debug("borehole_loadconfig = %s", repr(borehole_loadconfig))
+    LOGGER.debug(f"borehole_loadconfig = {borehole_loadconfig}")
     if borehole_loadconfig:
-        LOGGER.info("Writing to: %s", out_filename)
+        LOGGER.info(f"Writing to: {out_filename}")
         with open(out_filename, 'w') as file_p:
             json.dump(borehole_loadconfig, file_p, indent=4, sort_keys=True)
 
@@ -241,25 +249,25 @@ if __name__ == "__main__":
 
     # Check and create output directory, if necessary
     if not os.path.isdir(ARGS.dest_dir):
-        LOGGER.warning("Output directory %s does not exist", ARGS.dest_dir)
+        LOGGER.warning(f"Output directory {ARGS.dest_dir} does not exist")
         try:
-            LOGGER.info("Creating %s", ARGS.dest_dir)
+            LOGGER.info(f"Creating {ARGS.dest_dir}")
             os.mkdir(ARGS.dest_dir)
         except OSError as os_exc:
-            LOGGER.error("Cannot create dir %s: %s", ARGS.dest_dir, str(os_exc))
+            LOGGER.error(f"Cannot create dir {ARGS.dest_dir}:{os_exc}")
             sys.exit(1)
 
     # Check input file
     if getattr(ARGS, 'input', None) is not None:
         if not os.path.isfile(ARGS.input):
-            LOGGER.error("Input file does not exist: %s", ARGS.input)
+            LOGGER.error(f"Input file does not exist: {ARGS.input}")
             sys.exit(1)
         process_single(ARGS.dest_dir, ARGS.input, os.path.join(ARGS.dest_dir, ARGS.database))
 
     # Check batch file
     elif getattr(ARGS, 'batch', None) is not None:
         if not os.path.isfile(ARGS.batch):
-            LOGGER.error("Batch file does not exist: %s", ARGS.batch)
+            LOGGER.error(f"Batch file does not exist: {ARGS.batch}")
             sys.exit(1)
         CREATE_DB = True
         with open(ARGS.batch, 'r') as fp:

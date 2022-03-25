@@ -2,9 +2,7 @@
     "BoreholeData": {
         "BOREHOLE_CRS": "EPSG:28355",
         "BBOX": { "west": 300000.0, "east": 984000.0, "south": 5844000.0, "north": 6840000.0 },
-        "WFS_URL": "https://gs.geoscience.nsw.gov.au/geoserver/ows",
-        "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "https://nvcl.geoscience.nsw.gov.au/NVCLDataServices"
+        "PROVIDER": "nsw"
     },
     "ModelProperties": {
         "crs": "EPSG:28355",

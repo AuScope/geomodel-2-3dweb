@@ -1,9 +1,8 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 140.07922, "east": 140.80366, "south": -22.29506, "north": -20.66917 },
-        "WFS_URL": "https://geology.information.qld.gov.au/geoserver/ows",
-        "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "https://geology.information.qld.gov.au/NVCLDataServices"
+        "BOREHOLE_CRS": "EPSG:4283",
+        "PROVIDER": "qld"
     },
     "ModelProperties": {
         "crs": "EPSG:28354",

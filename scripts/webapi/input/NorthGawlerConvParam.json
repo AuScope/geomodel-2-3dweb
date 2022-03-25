@@ -1,8 +1,14 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 132.76, "south": -28.44, "east": 134.39, "north": -26.87 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": "http://portal.auscope.org/index.htm?state=XQAAAAI6CAAAAAAAAAA9776I776J77+H776j776DJO+/gT4/776VUi/vv4oW7761776j77+Q77+n776kCi3vv5Lvv4w1776KfO+/gWVT77+lPu++ku+/u+++mHlx776DKid577+/77+O776WCe++vO+/ihZGMO++ohTvv6oUbEY2fHnvvrnvv6oX77+rfO+/gO+/jF0ID1BXOO+/lxHvvoNX776L776xGu++oO++tO+/r1Em77+5He+/lO+/h+++lDdd77+1776reDLvvpAzRO++o++/tzTvvqTvv5B6T+++qQTvv4YbK3vvv6AdeAxk77+VG1bvvrrvv4QG776fLDlQ776V7768776gX+++qe+/kGtldncA776c77+5bVAd77+v776DJ1Q5KFliMBwf77+177+GeiTvvqTvvqjvv7/vv4lb776b77+Y7761776gRe+/qu++khzvvprvv4dq77+JS0ko776+77+W776I77+2C+++lQPvv4Uh776o77+DUzEj77+nAQVtPO++mm/vvoPvv77vvqrvv4Pvv7zvv6rvvrI1776hC0sjejbvvp5/776gTgLvv4J3aO+/hu++mu+/kCzvv7nvv4M077+d776h776377+W776qEO+/le+/g++/gBg/776eXu++ng5Ybe++ju++ogh8776USjHvvq5x77+rfE1A77+v77+M7768CO+/i+++ke++ku+/vCDvv5QJ77+YH1fvv6rvv7gGMz4fFu++mO+/iu++ju++ggDvvoxGMu+/kjINEQtS77+j77+07764776C77+Y77+n77+B77+hCT4IHO++pe++rVrvvrBR776CGSHvvp/vv4bvvoE/77+G776z77+5I++/pEVuJO++su+/ne++iWvvvrATDu++vRPvvoNr77+8BiQKOCEJ7768776E77+t776K77+Z7761776i77+lTO+/mu++qx3vvrw2776R77+B77+6776X776EOe+/lO++nu+/le++nW427766Lifvv7FCc++/uCBTIAtrFwjvvrceL18PQFrvvonvv4Zd77+lZiUmQFZd776yMu++rhvvvrp+PTXvv58eNwVY77+a776l776TCO++jzwVTHrvv4bvv6jvvorvv4XvvoxoVlVI77+mOlEkE++/jgYBfWnvv7Lvv4k6BO++su+/jO++vHzvvqsG77+1QFbvvoUP77+n776N77+S776JKe++hO++oO++hO+/pnATP+++kO++vknvv4FCegcvCU7vv7jvvogbNu++ku+/se++o++/tXbvv4nvvorvvpRsN+++n+++q+++s++/tu++u+++qh/vvrzvvp7vv5Ql776pfO++oGJC776sZmrvv7Tvv6/vvrRT776O776ocnBKSO++ne+/tnIS7762776f77+ODO+/jO++ve++jzRJHBjvvoMSEDhKT25N776BHu+/p+++iO++hnvvv5Tvvrfvv7Xvv7Pvv4zvv54jbkfvv4Hvv7Lvv7PvvqTvv4h4776H776EYF4P77+iTHTvv5vvv5Vt776Hc++/oBbvvqgx7769bu++gklr77+qeO+/hSxY776n776J776o77++77+l776577+r776T776877+lGT7vvrLvvoLvvolp77+H7762WzoILO+/qQzvv73vvrd+776/Z2RfHUrvv67vv4wPPu++v++/hmJw77+qVO+/liTvvqN5Iu++uFnvv7ps776W776+776f776L77+HKO+/gO++vzhS77++au+/tjIj776cKyFk776aSO+/tmLvvpMw776l77+1SHTvvq8LCTDvvoF6776TD+++sxHvv7MA77+fBu++tnbvv4jvv6xT776yQe++q++/rkosSe+/vu++h0rvvotT776Q77+mPgvvvoLvv6zvv5ExVClnITDvvrjvv6LvvrHvvoPvv65g77+aSGDvv6jvvoLvv7Tvvp8N77+HF++/u3Lvvq7vvqbvv7/vv6jvv5nvv5Lvvo4="
+                         },
+        "MODEL_CRS": "EPSG:28352",
+        "WFS_URL": "https://sarigdata.pir.sa.gov.au/nvcl/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
-        "PROVIDER": "sa"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "https://sarigdata.pir.sa.gov.au/nvcl/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28352",
@@ -16,6 +22,14 @@
              "filename": "UBC_Susc_0_0100.ts",
              "offset": [-802095, -6821605, 0]
         }
+    ],
+    "WMSServices": [
+        {
+            "display_name": "GA Lithostratigraphy",
+            "model_url": "http://services.ga.gov.au/gis/services/GA_Surface_Geology/MapServer/WMSServer",
+            "name": "AUS_GA_2500k_GUPoly_Lithostratigraphy",
+            "version": "1.3.0"
+        }    
     ],
     "GroupStructure": {
         "Ammaroodinna Faults": [
@@ -166,7 +180,7 @@
                 "Insert": {
                     "display_name": "2M Surface Geology",
                     "3dobject_label": "2MsurfaceGeologyZ52_PMsurfaceGeologyZ52_prop@@_0",
-                    "reference_url": "https://energymining.sa.gov.au/minerals/geoscience/geoscientific_data/3d_geological_models/northern_gawler_province"
+                    "reference_url": "http://www.minerals.statedevelopment.sa.gov.au/geoscience/geology/gawler_craton"
                 }
             }
         ],

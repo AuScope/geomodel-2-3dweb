@@ -1,8 +1,14 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 118.99, "south": -28.34, "east": 119.51, "north": -27.55 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:28350",
+        "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/ows",
         "BOREHOLE_CRS": "EPSG:4283",
-        "PROVIDER": "wa"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28350",
@@ -92,17 +98,15 @@
         ],
         "Inversion Results": [
             {
-                "FileNameKey": "VPmg_gravity_inversion_results.gzson",
+                "FileNameKey": "VPmg_gravity_inversion_results.gltf",
                 "Insert": {
-                    "display_name": "VPMG GRAVITY",
-		    "popups": {}
+                    "display_name": "VPMG GRAVITY"
                 }
             },
             {
-                "FileNameKey": "VPmg_magnetic_inversion_results.gzson",
+                "FileNameKey": "VPmg_magnetic_inversion_results.gltf",
                 "Insert": {
-                    "display_name": "VPMG MAGNETIC",
-		    "popups": {}
+                    "display_name": "VPMG MAGNETIC"
                 }
             }
         ],

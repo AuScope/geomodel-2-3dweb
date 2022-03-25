@@ -1,10 +1,8 @@
 {
    "BoreholeData": {
         "BBOX": { "west": 114.606468, "south": -23.4859203, "east": 118.283877, "north": -19.271620 },
-        "WFS_URL": "http://geossdi.dmp.wa.gov.au/services/ows",
         "BOREHOLE_CRS": "EPSG:4283",
-        "WFS_VERSION": "1.1.0",
-        "NVCL_URL": "http://geossdi.dmp.wa.gov.au/NVCLDataServices"
+        "PROVIDER": "wa"
     },
     "ModelProperties": {
         "crs": "EPSG:28350",

@@ -1,8 +1,14 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 139.5, "south": -22, "east": 147, "north": -17 },
+        "EXTERNAL_LINK": { "label": "AUSCOPE_PORTAL_URL",
+                           "URL": ""
+                         },
+        "MODEL_CRS": "EPSG:28354",
+        "WFS_URL": "https://geology.information.qld.gov.au/geoserver/ows",
         "BOREHOLE_CRS": "EPSG:4283",
-        "PROVIDER": "qld"
+        "WFS_VERSION": "1.1.0",
+        "NVCL_URL": "https://geology.information.qld.gov.au/NVCLDataServices"
     },
     "ModelProperties": {
         "crs": "EPSG:28354",
