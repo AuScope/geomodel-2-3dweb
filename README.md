@@ -76,7 +76,7 @@ Please see [README](doc_src/README.md) file for documentation generation details
 
 ### Acknowledgements
 
-Funding provided by AuScope Ltd
+Funding provided by [AuScope Pty Ltd](https://www.auscope.org.au/)
 
 SKUA/GOCAD software from the [Paradigm Academic Software Program](http://www.pdgm.com/affiliations/academic-software-programs/) was used to view some types of GOCAD object files and produce sample GOCAD OBJECT files used for testing
 
