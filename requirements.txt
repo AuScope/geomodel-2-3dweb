@@ -1,5 +1,5 @@
 numpy
-OWSLib==0.22.0
+OWSLib==0.28.1
 Pillow
 pyassimp
 pycollada
