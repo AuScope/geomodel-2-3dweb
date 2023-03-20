@@ -9,6 +9,7 @@ from collections import defaultdict
 import json
 from json import JSONDecodeError
 from types import SimpleNamespace
+import requests
 
 # Set up debugging
 LOGGER = logging.getLogger(__name__)
@@ -96,9 +97,12 @@ def find_gltf(geomodels_dir, input_dir, target_model_name, gltf_file):
     :param target_model_name: name of model we're searching for
     :param gltf_file: GLTF filename
     :returns: model file full path                                                                                               '''
-    # Open up and parse 'input/ProviderModelInfo.json'
-    config_file = os.path.join(input_dir, 'ProviderModelInfo.json')
-    conf_dict = read_json_file(config_file)
+    # Open up and parse 'ProviderModelInfo.json' from geomodelportal repo
+    result = requests.get("https://raw.githubusercontent.com/AuScope/geomodelportal/dev/ui/src/assets/geomodels/ProviderModelInfo.json")
+    if result.status_code != '200':
+        LOGGER.error("Cannot read ProviderModelInfo.json file")
+        sys.exit(1)
+    conf_dict = result.json()
     # pylint: disable=W0612
     for prov_name, model_dict in conf_dict.items():
         model_list = model_dict['models']
@@ -123,8 +127,7 @@ def read_json_file(file_name):
         LOGGER.error(f"Cannot open JSON file {file_name}: {oe_exc}")
         sys.exit(1)
     except JSONDecodeError as jd_exc:
-        json_dict = {}
-        LOGGER.error(f"Cannot read JSON file {file_name}: {jd_exc}")
+        LOGGER.error(f"Cannot parse JSON file {file_name}: {jd_exc}")
         sys.exit(1)
     return json_dict
 
