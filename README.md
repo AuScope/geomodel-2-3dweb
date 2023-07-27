@@ -5,30 +5,19 @@ Generates 3D web versions of geological models primarily for geomodelportal webs
 
 ### To configure
 
-1. Install Python v3 (https://www.python.org/) and these python library dependencies:
-
-+ OWSLib (https://github.com/geopython/OWSLib)
-+ pyassimp (https://github.com/assimp/assimp/tree/master/port/PyAssimp)
-+ SQLAlchemy (https://www.sqlalchemy.org/)
-+ pyproj (https://github.com/jswhit/pyproj)
-+ Pillow (https://github.com/python-pillow/Pillow)
-+ pycollada (https://github.com/pycollada/pycollada)
-+ numpy (http://www.numpy.org/)
-+ diskcache (http://www.grantjenks.com/docs/diskcache/)
-+ nvcl_kit (https://pypi.org/project/nvcl-kit/)
-+ geojson (https://python-geojson.readthedocs.io/en/latest/)
-+ fastapi (https://fastapi.tiangolo.com/)
-+ aiofiles (https://pypi.org/project/aiofiles/)
-+ uvicorn (https://www.uvicorn.org/)
+1. Install Python v3.7 or higher (https://www.python.org/)
+2. Install PDM (https://pdm.fming.dev/latest/)
 
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 
-2. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
-3. Set 'COLLADA2GLTF_BIN' environment variable to point to the path where 'COLLADA2GLTF-bin' resides, e.g.
+3. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
+4. Set 'COLLADA2GLTF_BIN' environment variable to point to the path where 'COLLADA2GLTF-bin' resides, e.g.
 ```
 export COLLADA2GLTF_BIN=/home/fred/github/COLLADA2GLTF/build/
 ```
-4. Clone this repository (i.e. geomodel-2-3dweb)
+5. Clone this repository (i.e. geomodel-2-3dweb)
+6. 'pdm install' will install the python library dependencies
+   'eval $(pdm venv activate)' will start a Python env, 'deactivate' to exit
 
 ### To convert some GOCAD files to GLTF or COLLADA (*.ts, *.pl, small *.vs, *.wl) NetCDF4 (large *.vs), GZIP (*.vo, *.sg). *.gp files can also be converted.
 

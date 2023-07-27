@@ -1,0 +1,10 @@
+
+[project]
+# PEP 621 project metadata
+# See https://www.python.org/dev/peps/pep-0621/
+dependencies = ["numpy", "OWSLib==0.28.1", "Pillow", "pyassimp", "pycollada", "pyproj", "SQLAlchemy", "diskcache", "nvcl-kit", "geojson", "fastapi", "aiofiles", "uvicorn", "wheel"]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
