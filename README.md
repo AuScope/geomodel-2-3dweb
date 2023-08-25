@@ -1,3 +1,5 @@
+[![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
+
 # geomodel-2-3dweb
 
 Generates 3D web versions of geological models primarily for geomodelportal website (https://github.com/AuScope/geomodelportal)
