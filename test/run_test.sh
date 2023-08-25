@@ -57,12 +57,11 @@ pushd regression > /dev/null
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
 
-## Test db
-# FIXME: Dperecated parameter problem
-#pushd ../scripts/lib/db > /dev/null
-#coverage erase
-#coverage run db_tables.py
-#popd > /dev/null
+# Test db
+pushd ../scripts/lib/db > /dev/null
+coverage erase
+coverage run db_tables.py
+popd > /dev/null
 
 coverage combine unit/gocad_import/.coverage # unit/assimp_kit/.coverage unit/webapi/.coverage ../scripts/.coverage ../scripts/lib/db/.coverage
 coverage report --omit '*/geomodel-2-3dweb/scripts/lib/exports/print_assimp.py'

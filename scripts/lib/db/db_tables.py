@@ -3,9 +3,9 @@
 Uses 'sqlalchemy' library to create a simple 'sqlite' db to hold query results for models
 """
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.schema import ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.exc import DatabaseError
 
@@ -137,10 +137,9 @@ class QueryDB():
         try:
             db_name = 'sqlite:///' + db_name
             eng = create_engine(db_name, echo=False)
-            Base.metadata.bind = eng
             if create:
-                Base.metadata.drop_all()
-                Base.metadata.create_all()
+                Base.metadata.drop_all(bind=eng)
+                Base.metadata.create_all(bind=eng)
             # 'scoped_session()' makes a thread-safe cache of session objects
             #  NOTE: Would like to eventually make scope_session() more global
             self.session_obj = scoped_session(sessionmaker(eng))
