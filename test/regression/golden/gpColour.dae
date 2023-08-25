@@ -51,17 +51,17 @@
           <float_array count="9" id="triverts-array-00000-array">377911 5348000 -9900 377950 5347897 -8560 378029 5347696 -8630</float_array>
           <technique_common>
             <accessor count="3" source="#triverts-array-00000-array" stride="3">
-              <param name="X" type="float" />
-              <param name="Y" type="float" />
-              <param name="Z" type="float" />
+              <param type="float" name="X"/>
+              <param type="float" name="Y"/>
+              <param type="float" name="Z"/>
             </accessor>
           </technique_common>
         </source>
         <vertices id="triverts-array-00000-vertices">
-          <input semantic="POSITION" source="#triverts-array-00000" />
+          <input semantic="POSITION" source="#triverts-array-00000"/>
         </vertices>
         <triangles count="1" material="materialref-00000">
-          <input offset="0" semantic="VERTEX" source="#triverts-array-00000-vertices" />
+          <input offset="0" semantic="VERTEX" source="#triverts-array-00000-vertices"/>
           <p>0 1 2</p>
         </triangles>
       </mesh>
@@ -69,7 +69,7 @@
   </library_geometries>
   <library_materials>
     <material id="material-00000" name="mymaterial-00000">
-      <instance_effect url="#effect-00000" />
+      <instance_effect url="#effect-00000"/>
     </material>
   </library_materials>
   <library_visual_scenes>
@@ -78,7 +78,7 @@
         <instance_geometry url="#geometry-00000">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00000" target="#material-00000" />
+              <instance_material symbol="materialref-00000" target="#material-00000"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
@@ -86,6 +86,6 @@
     </visual_scene>
   </library_visual_scenes>
   <scene>
-    <instance_visual_scene url="#myscene" />
+    <instance_visual_scene url="#myscene"/>
   </scene>
 </COLLADA>
