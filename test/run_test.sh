@@ -51,12 +51,11 @@ popd > /dev/null
 #popd > /dev/null
 #fi
 
-## Test regresssion
-## FIXME: Version incompatibility problems
-#pushd regression > /dev/null
-#./reg_run.sh
-#[ $? -ne 0 ] && exit 1
-#popd > /dev/null
+# Test regresssion
+pushd regression > /dev/null
+./reg_run.sh
+[ $? -ne 0 ] && exit 1
+popd > /dev/null
 
 ## Test db
 # FIXME: Dperecated parameter problem

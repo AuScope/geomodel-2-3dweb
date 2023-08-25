@@ -50,17 +50,23 @@ def read_volume_binary_files(self):
             # Prepare 'numpy' dtype object for binary float, integer signed/unsigned data types
             d_typ = prop_obj.make_numpy_dtype()
 
-            # Read entire file, assumes file small enough to store in memory
+            # Read entire file
+            # IMPORTANT: Assumes file small enough to store in memory
             self.logger.info(f"Reading binary file: {prop_obj.file_name}")
             elem_offset = prop_obj.offset // prop_obj.data_sz
             fp_arr = np.fromfile(prop_obj.file_name, dtype=d_typ, count=num_voxels + elem_offset)
             self.logger.debug(f"fp_arr.shape={fp_arr.shape}")
             fp_idx = elem_offset
             # Calculate max val
-            prop_obj.data_stats['max'] = float(np.amax(fp_arr))
-            # min val calculated in loop because we need to exclude 'no_data_marker' val
-            # NB: Assumes 'no_data_marker' is negative
-            min_val = float(np.amax(fp_arr))
+            if d_typ == prop_obj.make_numpy_dtype('rgba'):
+                prop_obj.data_stats['max'] = (255, 255, 255, 255)
+                min_val = (0, 0, 255, 255) # Assume: pure blue is minimum, pure red is maximum
+            else:
+                prop_obj.data_stats['max'] = float(np.max(fp_arr))
+                # min val calculated in loop because we need to exclude 'no_data_marker' val
+                # NB: Assumes 'no_data_marker' is negative
+                # Initialise min_val with a maximum
+                min_val = float(np.max(fp_arr))
 
             # If VOXET
             if self._is_vo:
@@ -82,16 +88,20 @@ def read_volume_binary_files(self):
                                     continue
                                 has_values = True
                                 prop_obj.assign_to_3d(x_val, y_val, z_val, data_val)
+                                # Calculate minimum excluding 'no_data_marker' value
+                                if data_val < min_val and data_val != prop_obj.no_data_marker:
+                                    min_val = data_val
+
                             # If RGBA VOXET
                             else:
                                 has_values = True
                                 data_val = fp_arr[fp_idx]
                                 prop_obj.assign_to_xyz((x_coord, y_coord, z_coord), data_val)
                                 prop_obj.assign_to_ijk((x_val, y_val, z_val), data_val)
-
-                            # Calculate minimum excluding 'no_data_marker' value
-                            if data_val < min_val and data_val != prop_obj.no_data_marker:
-                                min_val = data_val
+                                # NB: Minimum is calculated assuming the spectrum is used for data, but
+                                # assumes that red > green > blue, so that red colours indicate greater intensity etc.
+                                if data_val[3] > 0 and data_val[0]*256*256+data_val[1]*256+data_val[2] < min_val[0]*256*256+min_val[1]*256+min_val[2]:
+                                    min_val = data_val
 
                             fp_idx += 1
             # If SGRID

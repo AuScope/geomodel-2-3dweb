@@ -140,22 +140,31 @@ class PROPS:
         return ""
 
 
-    def make_numpy_dtype(self):
-        ''' Returns a string that can be passed to 'numpy' to read a binary file
-            It takes the 'data_type' of 'f', 'b', h' & 'rgba'
+    def make_numpy_dtype(self, data_type=None):
+        ''' Returns a dtype of the 'data_type' property.
+            It is used to help 'numpy' read read binary files.
+            It accepts the 'data_type' of 'f', 'b', h' & 'rgba'
+
+            :param data_type: optional parameter, if passed in will override the local 'data_type' 
         '''
+        # Override local data_type
+        if data_type is not None:
+            dtype = data_type
+        else:
+            dtype = self.data_type
+
         # Prepare 'numpy' binary float integer signed/unsigned data types
         # Using '>' to tell 'numpy' that it is big-endian
         # Using upper case to tell 'numpy' that it is unsigned integer
         # 'numpy' recognises 'h' as a 2-byte integer and 'b' as byte
-        if self.data_type == 'h' or self.data_type == 'b':
+        if dtype in ['h','b']:
             if not self.signed_int:
                 return numpy.dtype('>'+self.data_type.upper())
 
             return numpy.dtype('>'+self.data_type)
 
         # R,G,B,A 4-byte array of colour
-        if self.data_type == 'rgba':
+        if dtype == 'rgba':
             return numpy.dtype([('r', numpy.uint8), ('g', numpy.uint8), ('b', numpy.uint8), ('a', numpy.uint8)])
 
         # Floating point i.e. data_type = 'f'
@@ -165,10 +174,12 @@ class PROPS:
     def read_colour_table_csv(self, csv_file, transp_list):
         ''' Reads an RGB colour table from CSV file for use in VOXET colours
             CSV Format: col#1: integer index, col#2: R-value, col#3: G-value, col#4: B-value
-            csv_file - filename of  CSV file to read, without path
             Sets the 'colour_map' and 'rock_label_table' class attibutes
             'colour_map' is a dict, key is integer, value is (R,G,B,A) tuple of floats
             'rock_label_table' is a dict, key is integer, value is string
+
+            :param csv_file: filename of  CSV file to read, without path
+            :param transp_list: list of row numbers, these entries are made transparent
         '''
         col_tab = {}
         lab_tab = {}
@@ -193,8 +204,9 @@ class PROPS:
 
     def assign_to_3d(self, x_val, y_val, z_val, fltp):
         ''' Assigns a value to 3d array
-            x,y,z - XYZ integer array indexes
-            fltp - floating point value to be assigned
+
+            :param x,y,z: XYZ integer array indexes
+            :param fltp: floating point value to be assigned
 
         '''
         self.data_3d[x_val][y_val][z_val] = fltp
@@ -203,8 +215,9 @@ class PROPS:
 
     def assign_to_xyz(self, xyz, val):
         ''' Assigns a value to xyz dict
-            xyz - (X,Y,Z) tuple array indexes (floats)
-            val - value to be assigned (float or tuple)
+
+            :param xyz: (X,Y,Z) tuple array indexes (floats)
+            :param val: value to be assigned (float or tuple)
         '''
         self.data_xyz[xyz] = val
         if isinstance(val, float) or isinstance(val, numpy.float32):
@@ -213,8 +226,9 @@ class PROPS:
 
     def assign_to_ijk(self, ijk, val):
         ''' Assigns a value to ijk dict
-            ijk - (I,J,K) tuple array indexes (ints)
-            val - value to be assigned (float or tuple)
+
+            :param ijk: (I,J,K) tuple array indexes (ints)
+            :param val: value to be assigned (float or tuple)
         '''
         self.data_ijk[ijk] = val
         if isinstance(val, float) or isinstance(val, numpy.float32):
@@ -223,8 +237,9 @@ class PROPS:
 
     def append_to_xyz(self, xyz, val):
         ''' Appends a value to xyz dict
-            xyz - (X,Y,Z) tuple array indexes (floats)
-            val - value to be assigned
+
+            :param xyz: (X,Y,Z) tuple array indexes (floats)
+            :param val: value to be assigned
         '''
         x,y,z = xyz
         if not isinstance(x, float) or not isinstance(y, float) or \
@@ -236,8 +251,9 @@ class PROPS:
 
     def append_to_ijk(self, ijk, val):
         ''' Appends a value to xyz dict
-            ijk - (I,J,K) tuple array indexes (ints)
-            val - value to be assigned
+
+            :param ijk: (I,J,K) tuple array indexes (ints)
+            :param val: value to be assigned
         '''
         i,j,k = ijk
         if not isinstance(i, int) or not isinstance(j, int) or \
@@ -250,7 +266,8 @@ class PROPS:
     def __calc_minmax(self, fltp):
         ''' Calculates minimum & maximum of floating point value and stores
             result locally in 'data_stats'
-            fp - floating point value (numpy or python float)
+
+            :param fp: floating point value (numpy or python float)
         '''
         try:
             if fltp > self.data_stats['max']:

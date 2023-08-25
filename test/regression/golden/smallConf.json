@@ -2,6 +2,7 @@
     "groups": {
         "3D Slice Views": [
             {
+                "alt_group_label": "3D Volume small density@@",
                 "display_name": "Density",
                 "displayed": false,
                 "include": true,
@@ -46,6 +47,7 @@
                 }
             },
             {
+                "alt_group_label": "3D Volume small lithology@@",
                 "display_name": "Lithology",
                 "displayed": false,
                 "include": true,
@@ -241,8 +243,9 @@
                 }
             }
         ],
-        "Not Grouped": [
+        "3D Volume small susceptibility@@": [
             {
+                "alt_group_label": "3D Volume small susceptibility@@",
                 "display_name": "SMALL",
                 "displayed": false,
                 "include": true,
