@@ -3,10 +3,9 @@
 
 [metadata]
 groups = ["default"]
-cross_platform = true
-static_urls = false
-lock_version = "4.3"
-content_hash = "sha256:6c5d3174e3289c9196ce3241fd61bf71a8501cfef854f6c65a8f417542741e63"
+strategy = ["cross_platform"]
+lock_version = "4.4.2"
+content_hash = "sha256:e3504cbdf09436b06c1325f042bbc02863827efc95b2fcbf3e1af8ead16240fa"
 
 [[package]]
 name = "aiofiles"
@@ -526,11 +525,9 @@ files = [
 
 [[package]]
 name = "pyassimp"
-version = "5.2.5"
+version = "4.1.4"
+path = "./test/assimp-5.2.5/port/PyAssimp"
 summary = "Python bindings for the Open Asset Import Library (ASSIMP)"
-files = [
-    {file = "pyassimp-5.2.5.tar.gz", hash = "sha256:107d93780e4300d70698c4291c54dd32ff78e8cf0dafd56ac1801cd0260c36f3"},
-]
 
 [[package]]
 name = "pycollada"
@@ -868,7 +865,7 @@ version = "2.0.19"
 requires_python = ">=3.7"
 summary = "Database Abstraction Library"
 dependencies = [
-    "greenlet!=0.4.17; platform_machine == \"aarch64\" or (platform_machine == \"ppc64le\" or (platform_machine == \"x86_64\" or (platform_machine == \"amd64\" or (platform_machine == \"AMD64\" or (platform_machine == \"win32\" or platform_machine == \"WIN32\")))))",
+    "greenlet!=0.4.17; platform_machine == \"win32\" or platform_machine == \"WIN32\" or platform_machine == \"AMD64\" or platform_machine == \"amd64\" or platform_machine == \"x86_64\" or platform_machine == \"ppc64le\" or platform_machine == \"aarch64\"",
     "typing-extensions>=4.2.0",
 ]
 files = [

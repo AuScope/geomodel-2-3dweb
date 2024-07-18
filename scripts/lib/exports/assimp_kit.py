@@ -44,7 +44,7 @@ class AssimpKit(ExportKit):
         '''
         self.scn = structs.Scene()
         self.scn.mMetadata = None
-        self.scn.mPrivate = 0
+        self.scn.mPrivate = None
 
 
     def add_geom(self, geom_obj, style_obj, meta_obj):

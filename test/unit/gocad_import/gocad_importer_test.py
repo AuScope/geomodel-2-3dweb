@@ -49,13 +49,16 @@ def test_this(msg, test_file, assert_str, stop_on_exc=True, should_fail=False):
     # print("is_ok = ", is_ok)
     # print("gsm_list=", repr(gsm_list))
     if not is_ok and not should_fail:
-        print(msg, ": FAIL !!")
+        print(msg, ": FAIL !! Could not process GOCAD")
         sys.exit(1)
     try:
         # pylint: disable=W0123
         assert eval(assert_str)
-    except (AssertionError, IndexError) as exc:
-        print(msg, ": FAIL !!", str(exc))
+    except AssertionError as ae:
+        print(f"{msg}: FAIL !! AssertionError: {ae}")
+        sys.exit(1)
+    except IndexError as ie:
+        print(f"{msg}: FAIL !! IndexError: {ie}")
         sys.exit(1)
     print(msg, ": PASS")
 

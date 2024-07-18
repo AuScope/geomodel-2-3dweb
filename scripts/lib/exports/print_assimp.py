@@ -36,7 +36,8 @@ def print_mesh(mesh):
     print("\nMESH START :", repr(mesh))
     field_list = ['mBitangents', 'mBones', 'mColors', 'mFaces', 'mMaterialIndex', 'mName',
                   'mNormals', 'mNumAnimMeshes', 'mNumBones', 'mNumFaces', 'mNumUVComponents',
-                  'mNumVertices', 'mPrimitiveTypes', 'mTangents', 'mTextureCoords', 'mVertices']
+                  'mNumVertices', 'mPrimitiveTypes', 'mTangents', 'mTextureCoords', 'mVertices',
+                  'mTextureCoordsNames']
     for field in field_list:
         if getattr(mesh, field, False) is not False:
             print(field, ':', getattr(mesh, field))
@@ -56,6 +57,8 @@ def print_mesh(mesh):
                 print_texture(mesh.mTextureCoords)
             elif field == 'mNumUVComponents':
                 print_uvcomponents(mesh.mNumUVComponents)
+            elif field == 'mTextureCoordsNames':
+                print("IF NULL should be false: ", bool(mesh.mTextureCoordsNames))
 
     print("MESH END\n")
 

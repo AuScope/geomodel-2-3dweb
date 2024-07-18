@@ -47,6 +47,7 @@ if __name__ == "__main__":
             if golden_str.rstrip('\n') == test_str.rstrip('\n'):
                 print(MSG, "PASS ({})".format(golden_file))
                 sys.exit(0)
+    # Print diff and FAIL!!
     print(test_str)
     print('-------------------------------------------------------------------------------------------------')
     print(golden_str)
