@@ -49,6 +49,7 @@ jobs:
         export GEOMODELS_HOME=`pwd`/MODEL_SRC
         echo "GEOMODELS_HOME=$GEOMODELS_HOME"
         eval $(pdm venv activate)
+        env
         cd web_build/
         ./batch_proc.py
 
