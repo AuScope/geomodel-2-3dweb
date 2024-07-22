@@ -29,7 +29,6 @@ jobs:
         pushd COLLADA2GLTF
         wget https://github.com/KhronosGroup/COLLADA2GLTF/releases/download/v2.1.5/COLLADA2GLTF-v2.1.5-linux.zip
         unzip COLLADA2GLTF-v2.1.5-linux.zip
-        export COLLADA2GLTF_BIN=`pwd`
         popd
     - name: Install model sources
       run: |
@@ -37,6 +36,7 @@ jobs:
         pushd MODEL_SRC
         wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/PORTAL_RELEASE_20210718/GEOMODELS_SRC-GA.tar.gz
         tar xvfz GEOMODELS_SRC-GA.tar.gz
+        popd
     - name: Install pdm
       run: |
         python -m pip install --upgrade pip
@@ -46,10 +46,11 @@ jobs:
         pdm install
     - name: Build
       run: |
+        export COLLADA2GLTF_BIN=`pwd`/COLLADA2GLTF
+        echo "COLLADA2GLTF_BIN=$COLLADA2GLTF_BIN"
         export GEOMODELS_HOME=`pwd`/MODEL_SRC
         echo "GEOMODELS_HOME=$GEOMODELS_HOME"
         eval $(pdm venv activate)
-        env
         cd web_build/
         ./batch_proc.py
 
