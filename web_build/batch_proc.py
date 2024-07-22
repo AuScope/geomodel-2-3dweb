@@ -141,8 +141,26 @@ MODEL_DATA = [
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
+    parser.add_argument('--model_name', help='Model name e.g. "RockleaDome", "Yilgarn"')
     args = parser.parse_args()
-    if args.model is None:
+
+    # If user specified a model directory name
+    if args.model_name is not None:
+        if MODELS_SRC_DIR is None:
+            print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
+            sys.exit(1)
+        converted = False
+        for srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir  in MODEL_DATA:
+            if modelDirName == args.model_name:
+                print(srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir)
+                convert_model(srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir)
+                converted = True
+                break
+        if not converted:
+            print(f"Could not find model name {args.model_name}")
+
+    # If user wants to run all models in source dir
+    elif args.model is None:
         if MODELS_SRC_DIR is None:
             print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
             sys.exit(1)
@@ -160,6 +178,8 @@ if __name__ == "__main__":
         except OSError as exc:
             print("ERROR - ", repr(exc))
             sys.exit(1)
+
+    # If user specified all details on command line
     else:
         MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir = args.model
         # Run model conversion as a separate process
