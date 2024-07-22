@@ -13,10 +13,17 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  includes_only:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        include:
+          - src_name: "GEOMODELS_SRC-GA"
+            model_name: "NorthQueensland"
+          - src_name: "GEOMODELS_SRC-GA"
+            model_name: "Yilgarn"
+          - src_name: "GEOMODELS_SRC-GA"
+            model_name: "Tas"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
@@ -34,8 +41,8 @@ jobs:
       run: |
         mkdir MODEL_SRC
         pushd MODEL_SRC
-        wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/PORTAL_RELEASE_20210718/GEOMODELS_SRC-GA.tar.gz
-        tar xvfz GEOMODELS_SRC-GA.tar.gz
+        wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/PORTAL_RELEASE_20210718/${{matrix.src_name}}.tar.gz
+        tar xvfz ${{matrix.src_name}}.tar.gz
         popd
     - name: Install pdm
       run: |
@@ -52,8 +59,6 @@ jobs:
         echo "GEOMODELS_HOME=$GEOMODELS_HOME"
         eval $(pdm venv activate)
         cd web_build/
-        ./batch_proc.py --model_name=Yilgarn
-        ./batch_proc.py --model_name=NorthQueensland
-        ./batch_proc.py --model_name=Tas
+        ./batch_proc.py --model_name=${{matrix.model_name}}
 
 
