@@ -52,5 +52,8 @@ jobs:
         echo "GEOMODELS_HOME=$GEOMODELS_HOME"
         eval $(pdm venv activate)
         cd web_build/
-        ./batch_proc.py
+        ./batch_proc.py --model_name=Yilgarn
+        ./batch_proc.py --model_name=NorthQueensland
+        ./batch_proc.py --model_name=Tas
+
 
