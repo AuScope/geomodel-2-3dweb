@@ -48,7 +48,7 @@ jobs:
             model_name: "CurnamonaSed"
           # SA - Western Gawler
           - src_name: "GEOMODELS_SRC-SouthAust"
-            model_name: "CurnamonaSed"
+            model_name: "WesternGawler"
           # Tas - Rosebery Lyell
           - src_name: "GEOMODELS_SRC-Tasmania"
             model_name: "RoseberyLyell"
@@ -80,8 +80,8 @@ jobs:
           - src_name: "GEOMODELS_SRC-NewSouthWales"
             model_name: "NewEngland"
           ## NT - McArthur Basin
-          #- src_name: "GEOMODELS_SRC-NorthernTerritory"
-          #  model_name: "McArthurBasin"
+          - src_name: "GEOMODELS_SRC-NorthernTerritory"
+            model_name: "McArthurBasin"
           # GA - North Qld
           - src_name: "GEOMODELS_SRC-GA"
             model_name: "NorthQueensland"
