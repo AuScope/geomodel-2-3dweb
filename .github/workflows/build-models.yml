@@ -18,12 +18,85 @@ jobs:
     strategy:
       matrix:
         include:
+          # TODO: Pass this in from a file
+          # Vic - Bendigo
+          - src_name: "GEOMODELS_SRC-Victoria"
+            model_name: "Bendigo"
+          # Vic - Otway
+          - src_name: "GEOMODELS_SRC-Victoria"
+            model_name: "Otway"
+          # WA - Windimurra
+          - src_name: "GEOMODELS_SRC-WesternAust"
+            model_name: "Windimurra"
+           # WA - Sandstone
+          - src_name: "GEOMODELS_SRC-WesternAust"
+            model_name: "Sandstone"
+          # SA - Burra Mine
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "BurraMine"
+          # SA - Central Flinders
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "CentralFlinders"
+          # SA - North Flinders
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "NorthFlinders"
+          # SA - North Gawler
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "NorthGawler"
+          # SA - Curnamona Sedimentary Basins
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "CurnamonaSed"
+          # SA - Western Gawler
+          - src_name: "GEOMODELS_SRC-SouthAust"
+            model_name: "CurnamonaSed"
+          # Tas - Rosebery Lyell
+          - src_name: "GEOMODELS_SRC-Tasmania"
+            model_name: "RoseberyLyell"
+          # QLD - Quamby
+          - src_name: "GEOMODELS_SRC-Queensland"
+            model_name: "Quamby"
+          # QLD - MtDore
+          - src_name: "GEOMODELS_SRC-Queensland"
+            model_name: "MtDore"
+          # NSW - "Western Tamworth Belt"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "Tamworth"
+          # NSW - "Cobar geological and fault model package"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "Cobar"
+          # NSW - "Curnamona Province and Delamerian Orogen 3D fault model"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "Curnamona"
+          # NSW - "Eastern Lachlan Orogen 3D fault model"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "EastLachlan"
+          # NSW - "Western Lachlan Orogen and southern Thomson Orogen 3D fault model"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "WestLachlan"
+          # NSW - Southern New England Deep Crustal
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "SthNewEngland"
+          # NSW - "New England Orogen 3D fault model"
+          - src_name: "GEOMODELS_SRC-NewSouthWales"
+            model_name: "NewEngland"
+          # NT - McArthur Basin
+          - src_name: "GEOMODELS_SRC-NorthernTerritory"
+            model_name: "McArthurBasin"
+          # GA - North Qld
           - src_name: "GEOMODELS_SRC-GA"
             model_name: "NorthQueensland"
+          # GA - Yilgarn
           - src_name: "GEOMODELS_SRC-GA"
             model_name: "Yilgarn"
+          # GA - Tasmania
           - src_name: "GEOMODELS_SRC-GA"
-            model_name: "Tas"
+            model_name: "Tas"  
+          # CSIRO - RockLea Dome
+          - src_name: "GEOMODELS_SRC-CSIRO"
+            model_name: "RockleaDome"
+          # GA/NCI Stuart Shelf MT model
+          - src_name: "GEOMODELS_SRC-NCI"
+            model_name: "StuartShelf"
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
