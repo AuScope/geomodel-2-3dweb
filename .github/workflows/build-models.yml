@@ -46,7 +46,7 @@ jobs:
         pdm install
     - name: Build
       run: |
-        export GEOMODELS_HOME=`pwd`/MODEL_SRC/GA
+        export GEOMODELS_HOME=`pwd`/MODEL_SRC
         echo "GEOMODELS_HOME=$GEOMODELS_HOME"
         eval $(pdm venv activate)
         cd web_build/
