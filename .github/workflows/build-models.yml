@@ -32,6 +32,7 @@ jobs:
         export COLLADA2GLTF_BIN=`pwd`
         popd
     - name: Install model sources
+      run: |
         mkdir MODEL_SRC
         pushd MODEL_SRC
         wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/PORTAL_RELEASE_20210718/GEOMODELS_SRC-GA.tar.gz
