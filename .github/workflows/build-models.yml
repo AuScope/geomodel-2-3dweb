@@ -60,11 +60,16 @@ jobs:
         eval $(pdm venv activate)
         cd web_build/
         ./batch_proc.py --model_name=${{matrix.model_name}}
+        pwd
+        ls
+        cd ..
+        pwd
+        ls
     - name: Upload output
       uses: actions/upload-artifact@v4
       with:
         name: geomodels-${{matrix.model_name}}
-        path: geomodels/
+        path: web_build/geomodels/
         if-no-files-found: error
 
 
