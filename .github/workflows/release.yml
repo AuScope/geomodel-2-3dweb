@@ -20,19 +20,10 @@ jobs:
         workflow: build-models.yml
         workflow_conclusion: success
         branch: master
-    - name: Bundle artifacts together
-      run: |
-        ls
-        echo "---"
-        ls -lR
-        #mkdir geomodels
-        #for i in `ls -d1 geomodels-*`; do mv $i/* geomodels; done
-        #tar cvfz ${{inputs.rel_tag}}-geomodels_web_assets.tar.gz ./geomodels
-    
-    #- name: Add to release
-    #  uses: softprops/action-gh-release@v2
-    #  with:
-    #    tag_name: ${{inputs.rel_tag}}
-    #    name: Source and web asset release based on tag ${{inputs.rel_tag}}
-    #    files: |
-    #      ${{inputs.rel_tag}}-geomodels_web_assets.tar.gz
+    - name: Add to release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{inputs.rel_tag}}
+        name: Source and web asset release based on tag ${{inputs.rel_tag}}
+        files: |
+          geomodels-*-web-assets.tar.gz
