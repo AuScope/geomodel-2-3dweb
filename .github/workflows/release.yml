@@ -1,5 +1,6 @@
-# Work flow to manually
+# Work flow to manually create release
 
+name: Create Release
 on: workflow_dispatch
 
 jobs:
