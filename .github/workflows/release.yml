@@ -25,4 +25,4 @@ jobs:
       with:
         tag_name: ${{inputs.rel_tag}}
         name: Source and web asset release based on tag ${{inputs.rel_tag}}
-        files: '*.tar.gz'
+        files: geomodels*
