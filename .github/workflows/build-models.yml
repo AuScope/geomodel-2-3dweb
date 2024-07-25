@@ -105,7 +105,7 @@ jobs:
             model_name: "StuartShelf"
     steps:
     - name: Checkout
-    - uses: actions/checkout@v4
+      uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
@@ -147,11 +147,9 @@ jobs:
         name: geomodels-${{matrix.model_name}}
         path: web_build/geomodels/
         if-no-files-found: error
-    - name: release
+    - name: Release
       uses: softprops/action-gh-release@v2
       if: ${{ github.event_name == 'workflow_dispatch' }}
       with:
         files:
           web_build/geomodels_web_assets.tar.gz
-
-
