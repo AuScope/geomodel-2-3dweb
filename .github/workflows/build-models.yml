@@ -136,12 +136,10 @@ jobs:
         eval $(pdm venv activate)
         cd web_build/
         ./batch_proc.py --model_name=${{matrix.model_name}}
-        tar cvfz geomodels_web_assets.tar.gz ./geomodels
+        tar cvfz geomodels-${{matrix.model_name}}-web-assets.tar.gz ./geomodels
     - name: Upload output
       uses: actions/upload-artifact@v4
       with:
-        name: geomodels-${{matrix.model_name}}
-        path: web_build/geomodels/
+        name: geomodels-${{matrix.model_name}}-web-assets.tar.gz
+        path: web_build/geomodels-${{matrix.model_name}}-web-assets.tar.gz
         if-no-files-found: error
-        files:
-          web_build/${{env.SRC_TAG}}_web_assets.tar.gz
