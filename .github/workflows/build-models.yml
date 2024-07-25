@@ -143,11 +143,5 @@ jobs:
         name: geomodels-${{matrix.model_name}}
         path: web_build/geomodels/
         if-no-files-found: error
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      with:
-        tag_name: ${{env.SRC_TAG}}
-        name: Web asset release based on model sources tag ${{env.SRC_TAG}}
         files:
           web_build/${{env.SRC_TAG}}_web_assets.tar.gz
