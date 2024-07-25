@@ -22,9 +22,10 @@ jobs:
         mkdir geomodels
         for i in `ls -d1 geomodels-*`; do mv $i/* geomodels; done
         ls geomodels
-  #- name: Release
-  #  uses: softprops/action-gh-release@v2
-  #  if: ${{ github.event_name == 'workflow_dispatch' }}
-  #  with:
-  #    tag_name: ${{env.SRC_TAG}}
-  #    name: Web asset release based on model sources tag ${{env.SRC_TAG}}
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{env.SRC_TAG}}
+        name: Web asset release based on model sources tag ${{env.SRC_TAG}}
+        files: |
+          geomodels/*
