@@ -1,13 +1,14 @@
 # Release web assets from the latest successful build action into a certain release
 name: Release web assets
 
-on: workflow_dispatch
-  inputs:
-    - name: rel_tag
-      description: Files are inserted into the release with this tag
-      type: string
-      required: false
-      default: 'PORTAL_RELEASE_20210718'
+on: 
+  workflow_dispatch:
+    inputs:
+      rel_tag:
+        description: Files are inserted into the release with this tag
+        type: string
+        required: false
+        default: PORTAL_RELEASE_20210718
 
 jobs:
   do-release:
