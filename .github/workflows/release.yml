@@ -1,0 +1,28 @@
+# Release web assets from the latest successful build action
+name: Release web assets
+env:
+  # Model source tag
+  SRC_TAG: 'PORTAL_RELEASE_20210718'
+
+on: workflow_dispatch
+
+jobs:
+  do-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        workflow: build-models.yml
+        workflow_conclusion: success
+        branch: master
+    - name: Test
+      run: |
+        ls
+        ls -lR
+  #- name: Release
+  #  uses: softprops/action-gh-release@v2
+  #  if: ${{ github.event_name == 'workflow_dispatch' }}
+  #  with:
+  #    tag_name: ${{env.SRC_TAG}}
+  #    name: Web asset release based on model sources tag ${{env.SRC_TAG}}
