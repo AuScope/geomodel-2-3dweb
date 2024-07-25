@@ -8,6 +8,12 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Optional release tag'
+        required: false
+        type: boolean
 
 permissions:
   contents: read
@@ -98,6 +104,7 @@ jobs:
           - src_name: "GEOMODELS_SRC-NCI"
             model_name: "StuartShelf"
     steps:
+    - name: Checkout
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
@@ -133,11 +140,18 @@ jobs:
         eval $(pdm venv activate)
         cd web_build/
         ./batch_proc.py --model_name=${{matrix.model_name}}
+        tar cvfz geomodels_web_assets.tar.gz ./geomodels
     - name: Upload output
       uses: actions/upload-artifact@v4
       with:
         name: geomodels-${{matrix.model_name}}
         path: web_build/geomodels/
         if-no-files-found: error
+    - name: release
+      uses: softprops/action-gh-release@v2
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      with:
+        files:
+          web_build/geomodels_web_assets.tar.gz
 
 
