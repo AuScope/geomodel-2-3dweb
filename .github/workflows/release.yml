@@ -1,0 +1,7 @@
+# Work flow to manually
+
+on: workflow_dispatch
+
+jobs:
+  call-build-workflow:
+    uses: ./.github/workflows/build-models.yml
