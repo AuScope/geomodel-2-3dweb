@@ -1,8 +1,0 @@
-# Work flow to manually create release
-
-name: Create Release
-on: workflow_dispatch
-
-jobs:
-  call-build-workflow:
-    uses: ./.github/workflows/build-models.yml
