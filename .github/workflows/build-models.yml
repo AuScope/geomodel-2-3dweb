@@ -14,9 +14,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-permissions:
-  contents: read
-
 jobs:
   includes_only:
     runs-on: ubuntu-latest
