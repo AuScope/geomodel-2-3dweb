@@ -1,19 +1,18 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# This workflow builds model web assets from a model sources
+# with an option to build a release using current master
+# TODO: Paramterize model source tag ${{env.SRC_TAG}}
 
 name: Build Models
+env:
+  # Model source tag
+  SRC_TAG: 'PORTAL_RELEASE_20210718'
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Optional release tag'
-        required: false
-        type: boolean
 
 permissions:
   contents: read
@@ -121,7 +120,7 @@ jobs:
       run: |
         mkdir MODEL_SRC
         pushd MODEL_SRC
-        wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/PORTAL_RELEASE_20210718/${{matrix.src_name}}.tar.gz
+        wget https://github.com/AuScope/geomodel-2-3dweb/releases/download/${{env.SRC_TAG}}/${{matrix.src_name}}.tar.gz
         tar xvfz ${{matrix.src_name}}.tar.gz
         popd
     - name: Install pdm
@@ -151,5 +150,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       if: ${{ github.event_name == 'workflow_dispatch' }}
       with:
+        tag_name: ${{env.SRC_TAG}}
+        name: Web asset release based on model sources tag ${{env.SRC_TAG}}
         files:
-          web_build/geomodels_web_assets.tar.gz
+          web_build/${{env.SRC_TAG}}_web_assets.tar.gz
