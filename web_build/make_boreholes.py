@@ -24,7 +24,8 @@ from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.file_processing import get_input_conv_param_bh
 from lib.coords import convert_coords
 
-from nvcl_kit.reader import GSMLP_IDS, NVCLReader
+from nvcl_kit.reader import NVCLReader
+from nvcl_kit.wfs_helpers import GSMLP_IDS
 from nvcl_kit.param_builder import param_builder
 
 
