@@ -6,7 +6,11 @@ import sys
 import logging
 import ctypes
 from ctypes import POINTER, pointer, c_byte
-from pyassimp import structs, export, export_blob, material
+try:
+    from pyassimp import structs, export, export_blob, material
+except BaseException as ae:
+    print(ae, " - please ensure libassimp is in LD_LIBRARY_PATH")
+    sys.exit(1)
 
 from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
 from lib.exports.export_kit import ExportKit
