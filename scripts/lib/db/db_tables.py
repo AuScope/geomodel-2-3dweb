@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.schema import ForeignKey, PrimaryKeyConstraint
+from sqlalchemy.schema import ForeignKey, PrimaryKeyConstraint, MetaData
 from sqlalchemy.exc import DatabaseError
 
 QUERY_DB_FILE = 'query_data.db'
@@ -144,6 +144,8 @@ class QueryDB():
             #  NOTE: Would like to eventually make scope_session() more global
             self.session_obj = scoped_session(sessionmaker(eng))
             self.ses = self.session_obj()
+            self.metadata_obj = MetaData()
+            self.metadata_obj.reflect(bind=eng)
         except DatabaseError as db_exc:
             self.error = str(db_exc)
 
@@ -162,6 +164,12 @@ class QueryDB():
                           (False, exception string) if operation failed
         """
         try:
+            seginfo_obj = None
+            if 'segment_info' not in self.metadata_obj.tables.keys():
+                seginfo_obj = SegmentInfo(json=json_str)
+                self.ses.add(seginfo_obj)
+                self.ses.commit()
+                return True, seginfo_obj
             seginfo_obj = self.ses.query(SegmentInfo).filter_by(json=json_str).first()
             if seginfo_obj is None:
                 seginfo_obj = SegmentInfo(json=json_str)
@@ -180,6 +188,11 @@ class QueryDB():
                           (False, exception string) if operation failed
         """
         try:
+            if 'part_info' not in self.metadata_obj.tables.keys():
+                part_obj = PartInfo(json=json_str)
+                self.ses.add(part_obj)
+                self.ses.commit()
+                return True, part_obj
             part_obj = self.ses.query(PartInfo).filter_by(json=json_str).first()
             if part_obj is None:
                 part_obj = PartInfo(json=json_str)
@@ -198,6 +211,11 @@ class QueryDB():
                           (False, exception string) if operation failed
         """
         try:
+            if 'model_info' not in self.metadata_obj.tables.keys():
+                model_obj = ModelInfo(json=json_str)
+                self.ses.add(model_obj)
+                self.ses.commit()
+                return True, model_obj
             model_obj = self.ses.query(ModelInfo).filter_by(json=json_str).first()
             if model_obj is None:
                 model_obj = ModelInfo(json=json_str)
@@ -216,6 +234,11 @@ class QueryDB():
                           (False, exception string) if operation failed
         """
         try:
+            if 'user_info' not in self.metadata_obj.tables.keys():
+                userinfo_obj = UserInfo(json=json_str)
+                self.ses.add(userinfo_obj)
+                self.ses.commit()
+                return True, userinfo_obj
             userinfo_obj = self.ses.query(UserInfo).filter_by(json=json_str).first()
             if userinfo_obj is None:
                 userinfo_obj = UserInfo(json=json_str)
@@ -290,8 +313,10 @@ if __name__ == "__main__":
     assert MSG == ''
     OK, S = QUERY_DB.add_segment('seg')
     assert OK
+    assert S is not None
     OK, S2 = QUERY_DB.add_segment('seg')
     assert OK
+    assert S2 is not None
 
     # Test for no duplicates
     Q = QUERY_DB.ses.query(SegmentInfo)
@@ -299,12 +324,16 @@ if __name__ == "__main__":
 
     OK, S3 = QUERY_DB.add_segment('seg3')
     assert OK
+    assert S3 is not None
     OK, P = QUERY_DB.add_part('part')
     assert OK
+    assert P is not None
     OK, M = QUERY_DB.add_model('model')
     assert OK
+    assert M is not None
     OK, U = QUERY_DB.add_user('user')
     assert OK
+    assert U is not None
     OK, MSG = QUERY_DB.add_query('label', 'model_name', S, P, M, U)
     assert OK
     OK, MSG = QUERY_DB.add_query('label2', 'model_name2', S3, P, M, U)
