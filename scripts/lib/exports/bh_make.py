@@ -83,11 +83,11 @@ def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
         return {}, base_xyz
     ret_dict = {}
     for il in imagelog_list:
-        # For the moment, only process log type '1' and 'Grp1 uTSAS'
+        # For the moment, only process 'Grp1 uTSAS'
         # Min1,2,3 = 1st, 2nd, 3rd most common mineral
         # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
         # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-        if il.log_type == '1' and il.log_name == 'Grp1 uTSAS':
+        if il.log_name == 'Grp1 uTSAS':
             bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
             for depth in bh_data_dict:
                 ret_dict[depth] = bh_data_dict[depth]
