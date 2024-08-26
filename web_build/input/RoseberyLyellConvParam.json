@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 145.193865, "north": -41.5775155, "east": 145.8132337, "south": -42.2692428 },
-        "BOREHOLE_CRS": "EPSG:4283",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4283",
         "PROVIDER": "tas"
     },
     "ModelProperties": {

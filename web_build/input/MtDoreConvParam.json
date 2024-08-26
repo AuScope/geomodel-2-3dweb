@@ -1,7 +1,7 @@
 {
     "BoreholeData": {
         "BBOX": { "west": 140.07922, "east": 140.80366, "south": -22.29506, "north": -20.66917 },
-        "BOREHOLE_CRS": "EPSG:4283",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:4283",
         "PROVIDER": "qld"
     },
     "ModelProperties": {

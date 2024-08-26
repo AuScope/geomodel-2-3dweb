@@ -1,6 +1,6 @@
 {
     "BoreholeData": {    
-        "BOREHOLE_CRS": "EPSG:28354",
+        "BOREHOLE_CRS": "urn:x-ogc:def:crs:EPSG:28354",
         "BBOX": { "west": 184088, "east": 402043, "south": 6556505, "north": 6695279 },
         "PROVIDER": "sa"
     },
