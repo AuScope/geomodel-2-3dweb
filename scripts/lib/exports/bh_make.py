@@ -7,6 +7,8 @@ import logging, sys
 from lib.coords import convert_coords
 from nvcl_kit.reader import NVCLReader
 from lib.exports.assimp_kit import AssimpKit
+from nvcl_kit.generators import gen_scalar_by_depth
+from nvcl_kit.constants import Scalar
 
 
 LOG_LVL = logging.INFO
@@ -76,20 +78,13 @@ def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
     x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
                               [x, y])
     base_xyz = (x_m, y_m, z)
-    # Look for NVCL mineral data
-    imagelog_list = reader.get_imagelog_data(nvcl_id)
-    LOGGER.debug('imagelog_list = %s', str(imagelog_list))
-    if not imagelog_list:
-        return {}, base_xyz
     ret_dict = {}
-    for il in imagelog_list:
-        # For the moment, only process 'Grp1 uTSAS'
-        # Min1,2,3 = 1st, 2nd, 3rd most common mineral
-        # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
-        # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-        if il.log_name == 'Grp1 uTSAS':
-            bh_data_dict = reader.get_borehole_data(il.log_id, height_res, 'Grp1 uTSAS')
-            for depth in bh_data_dict:
-                ret_dict[depth] = bh_data_dict[depth]
-            break
+    # Look for NVCL mineral data
+    # For the moment, only process 'Grp1 uTSAS'
+    # Min1,2,3 = 1st, 2nd, 3rd most common mineral
+    # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
+    # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
+    for nvcl_id, log_id, sca_list in gen_scalar_by_depth(reader, nvcl_id_list=[nvcl_id], scalar_class=Scalar.Grp1_uTSAS, log_type='1'):
+        for depth in sca_list:
+            ret_dict[depth] = sca_list[depth]
     return ret_dict, base_xyz
