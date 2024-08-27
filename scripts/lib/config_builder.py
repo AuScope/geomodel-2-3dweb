@@ -276,8 +276,8 @@ class ConfigBuilder():
                                         'dataDims': geom_obj.vol_sz,
                                         'origin': geom_obj.vol_origin,
                                         'size': geom_obj.get_vol_side_lengths(),
-                                        'maxVal': geom_obj.get_max_data(),
-                                        'minVal': geom_obj.get_min_data(),
+                                        'maxVal': float(geom_obj.get_max_data()),
+                                        'minVal': float(geom_obj.get_min_data()),
                                         'rotation': geom_obj.get_rotation()}
         if style_obj.get_colour_table():
             modelconf_dict['volumeData']['colourLookup'] = style_obj.get_colour_table()
