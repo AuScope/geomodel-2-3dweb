@@ -110,20 +110,29 @@ def check_input_params(param_dict, param_file):
             LOGGER.error(f"Cannot process JSON file: {param_file} - found duplicate group names")
             sys.exit(1)
 
-        # Check for duplicate labels
+        # Check 'GroupStructure'
         for part_list in param_dict['GroupStructure'].values():
             display_name_set = set()
             filename_set = set()
             for part in part_list:
-                if part['FileNameKey'] in filename_set:
-                    LOGGER.error("Cannot process JSON file {param_file}: duplicate FileNameKey {part['FileNameKey']}")
-                    sys.exit(1)
-                filename_set.add(part['FileNameKey'])
-                if 'display_name' in part['Insert']:
-                    if part['Insert']['display_name'] in display_name_set:
+                # Check for duplicate labels
+                if 'FileNameKey' in part and 'Insert' in part:
+                    if part['FileNameKey'] in filename_set:
+                        LOGGER.error(f"Cannot process JSON file {param_file}: duplicate FileNameKey {part['FileNameKey']}")
+                        sys.exit(1)
+                    filename_set.add(part['FileNameKey'])
+                    if 'display_name' in part['Insert'] and part['Insert']['display_name'] in display_name_set:
                         LOGGER.error(f"Cannot process JSON file {param_file}: duplicate display_name {part['Insert']['display_name']}")
                         sys.exit(1)
                     display_name_set.add(part['Insert']['display_name'])
+                # Check for 'FileNameKey' without 'Insert' and vice-versa
+                elif 'FileNameKey' in part:
+                    LOGGER.error(f"Missing 'Insert' for 'FileNameKey': {part['FileNameKey']}")
+                    sys.exit(1)
+                elif 'Insert' in part:
+                    LOGGER.error(f"Missing 'FileNameKey' for 'Insert': {part['Insert']}")
+                    sys.exit(1)
+
 
 
 def initialise_params(param_file):
@@ -177,8 +186,9 @@ def initialise_params(param_file):
     if 'GroupStructure' in param_dict:
         for group_name, command_list in param_dict['GroupStructure'].items():
             for command in command_list:
-                # Create a substitution dict
-                params_obj.grp_struct_dict[command['FileNameKey']] = (group_name,
+                if 'FileNameKey' in command and 'Insert' in command:
+                    # Create a substitution dict
+                    params_obj.grp_struct_dict[command['FileNameKey']] = (group_name,
                                                                       command['Insert'])
 
     # Optionally rename auto-generated group labels in sidebar
