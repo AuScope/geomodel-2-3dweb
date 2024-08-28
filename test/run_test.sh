@@ -12,6 +12,7 @@ pdm install --venv for-test
 
 ASSIMP_VER=5.2.5
 # Make assimp shared library
+tar xvfz v5.2.5.tar.gz
 pushd assimp-$ASSIMP_VER > /dev/null
 cmake CMakeLists.txt
 make -j4
