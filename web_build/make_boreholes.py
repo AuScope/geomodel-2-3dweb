@@ -212,7 +212,7 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
         return
     reader = NVCLReader(bh_params)
     if reader.wfs is None:
-        LOGGER.error("Cannot contact web service")
+        LOGGER.error("Cannot contact web service or no boreholes in range")
         return
     qdb = QueryDB(create=create_db, db_name=db_name)
     err_str = qdb.get_error()
