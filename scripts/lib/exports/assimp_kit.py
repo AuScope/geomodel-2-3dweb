@@ -47,8 +47,6 @@ class AssimpKit(ExportKit):
         ''' Initiate scene creation, only one scene can be created at a time
         '''
         self.scn = structs.Scene()
-        self.scn.mMetadata = None
-        self.scn.mPrivate = None
 
 
     def add_geom(self, geom_obj, style_obj, meta_obj):
