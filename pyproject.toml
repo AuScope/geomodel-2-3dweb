@@ -27,4 +27,4 @@ build-backend = "pdm.backend"
 [tool.pdm]
 
 [tool.pdm.scripts]
-pre_install = "sh -c test/build_assimp.sh"
+pre_install = "sh -c 'cd test && ./build_assimp.sh'"
