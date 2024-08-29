@@ -30,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         # Remove old venv
-        pdm venv remove -y for-backend-build
+        pdm venv remove -y for-backend-build 2>/dev/null || pdm venv list
         # Create new venv
         pdm venv create --with-pip --name for-backend-build 3.10
         eval $(pdm venv activate for-backend-build)
