@@ -29,10 +29,15 @@ jobs:
         pip install pdm
     - name: Install dependencies
       run: |
-        pdm install
+        # Remove old venv
+        pdm venv remove -y for-backend-build
+        # Create new venv
+        pdm venv create --with-pip --name for-backend-build 3.10
+        eval $(pdm venv activate for-backend-build)
+        pdm install --venv for-backend-build
     - name: Make boreholes
       run: |
-        pdm run $SHELL
+        eval $(pdm venv activate for-backend-build)
         # Temporarily, a patched version of assimp lives in the 'test' dir
         # It was installed and built via 'pdm install'
         ASSIMP_VER=5.2.5
