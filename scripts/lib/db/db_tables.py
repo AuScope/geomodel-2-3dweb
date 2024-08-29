@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import logging
 
@@ -17,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 # Add handler to logger
 LOCAL_HANDLER = logging.StreamHandler(sys.stdout)
 LOGGER.addHandler(LOCAL_HANDLER)
-LOGGER.setLevel(logging.DEBUG)  # logging.INFO
+LOGGER.setLevel(logging.INFO)  # logging.DEBUG
 
 
 QUERY_DB_FILE = 'query_data.db'
@@ -143,15 +144,15 @@ class QueryDB():
     ''' A simple database class to manage the creation, writing and reading of the query database
 
     '''
-    def __init__(self, create=False, db_name='query_data.db'):
-        LOGGER.debug(f"__init__ db {create=} {db_name=}")
+    def __init__(self, overwrite=False, db_name='query_data.db'):
+        LOGGER.debug(f"__init__ db {overwrite=} {db_name=}")
         self.error = ''
         try:
             db_name = 'sqlite:///' + db_name
             eng = create_engine(db_name, echo=False)
-            if create:
+            if overwrite:
                 Base.metadata.drop_all(bind=eng)
-                Base.metadata.create_all(bind=eng)
+            Base.metadata.create_all(bind=eng)
             # 'scoped_session()' makes a thread-safe cache of session objects
             #  NOTE: Would like to eventually make scope_session() more global
             self.session_obj = scoped_session(sessionmaker(eng))
@@ -200,29 +201,18 @@ class QueryDB():
         :returns: a tuple (True, partinfo_obj) if successful
                           (False, exception string) if operation failed
         """
-        LOGGER.debug(f"add_part({json_str})")
-        LOGGER.debug(f"{self.metadata_obj.tables.keys()=}")
         try:
             if 'part_info' not in self.metadata_obj.tables.keys():
-                LOGGER.debug("'part_info' not in metadata")
                 part_obj = PartInfo(json=json_str)
-                LOGGER.debug(f"{part_obj=}")
                 self.ses.add(part_obj)
-                LOGGER.debug("'part_obj' added")
                 self.ses.commit()
-                LOGGER.debug("'part_obj' committed")
                 return True, part_obj
             part_obj = self.ses.query(PartInfo).filter_by(json=json_str).first()
-            LOGGER.debug(f"{part_obj=}")
             if part_obj is None:
                 part_obj = PartInfo(json=json_str)
-                LOGGER.debug(f"2:{part_obj=}")
                 self.ses.add(part_obj)
-                LOGGER.debug("2:'part_obj' added")
                 self.ses.commit()
-                LOGGER.debug("2:'part_obj' committed")
         except DatabaseError as db_exc:
-            LOGGER.debug(f"Exception in add_part {db_exc}")
             return False, str(db_exc)
         return True, part_obj
 
@@ -330,7 +320,7 @@ class QueryDB():
 if __name__ == "__main__":
     print("Testing query db")
     # Basic unit testing
-    QUERY_DB = QueryDB(create=True, db_name='db') #':memory:')
+    QUERY_DB = QueryDB(overwrite=True, db_name=':memory:')
     MSG = QUERY_DB.get_error()
     if MSG != '':
         print(MSG)

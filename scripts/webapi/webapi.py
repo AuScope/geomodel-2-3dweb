@@ -461,7 +461,7 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
     # Query database
     # Open up query database
     db_path = os.path.join(DATA_DIR, QUERY_DB_FILE)
-    qdb = QueryDB(create=False, db_name=db_path)
+    qdb = QueryDB(overwrite=False, db_name=db_path)
     err_msg = qdb.get_error()
     if err_msg != '':
         LOGGER.error('Could not open query db %s: %s', db_path, err_msg)

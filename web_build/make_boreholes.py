@@ -189,13 +189,13 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     return loadconfig_list, blob_obj
 
 
-def process_single(dest_dir, input_file, db_name, create_db=True):
+def process_single(dest_dir, input_file, db_name, overwrite_db=True):
     ''' Process a single model's boreholes
 
     :param dest_dir: directory to output database and files
     :param input_file: conversion parameter file
     :param db_name: name of database
-    :param create_db: optional (default True) create new database or append to existing one
+    :param overwrite_db: optional (default True) remove all current database tables or not
 
     '''
     LOGGER.info(f"Processing {input_file}")
@@ -214,7 +214,7 @@ def process_single(dest_dir, input_file, db_name, create_db=True):
     if reader.wfs is None:
         LOGGER.error("Cannot contact web service or no boreholes in range")
         return
-    qdb = QueryDB(create=create_db, db_name=db_name)
+    qdb = QueryDB(overwrite=overwrite_db, db_name=db_name)
     err_str = qdb.get_error()
     if err_str != '':
         LOGGER.error(f"Cannot open/create database: {err_str}")
@@ -255,7 +255,7 @@ if __name__ == "__main__":
             LOGGER.info(f"Creating {ARGS.dest_dir}")
             os.mkdir(ARGS.dest_dir)
         except OSError as os_exc:
-            LOGGER.error(f"Cannot create dir {ARGS.dest_dir}:{os_exc}")
+            LOGGER.error(f"Cannot create dir {ARGS.dest_dir}: {os_exc}")
             sys.exit(1)
 
     # Check input file
@@ -270,14 +270,20 @@ if __name__ == "__main__":
         if not os.path.isfile(ARGS.batch):
             LOGGER.error(f"Batch file does not exist: {ARGS.batch}")
             sys.exit(1)
-        CREATE_DB = True
+        db_file = os.path.join(ARGS.dest_dir, ARGS.database)
+        # Remove db file
+        if os.path.exists(db_file):
+            LOGGER.info(f"Removing {db_file}")
+            try:
+                os.remove(db_file)
+            except OSError as os_exc:
+                LOGGER.error(f"Cannot remove db file {db_file}: {os_exc}")
+                sys.exit(1)
         with open(ARGS.batch, 'r') as fp:
             for line in fp:
                 # Skip lines starting with '#'
                 if line[0] != '#':
-                    process_single(ARGS.dest_dir, line.rstrip('\n'),
-                                   os.path.join(ARGS.dest_dir, ARGS.database), CREATE_DB)
-                    CREATE_DB = False
+                    process_single(ARGS.dest_dir, line.rstrip('\n'), db_file, overwrite_db=False)
     else:
         print("No input file or batch file specified\n")
         PARSER.print_help()
