@@ -32,6 +32,7 @@ jobs:
         pdm install
     - name: Make boreholes
       run: |
+        pdm run $SHELL
         # Temporarily, a patched version of assimp lives in the 'test' dir
         # It was installed and built via 'pdm install'
         ASSIMP_VER=5.2.5
