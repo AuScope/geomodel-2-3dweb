@@ -6,7 +6,7 @@
 # Use the 'make_boreholes.py' script to create the sqlite db
 #
 test "$1" = "" && echo "Usage: `basename $0` <db file>"  && exit 1
-API_TAR=`date +%Y%m%d`-api.tar
+API_TAR=api.tar.gz
 \rm -f $API_TAR
 
 # Create data dir and copy in db
@@ -25,7 +25,7 @@ find api/lib -type f |  egrep -v ".*py$" | xargs -iX \rm -f X
 find api/lib -type d | grep __pycache__ | xargs -iX \rm -rf X
 
 # Add in data
-tar uf $API_TAR ./api
+tar cfvz $API_TAR ./api
 \rm -rf api
 
 echo "Done. Results are in: $API_TAR"
