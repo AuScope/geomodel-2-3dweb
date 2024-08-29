@@ -11,15 +11,9 @@ pip install --upgrade pip
 pdm install --venv for-test
 
 ASSIMP_VER=5.2.5
-# Make assimp shared library
-#tar xvfz v5.2.5.tar.gz
-#pushd assimp-$ASSIMP_VER > /dev/null
-#cmake CMakeLists.txt
-#make -j4
-#popd > /dev/null
+# NB: assimp shared library is already built as part of 'pdm install' 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/assimp-$ASSIMP_VER/bin
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
-
 
 # Install coverage
 python3 -m pip install coverage
