@@ -57,7 +57,7 @@ jobs:
     - name: Make API directory
       run: |
         pushd web_build
-        ./build_api_dir.sh ../web_build/query_data.db
+        ./build_api_dir.sh boreholes/query_data.db
         popd
     - name: Upload API directory
       uses: actions/upload-artifact@v4
