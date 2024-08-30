@@ -1,3 +1,4 @@
+input/NorthGawlerConvParam.json
 input/BendigoConvParam.json
 input/BurraMineConvParam.json
 input/CentralFlindersConvParam.json
@@ -9,7 +10,6 @@ input/McArthurBasinConvParam.json
 input/MtDoreConvParam.json
 input/NewEnglandConvParam.json
 input/NorthFlindersConvParam.json
-input/NorthGawlerConvParam.json
 input/NorthQueenslandConvParam.json
 input/OtwayConvParam.json
 input/QuambyConvParam.json

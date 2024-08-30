@@ -284,6 +284,8 @@ if __name__ == "__main__":
                 # Skip lines starting with '#'
                 if line[0] != '#':
                     process_single(ARGS.dest_dir, line.rstrip('\n'), db_file, overwrite_db=False)
+                    # FIXME: TEMPORARY
+                    break
     else:
         print("No input file or batch file specified\n")
         PARSER.print_help()
