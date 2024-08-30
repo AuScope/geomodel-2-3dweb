@@ -45,7 +45,7 @@ jobs:
         echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
         pushd web_build
         ./make_boreholes.py -b batch.txt -d query_data.db boreholes
-        tar cvfz boreholes.tag.gz ./boreholes
+        tar cvfz boreholes.tar.gz ./boreholes
         rm -rf boreholes
         popd
     - name: Upload borehole data
