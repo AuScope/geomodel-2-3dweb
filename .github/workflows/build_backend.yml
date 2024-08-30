@@ -56,7 +56,7 @@ jobs:
         if-no-files-found: error
     - name: Make API directory
       run: |
-        pushd scripts
+        pushd web_build
         ./build_api_dir.sh ../web_build/query_data.db
         popd
     - name: Upload API directory
