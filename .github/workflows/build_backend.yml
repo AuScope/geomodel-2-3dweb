@@ -62,7 +62,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: api.tar
-        path: scripts/api.tar
+        path: web_build/api.tar
         if-no-files-found: error
     
     
