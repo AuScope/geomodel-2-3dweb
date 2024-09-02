@@ -11,8 +11,9 @@ pip install --upgrade pip
 pdm install --venv for-test
 
 ASSIMP_VER=5.4.3
+REPO_DIR=`dirname $PWD`
 # NB: assimp shared library is already built as part of 'pdm install' 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/assimp-$ASSIMP_VER/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$REPO_DIR/assimp-$ASSIMP_VER/bin
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
 # Install coverage

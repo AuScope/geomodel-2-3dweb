@@ -2,6 +2,8 @@
 """
 This code creates GLTF files and a sqlite database
 which can be used to embed NVCL boreholes in a geological model
+
+Assumes assimp shared library was installed via pdm (see 'pyproject.toml')
 """
 
 import sys

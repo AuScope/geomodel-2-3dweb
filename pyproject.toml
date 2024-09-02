@@ -6,7 +6,7 @@ dependencies = [
     "numpy",
     "OWSLib==0.28.1",
     "Pillow",
-    "pyassimp @ file:///${PROJECT_ROOT}/test/assimp-5.4.3/port/PyAssimp",
+    "pyassimp @ file:///${PROJECT_ROOT}/assimp-5.4.3/port/PyAssimp",
     "pycollada",
     "pyproj",
     "SQLAlchemy",
@@ -27,4 +27,4 @@ build-backend = "pdm.backend"
 [tool.pdm]
 
 [tool.pdm.scripts]
-pre_install = "sh -c 'cd test && ./build_assimp.sh'"
+pre_install = "sh -c './build_assimp.sh'"

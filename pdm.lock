@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.5.0"
-content_hash = "sha256:3b8562d4cc40f6db5f40c577bc2836195cda39faa1e5e206d429a332adab63ce"
+content_hash = "sha256:c7d7b90a883b57541353c7bed2dbe706bc1fd0a0f0cbbb3c664d3345365b89ea"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -538,7 +538,7 @@ files = [
 [[package]]
 name = "pyassimp"
 version = "5.2.5"
-path = "./test/assimp-5.4.3/port/PyAssimp"
+path = "./assimp-5.4.3/port/PyAssimp"
 summary = "Python bindings for the Open Asset Import Library (ASSIMP)"
 
 [[package]]
