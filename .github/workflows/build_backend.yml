@@ -38,9 +38,8 @@ jobs:
     - name: Make boreholes
       run: |
         eval $(pdm venv activate for-backend-build)
-        # Temporarily, a patched version of assimp lives in the 'test' dir
-        # It was installed and built via 'pdm install'
-        ASSIMP_VER=5.2.5
+        # NB: assimp was installed and built via 'pdm install'
+        ASSIMP_VER=5.4.3
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/test/assimp-$ASSIMP_VER/bin
         echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
         pushd web_build
