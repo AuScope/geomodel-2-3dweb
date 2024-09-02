@@ -158,9 +158,15 @@ jobs:
         pip install pdm
     - name: Install dependencies
       run: |
-        pdm install
+        # Remove old venv
+        pdm venv remove -y for-backend-build 2>/dev/null || pdm venv list
+        # Create new venv
+        pdm venv create --with-pip --name for-backend-build 3.10
+        eval $(pdm venv activate for-backend-build)
+        pdm install --venv for-backend-build
     - name: Make boreholes
       run: |
+        eval $(pdm venv activate for-backend-build)
         # Temporarily, a patched version of assimp lives in the 'test' dir
         # It was installed and built via 'pdm install'
         ASSIMP_VER=5.2.5
@@ -168,8 +174,7 @@ jobs:
         echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
         pushd web_build
         ./make_boreholes.py -b batch.txt -d query_data.db boreholes
-        tar cvfz boreholes.tag.gz ./boreholes
-        rm -rf boreholes
+        tar cvfz boreholes.tar.gz ./boreholes
         popd
     - name: Upload borehole data
       uses: actions/upload-artifact@v4
@@ -179,14 +184,12 @@ jobs:
         if-no-files-found: error
     - name: Make API directory
       run: |
-        pushd scripts
-        ./build_api_dir.sh ../web_build/query_data.db
+        pushd web_build
+        ./build_api_dir.sh boreholes/query_data.db
         popd
     - name: Upload API directory
       uses: actions/upload-artifact@v4
       with:
-        name: api.tar
-        path: scripts/api.tar
+        name: api.tar.gz
+        path: web_build/api.tar.gz
         if-no-files-found: error
-    
-    
