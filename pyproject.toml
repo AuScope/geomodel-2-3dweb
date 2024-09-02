@@ -6,7 +6,7 @@ dependencies = [
     "numpy",
     "OWSLib==0.28.1",
     "Pillow",
-    "pyassimp @ file:///${PROJECT_ROOT}/test/assimp-5.2.5/port/PyAssimp",
+    "pyassimp @ file:///${PROJECT_ROOT}/test/assimp-5.4.3/port/PyAssimp",
     "pycollada",
     "pyproj",
     "SQLAlchemy",

@@ -2,11 +2,10 @@
 
 # NB: Assumes we're in the 'test' dir
 
-# Install patched version of assimp, will try github released version once relevant PRs are merged
-ASSIMP_VER=5.2.5
+# Fetch assimp release
+ASSIMP_VER=5.4.3
 if [ ! -d assimp-$ASSIMP_VER ]; then
-#wget https://github.com/assimp/assimp/archive/v$ASSIMP_VER.tar.gz
-#wget https://github.com/assimp/assimp/archive/refs/tags/v$ASSIMP_VER.tar.gz
+wget https://github.com/assimp/assimp/archive/refs/tags/v$ASSIMP_VER.tar.gz
 tar xfz v$ASSIMP_VER.tar.gz
 
 # NB: Assumes 'sudo apt install cmake' 
