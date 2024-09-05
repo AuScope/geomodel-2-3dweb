@@ -1,0 +1,19 @@
+{
+            "ga": {
+                "name": "Geoscience Australia",
+                "models": [
+                    {
+                        "name": "Tasmania",
+                        "modelUrlPath": "tas",
+                        "icon": "aus-white-icon.png",
+                        "colourClass": "ga",
+                        "configFile": "Tas.json",
+                        "modelDir": "Tas",
+                        "srcUrl" : "https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search?node=srv#/metadata/a05f7892-c08a-7506-e044-00144fdd4fa6"
+                    }
+                ],
+                "icon": "aus-white-icon.png",
+                "colourClass": "ga",
+                "infoUrl": "https://www.ga.gov.au/"
+            }
+}

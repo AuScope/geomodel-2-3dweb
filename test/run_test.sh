@@ -26,8 +26,7 @@ python3 -m coverage run gocad_importer_test.py
 [ $? -ne 0 ] && exit 1
 popd > /dev/null
 
-## Test assimp_kit
-## FIXME: Version incompatibility problems
+# Test assimp_kit
 pushd unit/assimp_kit > /dev/null
 coverage erase
 coverage run test_assimp_kit.py
@@ -35,17 +34,12 @@ coverage run test_assimp_kit.py
 popd > /dev/null
 
 # Test webapi
-# Avoid running webapi tests in gitlab
-## FIXME: Version incompatibility problems
-#python3 -m pip install pytest httpx
-#hostname -f | egrep '\.au$' > /dev/null 2>&1
-#if [ $? -eq 0 ]; then
-#pushd unit/webapi > /dev/null
-#coverage erase
-#coverage run --source webapi -m pytest
-#[ $? -ne 0 ] && exit 1
-#popd > /dev/null
-#fi
+python3 -m pip install pytest httpx
+pushd unit/webapi > /dev/null
+coverage erase
+coverage run --source webapi -m pytest
+[ $? -ne 0 ] && exit 1
+popd > /dev/null
 
 # Test regresssion
 pushd regression > /dev/null
@@ -59,7 +53,7 @@ coverage erase
 coverage run db_tables.py
 popd > /dev/null
 
-coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage # unit/assimp_kit/.coverage unit/webapi/.coverage
+coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage
 coverage report --omit '*/geomodel-2-3dweb/scripts/lib/exports/print_assimp.py'
 
 deactivate

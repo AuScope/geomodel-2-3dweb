@@ -27,6 +27,8 @@ from owslib.util import ServiceException
 from diskcache import Cache, Timeout
 import pyassimp
 from types import SimpleNamespace
+import copyreg
+from lxml import etree
 
 from lib.file_processing import get_input_conv_param_bh
 from lib.exports.bh_make import get_blob_boreholes
@@ -34,8 +36,11 @@ from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.file_processing import read_json_file, find_gltf
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.exports.assimp_kit import AssimpKit
+from webapi.picklers import element_unpickler, element_pickler, elementtree_unpickler, elementtree_pickler
+
 
 from nvcl_kit.reader import NVCLReader
+from nvcl_kit.param_builder import param_builder
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -116,6 +121,12 @@ G_WFS_DICT = {}
 ''' Stores owslib WebFeatureService objects, key: model name
 '''
 
+class PickleableWebFeatureService(WebFeatureService_1_1_0):
+    '''
+    Override 'WebFeatureService' so that it can initialise the class when unpickling
+    '''
+    def __getnewargs__(self):
+        return ('', '', None)
 
 
 def create_borehole_dict_list(model, param_dict, wfs_dict):
@@ -130,7 +141,7 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     # Concatenate response
     response_list = []
     if model not in wfs_dict or model not in param_dict:
-        LOGGER.warning("model %s not in wfs_dict or param_dict", model)
+        LOGGER.warning(f"Model {model} not in wfs_dict or param_dict")
         return {}, []
     param = SimpleNamespace()
     param.MAX_BOREHOLES = MAX_BOREHOLES
@@ -172,10 +183,10 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
                 cache_obj.add(bhl_key, bh_list)
             return bh_dict, bh_list
     except OSError as os_exc:
-        LOGGER.error("Cannot get cached dict list: %s", str(os_exc))
+        LOGGER.error(f"Cannot get cached dict list: {os_exc}")
         return (None, 0)
     except Timeout as t_exc:
-        LOGGER.error("DB Timeout, cannot get cached dict list: %s", str(t_exc))
+        LOGGER.error(f"DB Timeout, cannot get cached dict list: {t_exc}")
         return (None, 0)
 
 
@@ -197,10 +208,10 @@ def cache_blob(model, blob_id, blob, blob_sz, exp_timeout=None):
             return cache_obj.set(blob_key, (blob, blob_sz), expire=exp_timeout)
 
     except OSError as os_exc:
-        LOGGER.error("Cannot cache blob %s", str(os_exc))
+        LOGGER.error(f"Cannot cache blob {os_exc}")
         return False
     except Timeout as t_exc:
-        LOGGER.error("DB Timeout, cannot get cached dict list: %s", str(t_exc))
+        LOGGER.error(f"DB Timeout, cannot get cached dict list: {t_exc}")
         return False
 
 
@@ -220,24 +231,8 @@ def get_cached_blob(model, blob_id):
             return blob, blob_sz
 
     except OSError as os_exc:
-        LOGGER.error("Cannot get cached blob %s", str(os_exc))
+        LOGGER.error(f"Cannot get cached blob {os_exc}")
         return (None, 0)
-
-
-
-class MyWebFeatureService(WebFeatureService_1_1_0):
-    '''
-    I have to override 'WebFeatureService' because a bug in owslib makes 'pickle' unusable
-    I have created a pull request https://github.com/geopython/OWSLib/pull/548 to fix bug
-    '''
-    # pylint: disable=W0613,R0913
-    def __new__(cls, url, version, xml, parse_remote_metadata=False, timeout=30, username=None,
-                password=None):
-        obj = object.__new__(cls)
-        return obj
-
-    def __getnewargs__(self):
-        return ('', '', None)
 
 
 def get_cached_parameters():
@@ -247,13 +242,13 @@ def get_cached_parameters():
     :returns: parameter dict, WFS dict; both keyed on model name string
     '''
     if not os.path.exists(INPUT_DIR):
-        LOGGER.error("input dir %s does not exist", INPUT_DIR)
+        LOGGER.error(f"Input dir {INPUT_DIR} does not exist")
         sys.exit(1)
 
     # Get all the model names and details from 'ProviderModelInfo.json'
     config_file = os.path.join(INPUT_DIR, 'ProviderModelInfo.json')
     if not os.path.exists(config_file):
-        LOGGER.error("config file does not exist %s", config_file)
+        LOGGER.error(f"config file does not exist {config_file}")
         sys.exit(1)
     conf_dict = read_json_file(config_file)
     # For each provider
@@ -281,12 +276,16 @@ def get_cached_parameters():
                     param_dict[model].BOREHOLE_CRS = webasset_dict['properties']['crs']
                     extent =  webasset_dict['properties']['extent']
                     param_dict[model].BBOX = {'north': extent[3], 'south': extent[2], 'east': extent[1], 'west': extent[0]}
+            if not hasattr(param_dict[model], 'PROVIDER'):
+                LOGGER.error(f"Cannot find provider for {model}, check param conversion file")
+                sys.exit(1)
+            # Use nvcl_kit to get WFS_URL and WFS_VERSION parameters
             try:
-                wfs_dict[model] = MyWebFeatureService(param_dict[model].WFS_URL,
-                                                           version=param_dict[model].WFS_VERSION,
-                                                           xml=None, timeout=WFS_TIMEOUT)
+                param_obj = param_builder(param_dict[model].PROVIDER)
+                # Open up connection to WFS service
+                wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, version=param_obj.WFS_VERSION, xml=None, timeout=WFS_TIMEOUT)
             except ServiceException as e:
-                LOGGER.error("Cannot reach service %s: %s", param_dict[model].WFS_URL, str(e))
+                LOGGER.error(f"Cannot reach service {param_obj.WFS_URL}: {e}")
     return param_dict, wfs_dict
 
 
@@ -464,9 +463,9 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
     qdb = QueryDB(overwrite=False, db_name=db_path)
     err_msg = qdb.get_error()
     if err_msg != '':
-        LOGGER.error('Could not open query db %s: %s', db_path, err_msg)
+        LOGGER.error(f"Could not open query db {db_path}: {err_msg}")
         return make_str_response(' ')
-    LOGGER.debug('querying db: %s %s', obj_id, model)
+    LOGGER.debug(f"Querying db: {obj_id} {model}")
     o_k, result = qdb.query(obj_id, model)
     if o_k:
         # pylint: disable=W0612
@@ -511,10 +510,10 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     '''
     # This sends back the first part of the GLTF object - the GLTF file for the
     # resource id specified
-    LOGGER.debug('make_getresourcebyid_response(model = %s)', model)
+    LOGGER.debug(f"make_getresourcebyid_response({model=})")
 
     # Parse outputFormat from query string
-    LOGGER.debug('output_format = %s', output_format)
+    LOGGER.debug(f"{output_format=}")
     if not output_format:
         return make_json_exception_response(version, 'MissingParameterValue', 'missing outputFormat parameter')
     if output_format != 'model/gltf+json;charset=UTF-8':
@@ -522,14 +521,14 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
         return make_json_exception_response(version, 'InvalidParameterValue', resp_msg)
 
     # Parse resourceId from query string
-    LOGGER.debug('resourceid = %s', res_id)
+    LOGGER.debug(f"{res_id=}")
     if not res_id:
         return make_json_exception_response(version, 'MissingParameterValue', 'missing resourceId parameter')
 
     # Get borehole dictionary for this model
     # pylint: disable=W0612
     model_bh_dict, model_bh_list = get_cached_dict_list(model, param_dict, wfs_dict)
-    LOGGER.debug('model_bh_dict = %s', repr(model_bh_dict))
+    LOGGER.debug(f"{model_bh_dict=}")
     borehole_dict = model_bh_dict.get(res_id, None)
     if borehole_dict is not None:
         # Get blob from cache
@@ -559,9 +558,9 @@ def send_blob(model, blob_id, blob, exp_timeout=None):
     # There are 2 files in the blob, a GLTF file and a .bin file
     # pylint: disable=W0612
     for idx in range(2):
-        LOGGER.debug('blob.contents.name.data = %s', repr(blob.contents.name.data))
-        LOGGER.debug('blob.contents.size = %s', repr(blob.contents.size))
-        LOGGER.debug('blob.contents.data = %s', repr(blob.contents.data))
+        LOGGER.debug(f"{blob.contents.name.data=}")
+        LOGGER.debug(f"{blob.contents.size=}")
+        LOGGER.debug(f"{blob.contents.data=}")
         # Look for the GLTF file
         if not blob.contents.name.data:
             # Convert to byte array
@@ -571,13 +570,13 @@ def send_blob(model, blob_id, blob, exp_timeout=None):
             for bitt in bcd.contents:
                 bcd_bytes += bitt
             bcd_str = bcd_bytes.decode('utf-8', 'ignore')
-            LOGGER.debug('bcd_str = %s', bcd_str[:80])
+            LOGGER.debug(f"{bcd_str[:80]}")
             try:
                 # Convert to json
                 gltf_json = json.loads(bcd_str)
-                LOGGER.debug('gltf_json = %s', str(gltf_json)[:80])
+                LOGGER.debug(f"{gltf_json[:80]=}")
             except JSONDecodeError as jde_exc:
-                LOGGER.debug('JSONDecodeError loads(): %s', str(jde_exc))
+                LOGGER.debug(f"JSONDecodeError loads(): {jde_exc}")
             else:
                 try:
                     # This modifies the URL of the .bin file associated with the GLTF file
@@ -590,7 +589,7 @@ def send_blob(model, blob_id, blob, exp_timeout=None):
                     gltf_str = json.dumps(gltf_json)
                     gltf_bytes = bytes(gltf_str, 'utf-8')
                 except JSONDecodeError as jde_exc:
-                    LOGGER.debug('JSONDecodeError dumps(): %s', str(jde_exc))
+                    LOGGER.debug(f"JSONDecodeError dumps(): {jde_exc}")
 
         # Binary file (.bin)
         elif blob.contents.name.data == b'bin':
@@ -695,7 +694,7 @@ def convert_gltf2xxx(model, filename, fmt):
     # Use model name and file name to get full GLTF file path
     gltf_path = find_gltf(GEOMODELS_DIR, INPUT_DIR, model, filename)
     if not gltf_path:
-        LOGGER.error("Cannot find %s", gltf_path)
+        LOGGER.error(f"Cannot find {gltf_path}")
         return make_str_response(' ')
 
     gltf_path = os.path.abspath(gltf_path)
@@ -704,7 +703,7 @@ def convert_gltf2xxx(model, filename, fmt):
     try:
         assimp_obj = pyassimp.load(gltf_path, 'gltf2')
     except pyassimp.AssimpError as ae:
-        LOGGER.error("Cannot load %s:%s", gltf_path, str(ae))
+        LOGGER.error(f"Cannot load {gltf_path}: {ae}")
         return make_str_response(' ')
 
 
@@ -712,7 +711,7 @@ def convert_gltf2xxx(model, filename, fmt):
     try:
         blob_obj = pyassimp.export_blob(assimp_obj, fmt, processing=None)
     except pyassimp.AssimpError as ae:
-        LOGGER.error("Cannot export %s:%s", gltf_path, str(ae))
+        LOGGER.error(f"Cannot export {gltf_path}: {ae}")
         return make_str_response(' ')
 
     return send_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
@@ -949,6 +948,13 @@ Loads all the model parameters and WFS services from cache or creates them
 '''
 PARAM_CACHE_KEY = 'model_parameters'
 WFS_CACHE_KEY = 'wfs_dict'
+
+# Register functions to manage pickling/unpickling of objects from 'lxml' package
+# that are contained in the 'WebFeatureService_1_1_0' class
+copyreg.pickle(etree._Element, element_pickler, element_unpickler)
+copyreg.pickle(etree._ElementTree, elementtree_pickler, elementtree_unpickler)
+
+# Load cached config and 'WebFeatureService_1_1_0' classes
 try:
     with Cache(CACHE_DIR) as cache:
         G_PARAM_DICT = cache.get(PARAM_CACHE_KEY)
@@ -958,6 +964,6 @@ try:
             cache.add(PARAM_CACHE_KEY, G_PARAM_DICT)
             cache.add(WFS_CACHE_KEY, G_WFS_DICT)
 except OSError as os_exc:
-    LOGGER.error("Cannot fetch parameters & wfs from cache: %s", str(os_exc))
+    LOGGER.error(f"Cannot fetch parameters & wfs from cache: {os_exc}")
     G_PARAM_DICT = {}
     G_WFS_DICT = {}
