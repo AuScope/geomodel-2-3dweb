@@ -1,6 +1,6 @@
 [![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
 ![Test Status](https://github.com/AuScope/geomodel-2-3dweb/actions/workflows/tests.yml/badge.svg)
-[![Coverage Status](https://github.com/AuScope/geomodel-2-3dweb/blob/gh-pages/coverage-badge.svg)]()
+[![Coverage Status](https://github.com/AuScope/geomodel-2-3dweb/blob/master/test/badge/coverage-badge.svg)]()
 
 # geomodel-2-3dweb
 
