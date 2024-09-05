@@ -60,7 +60,7 @@
                             "name": "STRAT_TOP-CRAYFISH_GSV",
                             "title": "STRAT_TOP-CRAYFISH_GSV",
                             "href": [ {
-                                       "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=4874",
+                                       "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/4874",
                                        "label": "Australian Stratigraphic Units Database"
                                     }  ]
                         }
@@ -76,7 +76,7 @@
                             "name": "STRAT_TOP-EUMERALLA_GSV",
                             "title": "STRAT_TOP-EUMERALLA_GSV",
                             "href" : [ {
-                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=6363",
+                                        "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/6363",
                                         "label": "Australian Stratigraphic Units Database"
                                       } ]
                         }
@@ -92,7 +92,7 @@
                             "name": "STRAT_TOP-PRETTY-HILL-EAST_FROGTECH_FINAL",
                             "title": "STRAT_TOP-PRETTY-HILL-EAST_FROGTECH_FINAL",
                             "href" : [ {
-                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=15555",
+                                        "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/15555",
                                         "label": "Australian Stratigraphic Units Database"
                                       } ]
                         }
@@ -108,7 +108,7 @@
                             "name": "STRAT_TOP-PRETTY-HILL-WEST_FROGTECH_FINAL",
                             "title": "STRAT_TOP-PRETTY-HILL-WEST_FROGTECH_FINAL",
                             "href" : [ {
-                                        "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=15555",
+                                        "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/15555",
                                         "label": "Australian Stratigraphic Units Database"
                                       } ]
                         }

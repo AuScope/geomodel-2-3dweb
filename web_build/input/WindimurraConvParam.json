@@ -28,7 +28,7 @@
                             "name": "V01_BALDROCKSUPERSUITE",
                             "title": "V01_BALDROCKSUPERSUITE",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=74836",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/74836",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         }
@@ -86,7 +86,7 @@
                             "name": "V09_YARRAQUINSEISMICPROVINCE",
                             "title": "V09_YARRAQUINSEISMICPROVINCE",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=80136",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/80136",
                                 "label": "Australian Stratigraphic Units Database"
                             } ]
                         }
@@ -161,7 +161,7 @@
                             "name": "S01_BALDROCKSUPERSUITE",
                             "title": "S01_BALDROCKSUPERSUITE",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=74836",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/74836",
                                 "label": "Australian Stratigraphic Units Database"
                             } ]
                          }
@@ -219,7 +219,7 @@
                             "name": "S09_YARRAQUINSEISMICPROVINCE",
                             "title": "S09_YARRAQUINSEISMICPROVINCE",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=80136",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/80136",
                                 "label": "Australian Stratigraphic Units Database"
                             } ]
                         }

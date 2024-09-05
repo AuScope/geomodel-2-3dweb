@@ -42,7 +42,7 @@
                             "name": "BERNAFAI",
                             "title": "BERNAFAI",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=1513",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/1513",
                                 "label": "Australian Stratigraphic Units Database"
                             } ]
                         },
@@ -50,7 +50,7 @@
                             "name": "EASTERN_TYENNAN_MARGIN",
                             "title": "EASTERN_TYENNAN_MARGIN",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=37490",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/37490",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -58,7 +58,7 @@
                             "name": "GOG_RANGE",
                             "title": "GOG_RANGE",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=27421",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/27421",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -66,7 +66,7 @@
                             "name": "MARIONOAK",
                             "title": "MARIONOAK",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=79574",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/79574",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -74,7 +74,7 @@
                             "name": "PEDDER_RIVER",
                             "title": "PEDDER_RIVER",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=40960",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/40960",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -82,7 +82,7 @@
                             "name": "PIEMAN",
                             "title": "PIEMAN",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=31623",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/31623",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -90,7 +90,7 @@
                             "name": "ROSEBERY",
                             "title": "ROSEBERY",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=79506",
+                                "URL": "https://asud.ga.gov.au/search-stratigraphic-units/results/79506",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         },
@@ -98,7 +98,7 @@
                             "name": "TYENNAN_MARGIN",
                             "title": "TYENNAN_MARGIN",
                             "href": [ {
-                                "URL": "http://dbforms.ga.gov.au/pls/www/geodx.strat_units.sch_full?wher=stratno=37490",
+                                "URL": "3https://asud.ga.gov.au/search-stratigraphic-units/results/7490",
                                 "label": "Australian Stratigraphic Units Database"
                                 } ]
                         }
