@@ -52,7 +52,7 @@ app = FastAPI()
 ''' Set up web FastAPI interface
 '''
 
-DEBUG_LVL = logging.ERROR
+DEBUG_LVL = logging.DEBUG
 ''' Initialise debug level to minimal debugging
 '''
 
@@ -151,8 +151,10 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
         param.BOREHOLE_CRS = param_dict[model].BOREHOLE_CRS
     if hasattr(param_dict[model], 'BBOX'):
         param.BBOX = param_dict[model].BBOX
-    reader = NVCLReader(param_dict[model], wfs=wfs_dict[model])
+    LOGGER.debug(f"Creating NVCLReader {param_dict[model]=} {param=} {wfs_dict[model]=}")
+    reader = NVCLReader(param, wfs=wfs_dict[model])
     borehole_list = reader.get_boreholes_list()
+    LOGGER.debug(f"{borehole_list=}")
     result_dict = {}
     for borehole_dict in borehole_list:
         borehole_id = borehole_dict['nvcl_id']
@@ -177,8 +179,11 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
             bhl_key = 'bh_list|' + model
             bh_dict = cache_obj.get(bhd_key)
             bh_list = cache_obj.get(bhl_key)
+            LOGGER.debug(f"Fetched from cache {bh_dict=} {bh_list=}")
             if bh_dict is None or bh_list is None:
+                LOGGER.debug("Empty bh_dict / bh_list")
                 bh_dict, bh_list = create_borehole_dict_list(model, param_dict, wfs_dict)
+                LOGGER.debug(f"Created from network {bh_dict=} {bh_list=}")
                 cache_obj.add(bhd_key, bh_dict)
                 cache_obj.add(bhl_key, bh_list)
             return bh_dict, bh_list
