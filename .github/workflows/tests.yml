@@ -10,7 +10,7 @@ on:
     branches: [ "master" ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -40,8 +40,8 @@ jobs:
     - name: Deploy test badge to master
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-          folder: tests/badge
-          target-folder: tests/badge
+          folder: test/badge
+          target-folder: test/badge
           branch: master
         
         
