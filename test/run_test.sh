@@ -17,7 +17,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$REPO_DIR/assimp-$ASSIMP_VER/bin
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
 # Install coverage
-python3 -m pip install coverage
+python3 -m pip install coverage defusedxml genbadge
 
 # Test GOCAD import & conversion
 pushd unit/gocad_import > /dev/null
@@ -54,6 +54,9 @@ coverage run db_tables.py
 popd > /dev/null
 
 coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage
+coverage html
+coverage xml
 coverage report --omit '*/geomodel-2-3dweb/scripts/lib/exports/print_assimp.py'
+genbadge coverage -i coverage.xml -o badge/coverage-badge.svg -v
 
 deactivate

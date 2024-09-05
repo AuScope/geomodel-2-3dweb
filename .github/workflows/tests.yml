@@ -37,5 +37,10 @@ jobs:
       run: |
         cd test
         ./run_test.sh
+    - name: Deploy test badge to gh-pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+          folder: tests/badge
+          branch: gh-pages
         
         
