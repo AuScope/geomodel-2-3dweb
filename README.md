@@ -1,5 +1,5 @@
 [![pdm-managed](https://img.shields.io/badge/pdm-managed-blueviolet)](https://pdm.fming.dev)
-![Test Status](https://github.com/AuScope/geomodel-2-3dweb/actions/workflows/python-app.yml/badge.svg)
+![Test Status](https://github.com/AuScope/geomodel-2-3dweb/actions/workflows/tests.yml/badge.svg)
 
 # geomodel-2-3dweb
 
