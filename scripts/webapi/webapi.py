@@ -142,11 +142,10 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     response_list = []
     if model not in wfs_dict or model not in param_dict:
         LOGGER.warning(f"Model {model} not in wfs_dict or param_dict")
+        LOGGER.debug(f"{wfs_dict=} {param_dict=}")
         return {}, []
-    param = SimpleNamespace()
+    param = param_builder(param_dict[model].PROVIDER)
     param.MAX_BOREHOLES = MAX_BOREHOLES
-    param.NVCL_URL = param_dict[model].NVCL_URL
-    param.WFS_URL = param_dict[model].WFS_URL
     if hasattr(param_dict[model], 'BOREHOLE_CRS'):
         param.BOREHOLE_CRS = param_dict[model].BOREHOLE_CRS
     if hasattr(param_dict[model], 'BBOX'):
@@ -256,12 +255,14 @@ def get_cached_parameters():
         LOGGER.error(f"config file does not exist {config_file}")
         sys.exit(1)
     conf_dict = read_json_file(config_file)
+    LOGGER.debug(f"{conf_dict=}")
     # For each provider
     param_dict = {}
     wfs_dict = {}
     # pylint: disable=W0612
     for prov_name, model_dict in conf_dict.items():
         model_list = model_dict['models']
+        LOGGER.debug(f"{model_list=}")
         # For each model within a provider
         for model_obj in model_list:
             model = model_obj['modelUrlPath']
@@ -269,9 +270,12 @@ def get_cached_parameters():
             # Open up model's conversion input parameter file
             input_file = os.path.join(INPUT_DIR, file_prefix + 'ConvParam.json')
             if not os.path.exists(input_file):
+                LOGGER.warning(f"Cannot find {input_file}")
                 continue
             # Load params and connect to WFS service
             param_dict[model] = get_input_conv_param_bh(input_file)
+            LOGGER.debug(f"{model=}")
+            LOGGER.debug(f"{param_dict[model]=}")
             # If input conversion file does not have a bounding box, use the one calculated from the model
             # conversion process
             if not hasattr(param_dict[model], 'BOREHOLE_CRS') or not hasattr(param_dict[model], 'BBOX'):
@@ -289,8 +293,10 @@ def get_cached_parameters():
                 param_obj = param_builder(param_dict[model].PROVIDER)
                 # Open up connection to WFS service
                 wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, version=param_obj.WFS_VERSION, xml=None, timeout=WFS_TIMEOUT)
-            except ServiceException as e:
+            except Exception as e:
                 LOGGER.error(f"Cannot reach service {param_obj.WFS_URL}: {e}")
+    LOGGER.debug(f"Returning {param_dict=}")
+    LOGGER.debug(f"Returning {wfs_dict=}")
     return param_dict, wfs_dict
 
 

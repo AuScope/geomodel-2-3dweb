@@ -9,9 +9,10 @@ from nvcl_kit.reader import NVCLReader
 from lib.exports.assimp_kit import AssimpKit
 from nvcl_kit.generators import gen_scalar_by_depth
 from nvcl_kit.constants import Scalar
+from nvcl_kit.param_builder import param_builder
 
 
-LOG_LVL = logging.INFO
+LOG_LVL = logging.DEBUG
 ''' Initialise debug level to minimal debugging
 '''
 
@@ -35,18 +36,19 @@ if not LOGGER.hasHandlers():
 
 
 
-def get_blob_boreholes(borehole_dict, param_obj):
+def get_blob_boreholes(borehole_dict, model_param_dict):
     ''' Retrieves borehole data and writes 3D model files to a blob
 
-    :param borehole_dict:
-    :param param_obj: input parameters
+    :param borehole_dict: information about borehole
+    :param model_param_dict: input parameters, contains 'PROVIDER'
     :returns: GLTF blob object
     '''
-    LOGGER.debug("get_blob_boreholes(%s)", str(borehole_dict))
+    LOGGER.debug(f"get_blob_boreholes({borehole_dict}, {model_param_dict})")
     height_res = 10.0
 
+    param_obj = param_builder(model_param_dict.PROVIDER)
     reader = NVCLReader(param_obj)
-    if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
+    if reader.wfs is not None and all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
         bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
 
         # If there's data, then create the borehole
@@ -54,11 +56,10 @@ def get_blob_boreholes(borehole_dict, param_obj):
             assimp_obj = AssimpKit(LOG_LVL)
             blob_obj = assimp_obj.write_borehole(base_xyz, borehole_dict['name'],
                                                  bh_data_dict, height_res, '')
-            LOGGER.debug("Returning: blob_obj = %s", str(blob_obj))
+            LOGGER.debug(f"Returning: blob_obj = {blob_obj}")
             return blob_obj
 
-        LOGGER.debug("No borehole data")
-
+    LOGGER.debug("No borehole data")
     return None
 
 
