@@ -44,12 +44,13 @@ def get_blob_boreholes(borehole_dict, model_param_dict):
     :returns: GLTF blob object
     '''
     LOGGER.debug(f"get_blob_boreholes({borehole_dict}, {model_param_dict})")
+    # Height resolution (depth in metres between data points)
     height_res = 10.0
 
     param_obj = param_builder(model_param_dict.PROVIDER)
     reader = NVCLReader(param_obj)
     if reader.wfs is not None and all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-        bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
+        bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, model_param_dict.MODEL_CRS, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
 
         # If there's data, then create the borehole
         if bh_data_dict != {}:
@@ -63,11 +64,12 @@ def get_blob_boreholes(borehole_dict, model_param_dict):
     return None
 
 
-def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
+def get_nvcl_data(reader, param_obj, output_crs, height_res, x, y, z, nvcl_id):
     ''' Process the output of NVCL_kit's 'get_imagelog_data()'
 
         :param reader: NVCL_Kit object
         :param param_obj: NVCL_Kit constructor input
+        :param output_crs: borehole coordinates will be output in this CRS
         :param height_res: borehole data height resolution (float, metres)
         :param x,y,z: x,y,z coordinates of borehole collar
         :param nvcl_id: NVCL id of borehole
@@ -76,8 +78,7 @@ def get_nvcl_data(reader, param_obj, height_res, x, y, z, nvcl_id):
                   Returns empty dict upon error or no data \
                   and 'base_xyz' - (x,y,z) converted coordinate tuple in borehole CRS
     '''
-    x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                              [x, y])
+    x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, output_crs, [x, y])
     base_xyz = (x_m, y_m, z)
     ret_dict = {}
     # Look for NVCL mineral data

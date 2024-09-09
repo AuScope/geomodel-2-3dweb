@@ -585,7 +585,7 @@ def send_blob(model, blob_id, blob, exp_timeout=None):
             try:
                 # Convert to json
                 gltf_json = json.loads(bcd_str)
-                LOGGER.debug(f"{gltf_json[:80]=}")
+                LOGGER.debug(f"{gltf_json=}")
             except JSONDecodeError as jde_exc:
                 LOGGER.debug(f"JSONDecodeError loads(): {jde_exc}")
             else:
