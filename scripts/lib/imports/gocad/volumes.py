@@ -100,8 +100,11 @@ def read_volume_binary_files(self):
                                 prop_obj.assign_to_ijk((x_val, y_val, z_val), data_val)
                                 # NB: Minimum is calculated assuming the spectrum is used for data, but
                                 # assumes that red > green > blue, so that red colours indicate greater intensity etc.
-                                if data_val[3] > 0 and data_val[0]*256*256+data_val[1]*256+data_val[2] < min_val[0]*256*256+min_val[1]*256+min_val[2]:
-                                    min_val = data_val
+                                try:
+                                    if data_val[3] > 0 and int(data_val[0])*256*256+int(data_val[1])*256+int(data_val[2]) < min_val[0]*256*256+min_val[1]*256+min_val[2]:
+                                        min_val = data_val
+                                except ValueError:
+                                    pass
 
                             fp_idx += 1
             # If SGRID
