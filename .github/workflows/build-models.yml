@@ -167,11 +167,6 @@ jobs:
     - name: Make boreholes
       run: |
         eval $(pdm venv activate for-backend-build)
-        # Temporarily, a patched version of assimp lives in the 'test' dir
-        # It was installed and built via 'pdm install'
-        ASSIMP_VER=5.4.3
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/assimp-$ASSIMP_VER/bin
-        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
         pushd web_build
         ./make_boreholes.py -b batch.txt -d query_data.db boreholes
         tar cvfz boreholes.tar.gz ./boreholes

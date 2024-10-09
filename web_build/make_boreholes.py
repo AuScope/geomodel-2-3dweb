@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """
 This code creates GLTF files and a sqlite database
-which can be used to embed NVCL boreholes in a geological model
-
-Assumes assimp shared library was installed via pdm (see 'pyproject.toml')
+which can be used to embed NVCL boreholes in a 3d geoscience model
 """
 
 import sys
@@ -16,11 +14,9 @@ from json import JSONDecodeError
 import logging
 import argparse
 
-
-
 from lib.exports.bh_utils import make_borehole_filename, make_borehole_label
 from lib.exports.bh_make import get_nvcl_data
-from lib.exports.assimp_kit import AssimpKit
+from lib.exports.gltf_kit import GltfKit
 from lib.exports.geometry_gen import colour_borehole_gen
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
 from lib.file_processing import get_input_conv_param_bh
@@ -53,8 +49,8 @@ if not LOGGER.hasHandlers():
     # Add handler to LOGGER and set level
     LOGGER.addHandler(HANDLER)
 
-# We are exporting using AssimpKit, could also use ColladaKit
-EXPORT_KIT = AssimpKit(LOG_LVL)
+# We are exporting using GltfKit, could also use ColladaKit
+EXPORT_KIT = GltfKit(LOG_LVL)
 
 
 
@@ -130,19 +126,22 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
 
         # Get borehole information dictionary, and add to query db
         bh_info_dict = get_bh_info_dict(borehole_dict, param_obj)
+        LOGGER.debug(f"{bh_info_dict=}")
+        LOGGER.debug(f"{param_obj=}")
         is_ok, p_obj = qdb.add_part(json.dumps(bh_info_dict))
         if not is_ok:
             LOGGER.warning(f"Cannot add part to db: {p_obj}")
             continue
 
         if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
+            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, param_obj.MODEL_CRS, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
             if bh_data_dict == {}:
                 LOGGER.warning(f"NVCL data not available for {borehole_dict['nvcl_id']}")
                 continue
             # If there's NVCL data, then create the borehole
             first_depth = -1
             # pylint: disable=W0612
+            LOGGER.debug("Assembling database")
             for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in \
                 colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
                 if first_depth < 0:
@@ -154,7 +153,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 # Using 'make_borehole_label()' ensures that name is the same
                 # in both db and GLTF file
                 bh_label = make_borehole_label(borehole_dict['name'], first_depth)
-                bh_str = "{0}_{1}".format(bh_label.decode('utf-8'), colour_idx)
+                bh_str = f"{bh_label.decode('utf-8')}_{colour_idx}"
                 is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
                                              s_obj, p_obj, None, None)
                 if not is_ok:
@@ -162,6 +161,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                     continue
                 LOGGER.debug(f"ADD_QUERY({mesh_name}, {param_obj.modelUrlPath})")
 
+            LOGGER.debug("Writing GLTFs")
             file_name = make_borehole_filename(borehole_dict['name'])
             if output_mode == 'GLTF':
                 blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
@@ -180,6 +180,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 sys.exit(1)
             loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
             bh_cnt += 1
+            LOGGER.debug("Next BH")
 
     LOGGER.info(f"Found NVCL data for {bh_cnt}/{len(borehole_list)} boreholes")
     if output_mode != 'GLTF':

@@ -35,7 +35,7 @@ from lib.file_processing import read_json_file, find_gltf
 from lib.exports.bh_make import get_blob_boreholes
 from lib.imports.gocad.gocad_importer import GocadImporter
 from lib.db.db_tables import QueryDB, QUERY_DB_FILE
-from lib.exports.assimp_kit import AssimpKit
+from lib.exports.gltf_kit import GltfKit
 from lib.picklers import element_unpickler, element_pickler, elementtree_unpickler, elementtree_pickler
 
 
@@ -685,10 +685,10 @@ def convert_gocad2gltf(model, id_str, gocad_list):
         # Then, output GSM as GLTF ...
         gsm_obj = gsm_list[0]
         geom_obj, style_obj, metadata_obj = gsm_obj
-        assimp_obj = AssimpKit(DEBUG_LVL)
-        assimp_obj.start_scene()
-        assimp_obj.add_geom(geom_obj, style_obj, metadata_obj)
-        blob_obj = assimp_obj.end_scene("")
+        gltf_kit = GltfKit(DEBUG_LVL)
+        gltf_kit.start_scene()
+        gltf_kit.add_geom(geom_obj, style_obj, metadata_obj)
+        blob_obj = gltf_kit.end_scene("")
         return send_blob(model, 'drag_and_drop_'+id_str, blob_obj, 60.0)
     return make_str_response(' ')
 

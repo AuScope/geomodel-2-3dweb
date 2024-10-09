@@ -4,6 +4,7 @@ including: borehole sticks, lines, cubes and pyramids
 '''
 import math
 from types import SimpleNamespace
+import numpy as np
 from lib.exports.bh_utils import make_borehole_label
 
 def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
@@ -25,41 +26,42 @@ def colour_borehole_gen(pos, borehole_name, colour_info_dict, ht_resol):
                                                      'className': <measurement class> } \
         mesh_name - used to label meshes during mesh generation (bytes object)
     '''
-    bh_width = 10 # Width of stick
+    bh_width = 10.0 # Width of stick
 
     # Convert bv to an equilateral triangle of floats
     angl_rad = math.radians(30.0)
     cos_flt = math.cos(angl_rad)
     sin_flt = math.sin(angl_rad)
     for colour_idx, (depth, colour_info) in enumerate(colour_info_dict.items()):
-        height = pos[2]+ht_resol-depth
-        pt_a_high = [pos[0], pos[1]+bh_width*cos_flt, height]
-        pt_b_high = [pos[0]+bh_width*cos_flt, pos[1]-bh_width*sin_flt, height]
-        pt_c_high = [pos[0]-bh_width*cos_flt, pos[1]-bh_width*sin_flt, height]
-        pt_a_low = [pos[0], pos[1]+bh_width*cos_flt, height-ht_resol]
-        pt_b_low = [pos[0]+bh_width*cos_flt, pos[1]-bh_width*sin_flt, height-ht_resol]
-        pt_c_low = [pos[0]-bh_width*cos_flt, pos[1]-bh_width*sin_flt, height-ht_resol]
+        height = pos[2] + ht_resol - depth
+        pt_a_high = [pos[0], pos[1] + bh_width*cos_flt, height]
+        pt_b_high = [pos[0] + bh_width*cos_flt, pos[1] - bh_width*sin_flt, height]
+        pt_c_high = [pos[0] - bh_width*cos_flt, pos[1] - bh_width*sin_flt, height]
+        pt_a_low = [pos[0], pos[1] + bh_width*cos_flt, height - ht_resol]
+        pt_b_low = [pos[0] + bh_width*cos_flt, pos[1] - bh_width*sin_flt, height - ht_resol]
+        pt_c_low = [pos[0] - bh_width*cos_flt, pos[1] - bh_width*sin_flt, height - ht_resol]
 
-        vert_list = pt_a_high + pt_b_high + pt_c_high + pt_a_low + pt_c_low + pt_b_low
+        vert_list = [pt_a_high, pt_b_high, pt_c_high, pt_a_low, pt_c_low, pt_b_low]
 
-        indices = [0, 2, 1,
-                   3, 5, 4,
-                   1, 2, 5,
-                   2, 4, 5,
-                   0, 4, 2,
-                   0, 3, 4,
-                   0, 1, 3,
-                   1, 5, 3]
+        indices = [[0, 2, 1],
+                   [3, 5, 4],
+                   [1, 2, 5],
+                   [2, 4, 5],
+                   [0, 4, 2],
+                   [0, 3, 4],
+                   [0, 1, 3],
+                   [1, 5, 3]]
 
         mesh_name = make_borehole_label(borehole_name, depth)
 
         # If there is missing colour and mineral information, then add blank one
-        if not isinstance(colour_info, SimpleNamespace):
+        if not isinstance(colour_info, list) or len(colour_info) < 1:
             rgba_colour = (1.0, 1.0, 1.0, 1.0)
             class_dict = { 'classText': 'unknown', 'className': 'unknown'}
         else:
-            rgba_colour = colour_info.colour
-            class_dict = { 'classText': colour_info.classText, 'className': colour_info.className }
+            # NB: Only takes the colour of the most common mineral at that depth
+            rgba_colour = colour_info[0].colour
+            class_dict = { 'classText': colour_info[0].classText, 'className': colour_info[0].className }
 
         yield vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name
 

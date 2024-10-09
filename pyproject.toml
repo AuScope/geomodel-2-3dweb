@@ -2,10 +2,9 @@
 # PEP 621 project metadata
 # See https://www.python.org/dev/peps/pep-0621/
 dependencies = [
-    "numpy",
+    "numpy>=1.14",
     "OWSLib",
     "Pillow",
-    "pyassimp @ file:///${PROJECT_ROOT}/assimp-5.4.3/port/PyAssimp",
     "pycollada",
     "pyproj",
     "SQLAlchemy",
@@ -17,8 +16,9 @@ dependencies = [
     "uvicorn",
     "wheel",
     "pytest>=8.3.2",
+    "pygltflib>=1.16.2",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 
 [build-system]
 requires = ["pdm-backend"]
@@ -26,5 +26,3 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 
-[tool.pdm.scripts]
-pre_install = "sh -c './build_assimp.sh'"

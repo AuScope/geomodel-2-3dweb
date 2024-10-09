@@ -6,7 +6,7 @@ import logging, sys
 
 from lib.coords import convert_coords
 from nvcl_kit.reader import NVCLReader
-from lib.exports.assimp_kit import AssimpKit
+from lib.exports.gltf_kit import GltfKit
 from nvcl_kit.generators import gen_scalar_by_depth
 from nvcl_kit.constants import Scalar
 from nvcl_kit.param_builder import param_builder
@@ -54,8 +54,8 @@ def get_blob_boreholes(borehole_dict, model_param_dict):
 
         # If there's data, then create the borehole
         if bh_data_dict != {}:
-            assimp_obj = AssimpKit(LOG_LVL)
-            blob_obj = assimp_obj.write_borehole(base_xyz, borehole_dict['name'],
+            gltf_kit = GlftKit(LOG_LVL)
+            blob_obj = gltf_kit.write_borehole(base_xyz, borehole_dict['name'],
                                                  bh_data_dict, height_res, '')
             LOGGER.debug(f"Returning: blob_obj = {blob_obj}")
             return blob_obj
@@ -86,7 +86,7 @@ def get_nvcl_data(reader, param_obj, output_crs, height_res, x, y, z, nvcl_id):
     # Min1,2,3 = 1st, 2nd, 3rd most common mineral
     # Grp1,2,3 = 1st, 2nd, 3rd most common group of minerals
     # uTSAV = visible light, uTSAS = shortwave IR, uTSAT = thermal IR
-    for nvcl_id, log_id, sca_list in gen_scalar_by_depth(reader, nvcl_id_list=[nvcl_id], scalar_class=Scalar.Grp1_uTSAS, log_type='1'):
+    for nvcl_id, log_id, sca_list in gen_scalar_by_depth(reader, nvcl_id_list=[nvcl_id], scalar_class=Scalar.Grp1_uTSAS, log_type='1', resolution=height_res):
         for depth in sca_list:
             ret_dict[depth] = sca_list[depth]
     return ret_dict, base_xyz
