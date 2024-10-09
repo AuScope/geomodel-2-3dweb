@@ -1,6 +1,6 @@
-# This workflow builds model web assets from a model sources
+# This workflow builds model web assets from model sources
 # with an option to build a release using current master
-# TODO: Paramterize model source tag ${{env.SRC_TAG}}
+# TODO: Parameterize model source tag ${{env.SRC_TAG}}
 
 name: Build Models
 env:
