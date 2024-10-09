@@ -7,6 +7,7 @@ Run this in local directory
 import sys
 import logging
 import os
+import math
 
 # Add in path to local library files
 sys.path.append(os.path.join('..', '..', '..', 'scripts'))
@@ -427,8 +428,8 @@ gsm_list[0][0].vrtx_arr[1].xyz == (990.655890123452, 2009.403974792015, 153.7821
 "gsm_list[0][0].vol_data_type=='FLOAT_32' and " \
 "gsm_list[1][0].vol_data_type=='FLOAT_32' and " \
 "gsm_list[0][0]._xyz_data[0][(376000.0, 6496000.0, -25000.0)]==4.0 and " \
-"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]>2.6536592 and " \
-"gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)]<2.6536594")
+"math.isclose(gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)], 2.6536593, rel_tol=1e-06) and " \
+"math.isclose(gsm_list[1][0]._xyz_data[0][(368000.0, 6504000.0, -25000.0)], 2.6536593, rel_tol=1e-06)")
 
 
     #
