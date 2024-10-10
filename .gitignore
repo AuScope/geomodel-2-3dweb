@@ -1,3 +1,5 @@
 .tox/
 .pdm-python
-test/badge/
+**/.coverage
+**/coverage.xml
+**/__pycache__
