@@ -65,7 +65,7 @@ for i in 'pl' 'ts' 'vs' 'gp' 'wl'; do
 echo -n "$i File test: "
 
 # Convert GOCAD to COLLADA
-coverage run -a $CONV_SCRIPT -g -f $CWD/output "$CWD/input/${i}Test.$i" $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output "$CWD/input/${i}Test.$i" $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Remove date stamps from file
@@ -79,7 +79,7 @@ done
 
 # Test second type of well file
 echo -n "wl Type 2 File test: "
-coverage run -a $CONV_SCRIPT -g -f $CWD/output "$CWD/input/wl2Test.wl" $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output "$CWD/input/wl2Test.wl" $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 egrep -v '(<created>|<modified>)' "$CWD/output/wl2Test.dae" > "$CWD/output/wl2Test2.dae"
 [ $? -ne 0 ] && echo "FAILED" && exit 1
@@ -93,7 +93,7 @@ compare_and_print "$CWD/output/wl2Test2.dae" "$CWD/golden/wl2Test.dae"
 ##########################################################################################
 
 echo -n "Convert objects nested within 2 levels of group files: "
-coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/2layer.gp $MODEL_INDIR/TasConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/2layer.gp $MODEL_INDIR/TasConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - 2 layer gp conversion returned False" && exit 1
 
 # Remove date stamps from file
@@ -109,7 +109,7 @@ compare_and_print "$CWD/output/2layer2.dae" "$CWD/golden/2layer.dae"
 ##########################################################################################
 
 echo -n "Inherit colour from group file: "
-coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/gpColour.gp $MODEL_INDIR/TasConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/gpColour.gp $MODEL_INDIR/TasConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - inherit colour from gp returned False" && exit 1
 
 # Remove date stamps from file
@@ -127,7 +127,7 @@ compare_and_print "$CWD/output/gpColour.dae" "$CWD/golden/gpColour.dae"
 echo -n "Convert single layer VOXET to PNG test, with colour table: "
 
 # Convert GOCAD to PNG with colour table
-coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/PNGTest.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/PNGTest.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -137,7 +137,7 @@ compare_and_print "$CWD/output/PNGTest@@.PNG" "$CWD/golden/PNGTest.PNG"
 echo -n "Convert single layer VOXET to PNG test, without colour table: "
 
 # Convert GOCAD to PNG without colour table
-coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/PNGTestNoCT.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/PNGTestNoCT.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -151,7 +151,7 @@ compare_and_print "$CWD/output/PNGTestNoCT@@.PNG" "$CWD/golden/PNGTestNoCT.PNG"
 
 echo -n "Convert single layer RGBA voxet to PNG test: "
 
-coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/RGBA_voxet.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output $CWD/input/RGBA_voxet.vo $MODEL_INDIR/NorthGawlerConvParam.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - ct conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -164,7 +164,7 @@ compare_and_print "$CWD/output/RGBA_voxet@@.PNG" "$CWD/golden/RGBA_voxet.PNG"
 
 echo -n "Voxet with 3 binary files conversion & output config test: "
 
-coverage run -a $CONV_SCRIPT -g -f $CWD/output -o smallConf.json $CWD/input/small_voxet/small.vo $CWD/input/small_voxet/small.json >/dev/null 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -f $CWD/output -o smallConf.json $CWD/input/small_voxet/small.vo $CWD/input/small_voxet/small.json >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
 # Check that conversion was correct
@@ -189,7 +189,7 @@ compare_and_print "$CWD/output/smallConf.json" "$CWD/golden/smallConf.json"
 echo -n "Directory recursion test: "
 
 # Try converting all files at once
-coverage run -a $CONV_SCRIPT -g -r -f $CWD/output $CWD/input $MODEL_INDIR/NorthGawlerConvParam.json
+python3 -m coverage run -a $CONV_SCRIPT -g -r -f $CWD/output $CWD/input $MODEL_INDIR/NorthGawlerConvParam.json
 #  >/dev/null 2>&1
 [ $? -ne 0 ] && echo "FAILED - conversion returned False" && exit 1
 
@@ -211,7 +211,7 @@ echo -n "File output exception handling tests: "
 mkdir $CWD/output
 chmod a-w $CWD/output
 for f in tsTest.ts PNGTest.vo gpTest.gp vsTest.vs RGBA_voxet.vo wlTest.wl; do
-coverage run -a $CONV_SCRIPT -g -r -f $CWD/output $CWD/input/$f $MODEL_INDIR/NorthGawlerConvParam.json > output.txt 2>&1
+python3 -m coverage run -a $CONV_SCRIPT -g -r -f $CWD/output $CWD/input/$f $MODEL_INDIR/NorthGawlerConvParam.json > output.txt 2>&1
 [ $? -ne 0 ] && echo "FAILED - test returned False $f" && exit 1
 grep 'ERROR - Cannot open file' output.txt >/dev/null 2>&1 && [ $? -ne 0 ] && echo "FAILED - $f" && exit 1
 done

@@ -25,7 +25,14 @@ import logging
 from owslib.feature.wfs110 import WebFeatureService_1_1_0
 from owslib.util import ServiceException
 from diskcache import Cache, Timeout
-import pyassimp
+
+# If assimp (https://github.com/assimp/assimp) shared library is in the path, then multi format export will be supported
+try:
+    import pyassimp
+    HAS_ASSIMP = True
+except ImportError:
+    HAS_ASSIMP = False
+
 from types import SimpleNamespace
 import copyreg
 from lxml import etree
@@ -702,6 +709,11 @@ def convert_gltf2xxx(model, filename, fmt):
     :param fmt: string indicating what format to convert to, e.g. 'DXF'
     :returns: a file response
     '''
+    # Exit if assimp library not available
+    if not HAS_ASSIMP:
+        LOGGER.warning(f"Assimp package not available or shared library not in LD_LIBRARY_PATH. Cannot convert {filename} to {fmt} and export")
+        return make_str_reponse("Multi-format export not supported. Please contact website administrator.")
+
     # Use model name and file name to get full GLTF file path
     gltf_path = find_gltf(GEOMODELS_DIR, INPUT_DIR, model, filename)
     if not gltf_path:

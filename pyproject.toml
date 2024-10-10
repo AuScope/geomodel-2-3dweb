@@ -20,6 +20,14 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 
+[project.optional-dependencies]
+test = [
+    "coverage>=7.6.2",
+    "defusedxml>=0.7.1",
+    "genbadge>=1.1.1",
+    "pytest>=8.3.3",
+    "httpx>=0.27.2",
+]
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
