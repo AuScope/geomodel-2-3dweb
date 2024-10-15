@@ -73,4 +73,8 @@ Funding provided by [AuScope Pty Ltd](https://www.auscope.org.au/)
 
 SKUA/GOCAD software from the [Paradigm Academic Software Program](http://www.pdgm.com/affiliations/academic-software-programs/) was used to view some types of GOCAD object files and produce sample GOCAD OBJECT files used for testing
 
+### Citation
 
+Please cite as:
+
+Fazio, Vincent; Woodcock, Robert (2024): AuScope 3D Geological Models Portal. v1. CSIRO. Service Collection. http://hdl.handle.net/102.100.100/609085?index=1
