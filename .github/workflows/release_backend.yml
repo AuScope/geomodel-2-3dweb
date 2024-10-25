@@ -1,0 +1,26 @@
+# Release backend from the latest successful build action into a certain release
+name: Release backend api and borehole db
+
+on:
+  push:
+    tags:
+      - "PORTAL_RELEASE_*"
+
+jobs:
+  do-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifacts
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        workflow: build_backend.yml
+        workflow_conclusion: success
+        branch: master
+    - name: Add to release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Source and web asset release based on tag ${{github.ref}}
+        files: |
+          api.tar.gz
+          boreholes.tar.gz
+        fail_on_unmatched_files: true
