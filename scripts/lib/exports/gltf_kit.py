@@ -10,6 +10,7 @@ import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
 
 import pygltflib
+from pygltflib import BufferFormat
 
 from lib.exports.geometry_gen import colour_borehole_gen, tri_gen
 from lib.exports.export_kit import ExportKit
@@ -207,10 +208,11 @@ class GltfKit(ExportKit):
             materials=self.materials,
         )
         gltf.set_binary_blob(self.binary_blob)
-
-        #glb = b"".join(gltf.save_to_bytes())  # save_to_bytes returns an array of the components of a glb
-        #gltf.convert_buffers(BufferFormat.BINFILE)   # convert buffers to files
-        gltf.save(out_filename + ".gltf")  # glb or gltf all the buffers are saved in 0.bin, 1.bin, 2.bin.
+        gltf.convert_buffers(BufferFormat.DATAURI)   # Save buffers inside GLTF
+        if out_filename != '':
+            gltf.save(out_filename + ".gltf")
+            return True
+        return gltf.gltf_to_json()
 
 
     def write_borehole(self, base_vrtx, borehole_name, colour_info_dict, height_reso, out_filename=''):

@@ -116,10 +116,6 @@ LAYER_NAME = 'boreholes'
 ''' Name of our 3DPS layer
 '''
 
-GLTF_REQ_NAME = '$blobfile.bin'
-''' Name of the binary file holding GLTF data
-'''
-
 G_PARAM_DICT = {}
 ''' Stores the models' conversion parameters, key: model name
 '''
@@ -200,50 +196,6 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
         LOGGER.error(f"DB Timeout, cannot get cached dict list: {t_exc}")
         return (None, 0)
 
-
-
-def cache_blob(model, blob_id, blob, blob_sz, exp_timeout=None):
-    '''
-    Cache a GLTF blob and its size
-
-    :param model: name of model, string
-    :param blob_id: blob id string, must be unique within each model
-    :param blob: binary string
-    :param size of blob
-    :param exp_timeout cache expiry timeout, float, in seconds
-    :returns: True if blob was added to cache, false if it wasn't added
-    '''
-    try:
-        with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model + '|' + blob_id
-            return cache_obj.set(blob_key, (blob, blob_sz), expire=exp_timeout)
-
-    except OSError as os_exc:
-        LOGGER.error(f"Cannot cache blob {os_exc}")
-        return False
-    except Timeout as t_exc:
-        LOGGER.error(f"DB Timeout, cannot get cached dict list: {t_exc}")
-        return False
-
-
-
-def get_cached_blob(model, blob_id):
-    '''
-    Get blob from cache
-
-    :param model: name of model, string
-    :param blob_id: blob id string, must be unique within each model
-    :returns: a GLTF blob (binary string) and its size
-    '''
-    try:
-        with Cache(CACHE_DIR) as cache_obj:
-            blob_key = 'blob|' + model + '|' + blob_id
-            blob, blob_sz = cache_obj.get(blob_key, (None, 0))
-            return blob, blob_sz
-
-    except OSError as os_exc:
-        LOGGER.error(f"Cannot get cached blob {os_exc}")
-        return (None, 0)
 
 
 def get_cached_parameters():
@@ -550,11 +502,8 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     borehole_dict = model_bh_dict.get(res_id, None)
     if borehole_dict is not None:
         # Get blob from cache
-        blob = get_blob_boreholes(borehole_dict, param_dict[model])
-        # Some boreholes do not have the requested metric
-        if blob is not None:
-            return send_blob(model, res_id, blob)
-        LOGGER.debug('Empty GLTF blob')
+        gltf_str = get_blob_boreholes(borehole_dict, param_dict[model])
+        return send_blob(gltf_str)
     else:
         LOGGER.debug('Resource not found in borehole dict')
 
@@ -562,7 +511,88 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
 
 
 
-def send_blob(model, blob_id, blob, exp_timeout=None):
+def send_blob(gltf_str):
+    ''' Returns a blob in response
+
+    :param gltf_str: blob object
+    :returns: a binary file response
+    '''
+    LOGGER.debug(f"Got GLTF bytes {gltf_str}")
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".gltf", delete=False) as fp:
+        fp.write(gltf_str)
+    LOGGER.debug("Created temp file, returning it")
+    return FileResponse(fp.name, media_type="model/gltf+json;charset=UTF-8")
+
+
+def make_getpropvalue_response(model, version, output_format, type_name, value_ref, param_dict, wfs_dict):
+    '''
+    Returns a response to a WFS getPropertyValue request, example: \
+      https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue& \
+        outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
+
+    :param model: name of model (string)
+    :param version: 3DPS request version
+    :param output_format: 3DPS response format
+    :param type_name: type name
+    :param value_ref: value reference
+    :param param_dict: parameter dictionary
+    :param wfs_dict: dictionary of WFS services
+    :returns: byte array HTTP response
+    '''
+
+    # Parse outputFormat from query string
+    if not output_format:
+        return make_json_exception_response(version, 'MissingParameterValue', 'missing outputFormat parameter')
+    if output_format != 'application/json':
+        return make_json_exception_response(version, 'OperationProcessingFailed',
+                                            'incorrect outputFormat, try "application/json"')
+
+    # Parse typeName from query string
+    if not type_name:
+        return make_json_exception_response(version, 'MissingParameterValue', 'missing typeName parameter')
+    if type_name != 'boreholes':
+        return make_json_exception_response(version, 'OperationProcessingFailed', 'incorrect typeName, try "boreholes"')
+
+    # Parse valueReference from query string
+    if not value_ref:
+        return make_json_exception_response(version, 'MissingParameterValue', 'missing valueReference parameter')
+    if value_ref != 'borehole:id':
+        return make_json_exception_response(version, 'OperationProcessingFailed',
+                                                     'incorrect valueReference, try "borehole:id"')
+
+    # Fetch list of borehole ids
+    # pylint: disable=W0612
+    model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
+    response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
+    return response_json
+
+
+def convert_gocad2gltf(model, id_str, gocad_list):
+    '''
+    Call the conversion code to convert a GOCAD string to GLTF
+
+    :param model: name of model
+    :param id_str: sequence number string
+    :param gocad_list: GOCAD file lines as a list of strings
+    :returns: a JSON response
+    '''
+    base_xyz = (0.0, 0.0, 0.0)
+    gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
+                              nondefault_coords=NONDEF_COORDS)
+    # First convert GOCAD to GSM (geometry, style, metadata)
+    is_ok, gsm_list = gocad_obj.process_gocad('drag_and_drop', 'drag_and_drop.ts', gocad_list)
+    if is_ok and gsm_list:
+        # Then, output GSM as GLTF ...
+        gsm_obj = gsm_list[0]
+        geom_obj, style_obj, metadata_obj = gsm_obj
+        gltf_kit = GltfKit(DEBUG_LVL)
+        gltf_kit.start_scene()
+        gltf_kit.add_geom(geom_obj, style_obj, metadata_obj)
+        gltf_bytes = gltf_kit.end_scene("")
+        return send_blob(gltf_bytes)
+    return make_str_response(' ')
+
+def send_assimp_blob(model, blob_id, blob, exp_timeout=None):
     ''' Returns a blob in response
 
     :param model: name of model (string)
@@ -631,75 +661,6 @@ def send_blob(model, blob_id, blob, exp_timeout=None):
     return make_str_response('{}')
 
 
-def make_getpropvalue_response(model, version, output_format, type_name, value_ref, param_dict, wfs_dict):
-    '''
-    Returns a response to a WFS getPropertyValue request, example: \
-      https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue& \
-        outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
-
-    :param model: name of model (string)
-    :param version: 3DPS request version
-    :param output_format: 3DPS response format
-    :param type_name: type name
-    :param value_ref: value reference
-    :param param_dict: parameter dictionary
-    :param wfs_dict: dictionary of WFS services
-    :returns: byte array HTTP response
-    '''
-
-    # Parse outputFormat from query string
-    if not output_format:
-        return make_json_exception_response(version, 'MissingParameterValue', 'missing outputFormat parameter')
-    if output_format != 'application/json':
-        return make_json_exception_response(version, 'OperationProcessingFailed',
-                                            'incorrect outputFormat, try "application/json"')
-
-    # Parse typeName from query string
-    if not type_name:
-        return make_json_exception_response(version, 'MissingParameterValue', 'missing typeName parameter')
-    if type_name != 'boreholes':
-        return make_json_exception_response(version, 'OperationProcessingFailed', 'incorrect typeName, try "boreholes"')
-
-    # Parse valueReference from query string
-    if not value_ref:
-        return make_json_exception_response(version, 'MissingParameterValue', 'missing valueReference parameter')
-    if value_ref != 'borehole:id':
-        return make_json_exception_response(version, 'OperationProcessingFailed',
-                                                     'incorrect valueReference, try "borehole:id"')
-
-    # Fetch list of borehole ids
-    # pylint: disable=W0612
-    model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
-    response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
-    return response_json
-
-
-def convert_gocad2gltf(model, id_str, gocad_list):
-    '''
-    Call the conversion code to convert a GOCAD string to GLTF
-
-    :param model: name of model
-    :param id_str: sequence number string
-    :param gocad_list: GOCAD file lines as a list of strings
-    :returns: a JSON response
-    '''
-    base_xyz = (0.0, 0.0, 0.0)
-    gocad_obj = GocadImporter(DEBUG_LVL, base_xyz=base_xyz,
-                              nondefault_coords=NONDEF_COORDS)
-    # First convert GOCAD to GSM (geometry, style, metadata)
-    is_ok, gsm_list = gocad_obj.process_gocad('drag_and_drop', 'drag_and_drop.ts', gocad_list)
-    if is_ok and gsm_list:
-        # Then, output GSM as GLTF ...
-        gsm_obj = gsm_list[0]
-        geom_obj, style_obj, metadata_obj = gsm_obj
-        gltf_kit = GltfKit(DEBUG_LVL)
-        gltf_kit.start_scene()
-        gltf_kit.add_geom(geom_obj, style_obj, metadata_obj)
-        blob_obj = gltf_kit.end_scene("")
-        return send_blob(model, 'drag_and_drop_'+id_str, blob_obj, 60.0)
-    return make_str_response(' ')
-
-
 def convert_gltf2xxx(model, filename, fmt):
     '''
     Call the conversion code to convert GLTF string to a certain format
@@ -737,7 +698,7 @@ def convert_gltf2xxx(model, filename, fmt):
         LOGGER.error(f"Cannot export {gltf_path}: {ae}")
         return make_str_response(' ')
 
-    return send_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
+    return send_assimp_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
 
 
 

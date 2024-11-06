@@ -57,7 +57,7 @@ def get_blob_boreholes(borehole_dict, model_param_dict):
             gltf_kit = GltfKit(LOG_LVL)
             blob_obj = gltf_kit.write_borehole(base_xyz, borehole_dict['name'],
                                                  bh_data_dict, height_res, '')
-            LOGGER.debug(f"Returning: blob_obj = {blob_obj}")
+            LOGGER.debug(f"Returning: {blob_obj=}")
             return blob_obj
 
     LOGGER.debug("No borehole data")
