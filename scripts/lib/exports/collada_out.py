@@ -124,8 +124,6 @@ class ColladaOut():
             :param z_expand: is true if line width is drawn in z-direction else x-direction
             :returns: the line's geometry label
         '''
-        matnode = Collada.scene.MaterialNode("materialref-{0:05d}".format(obj_cnt),
-                                             mesh.materials[-1], inputs=[])
         geom_label_list = []
 
         for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width, z_expand):
@@ -142,6 +140,8 @@ class ColladaOut():
             input_list.addInput(0, 'VERTEX',
                                 "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt))
 
+            matnode = Collada.scene.MaterialNode("materialref-{0:010d}-{0:05d}".format(point_cnt, obj_cnt),
+                                             mesh.materials[-1], inputs=[])
             triset = geom.createTriangleSet(numpy.array(indices),
                                             input_list, "materialref-{0:05d}".format(obj_cnt))
             geom.primitives.append(triset)

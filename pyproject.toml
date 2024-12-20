@@ -5,7 +5,7 @@ dependencies = [
     "numpy>=1.14",
     "OWSLib",
     "Pillow",
-    "pycollada",
+    "pycollada>=0.8",
     "pyproj",
     "SQLAlchemy",
     "diskcache",
@@ -31,6 +31,4 @@ test = [
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
-[tool.pdm]
 

@@ -129,6 +129,7 @@ class ColladaKit(ExportKit):
             self.mesh_obj.geometries.append(geom)
             self.geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
 
+            # Create metadata for popup window on map
             popup_dict[geometry_name] = {'title': meta_obj.name, 'name': meta_obj.name}
             node_label = geometry_name
 
@@ -151,6 +152,7 @@ class ColladaKit(ExportKit):
                                                          self.geomnode_list, geom_obj.seg_arr,
                                                          geom_obj.vrtx_arr, self.obj_cnt,
                                                          geom_obj.line_width, not geom_obj.is_vert_line)
+            # Create metadata for popup window on map
             for geom_label in geom_label_list:
                 popup_dict[geom_label] = {'title': meta_obj.name, 'name': meta_obj.name}
                 node_label = geom_label
@@ -183,6 +185,7 @@ class ColladaKit(ExportKit):
                                                            self.geomnode_list, vrtx, self.obj_cnt,
                                                            self.POINT_SIZE, colour_num)
 
+                # Create metadata for popup window on map
                 popup_dict[geom_label] = {'name': meta_obj.get_property_name(),
                                           'title': geometry_name.replace('_', ' ')}
                 # Some vertices do not have properties
