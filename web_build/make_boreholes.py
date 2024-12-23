@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.pardir, 'scripts'))
 
 import json
 from json import JSONDecodeError
+from types import SimpleNamespace
 import logging
 import argparse
 
@@ -58,41 +59,41 @@ EXPORT_KIT = GltfKit(LOG_LVL)
 
 
 
-def get_bh_info_dict(borehole_dict, param_obj):
+def get_bh_info_dict(borehole: SimpleNamespace, param_obj: dict) -> dict:
     ''' Returns a dict of borehole info for displaying in a popup box
         when user clicks on a borehole in the model
 
-    :param borehole_dict: dict of borehole information expected keys are BH_INFO_KEYS
+    :param borehole: SimpleNamepsace() obj of borehole information, expected keys are BH_INFO_KEYS
     :param param_obj: object containing command line parameters
     :return: dict of borehole information
     '''
     info_obj = {}
-    info_obj['title'] = borehole_dict['name']
+    info_obj['title'] = borehole.name
     for key in BH_INFO_KEYS:
-        if key not in ['name', 'identifier', 'metadata_uri'] and borehole_dict[key]:
-            info_obj[key] = borehole_dict[key]
-    info_obj['href'] = [{'label': 'WFS URL', 'URL': borehole_dict['href']}]
+        if key not in ['name', 'identifier', 'metadata_uri'] and hasattr(borehole, key):
+            info_obj[key] = getattr(borehole, key)
+    info_obj['href'] = [{'label': 'WFS URL', 'URL': borehole.href}]
     if hasattr(param_obj, 'EXTERNAL_LINK'):
         info_obj['href'].append({'label': 'AuScope URL', 'URL': param_obj.EXTERNAL_LINK['URL']})
-    if borehole_dict['metadata_uri']:
-        info_obj['href'].append({'label': 'Metadata URI', 'URL': borehole_dict['metadata_uri']})
+    if hasattr(borehole, 'metadata_uri'):
+        info_obj['href'].append({'label': 'Metadata URI', 'URL': borehole.metadata_uri})
     return info_obj
 
 
-def get_loadconfig_dict(borehole_dict, param_obj):
+def get_loadconfig_dict(borehole: SimpleNamespace, param_obj: dict) -> dict:
     ''' Creates a config dictionary, used to load a static GLTF file
 
-    :param borehole_dict: dictionary of borehole data
+    :param borehole: borehole data
     :param param_obj: object containing command line parameters
     :return: config dictionary
     '''
     j_dict = {}
     j_dict['type'] = 'GLTFObject'
     x_m, y_m = convert_coords(param_obj.BOREHOLE_CRS, param_obj.MODEL_CRS,
-                              [borehole_dict['x'], borehole_dict['y']])
-    j_dict['position'] = [x_m, y_m, borehole_dict['z']]
-    j_dict['model_url'] = make_borehole_filename(borehole_dict['name'])+".gltf"
-    j_dict['display_name'] = borehole_dict['name']
+                              [borehole.x, borehole.y])
+    j_dict['position'] = [x_m, y_m, borehole.z]
+    j_dict['model_url'] = make_borehole_filename(borehole.name) + ".gltf"
+    j_dict['display_name'] = borehole.name
     j_dict['include'] = True
     j_dict['displayed'] = True
     return j_dict
@@ -125,10 +126,12 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
     # Parse response for all boreholes, make COLLADA files
     bh_cnt = 0
     loadconfig_list = []
-    for borehole_dict in borehole_list:
+
+    # Loop over list of SimpleNamespace objects
+    for borehole in borehole_list:
 
         # Get borehole information dictionary, and add to query db
-        bh_info_dict = get_bh_info_dict(borehole_dict, param_obj)
+        bh_info_dict = get_bh_info_dict(borehole, param_obj)
         LOGGER.debug(f"{bh_info_dict=}")
         LOGGER.debug(f"{param_obj=}")
         is_ok, p_obj = qdb.add_part(json.dumps(bh_info_dict))
@@ -136,17 +139,19 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
             LOGGER.warning(f"Cannot add part to db: {p_obj}")
             continue
 
-        if all(key in borehole_dict for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, param_obj.MODEL_CRS, height_res, borehole_dict['x'], borehole_dict['y'], borehole_dict['z'], borehole_dict['nvcl_id'])
+        # Does 'borehole' have ['name', 'x', 'y', 'z', 'nvcl_id'] attributes?
+        if all(key in vars(borehole) for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
+            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, param_obj.MODEL_CRS, height_res,
+                                                   borehole.x, borehole.y, borehole.z, borehole.nvcl_id)
             if bh_data_dict == {}:
-                LOGGER.warning(f"NVCL data not available for {borehole_dict['nvcl_id']}")
+                LOGGER.warning(f"NVCL data not available for {borehole.nvcl_id}")
                 continue
             # If there's NVCL data, then create the borehole
             first_depth = -1
             # pylint: disable=W0612
             LOGGER.debug("Assembling database")
             for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in \
-                colour_borehole_gen(base_xyz, borehole_dict['name'], bh_data_dict, height_res):
+                colour_borehole_gen(base_xyz, borehole.name, bh_data_dict, height_res):
                 if first_depth < 0:
                     first_depth = int(depth)
                 is_ok, s_obj = qdb.add_segment(json.dumps(class_dict))
@@ -155,7 +160,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                     continue
                 # Using 'make_borehole_label()' ensures that name is the same
                 # in both db and GLTF file
-                bh_label = make_borehole_label(borehole_dict['name'], first_depth)
+                bh_label = make_borehole_label(borehole.name, first_depth)
                 bh_str = f"{bh_label.decode('utf-8')}_{colour_idx}"
                 is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
                                              s_obj, p_obj, None, None)
@@ -165,9 +170,9 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 LOGGER.debug(f"ADD_QUERY({mesh_name}, {param_obj.modelUrlPath})")
 
             LOGGER.debug("Writing GLTFs")
-            file_name = make_borehole_filename(borehole_dict['name'])
+            file_name = make_borehole_filename(borehole.name)
             if output_mode == 'GLTF':
-                blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole_dict['name'],
+                blob_obj = EXPORT_KIT.write_borehole(base_xyz, borehole.name,
                                                      bh_data_dict, height_res,
                                                      os.path.join(dest_dir, file_name))
 
@@ -175,13 +180,13 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 import exports.collada2gltf
                 from exports.collada_kit import ColladaKit
                 export_kit = ColladaKit(LOG_LVL)
-                export_kit.write_borehole(base_xyz, borehole_dict['name'], bh_data_dict,
+                export_kit.write_borehole(base_xyz, borehole.name, bh_data_dict,
                                           height_res, os.path.join(dest_dir, file_name))
                 blob_obj = None
             else:
                 LOGGER.warning("ColladaKit cannot write blobs")
                 sys.exit(1)
-            loadconfig_list.append(get_loadconfig_dict(borehole_dict, param_obj))
+            loadconfig_list.append(get_loadconfig_dict(borehole, param_obj))
             bh_cnt += 1
             LOGGER.debug("Next BH")
 
