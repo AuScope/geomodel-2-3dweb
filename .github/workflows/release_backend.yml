@@ -1,4 +1,11 @@
-# Release backend from the latest successful build action into a certain release
+# Upon detection of new release tag, this action:
+#
+# 1. Creates a backend backend release
+# 2. Adds the files from the latest successful API build action
+#
+# NB: After running this release the 'release_models.yml' action should be ran to add 
+# model files to backend build and create a docker build 
+#
 name: Release API Backend
 
 on:
@@ -22,6 +29,6 @@ jobs:
     - name: Add to release
       uses: softprops/action-gh-release@v2
       with:
-        name: Source and web asset release based on tag ${{github.ref}}
+        name: AuScope Geomodels back-end assets release based on tag ${{github.ref}}
         files: ./**/*.tar.gz
         fail_on_unmatched_files: true
