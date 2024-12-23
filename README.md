@@ -4,7 +4,9 @@
 
 # AuScope Geomodels Portal back-end
 
-Generates 3D web versions of geological models primarily for geomodelportal website (https://github.com/AuScope/geomodelportal)
+Generates 3D web versions of geological models primarily for AuScope Geomodels website (https://geomodels.auscope.org.au)
+
+The source code for the front-end of AuScope Geomodels is [here](https://github.com/AuScope/geomodelportal)
 
 ## Development
 
