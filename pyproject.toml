@@ -9,7 +9,7 @@ dependencies = [
     "pyproj",
     "SQLAlchemy",
     "diskcache",
-    "nvcl-kit",
+    "nvcl-kit>=1.2.3",
     "geojson",
     "fastapi",
     "aiofiles",

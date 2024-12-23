@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:78b8e57425bb7534d54468af85c73d5e034cbad1544b25d65a59bc622565cd9a"
+content_hash = "sha256:f8b622feb9294e2ab1ed5c6bc106e1b022d24ba3ae0b605245d55b9960963d74"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -653,20 +653,20 @@ files = [
 
 [[package]]
 name = "nvcl-kit"
-version = "1.1.9"
-requires_python = ">=3.8"
+version = "1.2.3"
+requires_python = ">=3.9"
 summary = "Downloads Australian National Virtual Core Library (NVCL) datasets"
 groups = ["default"]
 dependencies = [
-    "owslib>=0.29.2",
     "pyproj>=3.5.0",
+    "python-dateutil>=2.9.0.post0",
     "pyyaml>=6.0.1",
     "requests>=2.31.0",
     "shapely>=2.0.1",
 ]
 files = [
-    {file = "nvcl-kit-1.1.9.tar.gz", hash = "sha256:ba39fa96c1710c0c67b6d355e0c62b1050af1ad34041a2fc02eed78cf9992f3a"},
-    {file = "nvcl_kit-1.1.9-py3-none-any.whl", hash = "sha256:3bb72db320f559484ca302d6961f8695ccf5469429ef2a92ee876981ee07c0ab"},
+    {file = "nvcl_kit-1.2.3-py3-none-any.whl", hash = "sha256:84021786eb53da6c3d19f1acdba75be7a31987b6818fe03819961fdca8298e41"},
+    {file = "nvcl_kit-1.2.3.tar.gz", hash = "sha256:510f0c1839ba52d1104585271c86ce8abb47d04e22ccfc2f57f7479525bf842a"},
 ]
 
 [[package]]
