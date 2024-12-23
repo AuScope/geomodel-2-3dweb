@@ -19,14 +19,11 @@ jobs:
     - name: List files
       run: |
           ls -al
-          [ -f api.tar.gz.zip ] && unzip api.tar.gz.zip
-          [ -f boreholes.tar.gz.zip ] && unzip boreholes.tar.gz.zip
-          ls -al
     - name: Add to release
       uses: softprops/action-gh-release@v2
       with:
         name: Source and web asset release based on tag ${{github.ref}}
         files: |
-          api.tar.gz.zip
-          boreholes.tar.gz.
+          api.tar.gz
+          boreholes.tar.gz
         fail_on_unmatched_files: true
