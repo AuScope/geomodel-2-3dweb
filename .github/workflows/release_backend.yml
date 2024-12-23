@@ -23,7 +23,5 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         name: Source and web asset release based on tag ${{github.ref}}
-        #files: |
-        #  api.tar.gz
-        #  boreholes.tar.gz
-        #fail_on_unmatched_files: true
+        files: ./**/*.tar.gz
+        fail_on_unmatched_files: true
