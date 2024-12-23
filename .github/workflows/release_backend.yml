@@ -18,9 +18,10 @@ jobs:
         branch: master
     - name: List files
       run: |
-          unzip api.tar.gz.zip
-          unzip boreholes.tar.gz.zip
-          ls -l
+          ls -al
+          [ -f api.tar.gz.zip ] && unzip api.tar.gz.zip
+          [ -f boreholes.tar.gz.zip ] && unzip boreholes.tar.gz.zip
+          ls -al
     - name: Add to release
       uses: softprops/action-gh-release@v2
       with:
