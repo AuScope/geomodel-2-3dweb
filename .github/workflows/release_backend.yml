@@ -1,5 +1,5 @@
 # Release backend from the latest successful build action into a certain release
-name: Release backend api and borehole db
+name: Release API Backend
 
 on:
   push:
