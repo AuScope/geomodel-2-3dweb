@@ -1,5 +1,5 @@
 # Release web assets from the latest successful build action into a certain release
-name: Release web assets
+name: Release Models Backend
 
 on: 
   workflow_dispatch:
