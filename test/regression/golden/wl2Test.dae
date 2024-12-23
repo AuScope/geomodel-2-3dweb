@@ -78,7 +78,7 @@
         <instance_geometry url="#geometry0000000000-00000">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00000" target="#material-00000"/>
+              <instance_material symbol="materialref-0000000000-00000" target="#material-00000"/>
             </technique_common>
           </bind_material>
         </instance_geometry>

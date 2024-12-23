@@ -268,37 +268,43 @@
       <node id="line-2LAYER-TEST_LINE3-0000000001" name="line-2LAYER-TEST_LINE3-0000000001">
         <instance_geometry url="#geometry0000000000-00000">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-0000000000-00000" target="#material-00000"/>
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000001-00000">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00000" target="#material-00000"/>
+              <instance_material symbol="materialref-0000000001-00001" target="#material-00000"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000000-00001">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-0000000000-00000" target="#material-00001"/>
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000001-00001">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00001" target="#material-00001"/>
+              <instance_material symbol="materialref-0000000001-00001" target="#material-00001"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000000-00002">
           <bind_material>
-            <technique_common/>
+            <technique_common>
+              <instance_material symbol="materialref-0000000000-00000" target="#material-00002"/>
+            </technique_common>
           </bind_material>
         </instance_geometry>
         <instance_geometry url="#geometry0000000001-00002">
           <bind_material>
             <technique_common>
-              <instance_material symbol="materialref-00002" target="#material-00002"/>
+              <instance_material symbol="materialref-0000000001-00001" target="#material-00002"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
