@@ -1,10 +1,9 @@
 # This workflow builds model web assets from model sources
-# with an option to build a release using current master
 # TODO: Parameterize model source tag ${{env.SRC_TAG}}
 
-name: Build Models
+name: Build Models Backend
 env:
-  # Model source tag
+  # Model source tag: models are built using this source
   SRC_TAG: 'PORTAL_RELEASE_20210718'
 
 on: 
