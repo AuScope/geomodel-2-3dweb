@@ -56,10 +56,20 @@ Use the '-g' flag to generate COLLADA files
 
 [batch_proc.py](web_build/batch_proc.py) is a simple batch script used to convert the GOCAD models for the website.
 
-
 ### Building a borehole database
 
 [make_boreholes.py](web_build/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](web_build/README.md) for more information.
+
+### Release Procedure
+
+1. Tag with "PORTAL_RELEASE_YYYYMMDD" annotated tag
+```
+git tag -a PORTAL_RELEASE_20241223 -m "December 2024 Release"
+git push --tags origin master
+```
+2. The 'release_backend.yml' action will create a release at this tag
+3. Once step 2 is complete, run the 'release_models.yml' action inputting the tag name
+4. The 'release_models.yml' will build all the model files and insert them into the release
 
 ### Code Documentation
 
