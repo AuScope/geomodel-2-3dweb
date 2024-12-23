@@ -23,8 +23,12 @@ from lib.file_processing import get_input_conv_param_bh
 from lib.coords import convert_coords
 
 from nvcl_kit.reader import NVCLReader
-from nvcl_kit.wfs_helpers import GSMLP_IDS
 from nvcl_kit.param_builder import param_builder
+
+BH_INFO_KEYS = ['nvcl_id', 'identifier', 'name', 'description', 'purpose', 'status', 'drillingMethod', 'operator', 'driller',
+    'drillStartDate', 'drillEndDate', 'startPoint', 'inclinationType', 'href', 'boreholeMaterialCustodian', 'boreholeLength_m',
+    'elevation_m', 'elevation_srs', 'positionalAccuracy', 'source', 'x', 'y', 'z', 'parentBorehole_uri', 'metadata_uri',
+    'genericSymbolizer']
 
 
 LOG_LVL = logging.INFO
@@ -58,14 +62,13 @@ def get_bh_info_dict(borehole_dict, param_obj):
     ''' Returns a dict of borehole info for displaying in a popup box
         when user clicks on a borehole in the model
 
-    :param borehole_dict: dict of borehole information \
-        expected keys are: 'x', 'y', 'z', 'href' and GSMLP_IDS
+    :param borehole_dict: dict of borehole information expected keys are BH_INFO_KEYS
     :param param_obj: object containing command line parameters
     :return: dict of borehole information
     '''
     info_obj = {}
     info_obj['title'] = borehole_dict['name']
-    for key in GSMLP_IDS:
+    for key in BH_INFO_KEYS:
         if key not in ['name', 'identifier', 'metadata_uri'] and borehole_dict[key]:
             info_obj[key] = borehole_dict[key]
     info_obj['href'] = [{'label': 'WFS URL', 'URL': borehole_dict['href']}]
