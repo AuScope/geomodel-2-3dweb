@@ -54,7 +54,6 @@ where _config.json_ looks like this:
 
 Use the '-g' flag to generate COLLADA files
 
-  
 #### Converting GOCAD models for use in geomodelportal website
 
 [batch_proc.py](web_build/batch_proc.py) is a simple batch script used to convert the GOCAD models for the website.
@@ -63,6 +62,59 @@ Use the '-g' flag to generate COLLADA files
 
 [make_boreholes.py](web_build/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](web_build/README.md) for more information.
 
+## Workflows
+
+### Build API Backend
+
+Triggers: manual dispatch, push to master
+
+Function:
+  - Make Python API directory
+  - Make borehole database
+  - Make Python package state files
+  - All outputs are exported as artifacts
+
+### Build Models Backend
+
+Triggers: push to master
+
+Function:
+  - Make models 3d web assets
+  - Web assets are exported as artifacts
+
+### Release API Backend
+
+Triggers: Push to a release tag
+
+Function:
+  - Creates a backend release
+  - Adds the files from the latest successful 'Build API Backend' action to the release
+
+**NB: After running this release the 'Release Models Backed' action (below) should be ran to add 
+model files to backend build and create a docker build**
+
+### Release Models Backend
+
+Triggers: Manual dispatch on provided tag
+
+Function:
+  - Release web assets from the latest successful 'Build Models Backend' action to the release
+
+### Pages Build Deployment
+
+Triggers: dynamic
+
+Function:
+  - Creates documentation deployed to https://auscope.github.io/geomodel-2-3dweb/
+
+### Testing
+
+Triggers: Push to master, pull_request to master
+
+Function:
+  - Runs all the unit and regression tests
+
+
 ## Release Procedure
 
 1. Tag with "PORTAL_RELEASE_YYYYMMDD" annotated tag
@@ -70,9 +122,9 @@ Use the '-g' flag to generate COLLADA files
 git tag -a PORTAL_RELEASE_20241223 -m "December 2024 Release"
 git push --tags origin master
 ```
-2. The 'release_backend.yml' action will create a release at this tag
-3. Once step 2 is complete, run the 'release_models.yml' action inputting the tag name
-4. The 'release_models.yml' will build all the model files and insert them into the release
+2. The 'Release API Backend' action will create a release at this tag
+3. Once step 2 is complete, run the 'Release Models Backend' action inputting the tag name
+4. The 'Release Models Backend' action will build all the model files and insert them into the release
 
 ## Code Documentation
 
