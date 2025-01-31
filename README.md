@@ -90,15 +90,15 @@ Function:
   - Creates a backend release
   - Adds the files from the latest successful 'Build API Backend' action to the release
 
-**NB: After running this release the 'Release Models Backed' action (below) should be ran to add 
-model files to backend build and create a docker build**
+**NB: After running this release the 'Release Models Backend' action (below) can be run to add 
+model web assets to the release**
 
 ### Release Models Backend
 
 Triggers: Manual dispatch on provided tag
 
 Function:
-  - Release web assets from the latest successful 'Build Models Backend' action to the release
+  - Add model web assets from the latest successful 'Build Models Backend' action to the release
 
 ### Pages Build Deployment
 
