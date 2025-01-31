@@ -60,7 +60,7 @@ jobs:
     - name: Upload Python package dependencies
       uses: actions/upload-artifact@v4
       with:
-        name: py_build_state
+        name: py_pkg_state
         path: |
           pdm.lock
           pyproject.toml
