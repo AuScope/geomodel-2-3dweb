@@ -6,8 +6,6 @@ name: Build API Backend
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
   workflow_dispatch:
 
 permissions:
