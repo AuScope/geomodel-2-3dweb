@@ -30,5 +30,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         name: AuScope Geomodels back-end assets release based on tag ${{github.ref}}
-        files: ./**/*.tar.gz
+        files: |
+              ./**/*.tar.gz
+              ./**/*.zip
         fail_on_unmatched_files: true
