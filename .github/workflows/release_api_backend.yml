@@ -20,7 +20,7 @@ jobs:
     - name: Download artifacts
       uses: dawidd6/action-download-artifact@v6
       with:
-        workflow: build_backend.yml
+        workflow: build_api_backend.yml
         workflow_conclusion: success
         branch: master
     - name: List files
