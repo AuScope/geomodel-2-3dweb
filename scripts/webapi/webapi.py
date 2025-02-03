@@ -503,7 +503,8 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     if borehole_dict is not None:
         # Get blob from cache
         gltf_str = get_blob_boreholes(borehole_dict, param_dict[model])
-        return send_blob(gltf_str)
+        if gltf_str is not None:
+            return send_blob(gltf_str)
     else:
         LOGGER.debug('Resource not found in borehole dict')
 
