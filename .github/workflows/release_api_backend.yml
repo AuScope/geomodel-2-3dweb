@@ -33,7 +33,5 @@ jobs:
       with:
         name: AuScope Geomodels back-end assets release based on tag ${{github.ref}}
         files: |
-          pyproject.toml
-          pdm.lock
-          ./**/*.tar.gz
+          ./**/*
         fail_on_unmatched_files: true
