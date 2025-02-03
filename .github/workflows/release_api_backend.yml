@@ -26,11 +26,13 @@ jobs:
     - name: List files
       run: |
           ls -al
+          ls -al $GITHUB_WORKSPACE
+          ls -al ${{ github.workspace }}
     - name: Add to release
       uses: softprops/action-gh-release@v2
       with:
         name: AuScope Geomodels back-end assets release based on tag ${{github.ref}}
         files: |
-              ./**/*.tar.gz
-              ./**/py_pkg_*
+           $GITHUB_WORKSPACE/*.tar.gz
+           $GITHUB_WORKSPACE/py_pkg_
         fail_on_unmatched_files: true
