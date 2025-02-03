@@ -92,7 +92,7 @@ jobs:
             model_name: "Tas"  
           # CSIRO - RockLea Dome
           - src_name: "GEOMODELS_SRC-CSIRO"
-            model_name: "RockleaDome"
+            model_name: "Rocklea"
           # GA/NCI Stuart Shelf MT model
           - src_name: "GEOMODELS_SRC-NCI"
             model_name: "StuartShelf"

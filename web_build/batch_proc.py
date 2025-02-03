@@ -94,7 +94,7 @@ MODEL_DATA = [
     
 
     # NSW - "Western Tamworth Belt"
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "tamworth", "Tamworth", "input/WestTamworthConvParam.json", "NewSouthWales/WesternTamworth", True),
+    (MODELS_SRC_DIR, GEOMODELS_DIR, "tamworth", "Tamworth", "input/TamworthConvParam.json", "NewSouthWales/WesternTamworth", True),
 
     # NSW - "Cobar geological and fault model package"
     (MODELS_SRC_DIR, GEOMODELS_DIR, "cobar", "Cobar", "input/CobarConvParam.json", "NewSouthWales/Cobar_GM_gocad_May18/Cobar_GM_gocad_May18", True),
@@ -130,7 +130,7 @@ MODEL_DATA = [
 
 
     # CSIRO - RockLea Dome
-    (MODELS_SRC_DIR, GEOMODELS_DIR, "rocklea", "RockleaDome", "input/RockleaConvParam.json", "CSIRO/RockleaDome", True),
+    (MODELS_SRC_DIR, GEOMODELS_DIR, "rocklea", "Rocklea", "input/RockleaConvParam.json", "CSIRO/RockleaDome", True),
 
     # GA/NCI Stuart Shelf MT model
     (MODELS_SRC_DIR, GEOMODELS_DIR, "stuartshelf", "StuartShelf", "input/StuartShelfConvParam.json", "NCI/MT", True)
@@ -141,7 +141,7 @@ MODEL_DATA = [
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', nargs=6, dest="model", help='MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, sDir')
-    parser.add_argument('--model_name', help='Model name e.g. "RockleaDome", "Yilgarn"')
+    parser.add_argument('--model_name', help='Model name e.g. "Rocklea", "Yilgarn"')
     args = parser.parse_args()
 
     # If user specified a model directory name

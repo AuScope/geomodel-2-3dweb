@@ -20,7 +20,7 @@ input/SthNewEnglandConvParam.json
 input/StuartShelfConvParam.json
 input/TasConvParam.json
 input/WestLachlanConvParam.json
-input/WestTamworthConvParam.json
+input/TamworthConvParam.json
 input/WesternGawlerConvParam.json
 input/WindimurraConvParam.json
 input/YilgarnConvParam.json
