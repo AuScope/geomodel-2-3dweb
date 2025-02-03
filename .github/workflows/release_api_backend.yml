@@ -32,5 +32,5 @@ jobs:
         name: AuScope Geomodels back-end assets release based on tag ${{github.ref}}
         files: |
               ./**/*.tar.gz
-              py_pkg_*
+              ./**/py_pkg_*
         fail_on_unmatched_files: true
