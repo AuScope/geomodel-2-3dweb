@@ -64,7 +64,7 @@ Use the '-g' flag to generate COLLADA files
 
 ## Workflows
 
-### Build API Backend
+### 'Build API Backend' Workflow
 
 Triggers: manual dispatch, push to master
 
@@ -74,7 +74,7 @@ Function:
   - Make Python package state files
   - All outputs are exported as artifacts
 
-### Build Models Backend
+### 'Build Models Backend' Workflow
 
 Triggers: push to master
 
@@ -82,7 +82,7 @@ Function:
   - Make models 3d web assets
   - Web assets are exported as artifacts
 
-### Release API Backend
+### 'Release API Backend' Workflow
 
 Triggers: Push to a release tag
 
@@ -93,21 +93,21 @@ Function:
 **NB: After running this release the 'Release Models Backend' action (below) can be run to add 
 model web assets to the release**
 
-### Release Models Backend
+### 'Release Models Backend' Workflow
 
 Triggers: Manual dispatch on provided tag
 
 Function:
   - Add model web assets from the latest successful 'Build Models Backend' action to the release
 
-### Pages Build Deployment
+### 'Pages Build Deployment' Workflow
 
 Triggers: dynamic
 
 Function:
   - Creates documentation deployed to https://auscope.github.io/geomodel-2-3dweb/
 
-### Testing
+### 'Testing' Workflow
 
 Triggers: Push to master, pull_request to master
 
