@@ -51,21 +51,19 @@ class ColladaOut():
         :param geomnode_list: pycollada 'GeometryNode' list
         :returns: the geometry label of this cube
         '''
-        #self.logger.debug("collada_cube(mesh=%s, colour_num=%s, x,y,z=%s, v_obj=%s,
-        # pt_size=%s, geometry_name=%s, file_cnt=%s, point_cnt=%s)",
-        # repr(mesh), repr(colour_num), repr((x,y,z)), repr(v_obj), repr(pt_size),
-        # repr(geometry_name), repr(file_cnt), repr(point_cnt))
+        #self.logger.debug(f"collada_cube({mesh=}, {colour_num=}, {x=}, {y=}, {z=}, {v_obj=},
+        # {pt_size=}, {geometry_name=}, {file_cnt=}, {point_cnt=}",
         gen = cube_gen(x_val, y_val, z_val, geom_obj, pt_size)
         vert_floats, indices = next(gen)
-        vert_src = Collada.source.FloatSource("cubeverts-array-{0:010d}".format(point_cnt),
+        vert_src = Collada.source.FloatSource(f"cubeverts-array-{point_cnt:010d}",
                                               numpy.array(vert_floats), ('X', 'Y', 'Z'))
-        geom_label = "{0}_{1}-{2:010d}".format(geometry_name, file_cnt, point_cnt)
-        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt),
+        geom_label = f"{geometry_name}_{file_cnt}-{point_cnt:010d}"
+        geom = Collada.geometry.Geometry(mesh, f"geometry{point_cnt:010d}",
                                          geom_label, [vert_src])
         input_list = Collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', "#cubeverts-array-{0:010d}".format(point_cnt))
+        input_list.addInput(0, 'VERTEX', f"#cubeverts-array-{point_cnt:010d}")
 
-        material_label = "materialref-{0:010d}".format(colour_num)
+        material_label = f"materialref-{colour_num:010d}"
         # Triangles seem to be more efficient than polygons
         triset = geom.createTriangleSet(numpy.array(indices), input_list, material_label)
         geom.primitives.append(triset)
@@ -95,17 +93,17 @@ class ColladaOut():
         vert_floats, indices = next(gen)
 
         input_list = Collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', "#pointverts-array-{0:010d}".format(point_cnt))
-        vert_src_list = [Collada.source.FloatSource("pointverts-array-{0:010d}".format(point_cnt),
+        input_list.addInput(0, 'VERTEX', f"#pointverts-array-{point_cnt:010d}"
+        vert_src_list = [Collada.source.FloatSource(f"pointverts-array-{point_cnt:010d}",
                                                     numpy.array(vert_floats), ('X', 'Y', 'Z'))]
-        geom_label = "{0}-{1:010d}".format(geometry_name, point_cnt)
-        geom = Collada.geometry.Geometry(mesh, "geometry{0:010d}".format(point_cnt),
+        geom_label = f"{geometry_name}-{point_cnt:010d}"
+        geom = Collada.geometry.Geometry(mesh, f"geometry{point_cnt:010d}",
                                          geom_label, vert_src_list)
         triset_list = [geom.createTriangleSet(numpy.array(indices), input_list,
-                                              "materialref-{0:010d}".format(colour_num))]
+                                              f"materialref-{colour_num:010d}")]
         geom.primitives = triset_list
         mesh.geometries.append(geom)
-        matnode_list = [Collada.scene.MaterialNode("materialref-{0:010d}".format(colour_num),
+        matnode_list = [Collada.scene.MaterialNode(f"materialref-{colour_num:010d}",
                                                    mesh.materials[colour_num], inputs=[])]
         geomnode_list.append(Collada.scene.GeometryNode(geom, matnode_list))
         return geom_label
@@ -129,21 +127,21 @@ class ColladaOut():
         for point_cnt, vert_floats, indices in line_gen(seg_arr, vrtx_arr, line_width, z_expand):
 
             vert_src = Collada.source.FloatSource(
-                "lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt),
+                f"lineverts-array-{point_cnt:010d}-{obj_cnt:05d}",
                 numpy.array(vert_floats), ('X', 'Y', 'Z'))
-            geom_label = "line-{0}-{1:010d}".format(geometry_name, point_cnt)
+            geom_label = f"line-{geometry_name}-{point_cnt:010d}"
             geom = Collada.geometry.Geometry(mesh,
-                                             "geometry{0:010d}-{1:05d}".format(point_cnt, obj_cnt),
+                                             f"geometry{point_cnt:010d}-{obj_cnt:05d}",
                                              geom_label, [vert_src])
 
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX',
-                                "#lineverts-array-{0:010d}-{1:05d}".format(point_cnt, obj_cnt))
+                                f"#lineverts-array-{point_cnt:010d}-{obj_cnt:05d}")
 
-            matnode = Collada.scene.MaterialNode("materialref-{0:010d}-{0:05d}".format(point_cnt, obj_cnt),
+            matnode = Collada.scene.MaterialNode(f"materialref-{point_cnt:010d}-{obj_cnt:05d}",
                                              mesh.materials[-1], inputs=[])
             triset = geom.createTriangleSet(numpy.array(indices),
-                                            input_list, "materialref-{0:05d}".format(obj_cnt))
+                    input_list, f"materialref-{point_cnt:010d}-{obj_cnt:05d}")
             geom.primitives.append(triset)
             mesh.geometries.append(geom)
             geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
@@ -165,22 +163,22 @@ class ColladaOut():
                                                                          'classText': label }
         :param ht_reso: height resolution
         '''
-        cb_gen = colour_borehole_gen(pos, "borehole-{0}".format(borehole_label),
+        cb_gen = colour_borehole_gen(pos, f"borehole-{borehole_label}",
                                      colour_info_dict, ht_resol)
         # pylint:disable=W0612
         for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in cb_gen:
             vert_src = Collada.source.FloatSource("pointverts-array-0", numpy.array(vert_list),
                                                   ('X', 'Y', 'Z'))
-            geom = Collada.geometry.Geometry(mesh, "geometry_{0}".format(int(depth)),
+            geom = Collada.geometry.Geometry(mesh, f"geometry_{int(depth)}",
                                              mesh_name, [vert_src])
             input_list = Collada.source.InputList()
             input_list.addInput(0, 'VERTEX', "#pointverts-array-0")
 
             triset = geom.createTriangleSet(numpy.array(indices), input_list,
-                                            "materialref-{:d}".format(int(depth)))
+                                            f"materialref-{int(depth)}")
             geom.primitives.append(triset)
             mesh.geometries.append(geom)
 
-            matnode = Collada.scene.MaterialNode("materialref-{:d}".format(int(depth)),
+            matnode = Collada.scene.MaterialNode(f"materialref-{int(depth)}",
                                                  mesh.materials[colour_idx], inputs=[])
             geomnode_list.append(Collada.scene.GeometryNode(geom, [matnode]))
