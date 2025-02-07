@@ -147,10 +147,10 @@ if __name__ == "__main__":
     # If user specified a model directory name
     if args.model_name is not None:
         if MODELS_SRC_DIR is None:
-            print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
+            print("Please set 'GEOMODELS_HOME' env var or use --model command line parameter")
             sys.exit(1)
         converted = False
-        for srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir  in MODEL_DATA:
+        for srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir in MODEL_DATA:
             if modelDirName == args.model_name:
                 print(srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir)
                 convert_model(srcDir, modelsDir, urlStr, modelDirName, inConvFile, srcSubDir, recreateOutDir)
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # If user wants to run all models in source dir
     elif args.model is None:
         if MODELS_SRC_DIR is None:
-            print("Please set 'GEOMODELS_HOME' env var or use --models command line parameter")
+            print("Please set 'GEOMODELS_HOME' env var or use --model command line parameter")
             sys.exit(1)
         try:
             # Remove and recreate models dir
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             print("ERROR - ", repr(exc))
             sys.exit(1)
 
-    # If user specified all details on command line
+    # If user specified all details on command line via --model parameter
     else:
         MODELS_SRC_DIR, GEOMODELS_DIR, urlStr, modelDirName, inConvFile, srcSubDir = args.model
         # Run model conversion as a separate process
