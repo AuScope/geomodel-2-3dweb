@@ -93,7 +93,7 @@ class ColladaOut():
         vert_floats, indices = next(gen)
 
         input_list = Collada.source.InputList()
-        input_list.addInput(0, 'VERTEX', f"#pointverts-array-{point_cnt:010d}"
+        input_list.addInput(0, 'VERTEX', f"#pointverts-array-{point_cnt:010d}")
         vert_src_list = [Collada.source.FloatSource(f"pointverts-array-{point_cnt:010d}",
                                                     numpy.array(vert_floats), ('X', 'Y', 'Z'))]
         geom_label = f"{geometry_name}-{point_cnt:010d}"
