@@ -36,7 +36,7 @@ e.g.
 
 ```
 
-where _config.json_ looks like this:
+where a simple _config.json_ looks like this:
 
 ```
 {
@@ -64,9 +64,17 @@ Use the '-g' flag to generate COLLADA files
 
 #### Run tests
 
+All tests
 ```
 cd test
 ./run_test.sh
+```
+
+Regression tests
+```
+pdm run $SHELL
+cd test/regression
+./run_reg.sh
 ```
 
 ## Workflows
