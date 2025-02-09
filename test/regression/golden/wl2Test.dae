@@ -60,7 +60,7 @@
         <vertices id="lineverts-array-0000000000-00000-vertices">
           <input semantic="POSITION" source="#lineverts-array-0000000000-00000"/>
         </vertices>
-        <triangles count="2" material="materialref-00000">
+        <triangles count="2" material="materialref-0000000000-00000">
           <input offset="0" semantic="VERTEX" source="#lineverts-array-0000000000-00000-vertices"/>
           <p>0 2 3 3 1 0</p>
         </triangles>
