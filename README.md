@@ -4,7 +4,7 @@
 
 # AuScope Geomodels Portal back-end
 
-Generates 3D web versions of geological models primarily for AuScope Geomodels website (https://geomodels.auscope.org.au)
+Generates 3D web versions of geoscience models primarily for AuScope Geomodels website (https://geomodels.auscope.org.au)
 
 The source code for the front-end of AuScope Geomodels is [here](https://github.com/AuScope/geomodelportal)
 
@@ -61,6 +61,13 @@ Use the '-g' flag to generate COLLADA files
 #### Building a borehole database
 
 [make_boreholes.py](web_build/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](web_build/README.md) for more information.
+
+#### Run tests
+
+```
+cd test
+./run_test.sh
+```
 
 ## Workflows
 
