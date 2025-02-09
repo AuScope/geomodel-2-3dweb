@@ -42,7 +42,8 @@ coverage erase
 coverage run db_tables.py
 popd > /dev/null
 
-coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage
+#coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage
+coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage unit/webapi/.coverage
 coverage html
 coverage xml
 coverage report --omit '*/geomodel-2-3dweb/scripts/lib/exports/print_assimp.py'
