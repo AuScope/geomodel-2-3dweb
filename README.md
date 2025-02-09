@@ -24,19 +24,26 @@ export COLLADA2GLTF_BIN=/home/fred/github/COLLADA2GLTF/build/
 ```
 5. Clone this repository (i.e. geomodel-2-3dweb)
 6. 'pdm install' will install the python library dependencies
-   'eval $(pdm venv activate)' will start a Python env, 'deactivate' to exit
+  * 'eval $(pdm venv activate)' will start a Python env, 'deactivate' to exit
+  * 'pdm run $SHELL' will run the Python env in a new shell
 
-#### To convert some GOCAD files to GLTF or COLLADA (*.ts, *.pl, small *.vs, *.wl) NetCDF4 (large *.vs), GZIP (*.vo, *.sg). *.gp files can also be converted.
+#### To convert one file or a folder of files to GLTF or COLLADA or GZIP (geophysics volumes)
 
-Run [conv_webasset.py](scripts/conv_webasset.py). You must give it either the directory where the GOCAD files reside, or a GOCAD file plus a conversion parameter file. This [README](web_build/input/README.md) explains the format of the conversion parameter file.
+* Accepted formats:
+     * GOCAD (*.ts *.pl *.vs *.wl *.vo *.sg *.gp)
+     * XYZV (X-coord Y-coord Z-coord value, space separated, one quadtuple per line, used for geophysics volumes)
+  
+Run [conv_webasset.py](scripts/conv_webasset.py). You must give it either a GOCAD file or the directory where the GOCAD files reside, plus a conversion parameter file. This [README](web_build/input/README.md) explains the format of the conversion parameter file.
 
 e.g.
 ```
+pdm run $SHELL
+cd scripts
 ./conv_webasset.py gocad.ts config.json
 
 ```
 
-where a simple _config.json_ looks like this:
+where a simple _config.json_ could look like this:
 
 ```
 {
@@ -54,7 +61,7 @@ where a simple _config.json_ looks like this:
 
 Use the '-g' flag to generate COLLADA files
 
-#### Converting GOCAD models for use in geomodelportal website
+#### Converting directories of files (e.g. GOCAD) for use in AuScope geomodels website
 
 [batch_proc.py](web_build/batch_proc.py) is a simple batch script used to convert the GOCAD models for the website.
 
