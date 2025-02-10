@@ -251,7 +251,7 @@ def get_cached_parameters():
             try:
                 param_obj = param_builder(param_dict[model].PROVIDER)
                 # Open up connection to WFS service
-                wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, version=param_obj.WFS_VERSION, xml=None, timeout=WFS_TIMEOUT)
+                wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, xml=None, timeout=WFS_TIMEOUT)
             except Exception as e:
                 LOGGER.error(f"Cannot reach service {param_obj.WFS_URL}: {e}")
     LOGGER.debug(f"Returning {param_dict=}")
