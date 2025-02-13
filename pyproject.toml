@@ -10,13 +10,14 @@ dependencies = [
     "SQLAlchemy",
     "diskcache",
     "nvcl-kit>=1.2.3",
-    "geojson",
+    "geojson>=3.2.0",
     "fastapi",
     "aiofiles",
     "uvicorn",
     "wheel",
     "pytest>=8.3.2",
     "pygltflib>=1.16.2",
+    "scipy>=1.13.1",
 ]
 requires-python = ">=3.9"
 

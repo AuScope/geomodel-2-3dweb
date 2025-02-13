@@ -173,6 +173,9 @@ class Gocad2WebAsset(Converter):
                                           os.path.join(os.path.dirname(filename), os.path.basename(prop_filename)),
                                           src_filename, self.model_url_path, file_ext=file_ext)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
+                # Add XYs to current model
+                self.config_build_obj.update_xy_set(geom_obj.xy_set)
+
         return True
 
 
@@ -208,6 +211,8 @@ class Gocad2WebAsset(Converter):
                 self.write_single_volume((geom_obj, style_obj, meta_obj),
                                          src_dir, out_filename, prop_idx)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
+                # Add XYs to current model
+                self.config_build_obj.update_xy_set(geom_obj.xy_set)
             has_result = True
         return has_result
 
@@ -251,6 +256,7 @@ class Gocad2WebAsset(Converter):
                                                                     meta_obj,
                                                                     out_filename)
                         self.make_config(meta_obj, filename, dest_dir, noext_filename, popup_dict, file_ext='.gzson')
+
                     # Else write out as COLLADA
                     else: 
                         p_dict, node_label = self.coll_kit_obj.add_geom_to_collada(geom_obj,
@@ -258,6 +264,8 @@ class Gocad2WebAsset(Converter):
                         popup_dict.update(p_dict)
                         has_result = True
                     self.config_build_obj.add_ext(geom_obj.get_extent())
+                    # Add XYs to current model
+                    self.config_build_obj.update_xy_set(geom_obj.xy_set)
 
         # If COLLADA object was added
         if has_result:
@@ -289,6 +297,7 @@ class Gocad2WebAsset(Converter):
                                          os.path.basename(noext_filename),
                                          popup_dict, noext_filename, src_filename,
                                           self.model_url_path, styling=s_dict, file_ext=file_ext)
+
 
     def copy_source(self, src_filename, dest_dir):
         '''
@@ -326,6 +335,7 @@ class Gocad2WebAsset(Converter):
 
         return zip_filename
 
+
     def process_groups(self, whole_file_lines, dest_dir, noext_filename, base_xyz, filename, src_dir, out_filename):
         ''' Process GOCAD group file
 
@@ -361,7 +371,10 @@ class Gocad2WebAsset(Converter):
                     popup_dict.update(p_dict)
                     has_geom = True
                 self.config_build_obj.add_ext(geom_obj.get_extent())
+                # Add XYs to current model
+                self.config_build_obj.update_xy_set(geom_obj.xy_set)
                 has_result = True
+
             # Only write out the COLLADA file if there were geometries included
             if has_geom and has_result:
                 src_filename = self.copy_source(filename, dest_dir)
@@ -391,6 +404,8 @@ class Gocad2WebAsset(Converter):
                                                 src_filename,
                                                 self.model_url_path)
                 self.config_build_obj.add_ext(geom_obj.get_extent())
+                # Add XYs to current model
+                self.config_build_obj.update_xy_set(geom_obj.xy_set)
                 has_result = True
         return has_result
 

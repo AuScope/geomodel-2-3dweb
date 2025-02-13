@@ -34,6 +34,10 @@ class ModelGeometries:
         ''' Array of named tuples 'SEG' used to store line segment data
         '''
 
+        self.xy_set = set()
+        ''' Set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
+        '''
+
         self.max_x = -sys.float_info.max
         ''' Maximum X coordinate, used to calculate extent
         '''
@@ -196,6 +200,11 @@ class ModelGeometries:
 
         :param x_coord, y_coord, z_coord: x,y,z coords (python or numpy float)
         '''
+        # 
+        # Add to set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
+        self.xy_set.add((x_coord, y_coord))
+
+        # Find x,y,z max and min, used to estimate model extent
         try: 
             if x_coord > self.max_x:
                 # Convert to python float
@@ -212,6 +221,7 @@ class ModelGeometries:
                 self.min_z = float(z_coord)
         except ValueError:
             pass
+
 
     def get_extent(self):
         ''' :returns: estimate of the 2D (XY) geographic extent of the model, using max and min \
