@@ -9,7 +9,7 @@ from collections import defaultdict
 from pathlib import PurePath
 from copy import deepcopy
 import numpy as np
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, QhullError
 from pyproj import Transformer
 
 # Set up debugging
@@ -317,17 +317,29 @@ class ConfigBuilder():
         # Convert to XY coords WGS84
         transformer = Transformer.from_crs(getattr(params, 'crs', "EPSG:4326"), "EPSG:4326", always_xy=True)
         xy_list = [transformer.transform(xy[0], xy[1]) for xy in list(self.xy_set)]
-        # convert set to ndarray of x,y point pairs
+        if len(xy_list) < 3:
+            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}, not enough XY points {xy_list}")
+            return
+        # Convert set to ndarray of x,y point pairs
         points = np.array(xy_list)
         # Calculate convex hull
-        hull = ConvexHull(points)
+        try:
+            hull = ConvexHull(points)
+        except QhullError as qe:
+            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}: {qe}")
+            return
+
         # Create GeoJSON points from hull
         gj_points = [geojson.Point(tuple(points[vert])) for vert in hull.vertices]
         features = [geojson.Feature(geometry=point) for point in gj_points]
         feature_collection = geojson.FeatureCollection(features)
 
         # Write the GeoJSON to a file
-        with open(os.path.join(dest_dir, 'convex_hull.geojson'), 'w') as f:
-            geojson.dump(feature_collection, f)
+        try:
+            with open(os.path.join(dest_dir, 'convex_hull.geojson'), 'w') as f:
+                geojson.dump(feature_collection, f)
+        except Exception as e:
+            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}: {e}")
+
 
 

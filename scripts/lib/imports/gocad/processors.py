@@ -202,7 +202,7 @@ def process_ascii_well_path(self, line_gen, field):
 
         # WREF X Y Z
         elif field[0] == 'WREF':
-            is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], False,
+            is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], True,
                                                   False)
             if not is_ok:
                 self.logger.error(f"Cannot process WREF: {field}")
