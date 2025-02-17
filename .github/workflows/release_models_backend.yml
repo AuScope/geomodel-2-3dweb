@@ -17,7 +17,7 @@ jobs:
     - name: Download artifacts
       uses: dawidd6/action-download-artifact@v6
       with:
-        workflow: build_models.yml
+        workflow: build_models_backend.yml
         workflow_conclusion: success
         branch: master
     - name: Add to release
