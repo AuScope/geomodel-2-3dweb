@@ -210,8 +210,8 @@ class ModelGeometries:
             except (ValueError, TypeError):
                 pass
         else:
-            # Just in case units are degrees - very unlikely
-            self.xy_set.add(x_coord, y_coord)
+            # Just in case units are degrees
+            self.xy_set.add((x_coord, y_coord))
 
         # Find x,y,z max and min, used to estimate model extent
         try: 
