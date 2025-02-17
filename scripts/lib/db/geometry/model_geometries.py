@@ -202,7 +202,16 @@ class ModelGeometries:
         '''
         # 
         # Add to set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
-        self.xy_set.add((x_coord, y_coord))
+        if abs(x_coord) > 180.1 and abs(y_coord) > 180.1:
+            try:
+                # NB: Assumes units are metres
+                # Round to nearest 1000m so that set does not get too large
+                self.xy_set.add((1000.0*int(x_coord/1000.0), 1000.0*int(y_coord/1000.0)))
+            except (ValueError, TypeError):
+                pass
+        else:
+            # Just in case units are degrees - very unlikely
+            self.xy_set.add(x_coord, y_coord)
 
         # Find x,y,z max and min, used to estimate model extent
         try: 
@@ -219,7 +228,7 @@ class ModelGeometries:
                 self.max_z = float(z_coord)
             if z_coord < self.min_z:
                 self.min_z = float(z_coord)
-        except ValueError:
+        except (ValueError, TypeError):
             pass
 
 
