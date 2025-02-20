@@ -202,8 +202,7 @@ def process_ascii_well_path(self, line_gen, field):
 
         # WREF X Y Z
         elif field[0] == 'WREF':
-            is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], True,
-                                                  False)
+            is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=True, convert=False)
             if not is_ok:
                 self.logger.error(f"Cannot process WREF: {field}")
                 sys.exit(1)
@@ -248,8 +247,7 @@ def process_ascii_well_path(self, line_gen, field):
             # Z-meas is depth of hole measured from the top
             if field[0] == 'PATH':
                 convert = (zm_units == 'KM')
-                is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4],
-                                                      False, convert)
+                is_ok, z_z, x_d, y_d = self.parse_xyz(True, field[2], field[3], field[4], do_minmax=False, convert=convert)
                 if not is_ok:
                     self.logger.error(f"Cannot read PATH {field}")
                     sys.exit(1)
@@ -261,8 +259,7 @@ def process_ascii_well_path(self, line_gen, field):
             # VRTX X Y Z
             elif field[0] == 'VRTX':
                 convert = (zm_units == 'KM')
-                is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3],
-                                                      False, convert)
+                is_ok, x_x, y_y, z_z = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, comvert=convert)
                 if not is_ok:
                     self.logger.error(f"Cannot read VRTX {field}")
                     sys.exit(1)
@@ -470,50 +467,43 @@ def process_vol_data(self, line_gen, field, field_raw, src_dir):
     while True:
         self.logger.debug(f"process_vol_data processing: field={field}")
         if field[0] == "AXIS_O":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], True)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=True)
             if is_ok:
                 self.axis_o = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_o = {self.axis_o}")
 
         elif field[0] == "AXIS_U":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.axis_u = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_u = {self.axis_u}")
 
         elif field[0] == "AXIS_V":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.axis_v = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_v = {self.axis_v}")
 
         elif field[0] == "AXIS_W":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.axis_w = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_w={self.axis_w}")
 
         elif field[0] == "AXIS_N":
-            is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_int, y_int, z_int = self.parse_xyz(False, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.vol_sz = (x_int, y_int, z_int)
                 self.logger.debug(f"self.vol_sz={self.vol_sz}")
 
         elif field[0] == "AXIS_MIN":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.axis_min = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_min={self.axis_min}")
 
         elif field[0] == "AXIS_MAX":
-            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2],
-                                                        field[3], False, False)
+            is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[1], field[2], field[3], do_minmax=False, convert=False)
             if is_ok:
                 self.axis_max = (x_flt, y_flt, z_flt)
                 self.logger.debug(f"self.axis_max={self.axis_max}")

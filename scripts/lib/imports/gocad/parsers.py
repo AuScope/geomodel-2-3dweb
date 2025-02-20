@@ -136,7 +136,7 @@ def parse_int(self, int_str, null_val=None):
     return True, num
 
 
-def parse_xyz(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True):
+def parse_xyz(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True, do_convhull=False):
     ''' Helpful function to read XYZ cooordinates
 
     :param is_float: if true parse x y z as floats else try integers
@@ -171,7 +171,7 @@ def parse_xyz(self, is_float, x_str, y_str, z_str, do_minmax=False, convert=True
 
     # Calculate and store minimum and maximum XYZ
     if do_minmax:
-        self.geom_obj.calc_minmax(x_val, y_val, z_val)
+        self.geom_obj.calc_minmax(x_val, y_val, z_val, do_convhull)
         x_val += self.base_xyz[0]
         y_val += self.base_xyz[1]
         z_val += self.base_xyz[2]

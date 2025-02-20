@@ -195,23 +195,25 @@ class ModelGeometries:
         return self.is_volume() and self.vol_sz[2] == 1
 
 
-    def calc_minmax(self, x_coord, y_coord, z_coord):
+    def calc_minmax(self, x_coord, y_coord, z_coord, cv_hull=False):
         ''' Calculates and stores the max and min of all x,y,z coords
 
         :param x_coord, y_coord, z_coord: x,y,z coords (python or numpy float)
         '''
-        # 
-        # Add to set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
-        if abs(x_coord) > 180.1 and abs(y_coord) > 180.1:
-            try:
-                # NB: Assumes units are metres
-                # Round to nearest 1000m so that set does not get too large
-                self.xy_set.add((1000.0*int(x_coord/1000.0), 1000.0*int(y_coord/1000.0)))
-            except (ValueError, TypeError):
-                pass
-        else:
-            # Just in case units are degrees
-            self.xy_set.add((x_coord, y_coord))
+        # Only points which indicate geological features are counted in convex hull
+        if cv_hull:
+            # Add to set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
+            if abs(x_coord) > 180.1 and abs(y_coord) > 180.1:
+                try:
+                    # NB: Assumes units are metres
+                    # Round to nearest RESO metres so that set does not get too large
+                    RESO=200.0
+                    self.xy_set.add((RESO*int(x_coord/RESO), RESO*int(y_coord/RESO)))
+                except (ValueError, TypeError):
+                    pass
+            else:
+                # Just in case units are degrees
+                self.xy_set.add((x_coord, y_coord))
 
         # Find x,y,z max and min, used to estimate model extent
         try: 

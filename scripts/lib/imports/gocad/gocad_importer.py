@@ -600,14 +600,13 @@ class GocadImporter():
 
                 # Grab the vertices and properties, does not care if there are
                 # gaps in the sequence number
-                elif field[0] == "PVRTX" or  field[0] == "VRTX":
+                elif field[0] == "PVRTX" or field[0] == "VRTX":
                     seq_no_prev = seq_no
                     is_ok_s, seq_no = self.parse_int(field[1])
-                    is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[2], field[3],
-                                                                field[4], True)
-                    self.logger.debug("ParseXYZ %s %f %f %f from %s %s %s", repr(is_ok),
-                                      x_flt, y_flt, z_flt,
-                                      field[2], field[3], field[4])
+                    # Attempt to limit convex hull calculations to geological features i.e. TSurf
+                    is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[2], field[3], field[4], do_minmax=True,
+                                                                convert=True, do_convhull=self._is_ts)
+                    self.logger.debug(f"ParseXYZ {is_ok} {x_flt} {y_flt} {z_flt} from {field[2]} {field[3]} {field[4]}")
                     if not is_ok_s or not is_ok:
                         seq_no = seq_no_prev
                     else:
@@ -624,8 +623,8 @@ class GocadImporter():
                 elif field[0] == "TRGL":
                     seq_no_prev = seq_no
                     is_ok_s, seq_no = self.parse_int(field[1])
-                    is_ok, a_int, b_int, c_int = self.parse_xyz(False, field[1], field[2],
-                                                                field[3], False, False)
+                    is_ok, a_int, b_int, c_int = self.parse_xyz(False, field[1], field[2], field[3], do_minmax=False,
+                                                                convert=False)
                     if not is_ok or not is_ok_s:
                         seq_no = seq_no_prev
                     else:
