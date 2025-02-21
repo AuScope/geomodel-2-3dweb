@@ -35,7 +35,7 @@ class ModelGeometries:
         '''
 
         self.xy_set = set()
-        ''' Set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
+        ''' Set of x,y pairs used to calculate 2D concave hull of each model on XY-plane
         '''
 
         self.max_x = -sys.float_info.max
@@ -200,9 +200,9 @@ class ModelGeometries:
 
         :param x_coord, y_coord, z_coord: x,y,z coords (python or numpy float)
         '''
-        # Only points which indicate geological features are counted in convex hull
+        # Only points which indicate geological features are counted in concave hull
         if cv_hull:
-            # Add to set of x,y pairs used to calculate 2D convex hull of each model on XY-plane
+            # Add to set of x,y pairs used to calculate 2D concave hull of each model on XY-plane
             if abs(x_coord) > 180.1 and abs(y_coord) > 180.1:
                 try:
                     # NB: Assumes units are metres

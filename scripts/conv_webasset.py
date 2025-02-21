@@ -275,7 +275,7 @@ if __name__ == "__main__":
             print(ARGS.src, "does not exist")
             sys.exit(1)
 
-        # Finally, create the config file and a 2D convex hull GeoJSON on XY plane
+        # Finally, create the config file and a 2D concave hull GeoJSON on XY plane
         if converter.config_build_obj.has_output():
             converter.config_build_obj.create_json_config(ARGS.output_config, DEST_DIR, converter.params)
-            converter.config_build_obj.make_convex_hull(DEST_DIR, converter.params)
+            converter.config_build_obj.make_concave_hull(DEST_DIR, converter.params)

@@ -9,8 +9,8 @@ from collections import defaultdict
 from pathlib import PurePath
 from copy import deepcopy
 import numpy as np
-from scipy.spatial import ConvexHull, QhullError
 from pyproj import Transformer
+from shapely import Polygon, concave_hull
 
 # Set up debugging
 LOCAL_LOGGER = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class ConfigBuilder():
         self.config_list = []
 
         '''
-        Set of x,y coords used for output of 2d convex hull of model as a GeoJSON file
+        Set of x,y coords used for output of 2d concave hull of model as a GeoJSON file
         '''
         self.xy_set = set()
 
@@ -305,9 +305,9 @@ class ConfigBuilder():
         self.xy_set.update(xy_set)
 
 
-    def make_convex_hull(self, dest_dir, params):
+    def make_concave_hull(self, dest_dir, params):
         '''
-        Make a GeoJSON file that contains a 2D convex hull of the model on the XY plane
+        Make a GeoJSON file that contains a 2D concave hull of the model on the XY plane
 
         :param dest_dir: destination directory
         :param params: model input parameters, SimpleNamespace() object,
@@ -318,28 +318,26 @@ class ConfigBuilder():
         transformer = Transformer.from_crs(getattr(params, 'crs', "EPSG:4326"), "EPSG:4326", always_xy=True)
         xy_list = [transformer.transform(xy[0], xy[1]) for xy in list(self.xy_set)]
         if len(xy_list) < 3:
-            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}, not enough XY points {xy_list}")
-            return
-        # Convert set to ndarray of x,y point pairs
-        points = np.array(xy_list)
-        # Calculate convex hull
-        try:
-            hull = ConvexHull(points)
-        except QhullError as qe:
-            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}: {qe}")
+            LOCAL_LOGGER.warning(f"Cannot write out concave hull file to {dest_dir}, not enough XY points {xy_list}")
             return
 
+        # Calculate concave hull and simplify 
+        poly = Polygon(xy_list)
+        conc_poly = concave_hull(poly, ratio=0.5)
+        simp_poly = conc_poly.simplify(0.001, preserve_topology=True)
+        coord_tups = list(simp_poly.exterior.coords)
+
         # Create GeoJSON points from hull
-        gj_points = [geojson.Point(tuple(points[vert])) for vert in hull.vertices]
+        gj_points = [geojson.Point(coord_tup) for coord_tup in coord_tups]
         features = [geojson.Feature(geometry=point) for point in gj_points]
         feature_collection = geojson.FeatureCollection(features)
 
         # Write the GeoJSON to a file
         try:
-            with open(os.path.join(dest_dir, 'convex_hull.geojson'), 'w') as f:
+            with open(os.path.join(dest_dir, 'concave_hull.geojson'), 'w') as f:
                 geojson.dump(feature_collection, f)
         except Exception as e:
-            LOCAL_LOGGER.warning(f"Cannot write out convex hull file to {dest_dir}: {e}")
+            LOCAL_LOGGER.warning(f"Cannot write out concave hull file to {dest_dir}: {e}")
 
 
 

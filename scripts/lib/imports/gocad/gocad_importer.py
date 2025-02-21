@@ -603,7 +603,7 @@ class GocadImporter():
                 elif field[0] == "PVRTX" or field[0] == "VRTX":
                     seq_no_prev = seq_no
                     is_ok_s, seq_no = self.parse_int(field[1])
-                    # Attempt to limit convex hull calculations to geological features i.e. TSurf
+                    # Attempt to limit concave hull calculations to geological features i.e. TSurf
                     is_ok, x_flt, y_flt, z_flt = self.parse_xyz(True, field[2], field[3], field[4], do_minmax=True,
                                                                 convert=True, do_convhull=self._is_ts)
                     self.logger.debug(f"ParseXYZ {is_ok} {x_flt} {y_flt} {z_flt} from {field[2]} {field[3]} {field[4]}")
