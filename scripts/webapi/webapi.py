@@ -144,7 +144,7 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     # Concatenate response
     response_list = []
     if model not in wfs_dict or model not in param_dict:
-        LOGGER.warning(f"Model {model} not in wfs_dict or param_dict")
+        LOGGER.warning(f"Model '{model}' not in wfs_dict or param_dict")
         LOGGER.debug(f"{wfs_dict=} {param_dict=}")
         return {}, []
     param = param_builder(param_dict[model].PROVIDER)
@@ -158,10 +158,10 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     borehole_list = reader.get_boreholes_list()
     LOGGER.debug(f"{borehole_list=}")
     result_dict = {}
-    for borehole_dict in borehole_list:
-        borehole_id = borehole_dict['nvcl_id']
+    for borehole_obj in borehole_list:
+        borehole_id = borehole_obj.nvcl_id
         response_list.append({'borehole:id': borehole_id})
-        result_dict[borehole_id] = borehole_dict
+        result_dict[borehole_id] = borehole_obj
     return result_dict, response_list
 
 
@@ -182,7 +182,7 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
             bh_dict = cache_obj.get(bhd_key)
             bh_list = cache_obj.get(bhl_key)
             LOGGER.debug(f"Fetched from cache {bh_dict=} {bh_list=}")
-            if bh_dict is None or bh_list is None:
+            if bh_dict in (None,{}) or bh_list in (None,[]):
                 LOGGER.debug("Empty bh_dict / bh_list")
                 bh_dict, bh_list = create_borehole_dict_list(model, param_dict, wfs_dict)
                 LOGGER.debug(f"Created from network {bh_dict=} {bh_list=}")
@@ -251,7 +251,7 @@ def get_cached_parameters():
             try:
                 param_obj = param_builder(param_dict[model].PROVIDER)
                 # Open up connection to WFS service
-                wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, xml=None, timeout=WFS_TIMEOUT)
+                wfs_dict[model] = PickleableWebFeatureService(url=param_obj.WFS_URL, xml=None, timeout=WFS_TIMEOUT, version="1.1.0")
             except Exception as e:
                 LOGGER.error(f"Cannot reach service {param_obj.WFS_URL}: {e}")
     LOGGER.debug(f"Returning {param_dict=}")
