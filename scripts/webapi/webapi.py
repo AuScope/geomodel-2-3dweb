@@ -144,8 +144,8 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     # Concatenate response
     response_list = []
     if model not in wfs_dict or model not in param_dict:
-        LOGGER.warning(f"Model '{model}' not in wfs_dict or param_dict")
-        LOGGER.debug(f"{wfs_dict=} {param_dict=}")
+        LOGGER.warning(f"Model '{model}' not in both wfs_dict and param_dict")
+        LOGGER.debug(f"Exiting {wfs_dict=} {param_dict=}")
         return {}, []
     param = param_builder(param_dict[model].PROVIDER)
     param.MAX_BOREHOLES = MAX_BOREHOLES
@@ -204,6 +204,7 @@ def get_cached_parameters():
 
     :returns: parameter dict, WFS dict; both keyed on model name string
     '''
+    LOGGER.debug("get_cached_parameters()")
     if not os.path.exists(INPUT_DIR):
         LOGGER.error(f"Input dir {INPUT_DIR} does not exist")
         sys.exit(1)
@@ -214,14 +215,14 @@ def get_cached_parameters():
         LOGGER.error(f"config file does not exist {config_file}")
         sys.exit(1)
     conf_dict = read_json_file(config_file)
-    LOGGER.debug(f"{conf_dict=}")
+    LOGGER.debug(f"Parsed 'ProviderModelInfo.json': {conf_dict=}")
     # For each provider
     param_dict = {}
     wfs_dict = {}
     # pylint: disable=W0612
     for prov_name, model_dict in conf_dict.items():
         model_list = model_dict['models']
-        LOGGER.debug(f"{model_list=}")
+        LOGGER.debug(f"For {prov_name}, {model_list=}")
         # For each model within a provider
         for model_obj in model_list:
             model = model_obj['modelUrlPath']
@@ -233,8 +234,7 @@ def get_cached_parameters():
                 continue
             # Load params and connect to WFS service
             param_dict[model] = get_input_conv_param_bh(input_file)
-            LOGGER.debug(f"{model=}")
-            LOGGER.debug(f"{param_dict[model]=}")
+            LOGGER.debug(f"For {model=}, {param_dict[model]=}")
             # If input conversion file does not have a bounding box, use the one calculated from the model
             # conversion process
             if not hasattr(param_dict[model], 'BOREHOLE_CRS') or not hasattr(param_dict[model], 'BBOX'):
@@ -944,7 +944,9 @@ try:
     with Cache(CACHE_DIR) as cache:
         G_PARAM_DICT = cache.get(PARAM_CACHE_KEY)
         G_WFS_DICT = cache.get(WFS_CACHE_KEY)
+        LOGGER.debug(f"Fetched {G_PARAM_DICT=} {G_WFS_DICT=}")
         if G_PARAM_DICT is None or G_WFS_DICT is None:
+            LOGGER.debug("Cached PARAMS/WFS empty, trying to recreate")
             G_PARAM_DICT, G_WFS_DICT = get_cached_parameters()
             cache.add(PARAM_CACHE_KEY, G_PARAM_DICT)
             cache.add(WFS_CACHE_KEY, G_WFS_DICT)
