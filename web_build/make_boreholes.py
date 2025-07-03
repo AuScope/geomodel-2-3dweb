@@ -214,7 +214,7 @@ def process_single(dest_dir, input_file, db_name, overwrite_db=True):
     input_params = get_input_conv_param_bh(input_file)
     builder_params = {}
     # NB: Only supports a subset of nvcl_kit parameters
-    for param in ['bbox', 'borehole_crs', 'wfs_version', 'wfs_url', 'nvcl_url', 'max_boreholes']:
+    for param in ['bbox', 'wfs_version', 'wfs_url', 'nvcl_url', 'max_boreholes']:
         if hasattr(input_params, param.upper()):
             builder_params[param] = getattr(input_params, param.upper())
     bh_params = param_builder(input_params.PROVIDER, **builder_params)
