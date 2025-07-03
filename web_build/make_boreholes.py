@@ -141,7 +141,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
 
         # Does 'borehole' have ['name', 'x', 'y', 'z', 'nvcl_id'] attributes?
         if all(key in vars(borehole) for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
-            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj, param_obj.MODEL_CRS, height_res,
+            bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj.MODEL_CRS, height_res,
                                                    borehole.x, borehole.y, borehole.z, borehole.nvcl_id)
             if bh_data_dict == {}:
                 LOGGER.warning(f"NVCL data not available for {borehole.nvcl_id}")
