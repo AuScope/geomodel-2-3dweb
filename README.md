@@ -12,7 +12,7 @@ The source code for the front-end of AuScope Geomodels is [here](https://github.
 
 #### To configure
 
-1. Install Python v3.9 or higher (https://www.python.org/)
+1. Install Python v3.10 or higher (https://www.python.org/)
 2. Install PDM (https://pdm.fming.dev/latest/) and jq (https://jqlang.github.io/jq/)
 
 NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately

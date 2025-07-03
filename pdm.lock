@@ -5,10 +5,10 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:368105716b533a91e2d5763da786010dfcba9333d1ede242c2f63cad8d156a6c"
+content_hash = "sha256:e6500167474ff10837195e5ce6683cfd8882beaa31db59edc4825028ccd0fdef"
 
 [[metadata.targets]]
-requires_python = ">=3.9"
+requires_python = ">=3.10"
 
 [[package]]
 name = "aiofiles"
