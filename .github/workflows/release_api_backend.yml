@@ -2,11 +2,8 @@
 #
 # 1. Creates a backend backend release
 # 2. Adds the files from the latest successful API build action
-#
-# NB: After running this release the 'release_models.yml' action should be ran to add 
-# model files to backend build and create a docker build 
-#
-name: Release API Backend
+# 3. Adds the files from the latest successful models (web assets) build action
+name: Release Backend upon tagging
 
 on:
   push:
@@ -14,7 +11,7 @@ on:
       - "PORTAL_RELEASE_*"
 
 jobs:
-  do-release:
+  do-api-release:
     runs-on: ubuntu-latest
     steps:
     - name: Download artifacts
@@ -34,4 +31,23 @@ jobs:
         name: AuScope Geomodels back-end assets release based on tag ${{github.ref_name}}
         files: |
           ./**/*
+        fail_on_unmatched_files: true
+
+# Add web assets to the release 
+  do-models-release:
+    runs-on: ubuntu-latest
+    needs: do-api-release
+    steps:
+    - name: Download artifacts
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        workflow: build_models_backend.yml
+        workflow_conclusion: success
+        branch: master
+    - name: Add to release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{github.ref_name}}
+        name: Source and web asset release based on tag ${{github.ref_name}}
+        files: ./**/*.tar.gz
         fail_on_unmatched_files: true
