@@ -104,23 +104,14 @@ Function:
   - Make models 3d web assets
   - Web assets are exported as artifacts
 
-### 'Release API Backend' Workflow
+### 'Release Backend' Workflow
 
-Triggers: Push to a release tag
+Triggers: Push to a PORTAL_RELEASE_* tag
 
 Function:
   - Creates a backend release
   - Adds the files from the latest successful 'Build API Backend' action to the release
-
-**NB: After running this release the 'Release Models Backend' action (below) can be run to add 
-model web assets to the release**
-
-### 'Release Models Backend' Workflow
-
-Triggers: Manual dispatch on provided tag
-
-Function:
-  - Add model web assets from the latest successful 'Build Models Backend' action to the release
+  - Add model web assets from the latest successful 'Build Models Backend' action to the release 
 
 ### 'Pages Build Deployment' Workflow
 
@@ -144,9 +135,10 @@ Function:
 git tag -a PORTAL_RELEASE_20241223 -m "December 2024 Release"
 git push --tags origin master
 ```
-2. The 'Release API Backend' action will create a release at this tag
-3. Once step 2 is complete, run the 'Release Models Backend' action inputting the tag name
-4. The 'Release Models Backend' action will build all the model files and insert them into the release
+2. The 'Release Backend' action will create a release at this tag
+
+**NB:** This action creates a release from the latest **completed** build actions.
+The build actions can take some time, so do not create a tag until the build actions are complete.
 
 ## Code Documentation
 
