@@ -67,6 +67,10 @@ NONDEF_COORDS = True
 ''' Will tolerate non default coordinates
 '''
 
+PROP_MAX = 20
+''' Maximum number of properties (e.g. borehole ids) returned in getpropval request
+'''
+
 # Set up debugging
 LOGGER = logging.getLogger(__name__)
 
@@ -470,6 +474,8 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     '''
     Create and initialise the 3DPS 'GetResourceById' response
 
+    *** Used to retrieve GLTF for 3D boreholes ***
+
     :param model: name of model (string)
     :param version: 3DPS request version
     :param output_format: 3DPS response format
@@ -515,6 +521,8 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
 def send_blob(gltf_str):
     ''' Returns a blob in response
 
+    *** Used to send data part of a 3D borehole ***
+
     :param gltf_str: blob object
     :returns: a binary file response
     '''
@@ -530,6 +538,9 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
     Returns a response to a WFS getPropertyValue request, example: \
       https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue& \
         outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
+
+    *** This is used to fetch the IDs for boreholes ***
+    
 
     :param model: name of model (string)
     :param version: 3DPS request version
@@ -564,6 +575,8 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
     # Fetch list of borehole ids
     # pylint: disable=W0612
     model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
+    # Only send the first PROP_MAX responses
+    response_list = response_list[:PROP_MAX]
     response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
     return response_json
 
