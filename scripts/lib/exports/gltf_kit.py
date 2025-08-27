@@ -162,8 +162,8 @@ class GltfKit(ExportKit):
         if geom_obj.is_trgl():
 
             # Set up a mesh
-            mesh_p_arr = (POINTER(structs.Mesh) * 1)()
-            mesh_arr_pp = ctypes.cast(mesh_p_arr, POINTER(POINTER(structs.Mesh)))
+            mesh_p_arr = (ctypes.POINTER(structs.Mesh) * 1)()
+            mesh_arr_pp = ctypes.cast(mesh_p_arr, ctypes.POINTER(ctypes.POINTER(structs.Mesh)))
             self.scn.mMeshes = mesh_arr_pp
             self.scn.mNumMeshes = 1
 
