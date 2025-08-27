@@ -50,10 +50,11 @@ class GltfKit(ExportKit):
         self.binary_blob = b''     
         self.first_accessor = False
 
-    def add_mesh(self, points, triangles, colour):
+    def add_mesh(self, points: list[list[int]], triangles: list[list[float]], colour: list[float]):
         '''
         :param points: list of points [x, y, z] - short int
         :param triangles: list of triangles [v1, v2, v3] - floats
+        :param colour: [red, green, blue, alpha] - floats
         '''
         # Calculate current max index
         for triples in triangles:
@@ -160,33 +161,16 @@ class GltfKit(ExportKit):
         :param meta_obj: METADATA object
         '''
         if geom_obj.is_trgl():
-
-            # Set up a mesh
-            mesh_p_arr = (ctypes.POINTER(structs.Mesh) * 1)()
-            mesh_arr_pp = ctypes.cast(mesh_p_arr, ctypes.POINTER(ctypes.POINTER(structs.Mesh)))
-            self.scn.mMeshes = mesh_arr_pp
-            self.scn.mNumMeshes = 1
-
-
-            # Put the mesh name in the mesh's parents, because GLTFLoader
-            # copies this into the mesh name
-            self.make_nodes(b'root_node', bytes(meta_obj.name, 'ascii') + b'_0', 1)
-
-
+            rgba_colour = style_obj.get_rgba_tup(def_rand=True)
             mesh_gen = tri_gen(geom_obj.trgl_arr, geom_obj.vrtx_arr, meta_obj.name)
-
             for vert_list, indices, mesh_name in mesh_gen:
-                mesh_obj = self.make_a_mesh(mesh_name, indices, 0)
-                mesh_p_arr[0] = ctypes.pointer(mesh_obj)
-                self.add_vertices_to_mesh(mesh_obj, vert_list)
-                # Make a double-sided material of a certain colour
-                mat_obj = self.make_material(style_obj.get_rgba_tup(), True)
-                mat_p_arr[0] = ctypes.pointer(mat_obj)
+                indices = [[idx+self.max_ind+1 for idx in triples] for triples in indices]
+                self.add_mesh(vert_list, indices, rgba_colour)
         else:
             self.logger.warning('GltfKit cannot convert point or line geometries')
 
 
-    def end_scene(self, out_filename):
+    def end_scene(self, out_filename: str) -> object | bool:
         ''' Called after geometries have all been added to scene and a file or blob should be created
 
         :param out_filename: filename and path of output file, without file extension \
@@ -215,7 +199,8 @@ class GltfKit(ExportKit):
         return gltf.gltf_to_json()
 
 
-    def write_borehole(self, base_vrtx, borehole_name, colour_info_dict, height_reso, out_filename=''):
+    def write_borehole(self, base_vrtx: list[float], borehole_name: str, colour_info_dict, height_reso: float,
+                             out_filename=''):
         ''' Write out a file or blob of a borehole stick
             if 'out_filename' is supplied then writes a file and returns True/False
             else returns a pointer to a 'structs.ExportDataBlob' object

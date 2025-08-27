@@ -37,9 +37,9 @@ class STYLE:
     def __repr__(self):
         ''' Pretty print version of this class
         '''
-        return "STYLE(): rgba_tup={0}".format(str(self.__rgba_tup)) + \
-               " colour_table={0}".format(str(self.__colour_table)) + \
-               " label_table={0}".format(str(self.__label_table))
+        return f"STYLE(): rgba_tup={self.__rgba_tup}" + \
+               f" colour_table={self.__colour_table}" + \
+               f" label_table={self.__label_table}"
 
 
     def get_rgba_tup(self, idx=None, def_rand=False):
