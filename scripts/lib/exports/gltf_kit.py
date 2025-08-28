@@ -164,8 +164,10 @@ class GltfKit(ExportKit):
             rgba_colour = style_obj.get_rgba_tup(def_rand=True)
             mesh_gen = tri_gen(geom_obj.trgl_arr, geom_obj.vrtx_arr, meta_obj.name)
             for vert_list, indices, mesh_name in mesh_gen:
-                indices = [[idx+self.max_ind+1 for idx in triples] for triples in indices]
-                self.add_mesh(vert_list, indices, rgba_colour)
+                tri_indices = [indices[i:i + 3] for i in range(0, len(indices), 3)]
+                n_indices = [[idx+self.max_ind+1 for idx in triples] for triples in tri_indices]
+                tri_verts = [vert_list[i:i + 3] for i in range(0, len(vert_list), 3)]
+                self.add_mesh(tri_verts, n_indices, rgba_colour)
         else:
             self.logger.warning('GltfKit cannot convert point or line geometries')
 
