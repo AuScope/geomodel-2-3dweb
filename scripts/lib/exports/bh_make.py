@@ -38,7 +38,7 @@ if not LOGGER.hasHandlers():
 
 
 def get_blob_boreholes(borehole_obj: SimpleNamespace, model_param_dict):
-    ''' Retrieves borehole data and writes 3D model files to a blob
+    ''' Retrieves borehole data and writes 3D GLTF model files to a blob
 
     :param borehole_obj: information about borehole
     :param model_param_dict: input parameters, contains 'PROVIDER'
@@ -51,11 +51,13 @@ def get_blob_boreholes(borehole_obj: SimpleNamespace, model_param_dict):
     param_obj = param_builder(model_param_dict.PROVIDER)
     reader = NVCLReader(param_obj)
     if reader.wfs is not None and all(hasattr(borehole_obj, key) for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
+        # Get mineralogy from nvcl_kit
         bh_data_dict, base_xyz = get_nvcl_data(reader, model_param_dict.MODEL_CRS, height_res, borehole_obj.x, borehole_obj.y, borehole_obj.z, borehole_obj.nvcl_id)
 
         # If there's data, then create the borehole
         if bh_data_dict != {}:
             gltf_kit = GltfKit(LOG_LVL)
+            # Create borehole GLTF including mineralogy
             blob_obj = gltf_kit.write_borehole(base_xyz, borehole_obj.name,
                                                bh_data_dict, height_res, '')
             LOGGER.debug(f"Returning: {blob_obj=}")
@@ -66,7 +68,7 @@ def get_blob_boreholes(borehole_obj: SimpleNamespace, model_param_dict):
 
 
 def get_nvcl_data(reader, output_crs, height_res, x, y, z, nvcl_id):
-    ''' Process the output of NVCL_kit's 'get_imagelog_data()'
+    ''' Fetch the scalar mineralogy output from nvcl_kit
 
         :param reader: NVCL_Kit object
         :param output_crs: borehole coordinates will be output in this CRS

@@ -2,9 +2,10 @@
  (http://docs.opengeospatial.org/is/15-001r4/15-001r4.html)
  and WFS v2.0 standard (http://www.opengeospatial.org/standards/wfs)
 
- Currently this is used to display boreholes in the geomodels website.
- In future, it will be expanded to other objects, add in a database
- and put in a more structured and secure framework
+ Currently this is used to display boreholes in the geomodels website, and display imported GOCAD TSURF files.
+ In future, it will be expanded to other functions, and put in a more structured and secure framework
+
+ Examples of functions:
 
  To get information upon double click on object:
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId=EWHDDH01_185_0&layers=boreholes&format=application%2Fjson
@@ -15,6 +16,21 @@
  To get borehole object after scene is loaded:
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetResourceById&resourceId=228563&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8
 '''
+
+"""
+Implementation NOTES
+
+A disk cache is used to improve response speed. (Uses 'diskcache' package)
+
+This stores:
+
+1. dict of OWSLib WFS service objects, cached to improve response time
+2. dict of model parameters
+3. dicts and lists of NVCL borehole metadata gleaned from nvcl_kit
+
+A small sqlite DB contains all the 3DPS feature info (e.g. NVCL borehole mineralogy)
+
+"""
 
 import sys, os
 import ctypes, tempfile
@@ -67,10 +83,6 @@ NONDEF_COORDS = True
 ''' Will tolerate non default coordinates
 '''
 
-PROP_MAX = 20
-''' Maximum number of properties (e.g. borehole ids) returned in getpropval request
-'''
-
 # Set up debugging
 LOGGER = logging.getLogger(__name__)
 
@@ -108,8 +120,8 @@ CACHE_DIR = os.path.join(DATA_DIR, 'cache')
 
 GEOMODELS_DIR = os.path.join(LOCAL_DIR, os.pardir, 'assets', 'geomodels')
 
-MAX_BOREHOLES = 9999
-''' Maximum number of boreholes processed
+MAX_BOREHOLES = 20
+''' Maximum number of boreholes requested from nvcl_kit, set low for fast response
 '''
 
 WFS_TIMEOUT = 6000
@@ -130,7 +142,7 @@ G_WFS_DICT = {}
 
 class PickleableWebFeatureService(WebFeatureService_1_1_0):
     '''
-    Override 'WebFeatureService' so that it can initialise the class when unpickling
+    Override OWSLib 'WebFeatureService' so that it can initialise the class when unpickling
     '''
     def __getnewargs__(self):
         return ('', '', None)
@@ -138,7 +150,7 @@ class PickleableWebFeatureService(WebFeatureService_1_1_0):
 
 def create_borehole_dict_list(model, param_dict, wfs_dict):
     '''
-    Call upon network services to create dictionary and a list of boreholes for a model
+    Call upon nvcl_kit's network services to create dictionary and a list of boreholes for a model
 
     :param model: name of model, string
     :param param_dict: parameter dictionary
@@ -152,9 +164,11 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
         LOGGER.debug(f"Exiting {wfs_dict=} {param_dict=}")
         return {}, []
     param = param_builder(param_dict[model].PROVIDER)
+    # Limit the number of boreholes so that they do not take too long to load
     param.MAX_BOREHOLES = MAX_BOREHOLES
     if hasattr(param_dict[model], 'BOREHOLE_CRS'):
         param.BOREHOLE_CRS = param_dict[model].BOREHOLE_CRS
+    # Use model's extent to limit borehole search area
     if hasattr(param_dict[model], 'BBOX'):
         param.BBOX = param_dict[model].BBOX
     LOGGER.debug(f"Creating NVCLReader {param_dict[model]=} {param=} {wfs_dict[model]=}")
@@ -170,7 +184,7 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
 
 
 
-def get_cached_dict_list(model, param_dict, wfs_dict):
+def get_cached_bhdict_list(model, param_dict, wfs_dict):
     '''
     Fetches borehole dictionary and response list from cache or creates them if necessary
 
@@ -186,8 +200,10 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
             bh_dict = cache_obj.get(bhd_key)
             bh_list = cache_obj.get(bhl_key)
             LOGGER.debug(f"Fetched from cache {bh_dict=} {bh_list=}")
+            # If there in nothing in the cache try the network
             if bh_dict in (None,{}) or bh_list in (None,[]):
                 LOGGER.debug("Empty bh_dict / bh_list")
+                # Use nvcl_kit's network services to create a lists of boreholes in the vicinity of the model
                 bh_dict, bh_list = create_borehole_dict_list(model, param_dict, wfs_dict)
                 LOGGER.debug(f"Created from network {bh_dict=} {bh_list=}")
                 cache_obj.add(bhd_key, bh_dict)
@@ -202,13 +218,13 @@ def get_cached_dict_list(model, param_dict, wfs_dict):
 
 
 
-def get_cached_parameters():
+def create_cacheable_parameters():
     '''
     Creates dictionaries to store model parameters and WFS services
 
-    :returns: parameter dict, WFS dict; both keyed on model name string
+    :returns: model parameter dict, WFS dict; both keyed on model name string
     '''
-    LOGGER.debug("get_cached_parameters()")
+    LOGGER.debug("create_cacheable_parameters()")
     if not os.path.exists(INPUT_DIR):
         LOGGER.error(f"Input dir {INPUT_DIR} does not exist")
         sys.exit(1)
@@ -266,7 +282,7 @@ def get_cached_parameters():
 
 def make_json_exception_response(version, code, message, locator='noLocator'):
     '''
-    Write out a json error response
+    Make a JSON error response
 
     :param version: version string
     :param code: error code string, can be 'OperationNotSupported', 'MissingParameterValue', \
@@ -283,6 +299,8 @@ def make_json_exception_response(version, code, message, locator='noLocator'):
 
 def make_str_response(msg):
     '''
+    Make a generic string response
+
     :param message: text message explaining error in more detail
     :returns: byte array HTTP response
     '''
@@ -432,7 +450,7 @@ def make_getfeatinfobyid_response(model, version, query_format, layer_names, obj
         return make_json_exception_response(version, 'InvalidParameterValue', 'incorrect layers, try "'+ LAYER_NAME + '"')
 
     # Query database
-    # Open up query database
+    # Open up query database to get object information (e.g. NVCL borehole mineralogy)
     db_path = os.path.join(DATA_DIR, QUERY_DB_FILE)
     qdb = QueryDB(overwrite=False, db_name=db_path)
     err_msg = qdb.get_error()
@@ -503,11 +521,11 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
 
     # Get borehole dictionary for this model
     # pylint: disable=W0612
-    model_bh_dict, model_bh_list = get_cached_dict_list(model, param_dict, wfs_dict)
+    model_bh_dict, model_bh_list = get_cached_bhdict_list(model, param_dict, wfs_dict)
     LOGGER.debug(f"{model_bh_dict=}")
     borehole_dict = model_bh_dict.get(res_id, None)
     if borehole_dict is not None:
-        # Get blob from cache
+        # Create a GLTF borehole including mineralogy
         gltf_str = get_blob_boreholes(borehole_dict, param_dict[model])
         if gltf_str is not None:
             return send_blob(gltf_str)
@@ -519,17 +537,17 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
 
 
 def send_blob(gltf_str):
-    ''' Returns a blob in response
+    ''' Generic routine that returns a blob in response
 
-    *** Used to send data part of a 3D borehole ***
+    *** Used to send either a GLTF 3D borehole or a GLTF representation of an imported GOCAD file ***
 
-    :param gltf_str: blob object
+    :param gltf_str: GLTF as a blob object
     :returns: a binary file response
     '''
-    LOGGER.debug(f"Got GLTF bytes {gltf_str}")
+    LOGGER.debug(f"send_blob(): Got GLTF bytes {gltf_str}")
     with tempfile.NamedTemporaryFile(mode="w", suffix=".gltf", delete=False) as fp:
         fp.write(gltf_str)
-    LOGGER.debug("Created temp file, returning it")
+    LOGGER.debug("send_blob(): Created temp file, returning it")
     return FileResponse(fp.name, media_type="model/gltf+json;charset=UTF-8")
 
 
@@ -539,8 +557,7 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
       https://demo.geo-solutions.it/geoserver/wfs?version=2.0&request=GetPropertyValue& \
         outputFormat=json&exceptions=application/json&typeName=test:Linea_costa&valueReference=id
 
-    *** This is used to fetch the IDs for boreholes ***
-    
+    *** This is used to fetch the IDs for boreholes using the disk cache ***
 
     :param model: name of model (string)
     :param version: 3DPS request version
@@ -574,9 +591,7 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
 
     # Fetch list of borehole ids
     # pylint: disable=W0612
-    model_bh_dict, response_list = get_cached_dict_list(model, param_dict, wfs_dict)
-    # Only send the first PROP_MAX responses
-    response_list = response_list[:PROP_MAX]
+    model_bh_dict, response_list = get_cached_bhdict_list(model, param_dict, wfs_dict)
     response_json = {'type': 'ValueCollection', 'totalValues': len(response_list), 'values': response_list}
     return response_json
 
@@ -584,6 +599,8 @@ def make_getpropvalue_response(model, version, output_format, type_name, value_r
 def convert_gocad2gltf(model, id_str, gocad_list):
     '''
     Call the conversion code to convert a GOCAD string to GLTF
+
+    *** Used when the user drags and drops a GOCAD .TS file into the 3D scene ***
 
     :param model: name of model
     :param id_str: sequence number string
@@ -606,78 +623,12 @@ def convert_gocad2gltf(model, id_str, gocad_list):
         return send_blob(gltf_bytes)
     return make_str_response(' ')
 
-def send_assimp_blob(model, blob_id, blob, exp_timeout=None):
-    ''' Returns a blob in response
-
-    :param model: name of model (string)
-    :param blob_id: unique id string for blob, used for caching
-    :param blob: blob object
-    :param exp_timeout: cache expiry timeout, float, in seconds
-    :returns: a binary file response
-    '''
-    LOGGER.debug('got blob %s', str(blob))
-    gltf_bytes = b''
-    # There are 2 files in the blob, a GLTF file and a .bin file
-    # pylint: disable=W0612
-    for idx in range(2):
-        LOGGER.debug(f"{blob.contents.name.data=}")
-        LOGGER.debug(f"{blob.contents.size=}")
-        LOGGER.debug(f"{blob.contents.data=}")
-        # Look for the GLTF file
-        if not blob.contents.name.data:
-            # Convert to byte array
-            bcd = ctypes.cast(blob.contents.data, ctypes.POINTER(blob.contents.size \
-                                                                 * ctypes.c_char))
-            bcd_bytes = b''
-            for bitt in bcd.contents:
-                bcd_bytes += bitt
-            bcd_str = bcd_bytes.decode('utf-8', 'ignore')
-            LOGGER.debug(f"{bcd_str[:80]}")
-            try:
-                # Convert to json
-                gltf_json = json.loads(bcd_str)
-                LOGGER.debug(f"{gltf_json=}")
-            except JSONDecodeError as jde_exc:
-                LOGGER.debug(f"JSONDecodeError loads(): {jde_exc}")
-            else:
-                try:
-                    # This modifies the URL of the .bin file associated with the GLTF file
-                    # Inserting model name and resource id as a parameter so we can tell
-                    # the .bin files apart
-                    gltf_json["buffers"][0]["uri"] = model + '/' + \
-                        gltf_json["buffers"][0]["uri"] + "?id=" + blob_id
-
-                    # Convert back to bytes and send
-                    gltf_str = json.dumps(gltf_json)
-                    gltf_bytes = bytes(gltf_str, 'utf-8')
-                except JSONDecodeError as jde_exc:
-                    LOGGER.debug(f"JSONDecodeError dumps(): {jde_exc}")
-
-        # Binary file (.bin)
-        elif blob.contents.name.data == b'bin':
-            # Convert to byte array
-            bcd = ctypes.cast(blob.contents.data,
-                              ctypes.POINTER(blob.contents.size * ctypes.c_char))
-            bcd_bytes = b''
-            for bitt in bcd.contents:
-                bcd_bytes += bitt
-            cache_blob(model, blob_id, bcd_bytes, blob.contents.size, exp_timeout)
-
-
-        blob = blob.contents.next
-    if gltf_bytes == b'':
-        LOGGER.debug('GLTF not found in blob')
-    else:
-        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".gltf", delete=False) as fp:
-            fp.write(gltf_bytes)
-        return FileResponse(fp.name, media_type="model/gltf+json;charset=UTF-8")
-
-    return make_str_response('{}')
-
 
 def convert_gltf2xxx(model, filename, fmt):
     '''
-    Call the conversion code to convert GLTF string to a certain format
+    Call the assimp conversion code to convert GLTF string to a certain format
+
+    *** Used in the experimental EXPORT function ***
 
     :param model: name of model
     :param filename: filename of GLTF file to be converted
@@ -697,13 +648,12 @@ def convert_gltf2xxx(model, filename, fmt):
 
     gltf_path = os.path.abspath(gltf_path)
 
-    # Load GLTF file
+    # Load GLTF file into assimp
     try:
         assimp_obj = pyassimp.load(gltf_path, 'gltf2')
     except pyassimp.AssimpError as ae:
         LOGGER.error(f"Cannot load {gltf_path}: {ae}")
         return make_str_response(' ')
-
 
     # Export as whatever format desired
     try:
@@ -712,13 +662,19 @@ def convert_gltf2xxx(model, filename, fmt):
         LOGGER.error(f"Cannot export {gltf_path}: {ae}")
         return make_str_response(' ')
 
-    return send_assimp_blob(model, 'export_{0}_{1}'.format(model, filename), blob_obj, 60.0)
-
+    # Assume it is a text file
+    with tempfile.NamedTemporaryFile(mode="w+b", suffix="."+fmt, delete=False) as fp:
+            fp.write(blob_obj)
+    return FileResponse(fp.name, media_type="text/plain;charset=UTF-8")
 
 
 def process3DPS(model, version, request, format, outputFormat, layers, objectId, resourceId):
     '''
     Process an OCG 3PS request. Roughly trying to conform to 3DPS standard
+
+    *** 'getresourcebyid' is used to retrieve GLTF version of NVCL borehole ***
+
+    *** 'getfeatureinfobyobjectid' is used to get information about a GLTF borehole ***
 
     :param model: name of model
     :param version: WFS version parameter
@@ -745,16 +701,16 @@ def process3DPS(model, version, request, format, outputFormat, layers, objectId,
                                             'Request type is not implemented',
                                             request.lower())
 
+    # Retrieve information about a resource
     if request.lower() == 'getfeatureinfobyobjectid':
         return make_getfeatinfobyid_response(model, version, format, layers, objectId)
 
+    # Retrieve a resource (i.e. GLTF)
     if request.lower() == 'getresourcebyid':
         return make_getresourcebyid_response(model, version, outputFormat, resourceId, G_PARAM_DICT, G_WFS_DICT)
 
     # Unknown request
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request type')
-
-
 
 
 def processWFS(model, version, request, outputFormat, exceptions, typeName, valueReference):
@@ -777,30 +733,11 @@ def processWFS(model, version, request, outputFormat, exceptions, typeName, valu
         return make_json_exception_response('Unknown', 'OperationProcessingFailed',
                                             'Incorrect version, try "2.0"')
 
-    # GetFeature
+    # WFS GetFeature request
     if request.lower() == 'getpropertyvalue':
         return make_getpropvalue_response(model, version, outputFormat, typeName, valueReference, G_PARAM_DICT, G_WFS_DICT)
 
     return make_json_exception_response(version, 'OperationNotSupported', 'Unknown request name')
-
-
-def processBLOB(model, id_val):
-    '''
-    Process blob file request
-
-    :param model: name of model
-    :param id_val: blob file identifier string
-    :returns: a binary file response
-    '''
-    # Check that the id format is correct
-    if (id_val[:14] == 'drag_and_drop_' and id_val[14:].isalnum() and len(id_val) == 30) \
-                                                                  or id_val.isnumeric():
-        blob, blob_sz = get_cached_blob(model, id_val)
-        if blob is not None:
-            with tempfile.NamedTemporaryFile(mode="w+b", suffix=".bin", delete=False) as fp:
-                fp.write(blob)
-            return FileResponse(fp.name, media_type="aplication/octet-stream")
-    return make_str_response("Unknown .bin file")
 
 
 def processEXPORT(model, filename, fmt):
@@ -909,7 +846,7 @@ async def processRequest(model: str, service: str, version: str, request: str,
     return "Unknown service name, should be one of: 'WFS', '3DPS'"
 
 
-# WMSPROXY
+# WMS PROXY
 @app.get("/api/{model}/wmsproxy/{styles}")
 async def wmsProxy(model: str, styles: str, wmsUrl: str, REQUEST: str, LAYERS: str, VERSION: str, STYLES: str, FORMAT:str, BBOX:str, CRS: str, WIDTH: str, HEIGHT:str):
 
@@ -917,10 +854,10 @@ async def wmsProxy(model: str, styles: str, wmsUrl: str, REQUEST: str, LAYERS: s
                                              format=FORMAT, bbox=BBOX, crs=CRS, width=WIDTH, height=HEIGHT)
 
 
+# Used in API signature below
 class ImportFile(BaseModel):
     crs: str
     content: bytes
-
 
 # Import GOCAD file
 @app.post("/api/{model}/import/{id}")
@@ -928,16 +865,10 @@ async def importFile(model: str, id: str, import_file: ImportFile):
     return processIMPORT(model, id, import_file)
 
 
-# Export DXF file
+# Export DXF file (experimental)
 @app.get("/api/{model}/export/{filename}/{fmt}")
 async def exportFile(model: str, filename: str, fmt: str):
     return processEXPORT(model, filename, fmt)
-
-
-# Request blobfile, second part of 3DPS request
-@app.get("/api/{model}/$blobfile.bin")
-async def downloadBlobFile(model: str, id: str):
-    return processBLOB(model, id)
 
 
 '''
@@ -960,7 +891,7 @@ try:
         LOGGER.debug(f"Fetched {G_PARAM_DICT=} {G_WFS_DICT=}")
         if G_PARAM_DICT is None or G_WFS_DICT is None:
             LOGGER.debug("Cached PARAMS/WFS empty, trying to recreate")
-            G_PARAM_DICT, G_WFS_DICT = get_cached_parameters()
+            G_PARAM_DICT, G_WFS_DICT = create_cacheable_parameters()
             cache.add(PARAM_CACHE_KEY, G_PARAM_DICT)
             cache.add(WFS_CACHE_KEY, G_WFS_DICT)
 except OSError as os_exc:
