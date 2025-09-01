@@ -10,21 +10,20 @@ The source code for the front-end of AuScope Geomodels is [here](https://github.
 
 ## Development
 
-Please see development notes [here](https://github.com/AuScope/geomodel-2-3dweb/DEV_NOTES.md)
+Please see development notes [here](https://github.com/AuScope/geomodel-2-3dweb/blob/master/DEV_NOTES.md)
 
 ## Run tests
 
 All tests
 ```
 cd test
-./run_test.sh
-```
+pdm run ./run_test.sh
+``` 
 
 Regression tests
 ```
-pdm run $SHELL
 cd test/regression
-./run_reg.sh
+pdm run ./run_reg.sh
 ```
 
 ## Workflows

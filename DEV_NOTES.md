@@ -1,11 +1,10 @@
 # Development Notes
 
-## To configure
+## To configure development environment
 
 1. Install Python v3.10 or higher (https://www.python.org/)
 2. Install PDM (https://pdm.fming.dev/latest/) and jq (https://jqlang.github.io/jq/)
 
-NB: pyassimp requires the assimp shared library which may need to be compiled and installed separately
 
 3. Clone and compile collada2gltf (https://github.com/KhronosGroup/COLLADA2GLTF)
 4. Set 'COLLADA2GLTF_BIN' environment variable to point to the path where 'COLLADA2GLTF-bin' resides, e.g.
@@ -17,9 +16,12 @@ export COLLADA2GLTF_BIN=/home/fred/github/COLLADA2GLTF/build/
   * 'eval $(pdm venv activate)' will start a Python env, 'deactivate' to exit
   * 'pdm run $SHELL' will run the Python env in a new shell
 
+NB: pyassimp is only required for the experimental file export function. It requires the assimp shared library which may need to be compiled and installed separately
+
+
 ## Converting files
 
-#### To convert one file or a folder of files to GLTF or COLLADA or GZIP (geophysics volumes)
+### To convert one file or a folder of files to GLTF or COLLADA or GZIP (geophysics volumes)
 
 * Accepted formats:
      * GOCAD (*.ts *.pl *.vs *.wl *.vo *.sg *.gp)
@@ -53,19 +55,36 @@ where a simple _config.json_ could look like this:
 
 Use the '-g' flag to generate COLLADA files
 
-#### Converting directories of files (e.g. GOCAD) for use in AuScope geomodels website
+### Converting directories of files (e.g. GOCAD) for use in AuScope geomodels website
 
 [batch_proc.py](web_build/batch_proc.py) is a simple batch script used to convert the GOCAD models for the website.
 
-#### Building a borehole database
 
-[make_boreholes.py](web_build/make_boreholes.py) is a script to create a database of NVCL borehole objects to display within the model. See this [README](web_build/README.md) for more information.
+## Creating a borehole database 
+
+To create a borehole database, run [make_boreholes.py](make_boreholes.py)
+
+e.g. from Linux bash shell, in "scripts" directory:
+
+_./make_boreholes.py -b batch.txt -d query_data.db output_dir_
+
+where: 
+
+  "batch.txt" contains a list of model input conversion files
+
+  "output_dir/query_data.db" is the output borehole database used to serve up NVCL boreholes
+
+NB: It also creates GLTF or COLLADA borehole files which are not used.
 
 
+## Creating 'api' directory
 
-Regression tests
-```
-pdm run $SHELL
-cd test/regression
-./run_reg.sh
-```
+To create a 'api' directory run [build_api_dir.sh](build_api_dir.sh)
+
+e.g. from Linux bash shell, in "scripts" directory:
+
+_./build_api_dir.sh output_dir/query_data.db_
+
+This will produce a tar file with today's date which can be copied to website
+
+NB: If you aren't using a borehole database, substitute an empty file for _output_dir/query_data.db_
