@@ -1,5 +1,9 @@
 # Geomodels Web API Description
 
+A basic implementation of a subset of the 3DPS standard V1.0 (http://docs.opengeospatial.org/is/15-001r4/15-001r4.html)
+ and WFS v2.0 standards (http://www.opengeospatial.org/standards/wfs)
+
+
 ## Proxy WMS
 
 /api/{model}?service=WMS&STYLES=default&wmsurl={WMS-url}
@@ -60,5 +64,5 @@ e.g. https://geomodels.auscope.org.au/api/rosebery?service=IMPORT&id=f0f071bd63b
 #### Purpose
 
 * This exports a model part in the form of a DXF file, but because it uses 'assimp' (https://github.com/assimp/assimp) it could export other formats
-* This requires installation of 'pyassimp' python package ('experimental' group in 'pyproject.yaml') and installation and compilation of 'assimmp' shared library
+* This requires installation of 'pyassimp' python package ('experimental' group in 'pyproject.yaml') and installation and compilation of 'assimp' shared library
 
