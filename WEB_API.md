@@ -20,15 +20,27 @@ e.g. https://geomodels.auscope.org.au/api/tas?service=WMS&STYLES=default&wmsurl=
 
 e.g. https://geomodels.auscope.org.au/api/rosebery?service=WFS&version=2.0&request=GetPropertyValue&exceptions=application%2Fjson&outputFormat=application%2Fjson&typeName=boreholes&valueReference=borehole%3Aid
 
-## 3DPS
+## 3DPS 
+
+### GetResourceById request
 
 /api/{model}?service=3DPS&version=1.0&request=GetResourceById&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8&resourceId={resource-id}
 
-#### Purpose 
+#### Purpose
 
 * Retrieves GLTF representations of NVCL (National Virtual Core Library) boreholes that are in the immediate vicinity of the 3D model
 
 e.g. https://geomodels.auscope.org.au/api/rosebery?service=3DPS&version=1.0&request=GetResourceById&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8&resourceId=10026
+
+### GetFeatureInfoById request
+
+/api/{model}?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId={object-id}&layers=boreholes&format=application%2Fjson
+
+#### Purpose
+
+* Retrieves information about an NVCL borehole
+
+e.g. https://geomodels.auscope.org.au/api/NorthGawler?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId=EWHDDH01_185_0&layers=boreholes&format=application%2Fjson
 
 ## Import GOCAD .TS file
 
@@ -39,10 +51,13 @@ e.g. https://geomodels.auscope.org.au/api/rosebery?service=IMPORT&id=f0f071bd63b
 #### Purpose 
 
 * Allows the user to drag and drop a .TS file into the 3D scene
+* Returns a GLTF file
 
 ## Export DXF file (experimental)
 
 /api/{model}?service=EXPORT&filename={model-part-filename}&format={format}
+
+#### Purpose
 
 * This exports a model part in the form of a DXF file, but because it uses 'assimp' (https://github.com/assimp/assimp) it could export other formats
 * This requires installation of 'pyassimp' python package ('experimental' group in 'pyproject.yaml') and installation and compilation of 'assimmp' shared library
