@@ -15,12 +15,11 @@ dependencies = [
     "aiofiles",
     "uvicorn",
     "wheel",
-    "pytest>=8.3.2",
     "pygltflib>=1.16.2",
 ]
 requires-python = ">=3.10"
 
-[project.optional-dependencies]
+[dependency-groups]
 test = [
     "coverage>=7.6.2",
     "defusedxml>=0.7.1",
@@ -28,7 +27,10 @@ test = [
     "pytest>=8.3.3",
     "httpx>=0.27.2",
 ]
+experimental = [
+    "pyassimp>=5.2.5",
+]
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
