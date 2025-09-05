@@ -31,9 +31,8 @@ Run [conv_webasset.py](scripts/conv_webasset.py). You must give it either a GOCA
 
 e.g.
 ```
-pdm run $SHELL
 cd scripts
-./conv_webasset.py gocad.ts config.json
+pdm run ./conv_webasset.py gocad.ts config.json
 
 ```
 
@@ -66,7 +65,7 @@ To create a borehole database, run [make_boreholes.py](make_boreholes.py)
 
 e.g. from Linux bash shell, in "web_build" directory:
 
-_./make_boreholes.py -b batch.txt -d query_data.db output_dir_
+_pdm run ./make_boreholes.py -b batch.txt -d query_data.db output_dir_
 
 where: 
 
@@ -83,7 +82,7 @@ To create a 'api' directory run [build_api_dir.sh](build_api_dir.sh)
 
 e.g. from Linux bash shell, in "web_build" directory:
 
-_./build_api_dir.sh output_dir/query_data.db_
+_pdm run ./build_api_dir.sh output_dir/query_data.db_
 
 This will produce a tar file with today's date which can be copied to website
 
