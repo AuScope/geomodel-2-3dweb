@@ -64,7 +64,7 @@ Use the '-g' flag to generate COLLADA files
 
 To create a borehole database, run [make_boreholes.py](make_boreholes.py)
 
-e.g. from Linux bash shell, in "scripts" directory:
+e.g. from Linux bash shell, in "web_build" directory:
 
 _./make_boreholes.py -b batch.txt -d query_data.db output_dir_
 
@@ -81,7 +81,7 @@ NB: It also creates GLTF or COLLADA borehole files which are not used.
 
 To create a 'api' directory run [build_api_dir.sh](build_api_dir.sh)
 
-e.g. from Linux bash shell, in "scripts" directory:
+e.g. from Linux bash shell, in "web_build" directory:
 
 _./build_api_dir.sh output_dir/query_data.db_
 
