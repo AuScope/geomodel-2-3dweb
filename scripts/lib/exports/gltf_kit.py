@@ -50,7 +50,7 @@ class GltfKit(ExportKit):
         self.binary_blob = b''     
         self.first_accessor = False
 
-    def add_mesh(self, points: list[list[int]], triangles: list[list[float]], colour: list[float]):
+    def add_mesh(self, points: list[list[int]], triangles: list[list[float]], colour: list[float], mesh_name: str = None):
         '''
         :param points: list of points [x, y, z] - short int
         :param triangles: list of triangles [v1, v2, v3] - floats
@@ -70,6 +70,7 @@ class GltfKit(ExportKit):
         self.logger.debug(f"@@ {np_triangles=}")
         self.logger.debug(f"@@ {np_points=}")
         self.logger.debug(f"@@ {colour=}")
+        self.logger.debug(f"@@ {mesh_name=}")
 
         self.nodes.append(pygltflib.Node(mesh=self.mesh_cnt))
         self.meshes.append(
@@ -81,7 +82,8 @@ class GltfKit(ExportKit):
                         indices=0, # Indices are at this accessor
                         material=self.mesh_cnt # Index to material
                     )
-                ]
+                ],
+                name=mesh_name
             )
         )
         if not self.first_accessor:
@@ -220,13 +222,13 @@ class GltfKit(ExportKit):
         self.start_scene()
 
         cb_gen = colour_borehole_gen(base_vrtx, borehole_name, colour_info_dict, height_reso)
-        for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in cb_gen:
+        for cnt, (vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name) in enumerate(cb_gen):
             self.logger.debug(f"{vert_list=}")
             self.logger.debug(f"{rgba_colour=}")
             self.logger.debug(f"adding 1+{self.max_ind=}")
             # Add max index + 1  to current set of indices
             indices = [[idx+self.max_ind+1 for idx in triples] for triples in indices]
-            self.add_mesh(vert_list, indices, rgba_colour)
+            self.add_mesh(vert_list, indices, rgba_colour, f"{mesh_name.decode('utf-8')}_{cnt}")
         self.logger.debug(f"... write_borehole({borehole_name=}) DONE")
         return self.end_scene(out_filename)
 

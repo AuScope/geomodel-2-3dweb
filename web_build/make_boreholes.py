@@ -134,6 +134,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
         bh_info_dict = get_bh_info_dict(borehole, param_obj)
         LOGGER.debug(f"{bh_info_dict=}")
         LOGGER.debug(f"{param_obj=}")
+        # Create a part in db with WFS borehole feature info
         is_ok, p_obj = qdb.add_part(json.dumps(bh_info_dict))
         if not is_ok:
             LOGGER.warning(f"Cannot add part to db: {p_obj}")
@@ -147,22 +148,20 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                 LOGGER.warning(f"NVCL data not available for {borehole.nvcl_id}")
                 continue
             # If there's NVCL data, then create the borehole
-            first_depth = -1
-            # pylint: disable=W0612
             LOGGER.debug("Assembling database")
-            for vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name in \
-                colour_borehole_gen(base_xyz, borehole.name, bh_data_dict, height_res):
-                if first_depth < 0:
-                    first_depth = int(depth)
+            cb_gen = colour_borehole_gen(base_xyz, borehole.name, bh_data_dict, height_res)
+            for cnt, (vert_list, indices, colour_idx, depth, rgba_colour, class_dict, mesh_name) in enumerate(cb_gen):
+                # Create a segment in db with mineralogy
                 is_ok, s_obj = qdb.add_segment(json.dumps(class_dict))
                 if not is_ok:
                     LOGGER.warning(f"Cannot add segment to db: {s_obj}")
                     continue
-                # Using 'make_borehole_label()' ensures that name is the same
-                # in both db and GLTF file
-                bh_label = make_borehole_label(borehole.name, first_depth)
-                bh_str = f"{bh_label.decode('utf-8')}_{colour_idx}"
-                is_ok, r_obj = qdb.add_query(bh_str, param_obj.modelUrlPath,
+                bh_label = f"{mesh_name.decode('utf-8')}_{cnt}"
+                # Add to the database:
+                # p_obj - WFS Feature Info
+                # s_obj - mineralogy JSON
+                # 
+                is_ok, r_obj = qdb.add_query(bh_label, param_obj.modelUrlPath,
                                              s_obj, p_obj, None, None)
                 if not is_ok:
                     LOGGER.warning(f"Cannot add query to db: {r_obj}")
