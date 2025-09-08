@@ -40,6 +40,7 @@ popd > /dev/null
 pushd ../scripts/lib/db > /dev/null
 coverage erase
 coverage run db_tables.py
+[ $? -ne 0 ] && exit 1
 popd > /dev/null
 
 #coverage combine unit/gocad_import/.coverage ../scripts/lib/db/.coverage ../scripts/.coverage unit/assimp_kit/.coverage unit/webapi/.coverage
