@@ -148,7 +148,7 @@ class PickleableWebFeatureService(WebFeatureService_1_1_0):
         return ('', '', None)
 
 
-def create_borehole_dict_list(model, param_dict, wfs_dict):
+def create_borehole_dict_list_old(model, param_dict, wfs_dict):
     '''
     Call upon nvcl_kit's network services to create dictionary and a list of boreholes for a model
 
@@ -182,6 +182,37 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
         result_dict[borehole_id] = borehole_obj
     return result_dict, response_list
 
+
+def create_borehole_dict_list(model, param_dict, wfs_dict):
+    '''
+    Call upon nvcl_kit's network services to create dictionary and a list of boreholes for a model
+
+    :param model: name of model, string
+    :param param_dict: parameter dictionary
+    :param wfs_dict: dictionary of WFS services
+    :returns: borehole_dict, response_list
+    '''
+    # Concatenate response
+    response_list = []
+    if model not in wfs_dict or model not in param_dict:
+        LOGGER.warning(f"Model '{model}' not in both wfs_dict and param_dict")
+        LOGGER.debug(f"Exiting {wfs_dict=} {param_dict=}")
+        return {}, []
+    # Query database
+    # Open up query database to get object information (e.g. NVCL borehole mineralogy)
+    db_path = os.path.join(DATA_DIR, QUERY_DB_FILE)
+    qdb = QueryDB(overwrite=False, db_name=db_path)
+    err_msg = qdb.get_error()
+    if err_msg != '':
+        LOGGER.error(f"Could not open query db {db_path}: {err_msg}")
+        return make_str_response(' ')
+    LOGGER.debug(f"Querying borehole feature info db: {model}")
+    o_k, results = qdb.get_part_json(model)
+    if o_k:
+        result_dict = {result['nvcl_id']:result for result in results }
+        return result_dict, results
+    LOGGER.debug(f"No borehole feature data found for {model} in db: {results}")
+    return {}, []
 
 
 def get_cached_bhdict_list(model, param_dict, wfs_dict):

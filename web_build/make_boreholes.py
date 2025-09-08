@@ -142,6 +142,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
 
         # Does 'borehole' have ['name', 'x', 'y', 'z', 'nvcl_id'] attributes?
         if all(key in vars(borehole) for key in ['name', 'x', 'y', 'z', 'nvcl_id']):
+            # Gets boreholes with mineralogy data of a certain scalar
             bh_data_dict, base_xyz = get_nvcl_data(reader, param_obj.MODEL_CRS, height_res,
                                                    borehole.x, borehole.y, borehole.z, borehole.nvcl_id)
             if bh_data_dict == {}:
@@ -168,6 +169,7 @@ def get_boreholes(reader, qdb, param_obj, output_mode='GLTF', dest_dir=''):
                     continue
                 LOGGER.debug(f"ADD_QUERY({mesh_name}, {param_obj.modelUrlPath})")
 
+            # Writes GLTFs to file, for testing purposes only
             LOGGER.debug("Writing GLTFs")
             file_name = make_borehole_filename(borehole.name)
             if output_mode == 'GLTF':

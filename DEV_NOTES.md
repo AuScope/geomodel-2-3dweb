@@ -87,3 +87,19 @@ _pdm run ./build_api_dir.sh output_dir/query_data.db_
 This will produce a tar file with today's date which can be copied to website
 
 NB: If you aren't using a borehole database, substitute an empty file for _output_dir/query_data.db_
+
+
+
+### Start a local dev server
+
+```bash
+# To start the proxy/borehole server, run 'uwsgi' in the 'api' directory created using 'build_api_dir.sh'
+# NB: Make sure you have set the port number in "proxy.conf.json" (geomodelportal/ui/proxy.conf.json)
+# to match uwsgi's listening port
+# e.g. change "target": "http://localhost", to "target": "http://localhost:4040",
+#
+tar xvf *-api.tar
+cd api
+pdm run uwsgi --http :4040 --wsgi-file webapi.py
+```
+

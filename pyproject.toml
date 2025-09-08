@@ -30,6 +30,9 @@ test = [
 experimental = [
     "pyassimp>=5.2.5",
 ]
+dev = [
+    "uwsgi>=2.0.30",
+]
 
 [build-system]
 requires = ["pdm-backend"]

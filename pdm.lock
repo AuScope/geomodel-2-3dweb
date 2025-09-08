@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "test"]
+groups = ["default", "dev", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:87b858333164de666b858a24955506ba720d30734ff81f973d8c9d8213aa56e8"
+content_hash = "sha256:ffb7545efb4242f8b67f4f112a65bcef0ef4e720faee943b754e9f55faefeb0e"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -1285,6 +1285,15 @@ dependencies = [
 files = [
     {file = "uvicorn-0.30.6-py3-none-any.whl", hash = "sha256:65fd46fe3fda5bdc1b03b94eb634923ff18cd35b2f084813ea79d1f103f711b5"},
     {file = "uvicorn-0.30.6.tar.gz", hash = "sha256:4b15decdda1e72be08209e860a1e10e92439ad5b97cf44cc945fcbee66fc5788"},
+]
+
+[[package]]
+name = "uwsgi"
+version = "2.0.30"
+summary = "The uWSGI server"
+groups = ["dev"]
+files = [
+    {file = "uwsgi-2.0.30.tar.gz", hash = "sha256:c12aa652124f062ac216077da59f6d247bd7ef938234445881552e58afb1eb5f"},
 ]
 
 [[package]]

@@ -10,6 +10,7 @@ Uses 'sqlalchemy' library to create a simple 'sqlite' db to hold query results f
 from sqlalchemy import create_engine
 from sqlalchemy import Integer
 from sqlalchemy import select, func
+from sqlalchemy import distinct
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 from sqlalchemy.schema import ForeignKey, MetaData, PrimaryKeyConstraint
@@ -146,6 +147,7 @@ class KeyValuePairs(Base):
 
 #
 class QueryDB():
+
     ''' A simple database class to manage the creation, writing and reading of the query database
 
     '''
@@ -168,13 +170,15 @@ class QueryDB():
             self.error = str(db_exc)
             LOGGER.debug(f"Error creating db {db_exc}")
 
+
     def get_error(self):
         """
         :returns: the current error message
         """
         return self.error
 
-    def add_segment(self, json_str):
+
+    def add_segment(self, json_str) -> (bool, SegmentInfo|str):
         """
         Adds a segment object to database
 
@@ -198,7 +202,8 @@ class QueryDB():
             return False, str(db_exc)
         return True, seginfo_obj
 
-    def add_part(self, json_str):
+
+    def add_part(self, json_str) -> (bool, PartInfo|str):
         """
         Adds a part object to database
 
@@ -221,7 +226,8 @@ class QueryDB():
             return False, str(db_exc)
         return True, part_obj
 
-    def add_model(self, json_str):
+
+    def add_model(self, json_str) -> (bool, ModelInfo|str):
         """
         Adds a model object to database
 
@@ -244,7 +250,8 @@ class QueryDB():
             return False, str(db_exc)
         return True, model_obj
 
-    def add_user(self, json_str):
+
+    def add_user(self, json_str) -> (bool, UserInfo|str):
         """
         Adds a user info object to database
 
@@ -267,11 +274,18 @@ class QueryDB():
             return False, str(db_exc)
         return True, userinfo_obj
 
-    def add_query(self, label, model_name, segment, part, model, user):
+
+    def add_query(self, label: str, model_name: str, segment: SegmentInfo,
+                  part: PartInfo, model: ModelInfo, user: UserInfo) -> (bool, Query|str):
         """
         Adds a query object to database
 
-        :param json_str: query object as a JSON string
+        :param label: label
+        :param model_name: model name
+        :param segment: SegmentInfo object
+        :param part: PartInfo object
+        :param model: ModelInfo object
+        :param user: UserInfo object
         :returns: a tuple (True, query_obj) if successful
                           (False, exception string) if operation failed
         """
@@ -284,7 +298,8 @@ class QueryDB():
             return False, str(db_exc)
         return True, None
 
-    def query(self, label, model_name):
+
+    def query(self, label: str, model_name: str) -> (bool, tuple|str):
         """
         Use this to query the database
 
@@ -312,6 +327,31 @@ class QueryDB():
                       getattr(result.part_info, 'json', None),
                       getattr(result.model_info, 'json', None),
                       getattr(result.user_info, 'json', None))
+
+
+    def get_json_from_parts(self, model_name: str) -> (bool, list|str):
+        """
+        Find all part info JSON for a model (e.g. borehole feature info)
+
+        "select distinct p.json from part_info p, query q where p.id = q.part_info_id and q.model_name = 'ngawler' limit 20;"
+
+        :param model_name: model name
+        :returns: (False, exception string) if there was an error
+                  (True, list of JSON strings)
+        """
+        try:
+            sql_stmt = (
+                select(distinct(PartInfo.json)).select_from(PartInfo) \
+                                               .join(Query, PartInfo.id == Query.part_info_id) \
+                                               .where(Query.model_name == model_name) \
+                                               .limit(20)
+            )
+            results = self.ses.execute(sql_stmt).scalars().all()
+        except DatabaseError as db_exc:
+            return False, str(db_exc)
+
+        return True, results
+
 
     def __del__(self):
         try:
@@ -382,5 +422,13 @@ if __name__ == "__main__":
     # Non existing 'Query'
     assert QUERY_DB.query('label1_6', 'model_name5') == (True, (None, None, None, None, None, None))
     assert QUERY_DB.query('_label6', 'model_name5') == (True, (None, None, None, None, None, None))
+
+    # Test 'get_json_from_parts'
+    OK, P2 = QUERY_DB.add_part('part2')
+    assert OK
+    OK, MSG = QUERY_DB.add_query('label2', 'model_name', S, P2, M, U)
+    assert OK
+    assert QUERY_DB.get_json_from_parts('model_name') == (True, ['part', 'part2'])
+    assert QUERY_DB.get_json_from_parts(b'model_nam\037e34343') == (True, [])
 
     print("PASSED QUERY DB TESTS")
