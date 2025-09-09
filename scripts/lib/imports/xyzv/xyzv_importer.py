@@ -6,7 +6,7 @@ from lib.db.geometry.types import VRTX, ATOM, TRGL, SEG
 from lib.db.geometry.model_geometries import ModelGeometries
 from lib.db.metadata.metadata import METADATA
 
-DEBUG_LVL = logging.DEBUG
+DEBUG_LVL = logging.INFO
 
 # Set up debugging
 LOGGER = logging.getLogger(__name__)

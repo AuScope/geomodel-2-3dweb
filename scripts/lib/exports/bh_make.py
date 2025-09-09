@@ -13,7 +13,7 @@ from nvcl_kit.constants import Scalar
 from nvcl_kit.param_builder import param_builder
 
 
-LOG_LVL = logging.DEBUG
+LOG_LVL = logging.INFO
 ''' Initialise debug level to minimal debugging
 '''
 
