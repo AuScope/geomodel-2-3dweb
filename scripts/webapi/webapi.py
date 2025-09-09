@@ -75,7 +75,7 @@ app = FastAPI()
 ''' Set up web FastAPI interface
 '''
 
-DEBUG_LVL = logging.DEBUG
+DEBUG_LVL = logging.INFO
 ''' Initialise debug level to minimal debugging
 '''
 
@@ -193,24 +193,39 @@ def create_borehole_dict_list(model, param_dict, wfs_dict):
     :returns: borehole_dict, response_list
     '''
     # Concatenate response
-    response_list = []
     if model not in wfs_dict or model not in param_dict:
         LOGGER.warning(f"Model '{model}' not in both wfs_dict and param_dict")
         LOGGER.debug(f"Exiting {wfs_dict=} {param_dict=}")
         return {}, []
     # Query database
-    # Open up query database to get object information (e.g. NVCL borehole mineralogy)
+    # Open up query database to get object information (e.g. NVCL borehole metadata)
     db_path = os.path.join(DATA_DIR, QUERY_DB_FILE)
     qdb = QueryDB(overwrite=False, db_name=db_path)
     err_msg = qdb.get_error()
     if err_msg != '':
         LOGGER.error(f"Could not open query db {db_path}: {err_msg}")
-        return make_str_response(' ')
+        return {}, []
     LOGGER.debug(f"Querying borehole feature info db: {model}")
-    o_k, results = qdb.get_part_json(model)
+    # Get borehole feature data from 'PartsInfo' table in db
+    result_dict = {}
+    result_list = []
+    o_k, parts_list = qdb.get_json_from_parts(model)
     if o_k:
-        result_dict = {result['nvcl_id']:result for result in results }
-        return result_dict, results
+        for parts_str in parts_list:
+            try:
+                parts = json.loads(parts_str)
+            except json.JSONDecodeError as e:
+                # Skip if can't parse JSON
+                continue
+            p = SimpleNamespace()
+            for key in parts:
+                setattr(p, key, parts[key])
+            borehole_id = parts['nvcl_id']
+            setattr(p, 'borehole:id', borehole_id)
+            setattr(p, 'name', borehole_id)
+            result_dict[borehole_id] = p
+            result_list.append({'borehole:id': borehole_id})
+        return result_dict, result_list
     LOGGER.debug(f"No borehole feature data found for {model} in db: {results}")
     return {}, []
 
