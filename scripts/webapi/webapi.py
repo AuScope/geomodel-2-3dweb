@@ -7,14 +7,34 @@
 
  Examples of functions:
 
- To get information upon double click on object:
- http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId=EWHDDH01_185_0&layers=boreholes&format=application%2Fjson
+ 1. To get information upon double click on object:
+ 
+ http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetFeatureInfoByObjectId&objectId=EWHDDH01_5_0&layers=boreholes&format=application%2Fjson
 
- To get list of borehole ids:
+ In practice, this uses the local sqlite3 database to fetch the NVCL borehole WFS metadata and uTSAS_Grp1 mineralogy for a borehole local to the 'NorthGawler' model.
+ Sections of boreholes are distinguishable because the borehole id, depth and depth index are included in the 'name' field within the GLTF file's meshes and consequently
+ the ThreeJS object in the scene inherits these
+
+ 2. To get list of borehole ids:
+ 
  http://localhost:4200/api/NorthGawler?service=WFS&version=2.0&request=GetPropertyValue&exceptions=application%2Fjson&outputFormat=application%2Fjson&typeName=boreholes&valueReference=borehole:id
 
- To get borehole object after scene is loaded:
+ This uses the local sqlite3 database to fetch the nvcl ids of NVCL boreholes local to the 'NorthGawler' model
+
+
+ 3. To get borehole object after scene is loaded:
+ 
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetResourceById&resourceId=228563&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8
+
+ This accesses NVCL infrastructure via nvcl_kit and calls converter code to construct a GLTF borehole
+ 
+
+ 4. Import a TSURF file onto the 3D scene of the 'BurraMine' model via drag and drop:
+
+ http://localhost:4200/api/burramine/import/bff191b0dd95dd35
+
+ This uses converter code to convert the TSURF file to a GLTF borehole 
+
 '''
 
 """
