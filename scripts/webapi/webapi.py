@@ -48,7 +48,7 @@ This stores:
 2. dict of model parameters
 3. dicts and lists of NVCL borehole metadata gleaned from nvcl_kit
 
-A small sqlite DB contains all the 3DPS feature info (e.g. NVCL borehole mineralogy)
+A small sqlite DB contains all the 3DPS and WFS feature info (e.g. NVCL borehole mineralogy)
 
 """
 
