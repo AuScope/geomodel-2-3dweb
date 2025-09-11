@@ -65,7 +65,7 @@ from lib.picklers import element_unpickler, element_pickler, elementtree_unpickl
 from nvcl_kit.reader import NVCLReader
 from nvcl_kit.param_builder import param_builder
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -565,21 +565,17 @@ def make_getresourcebyid_response(model, version, output_format, res_id, param_d
     if not res_id:
         return make_json_exception_response(version, 'MissingParameterValue', 'missing resourceId parameter')
 
-    # Get borehole dictionary for this model
-    # pylint: disable=W0612
-    model_bh_dict, model_bh_list = get_cached_bhdict_list(model, param_dict, wfs_dict)
-    LOGGER.debug(f"{model_bh_dict=}")
-    borehole_dict = model_bh_dict.get(res_id, None)
-    if borehole_dict is not None:
-        # Create a GLTF borehole including mineralogy
-        gltf_str = get_blob_boreholes(borehole_dict, param_dict[model])
-        if gltf_str is not None:
-            return send_blob(gltf_str)
-    else:
-        LOGGER.debug('Resource not found in borehole dict')
+    # Read borehole file from filesystem
+    file_name = f"Borehole_{res_id}.gltf"
+    file_path = os.path.join(os.pardir, "assets", "geomodels", "boreholes", file_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
 
-    return make_str_response('{}')
-
+    return FileResponse(
+        path=file_path,
+        media_type="model/gltf+json;charset=UTF-8",
+        filename=file_name
+    )
 
 
 def send_blob(gltf_str):
