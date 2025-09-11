@@ -26,7 +26,7 @@
  
  http://localhost:4200/api/NorthGawler?service=3DPS&version=1.0&request=GetResourceById&resourceId=228563&outputFormat=model%2Fgltf%2Bjson%3Bcharset%3DUTF-8
 
- This accesses NVCL infrastructure via nvcl_kit and calls converter code to construct a GLTF borehole
+ This retrieves and sends back pre-built GLTF borehole files which are included in the docker build process
  
 
  4. Import a TSURF file onto the 3D scene of the 'BurraMine' model via drag and drop:
