@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Set up Python 3.10
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.10"
     - name: Install PDM
@@ -41,7 +41,7 @@ jobs:
         tar cvfz boreholes.tar.gz ./boreholes
         popd
     - name: Upload borehole data
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: boreholes.tar.gz
         path: web_build/boreholes.tar.gz
@@ -52,13 +52,13 @@ jobs:
         ./build_api_dir.sh boreholes/query_data.db
         popd
     - name: Upload API directory
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: api.tar.gz
         path: web_build/api.tar.gz
         if-no-files-found: error
     - name: Upload Python package dependencies
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: py_pkg_state
         path: |
